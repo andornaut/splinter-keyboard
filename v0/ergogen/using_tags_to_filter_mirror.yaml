@@ -1,0 +1,32 @@
+points:
+  zones.reference:
+    columns.a.rows.b.tags:
+      left: true
+      right: true
+  zones.leftorright:
+    anchor:
+      ref: reference_a_b
+      shift: [1u, 1u]
+    mirror:   
+      ref: leftorright_a_b
+      distance: 2u
+    columns.a:
+      rows.b.tags.left: true
+      rows.b.mirror:
+        tags.left: $unset
+        tags.right: true
+outlines:
+  left:
+  - what: rectangle
+    where: left
+    size: u
+
+  right:
+  - what: rectangle
+    where: right
+    size: u
+
+  both:
+  - what: rectangle
+    where: true
+    size: u

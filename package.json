@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "ergogen": "^4.0.2"
+  },
+  "scripts": {
+    "build": "npx ergogen v0/ergogen/ergogen.yaml --output dist"
+  }
+}

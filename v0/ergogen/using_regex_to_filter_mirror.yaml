@@ -1,0 +1,16 @@
+points:
+  zones.thumbcluster:
+    mirror:   
+      ref: thumbcluster_space_ctrl
+      distance: 3u
+    columns.space:
+    rows.ctrl:
+outlines:
+  left:
+  - what: rectangle
+    where: /^thumbcluster_.+/
+    size: u
+  right:
+  - what: rectangle
+    where: /^mirror_thumbcluster_.+/
+    size: u
