@@ -156,28 +156,28 @@ points:
   zones.thumbcluster:
     mirror:   
       ref: thumbcluster_space_meta
-      distance: 6u - 3.5
+      distance: 6u - 12
     key.tags.matrix: true
     key.mirror.tags:
       matrix: $unset
       right: true      
     anchor:
       ref: matrix_five_meta
-      shift: [1.75, -4]
+      shift: [6, -5]
     columns:
       space.rows.meta:
-        bind: [0, 1/4u, 0, 1/4u]
+        bind: [0, u/4, 0, u/4]
         splay: -15
         spread: 1.5u
         width: 1.5u
         column_net: P4
         row_net: P9
       mod.rows.meta:
-        bind: [0, 1/8u, 0, 1/8u]
-        shift: [5, -1.5] 
+        bind: [0, 1/4u, 0, 1/4u]
+        shift: [1, -2.5] 
         splay: -10
-        spread: 1.25u
-        width: 1.25u
+        spread: 1.5u
+        width: 1.5u
         column_net: P10        
         row_net: P9
 outlines:
@@ -214,15 +214,13 @@ outlines:
       fillet: 2
       points:
         - ref: matrix_zero_number
-          shift: [-12, 12 + 6]
-        - ref: matrix_three_number
-          shift: [0, 12]
+          shift: [-15, 15 + 6]
         - ref: matrix_five_number
-          shift: [46, 12 + 6]        
+          shift: [55, 15 + 6]        
         - ref: matrix_five_bottom
-          shift: [46, -50]
+          shift: [55, -55]
         - ref: matrix_zero_meta
-          shift: [-12, -12]
+          shift: [-15, -15]
     - what: rectangle
       where: matrix
       operation: add
@@ -233,15 +231,15 @@ outlines:
       fillet: 2
       points:
         - ref: mirror_matrix_five_number
-          shift: [46, 12 + 6]
+          shift: [55, 15 + 6]
         - ref: extra_backspace_number
-          shift: [12, 12 + 6]
+          shift: [15, 15 + 6]
         - ref: extra_backspace_top
-          shift: [12, -26]
+          shift: [15, -26]
         - ref: mirror_matrix_zero_bottom
-          shift: [-12, -12 - 1u]
+          shift: [-15, -15 - 1u]
         - ref: mirror_matrix_five_bottom
-          shift: [46, -50]
+          shift: [55, -55]
     - what: rectangle
       where: right
       size: u
