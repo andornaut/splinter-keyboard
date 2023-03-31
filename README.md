@@ -3,24 +3,9 @@
 * [@andornaut /til/3D Printing](https://github.com/andornaut/til/blob/master/docs/3d-printing.md)
 * [@andornaut /til/Keyboards](https://github.com/andornaut/til/blob/master/docs/keyboards.md)
 
-## Parts and supplies
-
-* [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes)
-* [22AWG solid-core wire](https://www.pishop.ca/product/hook-up-wire-spool-set-22awg-solid-core-6-x-25-ft/)
-* [63/37 lead rosin core solder](https://www.pishop.ca/product/solder-wire-63-37-tin-lead-sn63-pb37-no-clean-water-washable-031-2oz/)
-* [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
-* [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
-* [Liquid flux pen](https://www.pishop.ca/product/liquid-flux-no-clean-in-10ml-pen-w-tip/)
-* [M2 screws (6mm)](https://keeb.io/collections/diy-parts/products/m2-screws-and-standoffs?variant=12490111582302)
-* [M2 standoffs (11mm)](https://keeb.io/collections/diy-parts/products/m2-screws-and-standoffs?variant=47432051654)
-* [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) x2
-* [Reset Pushbutton Switch](https://keeb.io/collections/diy-parts/products/reset-pushbutton-switch) x2
-* [TRRS Cable](https://keeb.io/collections/diy-parts/products/trrs-cable?variant=46391966470)
-* [TRRS PJ-320A Jack (3.5mm)](https://keeb.io/collections/diy-parts/products/trrs-jack-3-5mm) x2
-* [Tribosys 3203](https://shockport.ca/collections/lubes-and-films/products/tribosys-3203)
-* [USB-C Breakout Board](https://keeb.io/collections/diy-parts/products/usb-c-breakout-board)
-
 ## Installation on Ubuntu
+
+* [Setting Up Your QMK Environment](https://docs.qmk.fm/#/newbs_getting_started)
 
 ```
 # Ergogen
@@ -30,49 +15,146 @@ npm i
 # KiCad
 sudo add-apt-repository ppa:kicad/kicad-7.0-releases
 sudo apt install kicad
+
+# QMK
+python3 -m pip install --user qmk
+qmk setup -H ./qmk_firmware
 ```
 
-## Getting started
+## Building
+
+### Ergogen
 
 ```
+# Build ergogen
 npm run build
 ls dist
 ```
 
-## v0
+### QMK
 
-Question | Answer
+* [Anatomy of a keymap.c](https://github.com/qmk/qmk_firmware/blob/master/docs/keymap.md)
+* [Configurator](https://config.qmk.fm/#/test/)
+* [Keycodes](https://github.com/qmk/qmk_firmware/blob/master/docs/keycodes.md)
+* [Key overrides](https://docs.qmk.fm/#/feature_key_overrides)
+* [Split keyboard](https://github.com/qmk/qmk_firmware/blob/master/docs/feature_split_keyboard.md)
+
+```
+qmk config \
+    compile.keyboard=splinter \
+    compile.keymap=default \
+    flash.keyboard=splinter \
+    flash.keymap=default \
+    new_keyboard.keyboard=splinter \
+    new_keyboard.keymap=default
+qmk new-keyboard
+qmk compile
+
+# First time to set EEPROM handedness
+qmk flash -bl avrdude-split-left
+qmk flash -bl avrdude-split-right
+
+# Thereafter
+qmk flash
+```
+
+## Hardware
+
+### atmega32u4
+
+* [Pro Micro pinout](https://golem.hu/article/pro-micro-pinout/)
+
+Arduino pins | AVR ports
+---|---
+TX0 | D3
+RX1 | D2
+2   | D1
+3   | D0
+4   | D4
+5   | C6
+6   | D7
+7   | E6
+8   | B4
+9   | B5
+10  | B6
+14  | B3
+15  | B1
+16  | B2
+A0  | F7
+A1  | F6
+A2  | F5
+A3  | F4
+LED pin (left of crystal)  | B0
+LED pin (right of crystal) | D5
+
+### TRRS pinout
+
+Left | Right
 --- | ---
-Keycap material | ABS double shot
-Keycap profile | Cherry
+VCC | -
+SDA (2/D1) (pull-up resistors to VCC) | -
+SCL (3/D0) (pull-up resistors to VCC) | GND
+
+## Splinter keyboard
+
+A columnar split ergonomic 61 key keyboard.
+
+* [qmk_firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
+
+![v0](./splinter/v0.jpg)
+![v1](./splinter/v1.jpg)
+
+### Parts
+
+* [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes) x61
+* [22AWG solid-core wire](https://www.pishop.ca/product/hook-up-wire-spool-set-22awg-solid-core-6-x-25-ft/)
+* [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) x61
+* [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
+* [M3 screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
+* [M3 knurled nut inserts](https://www.amazon.ca/gp/product/B0B71QSH31/)
+* [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
+* [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) x2
+  * Alternative: [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) and [Reset Pushbutton Switch](https://keeb.io/collections/diy-parts/products/reset-pushbutton-switch)
+* [SparkFun Accessories TRRS jack (SMD)](https://www.mouser.ca/ProductDetail/474-PRT-12639) x2
+  * Alternative: [TRRS PJ-320A Jack (3.5mm)](https://keeb.io/collections/diy-parts/products/trrs-jack-3-5mm)
+
+#### Dimensions
+
+Part | Dimensions
+--- | ---
 [Keycap size](https://cdn.matt3o.com/uploads/2018/05/keycap-size-diagram.png) | 18mm²
 Keycap size with padding | 19mm²
-Switch (MX) cutout/hole | 14mm²
+Switch (MX) cutout size | 14mm²
 Switch (MX) outer size | 15.6mm²
 
-### Keyboard Layout
+### Design
 
-* [keyboard-layout.json](./v0/keyboard-layout/keyboard-layout.json)
+#### [Keyboard Layout](http://www.keyboard-layout-editor.com/)
 
-![Keyboard Layout](./v0/keyboard-layout/keyboard-layout.png)
+* [Project folder](./splinter/keyboard-layout)
+* [keyboard-layout.json](./splinter/keyboard-layout/keyboard-layout.json)
 
-### Ergogen
+![Keyboard Layout preview](./splinter/keyboard-layout/keyboard-layout.png)
 
-* [Project folder](./v0/ergogen)
-* [ergogen.yaml](./v0/ergogen/ergogen.yaml)
+#### [Ergogen](https://ergogen.cache.works/)
 
-![Ergogen](./v0/ergogen/ergogen.png)
+* [Project folder](./splinter/ergogen)
+* [ergogen.yaml](./splinter/ergogen/ergogen.yaml)
 
-### OnShape
+![Ergogen preview](./splinter/ergogen/ergogen.png)
 
-* [Project folder](./v0/OnShape)
+#### [OnShape](https://cad.onshape.com)
 
-### BambuStudio
+* [Project folder](./splinter/OnShape)
 
-* [Project folder](./v0/BambuStudio)
+![OnShape preview](./splinter/OnShape/both.png)
 
-### KiCad
+#### [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
-* [Project folder](./v0/KiCad)
+* [Project folder](./splinter/OrcaSlicer)
 
-![Left](./v0/KiCad/left.png)
+#### [KiCad](https://www.kicad.org/)
+
+* [Project folder](./splinter/KiCad)
+
+![KiCad preview](./splinter/KiCad/left.png)

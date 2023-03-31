@@ -15,32 +15,49 @@ points:
       zero:
         rows:
           meta:
-            mirror.skip: true
+            bind: [0, u/4, 0, u/4]
+            shift: [-u/4, 0]
+            spread: 1.5u
+            width: 1.5u
             column_net: P1
             row_net: P9
+            mirror.skip: true
           bottom:
-            mirror.bind: 0
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
             column_net: P1
             row_net: P8
+            mirror.skip: true
           home:
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
             column_net: P1
             row_net: P7
+            mirror.skip: true
           top:
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
             column_net: P1
             row_net: P6
+            mirror.skip: true
           number:
+            shift: [u/4, 0]
             column_net: P1
             row_net: P5
+            mirror.skip: true
       one:
         rows:
           meta:
-            mirror.skip: true
             column_net: P0
             row_net: P9
+            mirror.skip: true
           bottom:
-            mirror.bind: 0
             column_net: P0
             row_net: P8
+            mirror.bind: 0
           home:
             column_net: P0
             row_net: P7
@@ -131,23 +148,32 @@ points:
     key.tags.right: true
     anchor:
       ref: matrix_five_bottom
-      shift: [12u, 0]
+      shift: [11u, 0]
     columns:
+      minus:
       plus:
         rows:
-          bottom:
-            bind: 0
+          bottom: # Shift key
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
           home: # Enter key        
-            bind: [0, 3u/8, 0, 3u/8]
-            shift: [3u/8, 0]
-            width: 1.75u
-          top: # Shift key
-            shift: [-3u/8, 0]
+            bind: [0, u/4, 0, u/4]
+            width: 1.5u
+          top: # Backslash key
+            bind: 0
+            shift: [-u/4, 0]
       backspace:
         rows:
           bottom.skip: true
           home.skip: true
-          top.bind: 0
+          top:
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
+          number:
+            bind: [0, u/4, 0, u/4]
+            width: 1.5u
     rows:
       bottom:
       home:
@@ -156,14 +182,14 @@ points:
   zones.thumbcluster:
     mirror:   
       ref: thumbcluster_space_meta
-      distance: 6u - 12
+      distance: 6u - 4
     key.tags.matrix: true
     key.mirror.tags:
       matrix: $unset
       right: true      
     anchor:
       ref: matrix_five_meta
-      shift: [6, -5]
+      shift: [1.9, -5]
     columns:
       space.rows.meta:
         bind: [0, u/4, 0, u/4]
@@ -174,7 +200,7 @@ points:
         row_net: P9
       mod.rows.meta:
         bind: [0, 1/4u, 0, 1/4u]
-        shift: [1, -2.5] 
+        shift: [1.15, -2.5] 
         splay: -10
         spread: 1.5u
         width: 1.5u
@@ -211,39 +237,39 @@ outlines:
 
   plateleft:
     - what: polygon
-      fillet: 2
       points:
         - ref: matrix_zero_number
-          shift: [-15, 15 + 6]
+          shift: [-12 - u/2, 13 + 6]
         - ref: matrix_five_number
-          shift: [55, 15 + 6]        
+          shift: [48.4, 13 + 6]        
         - ref: matrix_five_bottom
-          shift: [55, -55]
+          shift: [48.4, -32.3] 
+        - ref: matrix_five_bottom
+          shift: [39.447, -51.5]
         - ref: matrix_zero_meta
-          shift: [-15, -15]
+          shift: [-12 - u/4, -12]
     - what: rectangle
       where: matrix
-      operation: add
       size: u
 
   plateright:
     - what: polygon
-      fillet: 2
       points:
         - ref: mirror_matrix_five_number
-          shift: [55, 15 + 6]
+          shift: [48.4, 13 + 6]
         - ref: extra_backspace_number
-          shift: [15, 15 + 6]
+          shift: [12 + u/4, 13 + 6]
         - ref: extra_backspace_top
-          shift: [15, -26]
-        - ref: mirror_matrix_zero_bottom
-          shift: [-15, -15 - 1u]
+          shift: [12 + u/4, -30]
+        - ref: extra_minus_bottom
+          shift: [12 + u/2, -12  - 1u]
         - ref: mirror_matrix_five_bottom
-          shift: [55, -55]
+          shift: [39.447, -51.5]
+        - ref: mirror_matrix_five_bottom
+          shift: [48.4, -32.3]          
     - what: rectangle
       where: right
       size: u
-      bound: true
 
   left:
     - name: plateleft
