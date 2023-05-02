@@ -3,6 +3,6 @@
     "ergogen": "^4.0.2"
   },
   "scripts": {
-    "build": "npx ergogen v0/ergogen/ergogen.yaml --output dist"
+    "build": "npx ergogen splinter/ergogen/ --output dist"
   }
 }
