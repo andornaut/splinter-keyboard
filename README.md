@@ -66,34 +66,38 @@ qmk flash
 
 Arduino pins | AVR ports
 ---|---
-TX0 | D3
-RX1 | D2
-2   | D1
-3   | D0
-4   | D4
-5   | C6
-6   | D7
-7   | E6
-8   | B4
-9   | B5
-10  | B6
+1 (TX)  | D3
+0 (RX)  | D2
+GND     |
+GND     |
+2 (SDA) | D1
+3 (SCL) | D0
+4 (A6)  | D4
+5       | C6
+6 (A7)  | D7
+7       | E6
+8 (A8)  | B4
+9 (A9)  | B5
+10 (A10)| B6
 14  | B3
 15  | B1
 16  | B2
-A0  | F7
-A1  | F6
-A2  | F5
-A3  | F4
-LED pin (left of crystal)  | B0
-LED pin (right of crystal) | D5
+A0 (P18) | F7
+A1 (P19) | F6
+A2 (P20) | F5
+A3 (P21) | F4
+VCC      |
+RST      |
+GND      |
+RAW      |
 
 ### TRRS pinout
 
 Left | Right
 --- | ---
-VCC | -
-SDA (2/D1) (pull-up resistors to VCC) | -
-SCL (3/D0) (pull-up resistors to VCC) | GND
+- | VCC
+- | SDA (2/D1) (pull-up resistors to VCC) 
+GND | SCL (3/D0) (pull-up resistors to VCC)
 
 ## Splinter keyboard
 
