@@ -112,6 +112,7 @@ A columnar split ergonomic 61 key keyboard.
 
 * [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes) x61
 * [22AWG solid-core wire](https://www.pishop.ca/product/hook-up-wire-spool-set-22awg-solid-core-6-x-25-ft/)
+* [4.7k ohm resistors](https://www.amazon.ca/dp/B00CVZ4B2U)
 * [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) x61
 * [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 * [M3 screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
