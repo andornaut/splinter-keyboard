@@ -82,10 +82,10 @@ GND     |
 14  | B3
 15  | B1
 16  | B2
-A0 (P18) | F7
-A1 (P19) | F6
-A2 (P20) | F5
-A3 (P21) | F4
+A0 (18) | F7
+A1 (19) | F6
+A2 (20) | F5
+A3 (21) | F4
 VCC      |
 RST      |
 GND      |
@@ -95,8 +95,8 @@ RAW      |
 
 Left | Right
 --- | ---
-- | VCC
-- | SDA (2/D1) (pull-up resistors to VCC) 
+-- | VCC
+-- | SDA (2/D1) (pull-up resistors to VCC) 
 GND | SCL (3/D0) (pull-up resistors to VCC)
 
 ## Splinter keyboard
