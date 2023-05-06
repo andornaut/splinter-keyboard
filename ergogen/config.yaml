@@ -7,9 +7,9 @@ points:
     mirror:   
       ref: matrix_five_number
       distance: 6u
-    key.tags.matrix: true
+    key.tags.left: true
     key.mirror.tags:
-      matrix: $unset
+      left: $unset
       right: true
     columns:
       zero:
@@ -19,125 +19,184 @@ points:
             shift: [-u/4, 0]
             spread: 1.5u
             width: 1.5u
-            column_net: P1
-            row_net: P9
+            column_net: P18
+            row_net: P8
             mirror.skip: true
           bottom:
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P1
-            row_net: P8
+            column_net: P18
+            row_net: P7
             mirror.skip: true
           home:
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P1
-            row_net: P7
+            column_net: P18
+            row_net: P6
             mirror.skip: true
           top:
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P1
-            row_net: P6
+            column_net: P18
+            row_net: P5
             mirror.skip: true
           number:
             shift: [u/4, 0]
-            column_net: P1
-            row_net: P5
+            column_net: P18
+            row_net: P4
             mirror.skip: true
       one:
         rows:
           meta:
-            column_net: P0
-            row_net: P9
+            column_net: P15
+            row_net: P8
             mirror.skip: true
           bottom:
-            column_net: P0
-            row_net: P8
-            mirror.bind: 0
-          home:
-            column_net: P0
+            column_net: P15
             row_net: P7
-          top:
-            column_net: P0
+            mirror:
+              column_net: P8
+              row_net: P18
+          home:
+            column_net: P15
             row_net: P6
-          number:
-            column_net: P0
+            mirror:
+              column_net: P8
+              row_net: P19
+          top:
+            column_net: P15
             row_net: P5
+            mirror:
+              column_net: P8
+              row_net: P20
+          number:
+            column_net: P15
+            row_net: P4
+            mirror:
+              column_net: P8
+              row_net: P21
       two:
         key.stagger: 3
         rows:
           meta:
             mirror.skip: true
-            column_net: P2
-            row_net: P9
+            column_net: P14
+            row_net: P8
           bottom:
             bind: 0
-            column_net: P2
-            row_net: P8
-          home:
-            column_net: P2
+            column_net: P14
             row_net: P7
-          top:
-            column_net: P2
+            mirror:
+              column_net: P9
+              row_net: P18
+          home:
+            column_net: P14
             row_net: P6
-          number:
-            column_net: P2
+            mirror:
+              column_net: P9
+              row_net: P19
+          top:
+            column_net: P14
             row_net: P5
+            mirror:
+              column_net: P9
+              row_net: P20
+          number:
+            column_net: P14
+            row_net: P4
+            mirror:
+              column_net: P9
+              row_net: P21
       three:
         key.stagger: 3
         rows:
           meta.skip: true
           bottom:
             bind: 0
-            column_net: P3
-            row_net: P8
-          home:
-            column_net: P3
+            column_net: P16
             row_net: P7
-          top:
-            column_net: P3
+            mirror:
+              column_net: P10
+              row_net: P18
+          home:
+            column_net: P16
             row_net: P6
-          number:
-            column_net: P3
+            mirror:
+              column_net: P10
+              row_net: P19
+          top:
+            column_net: P16
             row_net: P5
+            mirror:
+              column_net: P10
+              row_net: P20
+          number:
+            column_net: P16
+            row_net: P4
+            mirror:
+              column_net: P10
+              row_net: P21
       four:
         key.stagger: -3
         rows:
           meta.skip: true
           bottom:
             bind: 0
-            column_net: P4
-            row_net: P8
-          home:
-            column_net: P4
+            column_net: P10
             row_net: P7
-          top:
-            column_net: P4
+            mirror:
+              column_net: P16
+              row_net: P18
+          home:
+            column_net: P10
             row_net: P6
-          number:
-            column_net: P4
+            mirror:
+              column_net: P16
+              row_net: P19
+          top:
+            column_net: P10
             row_net: P5
+            mirror:
+              column_net: P16
+              row_net: P20
+          number:
+            column_net: P10
+            row_net: P4
+            mirror:
+              column_net: P16
+              row_net: P21
       five:
         key.stagger: -3
         rows:
           meta.skip: true
           bottom:
             bind: 0
-            column_net: P10
-            row_net: P8
-          home:
-            column_net: P10
+            column_net: P9
             row_net: P7
-          top:
-            column_net: P10
+            mirror:
+              column_net: P14
+              row_net: P18
+          home:
+            column_net: P9
             row_net: P6
-          number:
-            column_net: P10
+            mirror:
+              column_net: P14
+              row_net: P19
+          top:
+            column_net: P9
             row_net: P5
+            mirror:
+              column_net: P14
+              row_net: P20
+          number:
+            column_net: P9
+            row_net: P4
+            mirror:
+              column_net: P14
+              row_net: P21
     rows:
       meta:
       bottom:
@@ -151,29 +210,62 @@ points:
       shift: [11u, 0]
     columns:
       minus:
+        rows:
+          bottom: # Blank (alternative backspace) key
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
+            column_net: P7
+            row_net: P18
+          home: # Double quotation mark key        
+            bind: [0, u/4, 0, u/4]
+            width: 1.5u
+            column_net: P7
+            row_net: P19
+          top: # Opening square bracket key
+            bind: 0
+            shift: [-u/4, 0]
+            column_net: P7
+            row_net: P20
+          number: # Minus key
+            column_net: P7
+            row_net: P21
       plus:
         rows:
           bottom: # Shift key
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
+            column_net: P6
+            row_net: P18
           home: # Enter key        
             bind: [0, u/4, 0, u/4]
             width: 1.5u
-          top: # Backslash key
+            column_net: P6
+            row_net: P19
+          top: # Closing square bracket key
             bind: 0
             shift: [-u/4, 0]
+            column_net: P6
+            row_net: P20
+          number: # Plus key
+            column_net: P6
+            row_net: P21
       backspace:
         rows:
           bottom.skip: true
           home.skip: true
-          top:
+          top: # Backslash key
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
-          number:
+            column_net: P5
+            row_net: P20
+          number:  # Backspace key
             bind: [0, u/4, 0, u/4]
             width: 1.5u
+            column_net: P5
+            row_net: P21
     rows:
       bottom:
       home:
@@ -183,9 +275,9 @@ points:
     mirror:   
       ref: thumbcluster_space_meta
       distance: 6u - 4
-    key.tags.matrix: true
+    key.tags.left: true
     key.mirror.tags:
-      matrix: $unset
+      left: $unset
       right: true      
     anchor:
       ref: matrix_five_meta
@@ -196,16 +288,22 @@ points:
         splay: -15
         spread: 1.5u
         width: 1.5u
-        column_net: P4
-        row_net: P9
+        column_net: P10
+        row_net: P8
+        mirror:
+          column_net: P16
+          row_net: P15
       mod.rows.meta:
         bind: [0, 1/4u, 0, 1/4u]
         shift: [1.15, -2.5] 
         splay: -10
         spread: 1.5u
         width: 1.5u
-        column_net: P10        
-        row_net: P9
+        column_net: P9
+        row_net: P8
+        mirror:
+          column_net: P14
+          row_net: P15
 outlines:
   binding:
   - what: rectangle
@@ -215,7 +313,7 @@ outlines:
 
   cutoutsleft:
   - what: rectangle
-    where: matrix
+    where: left
     size: c
 
   cutoutsright:
@@ -225,7 +323,7 @@ outlines:
 
   switchesleft:
   - what: rectangle
-    where: matrix
+    where: left
     fillet: 1
     size: s
 
@@ -249,7 +347,7 @@ outlines:
         - ref: matrix_zero_meta
           shift: [-12 - u/4, -12]
     - what: rectangle
-      where: matrix
+      where: left
       size: u
 
   plateright:
@@ -298,60 +396,65 @@ outlines:
 # https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
 pcbs:
   left:
-    outlines.left.outline: left
+    outlines:
+      plateleft.outline: plateleft
+      keycaps:
+        outline: switchesleft
+        layer: Eco1.User
     footprints:
+
       # Any MX switch
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/mx.js
       mx:
         what: mx
+        where: left
         params:
-          keycaps: true
-          reverse: false
           hotswap: true
-          from: "{{colrow}}"
-          to: "{{column_net}}"
-        where: left 
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/diode.js
       diode:
         what: diode
-        params:
-          from: "{{colrow}}"
-          to: "{{row_net}}"
         where: left
         adjust:
           shift: [0, -5]
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
 
-      # Arduino ProMicro atmega32u4au
+      # Arduino Pro Micro atmega32u4au
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/promicro.js
       promicro:
         what: promicro
-        params:
-          orientation: "up"
         where:
           ref: matrix_five_number
-          shift: [22, -1]
+          shift: [1u +1, -0.5]
           rotate: -90
+        params:
+          orientation: "down"
+
       # Reset button
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/button.js
       reset:
         what: button
         where:
-          ref: matrix_one_number
-          shift: [0, 15]
+          ref: matrix_five_top
+          shift: [1u +1, -5]
         params:
-          from: RST
-          to: GND
+          from: GND
+          to: RST
+          side: "B"
+
       # TRRS-PJ-320A-dual audio cable port
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/trrs.js
       trrs:
         what: trrs
         where:
           ref: matrix_five_number
-          shift: [38, 16.3]
+          shift: [1u +1 +14.4 +5, 17]
         params:
-          A: GND
-          B: GND
-          C: P21
-          D: VCC
-          reverse: false
-          symmetric: false
+          A: VCC
+          B: P21
+          C: P20
+          D: GND

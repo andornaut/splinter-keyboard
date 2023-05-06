@@ -2,7 +2,11 @@
   "dependencies": {
     "ergogen": "^4.0.2"
   },
+  "devDependencies": {
+      "nodemon": "^2.0.22"
+  },
   "scripts": {
-    "build": "npx ergogen splinter/ergogen/ --output dist"
+    "build": "npx ergogen ergogen/ --output dist",
+    "watch": "nodemon --ext .js,.yaml --watch ergogen/config.yaml --exec npm run build"
   }
 }

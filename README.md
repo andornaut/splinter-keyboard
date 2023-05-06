@@ -1,4 +1,8 @@
-# Keyboards
+# Splinter keyboard
+
+A 61-key split columnar keyboard.
+
+![v1](./images/v1.jpg)
 
 * [@andornaut /til/3D Printing](https://github.com/andornaut/til/blob/master/docs/3d-printing.md)
 * [@andornaut /til/Keyboards](https://github.com/andornaut/til/blob/master/docs/keyboards.md)
@@ -30,14 +34,9 @@ qmk setup -H ./qmk_firmware
 npm run build
 ls dist
 ```
-
 ### QMK
 
-* [Anatomy of a keymap.c](https://github.com/qmk/qmk_firmware/blob/master/docs/keymap.md)
-* [Configurator](https://config.qmk.fm/#/test/)
-* [Keycodes](https://github.com/qmk/qmk_firmware/blob/master/docs/keycodes.md)
-* [Key overrides](https://docs.qmk.fm/#/feature_key_overrides)
-* [Split keyboard](https://github.com/qmk/qmk_firmware/blob/master/docs/feature_split_keyboard.md)
+* [Splinter qmk_firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
 
 ```
 qmk config \
@@ -99,15 +98,6 @@ Left | Right
 -- | SDA (2/D1) (pull-up resistors to VCC) 
 GND | SCL (3/D0) (pull-up resistors to VCC)
 
-## Splinter keyboard
-
-A columnar split ergonomic 61 key keyboard.
-
-* [qmk_firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
-
-![v0](./splinter/v0.jpg)
-![v1](./splinter/v1.jpg)
-
 ### Parts
 
 * [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes) x61
@@ -123,7 +113,7 @@ A columnar split ergonomic 61 key keyboard.
 * [SparkFun Accessories TRRS jack (SMD)](https://www.mouser.ca/ProductDetail/474-PRT-12639) x2
   * Alternative: [TRRS PJ-320A Jack (3.5mm)](https://keeb.io/collections/diy-parts/products/trrs-jack-3-5mm)
 
-#### Dimensions
+### Dimensions
 
 Part | Dimensions
 --- | ---
@@ -132,34 +122,34 @@ Keycap size with padding | 19mm²
 Switch (MX) cutout size | 14mm²
 Switch (MX) outer size | 15.6mm²
 
-### Design
+## Design
 
-#### [Keyboard Layout](http://www.keyboard-layout-editor.com/)
+### [Keyboard Layout](http://www.keyboard-layout-editor.com/)
 
-* [Project folder](./splinter/keyboard-layout)
-* [keyboard-layout.json](./splinter/keyboard-layout/keyboard-layout.json)
+* [Project folder](./keyboard-layout)
+* [keyboard-layout.json](./keyboard-layout/keyboard-layout.json)
 
-![Keyboard Layout preview](./splinter/keyboard-layout/keyboard-layout.png)
+![Keyboard Layout preview](./keyboard-layout/keyboard-layout.png)
 
-#### [Ergogen](https://ergogen.cache.works/)
+### [Ergogen](https://ergogen.cache.works/)
 
-* [Project folder](./splinter/ergogen)
-* [ergogen.yaml](./splinter/ergogen/ergogen.yaml)
+* [Project folder](./ergogen)
+* [ergogen.yaml](./ergogen/ergogen.yaml)
 
-![Ergogen preview](./splinter/ergogen/ergogen.png)
+![Ergogen preview](./ergogen/ergogen.png)
 
-#### [OnShape](https://cad.onshape.com)
+### [OnShape](https://cad.onshape.com)
 
-* [Project folder](./splinter/OnShape)
+* [Project folder](./OnShape)
 
-![OnShape preview](./splinter/OnShape/both.png)
+![OnShape preview](./OnShape/both.png)
 
-#### [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
+### [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
-* [Project folder](./splinter/OrcaSlicer)
+* [Project folder](./OrcaSlicer)
 
-#### [KiCad](https://www.kicad.org/)
+### [KiCad](https://www.kicad.org/)
 
-* [Project folder](./splinter/KiCad)
+* [Project folder](./KiCad)
 
-![KiCad preview](./splinter/KiCad/left.png)
+![KiCad preview](./KiCad/left.png)
