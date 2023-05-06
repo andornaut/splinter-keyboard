@@ -3,10 +3,16 @@
     "ergogen": "^4.0.2"
   },
   "devDependencies": {
-      "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22"
   },
   "scripts": {
-    "build": "npx ergogen ergogen/ --output dist",
-    "watch": "nodemon --ext .js,.yaml --watch ergogen/config.yaml --exec npm run build"
+    "build": "npx ergogen ergogen/ --output dist/ergogen/ && npm run update-pcbs",
+    "clean": "rm -rf ./dist",
+    "copy-pcbs-to-kicad": "cp dist/ergogen/pcbs/*.kicad_pcb kicad/",
+    "copy-traces": "set -vxe;for f in kicad/routed/*.kicad_pcb; do echo \"${f}\" && python3 ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" kicad/$(basename \"${f}\"); done",
+    "fab-jlcpcb": "for f in kicad/routed/*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/kicad/jlcpcb/; done",
+    "update-pcbs": "for f in dist/ergogen/pcbs/*.kicad_pcb; do echo \"${f}\" && python3 ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb \"${f}\"; done",
+    "watch": "nodemon --ext .js,.yaml --watch ergogen/config.yaml --exec 'npm run build'",
+    "watch-and-copy-pcbs-to-kicad": "nodemon --ext .js,.yaml --watch ergogen/config.yaml --exec 'npm run build && npm run copy-pcbs-to-kicad'"
   }
 }
