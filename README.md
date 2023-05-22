@@ -146,7 +146,14 @@ Overall process:
 
 #### PCB dimensions
 
-Position each PCB at (105,105). The left half starts at this position, but the right half must be moved before running `npm run copy-traces`.
+Position each PCB at (105,105). The left half starts at this position, but the right half must be moved before running `npm run copy-traces`. 100mm to provide a buffer around the edges of the document, and 5 mm to account for the case walls.
+
+#### Configuration
+
+Configuration | Description
+--- | ---
+Default netclass | Clearance: 0.25mm, Track width: 0.25mm
+VCC netclass | Clearance: 0.25mm, Track width: 0.25mm
 
 ##### Left half
 
