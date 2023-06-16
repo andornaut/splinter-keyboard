@@ -81,6 +81,7 @@ Key switches | 61 | [Cherry MX Ergo Clear](https://shockport.ca/collections/swit
 Microcontrollers | 2 | [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) or [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795)
 Reset buttons | 2 | [SparkFun COM-08720 switch](https://www.mouser.ca/ProductDetail/474-COM-08720) or [Reset Pushbutton Switch](https://keeb.io/collections/diy-parts/products/reset-pushbutton-switch) (not required when using [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) microcontrollers)
 Screws | 4 | [M3 screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
+Silicon bumpers | 12 | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)
 Sockets (12-pin)| 2 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000)
 Socket pins | 24 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030)
 Threaded inserts | 2 | [M3 5x4mm (width,height) brass threaded inserts](https://www.amazon.ca/uxcell-knurled-Threaded-Embedment-Printer/dp/B09MCWTBCC)
