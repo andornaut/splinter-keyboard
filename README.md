@@ -224,10 +224,7 @@ Left corner | 21.53214 mm
 
 ### [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
-* [Project folder](./orcaslicer)
-* [Project file](./orcaslicer/splinter.3mf)
-
-1. Open the [`./orcaslicer/splinter.3mf`](./orcaslicer/splinter.3mf) project file
+1. Open or create an OrcaSlicer project file
 1. Import `*.step` files from [`./onshape/`](./onshape/)
 1. Print the keyboard case
 
