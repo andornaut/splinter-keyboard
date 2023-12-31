@@ -1,0 +1,566 @@
+units:
+  c: 14 # Cherry MX switch cutout/hole length in mm
+  s: 16 # Cherry MX switches are 15.6mm at their widest
+  u: U # "U" was previously 19.05mm, but is now 19mm
+points:
+  zones.matrix:
+    anchor:
+      shift: [121.525, -196.2]
+    mirror:
+      ref: matrix_five_number
+      distance: 6u
+    key.tags.left: true
+    key.mirror.tags:
+      left: $unset
+      right: true
+    columns:
+      zero:
+        rows:
+          meta: # LCTRL
+            bind: [0, u/4, 0, u/4]
+            shift: [-u/4, 0]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P7
+            row_net: P10
+            mirror.skip: true
+          bottom:
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P7
+            row_net: P16
+            mirror.skip: true
+          home:
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P7
+            row_net: P14
+            mirror.skip: true
+          top:
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P7
+            row_net: P15
+            mirror.skip: true
+          number:
+            shift: [u/4, 0]
+            column_net: P7
+            row_net: P18
+            mirror.skip: true
+      one:
+        rows:
+          meta: # CODE / Super
+            column_net: P8
+            row_net: P10
+            mirror.skip: true
+          bottom:
+            column_net: P8
+            row_net: P16
+            mirror:
+              column_net: P16
+              row_net: P8
+          home:
+            column_net: P8
+            row_net: P14
+            mirror:
+              column_net: P16
+              row_net: P7
+          top:
+            column_net: P8
+            row_net: P15
+            mirror:
+              column_net: P16
+              row_net: P6
+          number:
+            column_net: P8
+            row_net: P18
+            mirror:
+              column_net: P16
+              row_net: P5
+      two:
+        key.stagger: 3
+        rows:
+          meta: # LALT
+            mirror.skip: true
+            column_net: P9
+            row_net: P10
+          bottom:
+            bind: 1
+            column_net: P9
+            row_net: P16
+            mirror:
+              column_net: P10
+              row_net: P8
+          home:
+            column_net: P9
+            row_net: P14
+            mirror:
+              column_net: P10
+              row_net: P7
+          top:
+            column_net: P9
+            row_net: P15
+            mirror:
+              column_net: P10
+              row_net: P6
+          number:
+            column_net: P9
+            row_net: P18
+            mirror:
+              column_net: P10
+              row_net: P5
+      three:
+        key.stagger: 3
+        rows:
+          meta.skip: true
+          bottom: # C
+            bind: 0
+            column_net: P21
+            row_net: P16
+            mirror:
+              column_net: P2
+              row_net: P8
+          home:
+            column_net: P21
+            row_net: P14
+            mirror:
+              column_net: P2
+              row_net: P7
+          top:
+            column_net: P21
+            row_net: P15
+            mirror:
+              column_net: P2
+              row_net: P6
+          number:
+            column_net: P21
+            row_net: P18
+            mirror:
+              column_net: P2
+              row_net: P5
+      four:
+        key.stagger: -3
+        rows:
+          meta.skip: true
+          bottom: # V
+            bind: 0
+            column_net: P20
+            row_net: P16
+            mirror:
+              column_net: P3
+              row_net: P8
+          home:
+            column_net: P20
+            row_net: P14
+            mirror:
+              column_net: P3
+              row_net: P7
+          top:
+            column_net: P20
+            row_net: P15
+            mirror:
+              column_net: P3
+              row_net: P6
+          number:
+            column_net: P20
+            row_net: P18
+            mirror:
+              column_net: P3
+              row_net: P5
+      five:
+        key.stagger: -3
+        rows:
+          meta.skip: true
+          bottom: # B
+            bind: 0
+            column_net: P19
+            row_net: P16
+            mirror:
+              column_net: P4
+              row_net: P8
+          home:
+            column_net: P19
+            row_net: P14
+            mirror:
+              column_net: P4
+              row_net: P7
+          top:
+            column_net: P19
+            row_net: P15
+            mirror:
+              column_net: P4
+              row_net: P6
+          number:
+            column_net: P19
+            row_net: P18
+            mirror:
+              column_net: P4
+              row_net: P5
+    rows:
+      meta:
+      bottom:
+      home:
+      top:
+      number:
+  zones.extra:
+    key.tags.right: true
+    anchor:
+      ref: matrix_five_bottom
+      shift: [11u, 0]
+    columns:
+      minus:
+        rows:
+          bottom: # Blank (alternative backspace)
+            column_net: P14
+            row_net: P8
+          home: # Double quotation mark
+            column_net: P14
+            row_net: P7
+          top: # Opening square bracket
+            column_net: P14
+            row_net: P6
+          number: # Minus key
+            column_net: P14
+            row_net: P5
+      plus:
+        rows:
+          bottom: # Shift
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
+            column_net: P15
+            row_net: P8
+          home: # Enter
+            bind: [0, u/4, 0, u/4]
+            width: 1.5u
+            column_net: P15
+            row_net: P7
+          top: # Closing square bracket
+            bind: 0
+            shift: [-u/4, 0]
+            column_net: P15
+            row_net: P6
+          number: # Plus
+            column_net: P15
+            row_net: P5
+      backspace:
+        rows:
+          bottom.skip: true
+          home.skip: true
+          top: # Backslash
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
+            column_net: P18
+            row_net: P6
+          number: # Backspace
+            bind: [0, u/4, 0, u/4]
+            width: 1.5u
+            column_net: P18
+            row_net: P5
+    rows:
+      bottom:
+      home:
+      top:
+      number:
+  zones.thumbcluster:
+    anchor:
+      ref: matrix_five_bottom
+      shift: [1.54 +0.25796, -1u -5]
+    key.tags.left: true
+    key.mirror.tags:
+      left: $unset
+      right: true
+    mirror:
+      ref: mirror_matrix_five_bottom
+      distance: -6u
+    columns:
+      four.rows.meta: # Space
+        bind: [0, u/4, 0, u/4]
+        shift: [0, 0]
+        splay: -15
+        spread: 1.5u
+        width: 1.5u
+        column_net: P20
+        row_net: P10
+        mirror:
+          column_net: P3
+          row_net: P9
+      five.rows.meta: # Mod
+        bind: [0, 1/4u, 0, 1/4u]
+        shift: [1.15, -2.5]
+        splay: -10
+        spread: 1.5u
+        width: 1.5u
+        column_net: P19
+        row_net: P10
+        mirror:
+          column_net: P4
+          row_net: P9
+
+outlines:
+  bindingleft:
+    - what: rectangle
+      where: left
+      size: u
+      bound: true
+
+  bindingright:
+    - what: rectangle
+      where: right
+      size: u
+      bound: true
+
+  cutoutsleft:
+    - what: rectangle
+      where: left
+      size: c
+
+  cutoutsright:
+    - what: rectangle
+      where: right
+      size: c
+
+  switchesleft:
+    - what: rectangle
+      where: left
+      fillet: 1
+      size: s
+
+  switchesright:
+    - what: rectangle
+      where: right
+      fillet: 1
+      size: s
+
+  wallsouterleft:
+    - what: polygon
+      points:
+        - ref: matrix_zero_number
+          shift: [-12 - u/2, 20]
+        - ref: matrix_five_number
+          shift: [48.725, 20]
+        - ref: matrix_five_bottom
+          shift: [48.725, -32.85]
+        - ref: matrix_five_bottom
+          shift: [39.62512545, -52.3647436]
+        - ref: matrix_zero_meta
+          shift: [-12 - u/4, -13.8]
+
+  wallsinnerleft:
+    - what: polygon
+      points:
+        - ref: matrix_zero_number
+          shift: [-12 - u/2 + 5, 20 - 5]
+        - ref: matrix_five_number
+          shift: [48.725 - 5, 20 - 5]
+        - ref: matrix_five_bottom
+          shift: [48.725 - 5 - 0.000001, -32.85 + 1.108483]
+        - ref: matrix_five_bottom
+          shift: [39.62512545 -2.9931263, -52.3647436 + 5.4122395]
+        - ref: matrix_zero_meta
+          shift: [-12 - u/4 + 5, -13.8 + 4.4149]
+
+  wallsouterright:
+    - what: polygon
+      points:
+        - ref: mirror_matrix_five_number
+          shift: [48.725, 20]
+        - ref: extra_backspace_number
+          shift: [12 + u/4, 20]
+        - ref: extra_backspace_top
+          shift: [12 + u/4, -30.1]
+        - ref: extra_minus_bottom
+          shift: [12 + u/2, -13.8  - 1u]
+        - ref: mirror_matrix_five_bottom
+          shift: [39.62512545, -52.3647436]
+        - ref: mirror_matrix_five_bottom
+          shift: [48.725, -32.85]
+
+  wallsinnerright:
+    - what: polygon
+      points:
+        - ref: mirror_matrix_five_number
+          shift: [48.725 - 5, 20 - 5]
+        - ref: extra_backspace_number
+          shift: [12 + u/4 - 5, 20 - 5]
+        - ref: extra_backspace_top
+          shift: [12 + u/4 - 5, -30.1 + 1.96981]
+        - ref: extra_minus_bottom
+          shift: [12 + u/2 - 2.419169, -13.8  - 1u + 4.736922]
+        - ref: mirror_matrix_five_bottom
+          shift: [39.62512545 -2.9931263, -52.3647436 + 5.4122395]
+        - ref: mirror_matrix_five_bottom
+          shift: [48.725 - 5 - 0.000001, -32.85 + 1.108483]
+
+  left:
+    - name: wallsouterleft
+    - name: wallsinnerleft
+      operation: stack
+    - name: switchesleft
+      operation: stack
+    - name: cutoutsleft
+      operation: stack
+
+  right:
+    - name: wallsouterright
+    - name: wallsinnerright
+      operation: stack
+    - name: switchesright
+      operation: stack
+    - name: cutoutsright
+      operation: stack
+
+  full:
+    - name: left
+    - name: right
+      operation: stack
+
+# Example:
+# https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
+pcbs:
+  left:
+    outlines:
+      wallsinnerleft.outline: wallsinnerleft
+      keycaps:
+        outline: switchesleft
+        layer: Eco1.User
+      binding:
+        outline: bindingleft
+        layer: Eco2.User
+
+    footprints:
+      # Any MX switch
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/mx.js
+      mx:
+        what: mx
+        where: left
+        params:
+          hotswap: true
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+
+      # Nexperia CFP3 (SOD-123W) SMD diode
+      diode:
+        what: sod-123w
+        where: left
+        adjust:
+          shift: [0, -5]
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+
+      # Arduino Pro Micro atmega32u4au
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/promicro.js
+      promicro:
+        what: promicro
+        where:
+          ref: matrix_five_number
+          rotate: -90
+          shift: [1u +1, 0.65]
+        params:
+          orientation: "down"
+
+      # Reset button
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/button.js
+      reset:
+        what: button
+        where:
+          ref: matrix_five_top
+          rotate: -90
+          shift: [1u +1, -5]
+        params:
+          from: GND
+          to: RST
+          side: "B"
+
+      # TRRS-PJ-320A-dual audio cable port
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/trrs.js
+      # https://keeb.io/products/trrs-jack-3-5mm
+      trrs:
+        what: trrs
+        where:
+          ref: matrix_five_number
+          shift: [1u +15.6 + 5, 17.95]
+        params:
+          A: GND # 1
+          B: GND # 2
+          C: VCC # 3
+          D: P0 # 4
+          reverse: true
+          # Symmetric only works for the "Serial" pinout
+          symmetric: true
+  right:
+    outlines:
+      wallsinnerright.outline: wallsinnerright
+      keycaps:
+        outline: switchesright
+        layer: Eco1.User
+      binding:
+        outline: bindingright
+        layer: Eco2.User
+
+    footprints:
+      # Any MX switch
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/mx.js
+      mx:
+        what: mx
+        where: right
+        params:
+          hotswap: true
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+
+      # Nexperia CFP3 (SOD-123W) SMD diode
+      diode:
+        what: sod-123w
+        where: right
+        adjust:
+          shift: [0, -5]
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+
+      # Arduino Pro Micro atmega32u4au
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/promicro.js
+      promicro:
+        what: promicro
+        where:
+          ref: mirror_matrix_five_number
+          rotate: 90
+          shift: [1u +1, 0.65]
+        params:
+          orientation: "down"
+
+      # Reset button
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/button.js
+      reset:
+        what: button
+        where:
+          ref: mirror_matrix_five_top
+          rotate: 90
+          shift: [1u +1, -5]
+        params:
+          from: GND
+          to: RST
+          side: "B"
+
+      # TRRS-PJ-320A-dual audio cable port
+      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/trrs.js
+      # https://keeb.io/products/trrs-jack-3-5mm
+      trrs:
+        what: trrs
+        where:
+          ref: mirror_matrix_five_number
+          shift: [1u + 11 + 5, 17.95]
+        params:
+          A: GND # 1
+          B: GND # 2
+          C: VCC # 3
+          D: P0 # 4
+          reverse: true
+          # Symmetric only works for the "Serial" pinout
+          symmetric: true

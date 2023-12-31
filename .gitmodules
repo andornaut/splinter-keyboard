@@ -1,5 +1,5 @@
-[submodule "ergogen/footprints/infused-kim"]
-	path = ergogen/footprints/infused-kim
+[submodule "ergogen/ergogen/footprints/infused-kim"]
+	path = ergogen/ergogen/footprints/infused-kim
 	url = git@github.com:infused-kim/kb_ergogen_fp.git
 [submodule "ergogen/kb_ergogen_helper"]
 	path = ergogen/kb_ergogen_helper
