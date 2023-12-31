@@ -10,18 +10,18 @@ A 61-key split columnar ergonomic keyboard
 
 ## Versions
 
-Version | Description | Photograph
+Version | Description | Layout
 --- | --- | ---
-[v1](./v1) | Production ready. Asymetrical. Traditional key layout. | [![v1](./v1/images/v1-300width.jpg)](./v1/images/v1.jpg)
-[v2](./v2) | In development. Symmetrical. Non-traditional backspace and backslack placement. | [![v2](./v2/images/v2-300width.jpg)](./v2/images/v2.jpg)
+[v1](./v1) | Production ready. Asymetrical. Traditional 61-key layout. | [![v1](./v1/images/v1-300width.jpg)](./v1/images/v1.jpg)
+[v2](./v2) | In development. Symmetrical cases. Non-traditional (moved backspace and backslash keys) 60-key layout. | [![v2](./v2/images/v2-300width.jpg)](./v2/images/v2.jpg)
 
 ## Installation
 
 * [Ergogen](https://github.com/ergogen/ergogen)
-  * [kb_ergogen_helper](https://github.com/infused-kim/kb_ergogen_helper)
+  * [Footprints](https://github.com/infused-kim/kb_ergogen_fp)
+  * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
 * [KiCad](https://www.kicad.org)
   * [KiKit automation tools](https://github.com/yaqwsx/KiKit)
-* [OnShape](https://www.onshape.com/en/)
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
 ```bash

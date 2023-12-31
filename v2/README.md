@@ -1,6 +1,8 @@
 # Version 2 of the Splinter keyboard
 
-A 61-key split columnar ergonomic keyboard - In development. Symmetrical. Non-traditional backspace and backslack placement.
+A 60-key split columnar ergonomic keyboard - In development. Symmetrical cases. Non-traditional placement of backspace and backslash keys.
+
+![v2](./images/v2.jpg)
 
 ## Hardware
 
@@ -39,10 +41,10 @@ Left | Right
 
 Category | Quantity | Part
 --- | --- | ---
-Diodes | 61 | Hand wired: [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes); PCB: [Nexperia PMEG100T10ELRX Diode 100 V 1A Surface Mount SOD-123W](https://www.digikey.ca/en/products/detail/nexperia-usa-inc/PMEG100T10ELRX/15777950)
-Hot swap sockets | 61 | PCB: [Kailh Colorful Hot Swap Socket](https://www.aliexpress.com/item/1005003166749340.html)
+Diodes | 60 | Hand wired: [1N4148 Diodes](https://keeb.io/collections/diy-parts/products/1n4148-diodes); PCB: [Nexperia PMEG100T10ELRX Diode 100 V 1A Surface Mount SOD-123W](https://www.digikey.ca/en/products/detail/nexperia-usa-inc/PMEG100T10ELRX/15777950)
+Hot swap sockets | 60 | PCB: [Kailh Colorful Hot Swap Socket](https://www.aliexpress.com/item/1005003166749340.html)
 Keycap sets || [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
-Key switches | 61 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
+Key switches | 60 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
 Microcontrollers | 2 | [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) or [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795)
 Reset buttons | 2 | [SparkFun COM-08720 switch](https://www.mouser.ca/ProductDetail/474-COM-08720) or [Reset Pushbutton Switch](https://keeb.io/collections/diy-parts/products/reset-pushbutton-switch) (not required when using [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) microcontrollers)
 Screws | 4 | [M3 screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
