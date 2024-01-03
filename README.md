@@ -13,7 +13,7 @@ A 61-key split columnar ergonomic keyboard
 Version | Description | Photograph
 --- | --- | ---
 [v1](./v1) | Production ready. Asymetrical. Traditional key layout. | [![v1](./v1/images/v1-300width.jpg)](./v1/images/v1.jpg)
-[v2](./v2) | In development. Symmetrical. Non-traditional backspace and backslack placement. |
+[v2](./v2) | In development. Symmetrical. Non-traditional backspace and backslack placement. | [![v2](./v2/images/v2-300width.jpg)](./v2/images/v2.jpg)
 
 ## Installation
 
