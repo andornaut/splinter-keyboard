@@ -12,8 +12,8 @@ A 61-key split columnar ergonomic keyboard
 
 Version | Description | Layout
 --- | --- | ---
-[v1](./v1) | Production ready. Asymetrical. Traditional 61-key layout. | [![v1](./v1/images/v1-300width.jpg)](./v1/images/v1.jpg)
-[v2](./v2) | In development. Symmetrical cases. Non-traditional (moved backspace and backslash keys) 60-key layout. | [![v2](./v2/images/v2-300width.jpg)](./v2/images/v2.jpg)
+[v1](./v1) | Production ready. Asymetrical. Traditional 61-key layout. | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
+[v2](./v2) | In development. Symmetrical cases. Non-traditional (moved backspace and backslash keys) 60-key layout. | [![v2](./v2/v2-300width.png)](./v2/v2.png)
 
 ## Installation
 

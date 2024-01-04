@@ -218,7 +218,7 @@ points:
             shift: [u/4, 0]
             width: 1.5u
             column_net: P18
-            row_net: P5          
+            row_net: P5       
           bottom: # Blank (alternative backspace)
             shift: [-u/4, 0]
             column_net: P14
@@ -256,7 +256,7 @@ points:
   zones.thumbcluster:
     anchor:
       ref: matrix_five_bottom
-      shift: [1.54 +0.25796, -1u -3]
+      shift: [0.65, -1u -4.5]
     key.tags.left: true
     key.mirror.tags:
       left: $unset
@@ -267,7 +267,7 @@ points:
     columns:
       four.rows.meta: # Space
         bind: [0, u/4, 0, u/4]
-        splay: -15
+        splay: -20
         spread: 1.5u
         width: 1.5u
         column_net: P20
@@ -322,29 +322,33 @@ outlines:
     - what: polygon
       points:
         - ref: matrix_zero_number
-          shift: [-u/2 -u, u/2 +6]
+          shift: [-u/2 -u , u/2 +6]
         - ref: matrix_five_number
-          shift: [1.94u, u/2 +6]
+          shift: [u + 16.19, u/2 +6]
         - ref: matrix_five_bottom
-          shift: [1.94u, -1.12u]
-        - ref: matrix_five_bottom
-          shift: [1.67u, -2.12u]
+          shift: [u + 16.19, -1u -6.95]
+        - ref: matrix_one_meta
+          shift: [4u, -u/2]
         - ref: matrix_zero_meta
+          shift: [-u/2 -u/4, -u/2]
+        - ref: matrix_zero_bottom
           shift: [-u/2 -u +u/4, -u/2]
 
   wallsright:
     - what: polygon
       points:
         - ref: mirror_matrix_five_number
-          shift: [1.94u, u/2 +6]
+          shift: [u + 16.19, u/2 +6]
         - ref: extra_plus_number
           shift: [u/2, u/2 +6]
         - ref: extra_plus_bottom
-          shift: [u/2, -u/2 -u]
+          shift: [u/2, -u/2]
+        - ref: extra_plus_bottom
+          shift: [0, -u/2 -u]          
+        - ref: extra_minus_meta
+          shift: [-5u, -u/2]
         - ref: mirror_matrix_five_bottom
-          shift: [1.67u, -2.12u]
-        - ref: mirror_matrix_five_bottom
-          shift: [1.94u, -1.12u]
+          shift: [u + 16.19, -u -6.95]
 
   left:
     - name: bindingleft
