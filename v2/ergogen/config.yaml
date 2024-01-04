@@ -330,9 +330,7 @@ outlines:
         - ref: matrix_one_meta
           shift: [4u, -u/2]
         - ref: matrix_zero_meta
-          shift: [-u/2 -u/4, -u/2]
-        - ref: matrix_zero_bottom
-          shift: [-u/2 -u +u/4, -u/2]
+          shift: [-u/4 -u, -u/2]
 
   wallsright:
     - what: polygon
@@ -342,9 +340,7 @@ outlines:
         - ref: extra_plus_number
           shift: [u/2, u/2 +6]
         - ref: extra_plus_bottom
-          shift: [u/2, -u/2]
-        - ref: extra_plus_bottom
-          shift: [0, -u/2 -u]          
+          shift: [u/2, -u/2 -u]        
         - ref: extra_minus_meta
           shift: [-5u, -u/2]
         - ref: mirror_matrix_five_bottom

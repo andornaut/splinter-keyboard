@@ -18,7 +18,8 @@ Version | Description | Layout
 ## Installation
 
 * [Ergogen](https://github.com/ergogen/ergogen)
-  * [Footprints](https://github.com/infused-kim/kb_ergogen_fp)
+  * [Footprints by infused-kim](https://github.com/infused-kim/kb_ergogen_fp)
+  * [Footprints by sboysel](https://github.com/sboysel/ergogen/tree/develop/src/footprints)
   * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
 * [KiCad](https://www.kicad.org)
   * [KiKit automation tools](https://github.com/yaqwsx/KiKit)
