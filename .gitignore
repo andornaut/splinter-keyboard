@@ -1,5 +1,6 @@
 ^dist$
 _autosave*
-kicad/temp-freerouting.dsn
-kicad/**/fp-info-cache
-kicad/**/*-backups
+*/kicad/temp-freerouting.dsn
+*/kicad/**/fp-info-cache
+*/kicad/**/*.lck
+*/kicad/**/*-backups
