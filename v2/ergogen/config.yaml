@@ -328,7 +328,7 @@ outlines:
         - ref: matrix_five_bottom
           shift: [u + 16.19, -1u -6.95]
         - ref: matrix_one_meta
-          shift: [4u, -u/2]
+          shift: [5u, -u/2]
         - ref: matrix_zero_meta
           shift: [-u/4 -u, -u/2]
 
@@ -342,7 +342,7 @@ outlines:
         - ref: extra_plus_bottom
           shift: [u/2, -u/2 -u]        
         - ref: extra_minus_meta
-          shift: [-5u, -u/2]
+          shift: [-6u -u/4, -u/2]
         - ref: mirror_matrix_five_bottom
           shift: [u + 16.19, -u -6.95]
 
