@@ -45,7 +45,7 @@ Diodes | 61 | Hand wired: [1N4148 Diodes](https://keeb.io/collections/diy-parts/
 Hot swap sockets | 61 | PCB: [Kailh Colorful Hot Swap Socket](https://www.aliexpress.com/item/1005003166749340.html)
 Keycap sets || [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 Key switches | 61 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
-Microcontrollers | 2 | [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) or [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795)
+Microcontrollers | 2 | [Pro Micro (USB-C) - 5V/16MHz - ATmega32U4](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) or [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file))
 Reset buttons | 2 | [SparkFun COM-08720 switch](https://www.mouser.ca/ProductDetail/474-COM-08720) or [Reset Pushbutton Switch](https://keeb.io/collections/diy-parts/products/reset-pushbutton-switch) (not required when using [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) microcontrollers)
 Screws | 4 | [M3 screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
 Silicon bumpers | 12 | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)
