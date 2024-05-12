@@ -74,12 +74,12 @@ Switch (MX) outer size | 15.6mm²
 ### [Keyboard Layout](http://www.keyboard-layout-editor.com/)
 
 * [Project folder](./keyboard-layout-editor)
-* [Configuration file](./keyboard-layout-editor/keyboard-layout.json)
+* [Configuration file](./keyboard-layout-editor/keyboard-layout-editor.json)
 
 ![Keyboard Layout preview](./keyboard-layout-editor/keyboard-layout-editor.png)
 
 1. Prototype a keyboard layout using [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
-1. Export the layout configuration to [`./keyboard-layout-editor/keyboard-layout.json`](./keyboard-layout-editor/keyboard-layout.json), so that you can import it and iterate on it in the future
+1. Export the layout configuration to [`./keyboard-layout-editor/keyboard-layout-editor.json`](./keyboard-layout-editor/keyboard-layout-editor.json), so that you can import it and iterate on it in the future
 1. Use the prototype as inspiration for creating a production-ready design using Ergogen
 
 ### [Ergogen](https://github.com/ergogen/ergogen)

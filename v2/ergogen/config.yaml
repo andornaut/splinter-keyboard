@@ -191,7 +191,7 @@ points:
             column_net: P19
             row_net: P15
             mirror:
-              column_net: P4
+              column_net: P5
               row_net: P6
           number:
             column_net: P19
@@ -218,7 +218,7 @@ points:
             shift: [u/4, 0]
             width: 1.5u
             column_net: P18
-            row_net: P5       
+            row_net: P5
           bottom: # Blank (alternative backspace)
             shift: [-u/4, 0]
             column_net: P14
@@ -255,8 +255,8 @@ points:
       number:
   zones.thumbcluster:
     anchor:
-      ref: matrix_five_bottom
-      shift: [0.65, -1u -4.5]
+      ref: matrix_four_bottom
+      shift: [-3.45, -1u -3]
     key.tags.left: true
     key.mirror.tags:
       left: $unset
@@ -265,10 +265,16 @@ points:
       ref: mirror_matrix_five_bottom
       distance: -6u
     columns:
+      three.rows.meta: # Backspace
+        splay: -18.925
+        column_net: P19 #TBD
+        row_net: P10 #TBD
+        mirror:
+          column_net: P4 #TBD
+          row_net: P9 #TBD
       four.rows.meta: # Space
         bind: [0, u/4, 0, u/4]
-        splay: -20
-        spread: 1.5u
+        spread: 1.25u
         width: 1.5u
         column_net: P20
         row_net: P10
@@ -322,13 +328,11 @@ outlines:
     - what: polygon
       points:
         - ref: matrix_zero_number
-          shift: [-u/2 -u , u/2 +6]
+          shift: [-u/2 -u, u/2 +6]
         - ref: matrix_five_number
-          shift: [u + 16.19, u/2 +6]
+          shift: [u + 15.6, u/2 +6]
         - ref: matrix_five_bottom
-          shift: [u + 16.19, -1u -6.95]
-        - ref: matrix_one_meta
-          shift: [5u, -u/2]
+          shift: [u + 15.6, -1u -1/2u]
         - ref: matrix_zero_meta
           shift: [-u/4 -u, -u/2]
 
@@ -336,15 +340,13 @@ outlines:
     - what: polygon
       points:
         - ref: mirror_matrix_five_number
-          shift: [u + 16.19, u/2 +6]
+          shift: [u + 15.6, u/2 +6]
         - ref: extra_plus_number
           shift: [u/2, u/2 +6]
         - ref: extra_plus_bottom
-          shift: [u/2, -u/2 -u]        
-        - ref: extra_minus_meta
-          shift: [-6u -u/4, -u/2]
+          shift: [u/2, -u/2 -u]
         - ref: mirror_matrix_five_bottom
-          shift: [u + 16.19, -u -6.95]
+          shift: [u + 15.6, -u -1/2u]
 
   left:
     - name: bindingleft
