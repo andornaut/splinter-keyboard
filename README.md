@@ -1,6 +1,6 @@
 # Splinter keyboard
 
-A 61-key split columnar ergonomic keyboard
+A 62-key split columnar ergonomic keyboard
 
 * [andornaut@github /til](https://github.com/andornaut/til/)
   * [3D Printing](https://github.com/andornaut/til/blob/master/docs/3d-printing.md)
@@ -12,12 +12,13 @@ A 61-key split columnar ergonomic keyboard
 
 Version | Description | Layout
 --- | --- | ---
-[v1](./v1) | Production ready. Asymetrical. Traditional 61-key layout. | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
-[v2](./v2) | In development. Symmetrical cases. Non-traditional (moved backspace and backslash keys) 60-key layout. | [![v2](./v2/v2-300width.png)](./v2/v2.png)
+[v1](./v1) | 61-keys. Asymetrical enclosures. Traditional layout. | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
+[v2](./v2) | 62-keys. Symmetrical enclosures. Non-traditional placement of backspace and backslash keys. | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg)
 
 ## Installation
 
 * [Ergogen](https://github.com/ergogen/ergogen)
+  * [Footprints by ceoloide](https://github.com/ceoloide/ergogen-footprints)
   * [Footprints by infused-kim](https://github.com/infused-kim/kb_ergogen_fp)
   * [Footprints by sboysel](https://github.com/sboysel/ergogen/tree/develop/src/footprints)
   * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
@@ -35,12 +36,15 @@ nvm use
 npm install
 
 # Install KiCad
-sudo add-apt-repository ppa:kicad/kicad-7.0-releases
+sudo add-apt-repository ppa:kicad/kicad-8.0-releases
 sudo apt install kicad
 
 # Install KiKit
 # Must use the same Python interpreter as KiCad (will not work in a venv)
-pip install kikit
+sudo pip install kikit --break-system-packages
+
+# Update submodules
+git submodule update --recursive --remote
 ```
 
 ## Developing
@@ -53,3 +57,23 @@ pip install kikit
 1. Model a case using [OnShape](https://cad.onshape.com)
 1. Print the case using [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 1. Install the [custom QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
+
+### Fix error when running `npm run build`
+
+The `pcbnew` Python library, which is packaged with Kicad, may fail if it cannot find libTKBO, eg.:
+```
+$ python3
+Python 3.12.3 (main, Apr 10 2024, 05:33:47) [GCC 13.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pcbnew
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/lib/python3/dist-packages/pcbnew.py", line 12, in <module>
+    import _pcbnew
+ImportError: libTKBO.so.7: cannot open shared object file: No such file or directory
+```
+
+Workaround this issue by installing the missing library:
+```
+sudo apt install libocct-modeling-algorithms-7.6t64
+```

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "ergogen": "^4.0.2"
+    "ergogen": "^4.1.0"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
@@ -11,13 +11,15 @@
     "_build": "npx ergogen ./${VERSION}/ergogen/ --output dist/${VERSION}/ergogen/ && npm run update-pcbs",
     "clean": "rm -rf dist",
     "copy-pcbs-to-kicad": "npx env-cmd --use-shell npm run _copy-pcbs-to-kicad",
-    "_copy-pcbs-to-kicad": "cp dist/${VERSION}/ergogen/pcbs/*.kicad_pcb ./${VERSION}/kicad/",
+    "_copy-pcbs-to-kicad": "cp dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb ./${VERSION}/kicad/",
+    "copy-to-routed": "npx env-cmd --use-shell npm run _copy-to-routed",
+    "_copy-to-routed": "set -vxe;cp ./${VERSION}/kicad/[!_]*.kicad_pcb ./${VERSION}/kicad/routed/",
     "copy-traces": "npx env-cmd --use-shell npm run _copy-traces",
-    "_copy-traces": "set -vxe;for f in ./${VERSION}/kicad/routed/*.kicad_pcb; do echo \"${f}\" && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" ./${VERSION}/kicad/$(basename \"${f}\"); done",
+    "_copy-traces": "set -vxe;for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" ./${VERSION}/kicad/$(basename \"${f}\"); done",
     "fab-jlcpcb": "npx env-cmd --use-shell npm run _fab-jlcpcb",
-    "_fab-jlcpcb": "for f in ./${VERSION}/kicad/routed/*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/kicad/jlcpcb/; done",
-    "update-pcbs": "npx env-cmd --use-shell npm run _update-pcbs", 
-    "_update-pcbs": "for f in dist/$VERSION/ergogen/pcbs/*.kicad_pcb; do echo ${f} && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb ${f}; done",
+    "_fab-jlcpcb": "for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/${VERSION}/kicad/jlcpcb/; done",
+    "update-pcbs": "npx env-cmd --use-shell npm run _update-pcbs",
+    "_update-pcbs": "for f in dist/$VERSION/ergogen/pcbs/[!_]*.kicad_pcb; do echo ${f} && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb ${f}; done",
     "watch": "npx env-cmd --use-shell npm run _watch",
     "_watch": "nodemon --ext .js,.yaml --watch ./${VERSION}/ergogen/config.yaml --exec 'npm run build'",
     "watch-and-copy-pcbs-to-kicad": "npx env-cmd --use-shell npm run _watch-and-copy-pcbs-to-kicad",
