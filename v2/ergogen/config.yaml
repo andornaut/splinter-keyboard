@@ -61,27 +61,19 @@ points:
           bottom: # Z
             column_net: P18
             row_net: P8
-            mirror: # /
-              column_net: P5
-              row_net: P16
+            mirror.skip: true
           home: # A
             column_net: P18
             row_net: P7
-            mirror: # ;
-              column_net: P5
-              row_net: P14
+            mirror.skip: true
           top: # Q
             column_net: P18
             row_net: P6
-            mirror: # P
-              column_net: P5
-              row_net: P15
+            mirror.skip: true
           number: # 1
             column_net: P18
             row_net: P5
-            mirror: # 0
-              column_net: P5
-              row_net: P18
+            mirror.skip: true
       two:
         key.stagger: 3
         rows:
@@ -211,18 +203,33 @@ points:
     key.tags.right: true
     anchor:
       ref: matrix_five_meta
-      shift: [10u, 0]
+      shift: [9u, 0]
     columns:
-      dash:
+      zero:
         rows:
           meta: # BACKSPACE
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
-            column_net: P6
+            column_net: P5
             row_net: P10
-          bottom: # \
+          bottom: # Z
             shift: [-u/4, 0]
+            column_net: P5
+            row_net: P16
+          home: # A
+            column_net: P5
+            row_net: P14
+          top: # Q
+            column_net: P5
+            row_net: P15
+          number: # 1
+            column_net: P5
+            row_net: P18    
+      dash:
+        rows:
+          meta.skip: true
+          bottom: # \
             column_net: P6
             row_net: P16
           home: # '
@@ -334,15 +341,15 @@ outlines:
         - ref: matrix_zero_number
           shift: [-u/2 -u, u/2 +6]
 
-        - ref: matrix_five_number
-          shift: [u + 15.6 - 28, u/2 +6]
-        - ref: matrix_five_number
-          shift: [u + 15.6 - 28, u/2 +6 +1]
-        - ref: matrix_five_number
-          shift: [u + 15.6, u/2 +6 +1]
-
         #- ref: matrix_five_number
-        #  shift: [u + 15.6, u/2 +6]
+        #  shift: [u + 15.6 - 28, u/2 +6]
+        #- ref: matrix_five_number
+        #  shift: [u + 15.6 - 28, u/2 +6 +1]
+        #- ref: matrix_five_number
+        #  shift: [u + 15.6, u/2 +6 +1]
+
+        - ref: matrix_five_number
+          shift: [u + 15.6, u/2 +6]
         - ref: matrix_five_bottom
           shift: [u + 15.6, -1u -1/2u]
         - ref: matrix_zero_meta
@@ -351,15 +358,15 @@ outlines:
   _boxright:
     - what: polygon
       points:
-        - ref: mirror_matrix_five_number
-          shift: [u + 15.6, u/2 +6 +1]
-        - ref: mirror_matrix_five_number
-          shift: [u + 15.6 -28, u/2 +6 +1]
-        - ref: mirror_matrix_five_number
-          shift: [u + 15.6 -28, u/2 +6]
-
         #- ref: mirror_matrix_five_number
-        #  shift: [u + 15.6, u/2 +6]
+        #  shift: [u + 15.6, u/2 +6 +1]
+        #- ref: mirror_matrix_five_number
+        #  shift: [u + 15.6 -28, u/2 +6 +1]
+        #- ref: mirror_matrix_five_number
+        #  shift: [u + 15.6 -28, u/2 +6]
+
+        - ref: mirror_matrix_five_number
+          shift: [u + 15.6, u/2 +6]
         - ref: extra_equal_number
           shift: [u/2, u/2 +6]
         - ref: extra_equal_bottom
@@ -436,11 +443,13 @@ pcbs:
         layer: Eco1.User
 
     footprints:
+      # Diode
       # Nexperia BAS16H,115: 100V Single 1.25V@150mA 4ns 215mA SOD-123F Switching Diode ROHS
-      # sod-123w and sod-123f have very similar dimensions:
+      # The footprint is for a sod-123w package, but the recommended diodes are sod-123f,
+      # but these both have similar dimensions
       # https://blog.mbedded.ninja/pcb-design/component-packages/sod-123-component-package/
       diode: &diode
-        what: sod-123w
+        what: sod-123w # diode
         where: left
         adjust:
           shift: [0, -5]
@@ -467,17 +476,19 @@ pcbs:
           to: "{{colrow}}" # Pin 2
 
       # Arduino Pro Micro atmega32u4au
+      # SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/promicro.js
       promicro: &promicro
         what: promicro
         where:
           ref: matrix_five_number
           rotate: -90
-          shift: [18, -1]
+          shift: [18, -4]
         params:
           orientation: down
 
       # Reset button
+      # E-Switch TL3342F450QG
       # https://www.e-switch.com/product-catalog/tl3342-series-low-profile-smt-tactile-switch
       # https://github.com/ergogen/ergogen/blob/develop/src/footprints/button.js
       reset: &reset
@@ -491,9 +502,10 @@ pcbs:
           to: RST
           side: B
 
-      # TRRS PJ-320A jack sold by LCSC
+      # TRRS jack 
+      # HCTL HC-PJ-320A-4P-D
+      # https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html
       # https://github.com/ceoloide/ergogen-footprints/blob/main/trrs_pj320a.js
-      # Datasheet: https://datasheet.lcsc.com/lcsc/2311241628_Hong-Cheng-HC-PJ-320A_C7501806.pdf
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
@@ -534,7 +546,7 @@ pcbs:
         where:
           ref: mirror_matrix_five_number
           rotate: 90
-          shift: [18, -1]
+          shift: [18, -4]
 
       reset:
         <<: *reset
@@ -548,3 +560,4 @@ pcbs:
         where:
           ref: mirror_matrix_five_number
           shift: [18 + 13, 16.25]
+
