@@ -27,8 +27,8 @@ GND      |    | VCC      |
 
 ### TRRS serial pinout
 
-* [qmk_firmware/docs/feature_split_keyboard](https://github.com/qmk/qmk_firmware/blob/master/docs/feature_split_keyboard.md#serial-wiring)
-* [qmk_firmware/docs/serial_driver](https://github.com/qmk/qmk_firmware/blob/master/docs/serial_driver.md)
+* [qmk_firmware/docs/features/split_keyboard](https://github.com/qmk/qmk_firmware/blob/master/docs/features/split_keyboard.md#serial-wiring)
+* [qmk_firmware/docs/drivers/serial](https://github.com/qmk/qmk_firmware/blob/master/docs/drivers/serial.md)
 
 Connect: 0 (RX1, D2), GND, VCC
 
