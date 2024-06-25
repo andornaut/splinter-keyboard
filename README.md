@@ -47,6 +47,8 @@ sudo pip install kikit --break-system-packages
 git submodule update --recursive --remote
 ```
 
+Alternatively, you can install OrcaSlicer and Kicad using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/master/roles/dev/tasks/hobbies.yml).
+
 ## Developing
 
 1. Set the `VERSION` environment variable in [`.env`](./.env) to one of "v1" or "v2"
