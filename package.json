@@ -7,13 +7,13 @@
     "nodemon": "^3.1.10"
   },
   "scripts": {
-    "build": "dotenv -- npx ergogen ./${VERSION}/ergogen/ --output dist/${VERSION}/ergogen/ && npm run update-pcbs",
+    "build": "dotenv -- sh -c 'npx ergogen ./${VERSION}/ergogen/ --output dist/${VERSION}/ergogen/ && npm run update-pcbs'",
     "clean": "rm -rf dist",
-    "copy-pcbs-to-kicad": "dotenv -- cp dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb ./${VERSION}/kicad/",
-    "copy-to-routed": "dotenv -- set -vxe;cp ./${VERSION}/kicad/[!_]*.kicad_pcb ./${VERSION}/kicad/routed/",
-    "copy-traces": "dotenv -- set -vxe;for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" ./${VERSION}/kicad/$(basename \"${f}\"); done",
-    "fab-jlcpcb": "dotenv -- for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/${VERSION}/kicad/jlcpcb/; done",
-    "update-pcbs": "dotenv -- for f in dist/$VERSION/ergogen/pcbs/[!_]*.kicad_pcb; do echo ${f} && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb ${f}; done",
+    "copy-pcbs-to-kicad": "dotenv -- sh -c 'cp dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb ./${VERSION}/kicad/'",
+    "copy-to-routed": "dotenv -- sh -c 'set -vxe;cp ./${VERSION}/kicad/[!_]*.kicad_pcb ./${VERSION}/kicad/routed/'",
+    "copy-traces": "dotenv -- sh -c 'set -vxe;for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" ./${VERSION}/kicad/$(basename \"${f}\"); done'",
+    "fab-jlcpcb": "dotenv -- sh -c 'for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/${VERSION}/kicad/jlcpcb/; done'",
+    "update-pcbs": "dotenv -- sh -c 'for f in dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb; do echo ${f} && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb ${f}; done'",
     "watch": "dotenv -- nodemon --ext .js,.yaml --watch ./${VERSION}/ergogen/config.yaml --exec 'npm run build'",
     "watch-and-copy-pcbs-to-kicad": "dotenv -- nodemon --ext .js,.yaml --watch ./${VERSION}/ergogen/config.yaml --exec 'npm run build && npm run copy-pcbs-to-kicad'"
   }

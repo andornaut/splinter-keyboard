@@ -63,7 +63,8 @@ Alternatively, you can install OrcaSlicer and Kicad using [these Ansible tasks](
 ### Fix error when running `npm run build`
 
 The `pcbnew` Python library, which is packaged with Kicad, may fail if it cannot find libTKBO, eg.:
-```
+
+```bash
 $ python3
 Python 3.12.3 (main, Apr 10 2024, 05:33:47) [GCC 13.2.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
@@ -76,6 +77,7 @@ ImportError: libTKBO.so.7: cannot open shared object file: No such file or direc
 ```
 
 Workaround this issue by installing the missing library:
-```
+
+```bash
 sudo apt install libocct-modeling-algorithms-7.6t64
 ```
