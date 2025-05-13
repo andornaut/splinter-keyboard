@@ -85,7 +85,7 @@ Connect: 0 (RX1, D2), GND, VCC
 ![Ergogen preview](./ergogen/ergogen.png)
 
 1. Convert the prototype to Ergogen's DSL, and then save it to [`./ergogen/config.yaml`](./ergogen/config.yaml)
-   * If prototyping using this [online version of Ergogen](https://ergogen.ceoloide.com/), then download the "raw.txt" file
+   * If prototyping using this [online Ergogen editor](https://ergogen.ceoloide.com/), then click the gear icon, then add the [sod-123w footprint](./ergogen/footprints/sod-123w.js)
 1. Run `npm run build` to generate and save outlines and pcbs to `../dist/v2/ergogen/`
     * Alternatively, run `npm run watch` or `npm run watch-and-copy-pcbs-to-kicad`
 
