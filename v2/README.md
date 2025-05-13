@@ -1,18 +1,26 @@
 # Version 2 of the Splinter keyboard
 
-A 62-key split columnar ergonomic keyboard - Symmetrical enclosures. Non-traditional placement of backspace and backslash keys.
+* [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter)
+
+A 62-key split columnar ergonomic keyboard - Symmetrical enclosures.
+Non-traditional placement of backspace and backslash keys.
 
 ![v2](./v2.jpg)
 
 ## Hardware
 
-### Parts
+### Bill of materials (BOM)
 
 Category | Quantity | Part
 --- | --- | ---
 Diodes | 62 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)
 Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)
-Keycap sets |  | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
+
+Description | Quantity | Part
+--- | --- | ---
+Diodes | 62 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)
+Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)
+Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
 Microcontrollers | 2 | [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file)) (Note that [some USB-C Pro Micros are 3mm longer](https://keeb.io/products/pro-micro-usb-c-version-5v-16mhz-arduino-compatible-atmega32u4) than the Micro-USB version that the Ergogen footprint is based on, but this is not true of the [SparkFun USB-C Pro Micro](https://www.sparkfun.com/products/15795))
 Reset buttons | 2 | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller)
@@ -41,10 +49,10 @@ Switch (MX) outer size | 15.6mm²
 
 Left Arduino | Left AVR | Right Arduino | Right AVR
 ---      |--- | ---      |---
-1 (TX0)  | D3 | RAW      |
-0 (RX1)  | D2 | GND      |
-GND      |    | RST      |
-GND      |    | VCC      |
+1 (TX0)  | D3 | RAW      ||
+0 (RX1)  | D2 | GND      ||
+GND      |    | RST      ||
+GND      |    | VCC      ||
 2 (SDA)  | D1 | A3 (21)  | F4
 3 (SCL)  | D0 | A2 (20)  | F5
 4 (A6)   | D4 | A1 (19)  | F6
@@ -53,84 +61,3 @@ GND      |    | VCC      |
 7        | E6 | 14       | B3
 8 (A8)   | B4 | 16       | B2
 9 (A9)   | B5 | 10 (A10) | B6
-
-### TRRS serial pinout
-
-* [qmk_firmware/docs/features/split_keyboard](https://github.com/qmk/qmk_firmware/blob/master/docs/features/split_keyboard.md#serial-wiring)
-* [qmk_firmware/docs/drivers/serial](https://github.com/qmk/qmk_firmware/blob/master/docs/drivers/serial.md)
-
-Connect: 0 (RX1, D2), GND, VCC
-
-## Developing
-
-* [Overall process](../README.md#developing)
-
-### [Keyboard Layout](http://www.keyboard-layout-editor.com/)
-
-* [Project folder](./keyboard-layout-editor)
-* [Configuration file](./keyboard-layout-editor/keyboard-layout-editor.json)
-
-![Keyboard Layout preview](./keyboard-layout-editor/keyboard-layout-editor.png)
-
-1. Prototype a keyboard layout using [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
-1. Export the layout configuration to [`./keyboard-layout-editor/keyboard-layout-editor.json`](./keyboard-layout-editor/keyboard-layout-editor.json), so that you can import it and iterate on it in the future
-1. Use the prototype as inspiration for creating a production-ready design using Ergogen
-
-### [Ergogen](https://github.com/ergogen/ergogen)
-
-* [Project folder](./ergogen)
-* [Configuration file](./ergogen/config.yaml)
-* [Online version of Ergogen that includes ceoloide's footprints](https://ergogen.ceoloide.com/)
-
-![Ergogen preview](./ergogen/ergogen.png)
-
-1. Convert the prototype to Ergogen's DSL, and then save it to [`./ergogen/config.yaml`](./ergogen/config.yaml)
-   * If prototyping using this [online Ergogen editor](https://ergogen.ceoloide.com/), then click the gear icon, then add the [sod-123w footprint](./ergogen/footprints/sod-123w.js)
-1. Run `npm run build` to generate and save outlines and pcbs to `../dist/v2/ergogen/`
-    * Alternatively, run `npm run watch` or `npm run watch-and-copy-pcbs-to-kicad`
-
-### [KiCad](https://www.kicad.org/)
-
-* [Project folder](./kicad)
-
-![KiCad preview](./kicad/kicad.png)
-
-1. Run `npm run copy-pcbs-to-kicad` to copy the `../dist/v2/ergogen/pcbs/*.kicad_pcb` files generated by Ergogen to [`./kicad/`](./kicad/)
-1. Run `xdg-open ./v2/kicad/left.kicad_pcb`
-1. Route the PCBs in [`./kicad/`](./kicad/), and then save them to [`./kicad/routed/`](./kicad/routed/)
-    * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces` to copy traces from the PCBs in [`./kicad/routed/`](./kicad/routed/) back to those of the same name in [`./kicad/`](./kicad/)
-1. Run `npm run fab-jlcpcb` to generate and save gerber and drill files to `../dist/v2/kicad/jlcpcb/*.zip`
-1. Submit the `../dist/v2/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)
-
-#### Configuration
-
-1. Navigate to File > Board Setup... > Design Rules > Netclasses
-1. Update the "Default" netclass
-1. Click the "+" button to add a "VCC" netclass
-
-Configuration | Description
---- | ---
-Default netclass | Clearance: 0.20mm, Track width: 0.20mm
-VCC netclass | Clearance: 0.25mm, Track width: 0.25mm
-
-### [OnShape](https://cad.onshape.com)
-
-* [Project folder](./onshape)
-
-![OnShape preview](./onshape/onshape.png)
-
-1. Create a new document
-1. Start a new sketch
-1. Select "Import DXF or DWG files" > "Import ..." (at the bottom of the dialog) > Select `../dist/v2/ergogen/outlines/full.dxf`
-1. Design a keyboard case
-1. Export `*.step` files to [`./onshape/`](./onshape/)
-
-### [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
-
-1. Open or create an OrcaSlicer project file
-1. Import `*.step` files from [`./onshape/`](./onshape/)
-1. Print the keyboard case
-
-### [QMK Firmware](https://qmk.fm/)
-
-Install [the "splinter" fork of qmk_firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).

@@ -1,0 +1,554 @@
+meta:
+  engine: 4.1.0 # Min Ergogen version for KiCad 8 footprints
+
+# --- Units: Common measurements used throughout the config ---
+units:
+  c: 14 # Cherry MX switch cutout/hole length in mm
+  s: 16 # Cherry MX switches are 15.6mm at their widest
+  u: U # "U" was previously 19.05mm, but is now 19mm
+
+# --- Points: Key matrix, thumb cluster, and mounting hole locations ---
+points:
+  # --- Main key matrix: standard alphanumeric and modifier keys ---
+  zones.matrix:
+    anchor:
+      shift: [68.575, -185 -6.725] # Start (top left corner) at (40,100) in Kicad
+    mirror:
+      ref: matrix_five_number
+      distance: 5u
+    key.tags.left: true
+    key.mirror.tags:
+      left: $unset
+      right: true
+    columns:
+      zero:
+        rows:
+          meta: # LCTRL
+            bind: [0, u/4, 0, u/4]
+            shift: [-u/4, 0]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P2
+            row_net: P10
+            mirror.skip: true
+          bottom: # LSHIFT
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P2
+            row_net: P16
+            mirror.skip: true
+          home: # ESC
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P2
+            row_net: P14
+            mirror.skip: true
+          top: # TAB
+            bind: [0, u/4, 0, u/4]
+            spread: 1.5u
+            width: 1.5u
+            column_net: P2
+            row_net: P15
+            mirror.skip: true
+          number: # `
+            shift: [u/4, 0]
+            column_net: P2
+            row_net: P5
+            mirror.skip: true
+      one:
+        rows:
+          meta: # SUPER
+            column_net: P3
+            row_net: P10
+            mirror.skip: true
+          bottom: # Z
+            column_net: P3
+            row_net: P16
+            mirror.skip: true
+          home: # A
+            column_net: P3
+            row_net: P14
+            mirror.skip: true
+          top: # Q
+            column_net: P3
+            row_net: P15
+            mirror.skip: true
+          number: # 1
+            column_net: P3
+            row_net: P5
+            mirror.skip: true
+      two:
+        key.stagger: 3
+        rows:
+          meta: # LALT
+            mirror.skip: true
+            column_net: P9
+            row_net: P10
+          bottom: # X
+            bind: 1
+            column_net: P9
+            row_net: P16
+            mirror: # .
+              column_net: P5
+              row_net: P14
+          home: # S
+            column_net: P9
+            row_net: P14
+            mirror: # L
+              column_net: P5
+              row_net: P16
+          top: # W
+            column_net: P9
+            row_net: P15
+            mirror: # O
+              column_net: P5
+              row_net: P10
+          number: # 2
+            column_net: P9
+            row_net: P5
+            mirror: # 9
+              column_net: P5
+              row_net: P15
+      three:
+        key.stagger: 3
+        rows:
+          meta.skip: true
+          bottom: # C
+            bind: 0
+            column_net: P8
+            row_net: P16
+            mirror: # ,
+              column_net: P4
+              row_net: P14
+          home: # D
+            column_net: P8
+            row_net: P14
+            mirror: # K
+              column_net: P4
+              row_net: P16
+          top: # E
+            column_net: P8
+            row_net: P15
+            mirror: # I
+              column_net: P4
+              row_net: P10
+          number: # 3
+            column_net: P8
+            row_net: P5
+            mirror: # 8
+              column_net: P4
+              row_net: P15
+      four:
+        key.stagger: -3
+        rows:
+          meta.skip: true
+          bottom: # V
+            bind: 0
+            column_net: P7
+            row_net: P16
+            mirror: # M
+              column_net: P3
+              row_net: P14
+          home: # F
+            column_net: P7
+            row_net: P14
+            mirror: # J
+              column_net: P3
+              row_net: P16
+          top: # R
+            column_net: P7
+            row_net: P15
+            mirror: # U
+              column_net: P3
+              row_net: P10
+          number: # 4
+            column_net: P7
+            row_net: P5
+            mirror: # 7
+              column_net: P3
+              row_net: P15
+      five:
+        key.stagger: -3
+        rows:
+          meta.skip: true
+          bottom: # B
+            bind: 0
+            column_net: P6
+            row_net: P16
+            mirror: # N
+              column_net: P20
+              row_net: P14
+          home: # G
+            column_net: P6
+            row_net: P14
+            mirror: # H
+              column_net: P20
+              row_net: P16
+          top: # T
+            column_net: P6
+            row_net: P15
+            mirror: # Y
+              column_net: P20
+              row_net: P10
+          number: # 5
+            column_net: P6
+            row_net: P5
+            mirror: # 6
+              column_net: P20
+              row_net: P15
+    rows:
+      meta:
+      bottom:
+      home:
+      top:
+      number:
+  # --- Extra keys: right-hand modifiers and special keys ---
+  zones.extra:
+    key.tags.right: true
+    anchor:
+      ref: matrix_five_meta
+      shift: [9u, 0]
+    columns:
+      zero:
+        rows:
+          meta: # BACKSPACE
+            bind: [0, u/4, 0, u/4]
+            shift: [u/4, 0]
+            width: 1.5u
+            column_net: P6
+            row_net: P9
+          bottom: # Z
+            shift: [-u/4, 0]
+            column_net: P6
+            row_net: P14
+          home: # A
+            column_net: P6
+            row_net: P16
+          top: # Q
+            column_net: P6
+            row_net: P10
+          number: # 1
+            column_net: P6
+            row_net: P15
+      dash:
+        rows:
+          meta.skip: true
+          bottom: # \
+            column_net: P7
+            row_net: P14
+          home: # '
+            column_net: P7
+            row_net: P16
+          top: # [
+            column_net: P7
+            row_net: P10
+          number: # -
+            column_net: P7
+            row_net: P15
+      equal:
+        rows:
+          meta.skip: true
+          bottom: # SHIFT
+            column_net: P8
+            row_net: P14
+          home: # ENTER
+            column_net: P8
+            row_net: P16
+          top: # ]
+            column_net: P8
+            row_net: P10
+          number: # +
+            column_net: P8
+            row_net: P15
+    rows:
+      meta:
+      bottom:
+      home:
+      top:
+      number:
+  # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
+  zones.thumbcluster:
+    anchor:
+      ref: matrix_four_bottom
+      shift: [-3.45, -1u -3]
+    key.tags.left: true
+    key.mirror.tags:
+      left: $unset
+      right: true
+    mirror:
+      ref: mirror_matrix_five_bottom
+      distance: -5u
+    columns:
+      three.rows.meta: # BACKSPACE
+        splay: -18.925
+        column_net: P8
+        row_net: P10
+        mirror:
+          column_net: P4
+          row_net: P9
+      four.rows.meta: # SPACE
+        bind: [0, u/4, 0, u/4]
+        spread: 1.25u
+        width: 1.5u
+        column_net: P7
+        row_net: P10
+        mirror:
+          column_net: P3
+          row_net: P9
+      five.rows.meta: # MOD
+        shift: [u/4, -0]
+        column_net: P6
+        row_net: P10
+        mirror:
+          column_net: P20
+          row_net: P9
+  # --- Screw zones: anchor pbboints for mounting holes (left side) ---
+  zones.screw_left_left:
+    anchor:
+      - ref: matrix_one_home
+        shift: [-9.5, 9.525]
+  # --- Screw zones: anchor points for mounting holes (left center) ---
+  zones.screw_left_center:
+    anchor:
+      - ref: matrix_three_home
+        shift: [-10.15, -12.525]
+  # --- Screw zones: anchor points for mounting holes (left right) ---
+  zones.screw_left_right:
+    anchor:
+      - ref: matrix_five_home
+        shift: [-8.85, 9.525]
+  # --- Screw zones: anchor points for mounting holes (right left) ---
+  zones.screw_right_left:
+    anchor:
+      - ref: mirror_matrix_five_home
+        shift: [-8.85, 9.525]
+  # --- Screw zones: anchor points for mounting holes (right center) ---
+  zones.screw_right_center:
+    anchor:
+      - ref: mirror_matrix_three_home
+        shift: [-10.15, -12.525]
+  # --- Screw zones: anchor points for mounting holes (right right) ---
+  zones.screw_right_right:
+    anchor:
+      - ref: mirror_matrix_one_home
+        shift: [-9.5, 9.525]
+
+# --- Outlines: Board shape, cutouts, and geometric features ---
+outlines:
+  _bindingleft:
+    - what: rectangle
+      where: left
+      size: u
+      bound: true
+  _bindingright:
+    - what: rectangle
+      where: right
+      size: u
+      bound: true
+  _boxleft:
+    - what: polygon
+      points:
+        - ref: matrix_zero_number
+          shift: [-u/2 -u, u/2 +6]
+
+        # Cutout for USB-c port
+        - ref: matrix_five_number
+          shift: [13, u/2 +6]
+        - ref: matrix_five_number
+          shift: [13, u/2 -1]
+        - ref: matrix_five_number
+          shift: [23, u/2 -1]
+        - ref: matrix_five_number
+          shift: [23, u/2 +6]
+
+        - ref: matrix_five_number
+          shift: [u + 15.6, u/2 +6]
+        - ref: matrix_five_bottom
+          shift: [u + 15.6, -1u -1/2u]
+        - ref: matrix_zero_meta
+          shift: [-u/4 -u, -u/2]
+  _boxright:
+    - what: polygon
+      points:
+        - ref: mirror_matrix_five_number
+          shift: [u + 15.6, u/2 +6]
+
+        # Cutout for USB-c port
+        - ref: mirror_matrix_five_number
+          shift: [23, u/2 +6]
+        - ref: mirror_matrix_five_number
+          shift: [23, u/2 -1]
+        - ref: mirror_matrix_five_number
+          shift: [13, u/2 -1]
+        - ref: mirror_matrix_five_number
+          shift: [13, u/2 +6]
+
+        - ref: extra_equal_number
+          shift: [u/2, u/2 +6]
+        - ref: extra_equal_bottom
+          shift: [u/2, -u/2 -u]
+        - ref: mirror_matrix_five_bottom
+          shift: [u + 15.6, -u -1/2u]
+  _cutoutsleft:
+    - what: rectangle
+      where: left
+      size: c
+  _cutoutsright:
+    - what: rectangle
+      where: right
+      size: c
+  _screws:
+    - what: circle
+      where: /screw/
+      radius: 1.75
+  switchesleft:
+    - what: rectangle
+      where: left
+      fillet: 1
+      size: s
+  switchesright:
+    - what: rectangle
+      where: right
+      fillet: 1
+      size: s
+  wallsleft:
+    - name: _boxleft
+    - name: _bindingleft
+  wallsright:
+    - name: _boxright
+    - name: _bindingright
+  left:
+    - name: wallsleft
+    - name: switchesleft
+      operation: stack
+    - name: _cutoutsleft
+      operation: stack # TODO change to subtract after screws are positioned
+    - name: _screws
+      operation: subtract
+  right:
+    - name: wallsright
+    - name: switchesright
+      operation: stack
+    - name: _cutoutsright
+      operation: stack # TODO change to subtract after screws are positioned
+    - name: _screws
+      operation: subtract
+  full:
+    - name: left
+    - name: right
+
+# Example:
+# https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
+pcbs:
+  left:
+    template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
+    outlines:
+      main.outline: wallsleft
+      keycaps:
+        outline: switchesleft
+        layer: Eco1.User
+    footprints:
+      # --- Diode: Nexperia BAS16H,115 (SOD-123F, compatible with SOD-123W footprint) ---
+      diode: &diode
+        what: sod-123w # diode
+        where: left
+        adjust:
+          shift: [0, -5]
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+      # --- Mounting Hole: Non-plated through hole for M3 screw ---
+      mounting_hole_npth: &mounting_hole_npth
+        what: ceoloide/mounting_hole_npth
+        where: /screw_left/
+        params:
+          hole_drill: 3.5 # M3 is 3.4mm
+          hole_size: 3.5
+      # --- MX Switch: Any MX-compatible switch, hotswap enabled ---
+      mx: &mx
+        what: mx
+        where: left
+        params:
+          hotswap: true
+          from: "{{column_net}}" # Pin 1
+          to: "{{colrow}}" # Pin 2
+      # --- Microcontroller: Adafruit KB2040 ---
+      # mcu: &mcu
+      #   what: ceoloide/backlog/virginia2244/kb2040
+      #   where:
+      #     ref: matrix_five_number
+      #     shift: [18, -2.25]
+      #   params:
+      #     reversable: true
+      # --- Microcontroller: Arduino Pro Micro (ATmega32U4) ---
+      mcu: &mcu
+        what: promicro
+        where:
+          ref: matrix_five_number
+          rotate: -90
+          shift: [18, -2.25]
+        params:
+          orientation: up
+      # --- Reset Button: E-Switch TL3342F450QG ---
+      reset: &reset
+        what: button
+        where:
+          ref: matrix_five_home
+          rotate: 90
+          shift: [18, u/4]
+        params:
+          from: GND
+          to: RST
+          side: B
+      # --- TRRS Jack: HCTL HC-PJ-320A-4P-D ---
+      trrs: &trrs
+        what: ceoloide/trrs_pj320a
+        where:
+          ref: matrix_five_number
+          shift: [18 + 13, 15]
+        params:
+          TP: VCC # 1
+          R1: VCC # 2
+          R2: GND # 3
+          SL: P0 # 4
+          reversible: true
+          side: B
+          # Symmetric only works for the "Serial" pinout
+          symmetric: true
+  right:
+    template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
+    outlines:
+      main.outline: wallsright
+      keycaps:
+        outline: switchesright
+        layer: Eco1.User
+    footprints:
+      # See left for footprint details
+      diode:
+        <<: *diode
+        where: right
+      mounting_hole_npth:
+        <<: *mounting_hole_npth
+        where: /screw_right/
+      mx:
+        <<: *mx
+        where: right
+      mcu:
+        <<: *mcu
+        where:
+          ref: mirror_matrix_five_number
+          rotate: 90
+          shift: [18, -2.25]
+      reset:
+        <<: *reset
+        where:
+          ref: mirror_matrix_five_home
+          rotate: -90
+          shift: [18, u/4]
+      trrs:
+        <<: *trrs
+        where:
+          ref: mirror_matrix_five_number
+          shift: [18 + 13, 15]
