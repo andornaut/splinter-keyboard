@@ -1,10 +1,15 @@
 meta:
   engine: 4.1.0 # Min Ergogen version for KiCad 8 footprints
+
+# --- Units: Common measurements used throughout the config ---
 units:
   c: 14 # Cherry MX switch cutout/hole length in mm
   s: 16 # Cherry MX switches are 15.6mm at their widest
   u: U # "U" was previously 19.05mm, but is now 19mm
+
+# --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
+  # --- Main key matrix: standard alphanumeric and modifier keys ---
   zones.matrix:
     anchor:
       shift: [68.575, -185 -6.725] # Start (top left corner) at (40,100) in Kicad
@@ -199,6 +204,7 @@ points:
       home:
       top:
       number:
+  # --- Extra keys: right-hand modifiers and special keys ---
   zones.extra:
     key.tags.right: true
     anchor:
@@ -225,7 +231,7 @@ points:
             row_net: P15
           number: # 1
             column_net: P5
-            row_net: P18    
+            row_net: P18
       dash:
         rows:
           meta.skip: true
@@ -262,6 +268,7 @@ points:
       home:
       top:
       number:
+  # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
     anchor:
       ref: matrix_four_bottom
@@ -297,74 +304,63 @@ points:
         mirror:
           column_net: P9
           row_net: P10
+  # --- Screw zones: anchor points for mounting holes (left side) ---
   zones.screw_left_left:
     anchor:
       - ref: matrix_one_home
         shift: [-9.5, 9.525]
+  # --- Screw zones: anchor points for mounting holes (left center) ---
   zones.screw_left_center:
     anchor:
       - ref: matrix_three_home
         shift: [-10.15, -12.525]
+  # --- Screw zones: anchor points for mounting holes (left right) ---
   zones.screw_left_right:
     anchor:
       - ref: matrix_five_home
         shift: [-10.15, 12.525]
+  # --- Screw zones: anchor points for mounting holes (right left) ---
   zones.screw_right_left:
     anchor:
       - ref: mirror_matrix_five_home
         shift: [-10.15, 12.525]
+  # --- Screw zones: anchor points for mounting holes (right center) ---
   zones.screw_right_center:
     anchor:
       - ref: mirror_matrix_three_home
         shift: [-10.15, -12.525]
+  # --- Screw zones: anchor points for mounting holes (right right) ---
   zones.screw_right_right:
     anchor:
       - ref: mirror_matrix_one_home
         shift: [-9.5, 9.525]
 
+# --- Outlines: Board shape, cutouts, and geometric features ---
 outlines:
   _bindingleft:
     - what: rectangle
       where: left
       size: u
       bound: true
-
   _bindingright:
     - what: rectangle
       where: right
       size: u
       bound: true
-
   _boxleft:
     - what: polygon
       points:
         - ref: matrix_zero_number
           shift: [-u/2 -u, u/2 +6]
-
-        #- ref: matrix_five_number
-        #  shift: [u + 15.6 - 28, u/2 +6]
-        #- ref: matrix_five_number
-        #  shift: [u + 15.6 - 28, u/2 +6 +1]
-        #- ref: matrix_five_number
-        #  shift: [u + 15.6, u/2 +6 +1]
-
         - ref: matrix_five_number
           shift: [u + 15.6, u/2 +6]
         - ref: matrix_five_bottom
           shift: [u + 15.6, -1u -1/2u]
         - ref: matrix_zero_meta
           shift: [-u/4 -u, -u/2]
-
   _boxright:
     - what: polygon
       points:
-        #- ref: mirror_matrix_five_number
-        #  shift: [u + 15.6, u/2 +6 +1]
-        #- ref: mirror_matrix_five_number
-        #  shift: [u + 15.6 -28, u/2 +6 +1]
-        #- ref: mirror_matrix_five_number
-        #  shift: [u + 15.6 -28, u/2 +6]
-
         - ref: mirror_matrix_five_number
           shift: [u + 15.6, u/2 +6]
         - ref: extra_equal_number
@@ -373,42 +369,34 @@ outlines:
           shift: [u/2, -u/2 -u]
         - ref: mirror_matrix_five_bottom
           shift: [u + 15.6, -u -1/2u]
-
   _cutoutsleft:
     - what: rectangle
       where: left
       size: c
-
   _cutoutsright:
     - what: rectangle
       where: right
       size: c
-
   _screws:
     - what: circle
       where: /screw/
       radius: 1.75
-
   switchesleft:
     - what: rectangle
       where: left
       fillet: 1
       size: s
-
   switchesright:
     - what: rectangle
       where: right
       fillet: 1
       size: s
-
   wallsleft:
     - name: _boxleft
     - name: _bindingleft
-
   wallsright:
     - name: _boxright
     - name: _bindingright
-
   left:
     - name: wallsleft
     - name: switchesleft
@@ -417,7 +405,6 @@ outlines:
       operation: stack # TODO change to subtract after screws are positioned
     - name: _screws
       operation: subtract
-
   right:
     - name: wallsright
     - name: switchesright
@@ -426,7 +413,6 @@ outlines:
       operation: stack # TODO change to subtract after screws are positioned
     - name: _screws
       operation: subtract
-
   full:
     - name: left
     - name: right
@@ -441,13 +427,8 @@ pcbs:
       keycaps:
         outline: switchesleft
         layer: Eco1.User
-
     footprints:
-      # Diode
-      # Nexperia BAS16H,115: 100V Single 1.25V@150mA 4ns 215mA SOD-123F Switching Diode ROHS
-      # The footprint is for a sod-123w package, but the recommended diodes are sod-123f,
-      # but these both have similar dimensions
-      # https://blog.mbedded.ninja/pcb-design/component-packages/sod-123-component-package/
+      # --- Diode: Nexperia BAS16H,115 (SOD-123F, compatible with SOD-123W footprint) ---
       diode: &diode
         what: sod-123w # diode
         where: left
@@ -456,17 +437,14 @@ pcbs:
         params:
           from: "{{colrow}}"
           to: "{{row_net}}"
-
-      # https://github.com/ceoloide/ergogen-footprints/blob/main/mounting_hole_npth.js
+      # --- Mounting Hole: Non-plated through hole for M3 screw ---
       mounting_hole_npth: &mounting_hole_npth
         what: ceoloide/mounting_hole_npth
         where: /screw_left/
         params:
           hole_drill: 3.5 # M3 is 3.4mm
           hole_size: 3.5
-
-      # Any MX switch
-      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/mx.js
+      # --- MX Switch: Any MX-compatible switch, hotswap enabled ---
       mx: &mx
         what: mx
         where: left
@@ -474,10 +452,7 @@ pcbs:
           hotswap: true
           from: "{{column_net}}" # Pin 1
           to: "{{colrow}}" # Pin 2
-
-      # Arduino Pro Micro atmega32u4au
-      # SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)
-      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/promicro.js
+      # --- Microcontroller: Arduino Pro Micro (ATmega32U4) ---
       promicro: &promicro
         what: promicro
         where:
@@ -486,11 +461,7 @@ pcbs:
           shift: [18, -4]
         params:
           orientation: down
-
-      # Reset button
-      # E-Switch TL3342F450QG
-      # https://www.e-switch.com/product-catalog/tl3342-series-low-profile-smt-tactile-switch
-      # https://github.com/ergogen/ergogen/blob/develop/src/footprints/button.js
+      # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button
         where:
@@ -501,11 +472,7 @@ pcbs:
           from: GND
           to: RST
           side: B
-
-      # TRRS jack 
-      # HCTL HC-PJ-320A-4P-D
-      # https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html
-      # https://github.com/ceoloide/ergogen-footprints/blob/main/trrs_pj320a.js
+      # --- TRRS Jack: HCTL HC-PJ-320A-4P-D ---
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
@@ -527,37 +494,31 @@ pcbs:
       keycaps:
         outline: switchesright
         layer: Eco1.User
-
     footprints:
+      # See left for footprint details
       diode:
         <<: *diode
         where: right
-
       mounting_hole_npth:
         <<: *mounting_hole_npth
         where: /screw_right/
-
       mx:
         <<: *mx
         where: right
-
       promicro:
         <<: *promicro
         where:
           ref: mirror_matrix_five_number
           rotate: 90
           shift: [18, -4]
-
       reset:
         <<: *reset
         where:
           ref: mirror_matrix_five_top
           rotate: -90
           shift: [18 + 13, 15]
-
       trrs:
         <<: *trrs
         where:
           ref: mirror_matrix_five_number
           shift: [18 + 13, 16.25]
-
