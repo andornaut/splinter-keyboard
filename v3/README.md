@@ -122,7 +122,7 @@ VCC netclass | Clearance: 0.25mm, Track width: 0.25mm
 
 1. Create a new document
 1. Start a new sketch
-1. Select "Import DXF or DWG files" > "Import ..." (at the bottom of the dialog) > Select `../dist/v2/ergogen/outlines/full.dxf`
+1. Select "Insert a DXF or DWG file" > "Import ..." (at the bottom of the dialog) > Select `../dist/v2/ergogen/outlines/full.dxf`
 1. Design a keyboard case
 1. Export `*.step` files to [`./onshape/`](./onshape/)
 
