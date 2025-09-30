@@ -101,29 +101,6 @@ Configuration | Description
 Default | Clearance: 0.20mm, Track width: 0.20mm
 VCC | Clearance: 0.25mm, Track width: 0.25mm
 
-#### Fix error when running `npm run build`
-
-The `pcbnew` Python library, which is packaged with Kicad,
-may fail if it cannot find libTKBO, eg.:
-
-```bash
-$ python3
-Python 3.12.3 (main, Apr 10 2024, 05:33:47) [GCC 13.2.0] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> import pcbnew
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "/usr/lib/python3/dist-packages/pcbnew.py", line 12, in <module>
-    import _pcbnew
-ImportError: libTKBO.so.7: cannot open shared object file: No such file or directory
-```
-
-Workaround this issue by installing the missing library:
-
-```bash
-sudo apt install libocct-modeling-algorithms-7.6t64
-```
-
 ### Step 5. [OnShape](https://cad.onshape.com)
 
 ![OnShape preview](./v3/onshape/onshape.png)
