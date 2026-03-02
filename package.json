@@ -1,10 +1,10 @@
 {
   "dependencies": {
-    "ergogen": "^4.1.0"
+    "ergogen": "^4.2.1"
   },
   "devDependencies": {
-    "dotenv-cli": "^8.0.0",
-    "nodemon": "^3.1.10"
+    "dotenv-cli": "^11.0.0",
+    "nodemon": "^3.1.14"
   },
   "scripts": {
     "build": "dotenv -- sh -c 'set -vxe;npx ergogen ./${VERSION}/ergogen/ --output dist/${VERSION}/ergogen/ && npm run update-pcbs'",
