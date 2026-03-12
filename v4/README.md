@@ -5,6 +5,33 @@
 A 62-key split columnar ergonomic keyboard - Symmetrical enclosures.
 Non-traditional placement of backspace and backslash keys.
 
+## Changes from v3
+
+The Liatris replaces the KB2040 as the microcontroller. The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
+
+### Firmware changes required
+
+Add to `config.h`:
+
+```c
+#define USB_VBUS_PIN GP19
+```
+
+Remove from `config.h` (no longer needed):
+
+```c
+#define SPLIT_WATCHDOG_ENABLE
+#define SPLIT_WATCHDOG_TIMEOUT 3000
+```
+
+Remove the `SPLIT_USB_DETECT` comment block from `config.h` — it no longer applies since VBUS detection bypasses the polling loop entirely.
+
+Update `keyboard.json`:
+
+```json
+"development_board": "liatris"
+```
+
 ## Hardware
 
 ### Bill of materials (BOM)
