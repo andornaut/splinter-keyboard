@@ -26,9 +26,6 @@
 //    include_traces: default is true
 //      if true it will include traces that connect the jumper pads to the vias
 //      and the through-holes for the MCU
-//    include_extra_pins: default is false
-//      if true and if not reversible it will include Liatris extra bottom pin sockets
-//      (GP12, GP13, GP14, GP15, GP16)
 //    only_required_jumpers: default is false
 //      if true, it will only place jumpers on the first 4 rows of pins, which can't be
 //      reversed in firmware, i.e. RAW and P1, GND and P0, GND and RST, GND and VCC.
@@ -69,8 +66,7 @@
 //  - Add single side (non-reversible) support
 //  - Add ability to mount with MCU facing towards or away from PCB
 //  - Add ability to show silkscreen labels on both sides for single side footprint
-//  - Add extra pins (GP12-GP16) when footprint is single-side or reversible
-//    (only required jumpers)
+//  - Always include bottom pins (GP12-GP16) since they are standard on the Liatris
 //  - Upgrade to KiCad 8
 //
 // # Placement and soldering of jumpers
@@ -97,7 +93,6 @@ module.exports = {
     reversible: false,
     reverse_mount: false,
     include_traces: true,
-    include_extra_pins: false,
     invert_jumpers_position: false,
     only_required_jumpers: false,
     use_rectangular_jumpers: false,
@@ -491,7 +486,7 @@ module.exports = {
     }
 
     const common_top = `
-  (footprint "splinter:mcu_liatris"
+  (footprint "ceoloide:mcu_liatris"
     (layer "${p.side}.Cu")
     ${p.at}
     (property "Reference" "${p.ref}"
@@ -529,38 +524,65 @@ module.exports = {
     )
     const traces = gen_traces()
 
-    const extra_pin_labels = p.show_silk_labels ? `
-    (fp_text user "${p.GP12_label}" (at -5.08 13.7 ${p.r}) (layer "${p.side}.SilkS")
+    const gen_extra_pin_labels = () => {
+      if (!p.show_silk_labels) return ''
+      let labels = ''
+      if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'F') {
+        labels += `
+    (fp_text user "${p.GP12_label}" (at ${invert_pins ? '' : '-'}5.08 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
     )
-    (fp_text user "${p.GP13_label}" (at -2.54 13.7 ${p.r}) (layer "${p.side}.SilkS")
+    (fp_text user "${p.GP13_label}" (at ${invert_pins ? '' : '-'}2.54 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
     )
-    (fp_text user "${p.GP14_label}" (at 0 13.7 ${p.r}) (layer "${p.side}.SilkS")
+    (fp_text user "${p.GP14_label}" (at 0 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
     )
-    (fp_text user "${p.GP15_label}" (at 2.54 13.7 ${p.r}) (layer "${p.side}.SilkS")
+    (fp_text user "${p.GP15_label}" (at ${invert_pins ? '-' : ''}2.54 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
     )
-    (fp_text user "${p.GP16_label}" (at 5.08 13.7 ${p.r}) (layer "${p.side}.SilkS")
+    (fp_text user "${p.GP16_label}" (at ${invert_pins ? '-' : ''}5.08 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
     )
-    ` : ''
+        `
+      }
+      if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'B') {
+        labels += `
+    (fp_text user "${p.GP12_label}" (at ${invert_pins ? '' : '-'}5.08 13.7 ${p.r}) (layer "B.SilkS")
+      (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
+    )
+    (fp_text user "${p.GP13_label}" (at ${invert_pins ? '' : '-'}2.54 13.7 ${p.r}) (layer "B.SilkS")
+      (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
+    )
+    (fp_text user "${p.GP14_label}" (at 0 13.7 ${p.r}) (layer "B.SilkS")
+      (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
+    )
+    (fp_text user "${p.GP15_label}" (at ${invert_pins ? '-' : ''}2.54 13.7 ${p.r}) (layer "B.SilkS")
+      (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
+    )
+    (fp_text user "${p.GP16_label}" (at ${invert_pins ? '-' : ''}5.08 13.7 ${p.r}) (layer "B.SilkS")
+      (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))
+    )
+        `
+      }
+      return labels
+    }
+    const extra_pin_labels = gen_extra_pin_labels()
 
     const extra_pins = `
-    (pad "25" thru_hole circle (at -5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP12})
-    (pad "26" thru_hole circle (at -2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP13})
+    (pad "25" thru_hole circle (at ${invert_pins ? '' : '-'}5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP12})
+    (pad "26" thru_hole circle (at ${invert_pins ? '' : '-'}2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP13})
     (pad "27" thru_hole circle (at 0 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP14})
-    (pad "28" thru_hole circle (at 2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP15})
-    (pad "29" thru_hole circle (at 5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP16})
+    (pad "28" thru_hole circle (at ${invert_pins ? '-' : ''}2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP15})
+    (pad "29" thru_hole circle (at ${invert_pins ? '-' : ''}5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP16})
     ${extra_pin_labels}
     `
     const extra_pins_reversible = `
-    (pad "30" thru_hole circle (at 5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP12})
-    (pad "31" thru_hole circle (at 2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP13})
+    (pad "30" thru_hole circle (at ${invert_pins ? '-' : ''}5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP12})
+    (pad "31" thru_hole circle (at ${invert_pins ? '-' : ''}2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP13})
     (pad "32" thru_hole circle (at 0 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP14})
-    (pad "33" thru_hole circle (at -2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP15})
-    (pad "34" thru_hole circle (at -5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP16})
+    (pad "33" thru_hole circle (at ${invert_pins ? '' : '-'}2.54 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP15})
+    (pad "34" thru_hole circle (at ${invert_pins ? '' : '-'}5.08 15.24 ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.GP16})
     `
 
     const mcu_3dmodel = `
@@ -575,8 +597,8 @@ module.exports = {
     ${''/* Controller*/}
     ${common_top}
     ${socket_rows}
-    ${p.include_extra_pins && (!p.reversible || (p.reversible && p.only_required_jumpers)) ? extra_pins : ''}
-    ${p.include_extra_pins && p.reversible && p.only_required_jumpers ? extra_pins_reversible : ''}
+    ${(!p.reversible || (p.reversible && p.only_required_jumpers)) ? extra_pins : ''}
+    ${p.reversible && p.only_required_jumpers ? extra_pins_reversible : ''}
     ${p.reversible && p.show_instructions ? instructions : ''}
     ${p.mcu_3dmodel_filename ? mcu_3dmodel : ''}
   )
