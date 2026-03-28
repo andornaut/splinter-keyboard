@@ -78,6 +78,10 @@ Set the `VERSION` environment variable in [`.env`](./.env) to one of v1, v2, v3,
 1. Run `npm run build` to generate and save outlines and pcbs to `dist/v4/ergogen/` then `npm run copy-pcbs-to-kicad`
     * Alternatively, run `npm run watch` or `npm run watch-and-copy-pcbs-to-kicad`
 
+**Notes:**
+
+* The Ergogen GUI is useful for prototyping key placement, layout, and outlines, but it does not render PCB layouts. Use the local npm pipeline to generate PCB files for KiCad.
+
 ### Step 4. [KiCad](https://www.kicad.org/)
 
 ![KiCad preview](./v4/kicad/kicad.png)
