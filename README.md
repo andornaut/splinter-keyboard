@@ -12,8 +12,8 @@ A 62-key split columnar ergonomic keyboard
 
 Version | Description | Firmware | Layout
 --- | --- | --- | ---
-[v4](./v4) | 62-keys. Liatris MCU with USB VBUS detection. SMD diodes. | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | |
-[v3](./v3) | 62-keys. KB2040 MCU. Symmetrical enclosures. | [tags/splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg)
+[v4](./v4) | 62-keys. Liatris MCU with USB VBUS detection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | |
+[v3](./v3) | 62-keys. KB2040 MCU. | [tags/splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg)
 [v2](./v2) | 62-keys. ATmega32U4 MCU. Symmetrical enclosures. | [tags/splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg)
 [v1](./v1) | 61-keys. ATmega32U4 MCU. Asymmetrical enclosures. Traditional layout. | [tags/splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
 
