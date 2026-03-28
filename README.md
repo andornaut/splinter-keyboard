@@ -12,20 +12,22 @@ A 62-key split columnar ergonomic keyboard
 
 Version | Description | Firmware | Layout
 --- | --- | --- | ---
-[v3](./v3) | 62-keys. Symmetrical enclosures. Non-traditional placement of backspace and backslash keys. | [tags/splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg)
-[v2](./v2) | 62-keys. Symmetrical enclosures. Non-traditional placement of backspace and backslash keys. | [tags/splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg)
-[v1](./v1) | 61-keys. Asymetrical enclosures. Traditional layout. | [tags/splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
+[v4](./v4) | 62-keys. Liatris MCU with USB VBUS detection. SMD diodes. | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | |
+[v3](./v3) | 62-keys. KB2040 MCU. Symmetrical enclosures. | [tags/splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg)
+[v2](./v2) | 62-keys. ATmega32U4 MCU. Symmetrical enclosures. | [tags/splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg)
+[v1](./v1) | 61-keys. ATmega32U4 MCU. Asymmetrical enclosures. Traditional layout. | [tags/splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
 
 ## Installation
 
-* [Ergogen](https://github.com/ergogen/ergogen)
+Install the following tools:
+
+* [Ergogen](https://github.com/ergogen/ergogen) - PCB generation from YAML config
   * [Footprints by ceoloide](https://github.com/ceoloide/ergogen-footprints)
   * [Footprints by infused-kim](https://github.com/infused-kim/kb_ergogen_fp)
-  * [Footprints by sboysel](https://github.com/sboysel/ergogen/tree/develop/src/footprints)
   * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
-* [KiCad](https://www.kicad.org)
-  * [KiKit automation tools](https://github.com/yaqwsx/KiKit)
-* [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
+* [KiCad](https://www.kicad.org) - PCB editor
+  * [KiKit automation tools](https://github.com/yaqwsx/KiKit) - Gerber file generation
+* [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
 
 ```bash
 # Include submodules when cloning
@@ -54,40 +56,39 @@ Alternatively, you can install OrcaSlicer and Kicad using [these Ansible tasks](
 
 ### Step 1. Configure the environment
 
-Set the `VERSION` environment variable in [`.env`](./.env) to one of v1, v2, or v3
+Set the `VERSION` environment variable in [`.env`](./.env) to one of v1, v2, v3, or v4
 
 ### Step 2. [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
 
-![Keyboard Layout preview](./v3/keyboard-layout-editor/keyboard-layout-editor.png)
+![Keyboard Layout preview](./v4/keyboard-layout-editor/keyboard-layout-editor.png)
 
 1. Prototype a keyboard layout using [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
-1. Export the layout configuration to [`keyboard-layout-editor/keyboard-layout-editor.json`](./v3/keyboard-layout-editor/keyboard-layout-editor.json), so that you can import it and iterate on it in the future
+1. Export the layout configuration to [`keyboard-layout-editor/keyboard-layout-editor.json`](./v4/keyboard-layout-editor/keyboard-layout-editor.json), so that you can import it and iterate on it in the future
 1. Use the prototype as inspiration for creating a production-ready design using Ergogen
 
 ### Step 3. [Ergogen](https://github.com/ergogen/ergogen)
 
 * [Online version of Ergogen that includes ceoloide's footprints](https://ergogen.ceoloide.com/)
 
-![Ergogen preview](./v3/ergogen/ergogen.png)
+![Ergogen preview](./v4/ergogen/ergogen.png)
 
-1. Convert the prototype to a production-ready design using [Ergogen](https://github.com/ergogen/ergogen), and then save it to [`ergogen/config.yaml`](./v3/ergogen/config.yaml)
-   * If prototyping using this [online Ergogen editor](https://ergogen.ceoloide.com/), then click the gear icon, then add the [sod-123w footprint](./ergogen/footprints/sod-123w.js)
-1. Run `npm run build` to generate and save outlines and pcbs to `../dist/v3/ergogen/` then `npm run copy-pcbs-to-kicad`
+1. Convert the prototype to a production-ready design using [Ergogen](https://github.com/ergogen/ergogen), and then save it to [`ergogen/config.yaml`](./v4/ergogen/config.yaml)
+1. Run `npm run build` to generate and save outlines and pcbs to `../dist/v4/ergogen/` then `npm run copy-pcbs-to-kicad`
     * Alternatively, run `npm run watch` or `npm run watch-and-copy-pcbs-to-kicad`
 
-### Steps 4. [KiCad](https://www.kicad.org/)
+### Step 4. [KiCad](https://www.kicad.org/)
 
-![KiCad preview](./v3/kicad/kicad.png)
+![KiCad preview](./v4/kicad/kicad.png)
 
 1. Design the PCBs using [KiCad](https://www.kicad.org/)
-1. Run `npm run copy-pcbs-to-kicad` to copy the `../dist/v3/ergogen/pcbs/*.kicad_pcb` files generated by Ergogen to [`kicad/`](./v3/kicad/)
-1. Run `xdg-open ./v3/kicad/left.kicad_pcb`
-1. Route the PCBs in [`kicad/`](./v3/kicad/), and then save them to [`kicad/routed/`](./v3/kicad/routed/)
-   * Once you're happy with the routing, run `npm run copy-pcbs-to-routed` to copy the PCBs to [`kicad/routed/`](./v3/kicad/routed/)
-   * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-from-routed` to copy traces from the PCBs in [`kicad/routed/`](./v3/kicad/routed/) back to those of the same name in [`kicad/`](./v3/kicad/). Select File > Revert > Yes to refresh the PCB in Kicad.
-1. Run `npm run copy-pcbs-to-routed && npm run fab-jlcpcb` to generate and save gerber and drill files to `../dist/v3/kicad/jlcpcb/*.zip`
+1. Run `npm run copy-pcbs-to-kicad` to copy the `../dist/v4/ergogen/pcbs/*.kicad_pcb` files generated by Ergogen to [`kicad/`](./v4/kicad/)
+1. Run `xdg-open ./v4/kicad/left.kicad_pcb`
+1. Route the PCBs in [`kicad/`](./v4/kicad/), and then save them to [`kicad/routed/`](./v4/kicad/routed/)
+   * Once you're happy with the routing, run `npm run copy-pcbs-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
+   * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-from-routed` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in Kicad.
+1. Run `npm run copy-pcbs-to-routed && npm run fab-jlcpcb` to generate and save gerber and drill files to `../dist/v4/kicad/jlcpcb/*.zip`
 1. Print the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
-   * Submit the `../dist/v3/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)
+   * Submit the `../dist/v4/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)
 
 #### Customize net classes
 
@@ -103,20 +104,20 @@ VCC | Clearance: 0.25mm, Track width: 0.25mm
 
 ### Step 5. [OnShape](https://cad.onshape.com)
 
-![OnShape preview](./v3/onshape/onshape.png)
+![OnShape preview](./v4/onshape/onshape.png)
 
 1. Model the case using [OnShape](https://cad.onshape.com)
 1. Create a new document
 1. Start a new sketch
-1. Select "Insert a DXF or DWG file" > "Import ..." (at the bottom of the dialog) > Select `../dist/v3/ergogen/outlines/full.dxf`
+1. Select "Insert a DXF or DWG file" > "Import ..." (at the bottom of the dialog) > Select `../dist/v4/ergogen/outlines/full.dxf`
 1. Design a keyboard case
-1. Export `*.step` files to [`onshape/`](./v3/onshape/)
+1. Export `*.step` files to [`onshape/`](./v4/onshape/)
 
 ### Step 6. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
 1. Print the case using [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 1. Open or create an OrcaSlicer project file
-1. Import `*.step` files from [`onshape/`](./v3/onshape/)
+1. Import `*.step` files from [`onshape/`](./v4/onshape/)
 1. Print the keyboard case
 
 ### Step 7. [QMK Firmware](https://qmk.fm/)

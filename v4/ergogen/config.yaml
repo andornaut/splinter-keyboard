@@ -450,13 +450,15 @@ pcbs:
         outline: switchesleft
         layer: Eco1.User
     footprints:
-      # --- Diode: Nexperia BAS16H,115 (SOD-123F, compatible with SOD-123W footprint) ---
+      # --- Diode: Nexperia BAS16H,115 (SOD-123) ---
       diode: &diode
-        what: sod-123w # diode
+        what: ceoloide/diode_tht_sod123
         where: left
         adjust:
           shift: [0, -5]
         params:
+          side: B
+          include_tht: false
           from: "{{colrow}}"
           to: "{{row_net}}"
       # --- Mounting Hole: Non-plated through hole for M3 screw ---
@@ -468,29 +470,25 @@ pcbs:
           hole_size: 3.5
       # --- MX Switch: Any MX-compatible switch, hotswap enabled ---
       mx: &mx
-        what: mx
+        what: ceoloide/switch_mx
         where: left
         params:
+          side: B
           hotswap: true
+          solder: false
           from: "{{column_net}}" # Pin 1
           to: "{{colrow}}" # Pin 2
-      # --- Microcontroller: Adafruit KB2040 ---
-      # mcu: &mcu
-      #   what: ceoloide/backlog/virginia2244/kb2040
-      #   where:
-      #     ref: matrix_five_number
-      #     shift: [18, -2.25]
-      #   params:
-      #     reversable: true
-      # --- Microcontroller: Arduino Pro Micro (ATmega32U4) ---
+      # --- Microcontroller: splitkb Liatris (nice!nano pin-compatible) ---
       mcu: &mcu
-        what: promicro
+        what: ceoloide/mcu_nice_nano
         where:
           ref: matrix_five_number
           rotate: -90
           shift: [18, -2.25]
         params:
-          orientation: up
+          side: F
+          reversible: false
+          reverse_mount: false
       # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button

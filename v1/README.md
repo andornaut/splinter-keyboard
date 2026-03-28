@@ -21,7 +21,7 @@ Microcontrollers | 2 | [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://w
 Reset buttons | 2 | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller)
 Screws | 4 | [M3x12mm screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
 Silicon bumpers | 10 | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)
-Sockets (12-pin)| 4 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000)
+Sockets (12-pin) | 4 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000)
 Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030)
 Threaded inserts | 4 | [M3x3mm (short) threaded inserts](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m3-short-100-stk-pcs)
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
@@ -32,19 +32,19 @@ TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audi
 * [Pro Micro pinout](https://golem.hu/article/pro-micro-pinout/)
 
 Left Arduino | Left AVR | Right Arduino | Right AVR
----      |--- | ---      |---
-1 (TX0)  | D3 | RAW      ||
-0 (RX1)  | D2 | GND      ||
-GND      |    | RST      ||
-GND      |    | VCC      ||
-2 (SDA)  | D1 | A3 (21)  | F4
-3 (SCL)  | D0 | A2 (20)  | F5
-4 (A6)   | D4 | A1 (19)  | F6
-5        | C6 | A0 (18)  | F7
-6 (A7)   | D7 | 15       | B1
-7        | E6 | 14       | B3
-8 (A8)   | B4 | 16       | B2
-9 (A9)   | B5 | 10 (A10) | B6
+--- | --- | --- | ---
+1 (TX0) | D3 | RAW | |
+0 (RX1) | D2 | GND | |
+GND | | RST | |
+GND | | VCC | |
+2 (SDA) | D1 | A3 (21) | F4
+3 (SCL) | D0 | A2 (20) | F5
+4 (A6) | D4 | A1 (19) | F6
+5 | C6 | A0 (18) | F7
+6 (A7) | D7 | 15 | B1
+7 | E6 | 14 | B3
+8 (A8) | B4 | 16 | B2
+9 (A9) | B5 | 10 (A10) | B6
 
 ### Part dimensions
 
@@ -94,7 +94,7 @@ PCB outside edge to center of M3 hole | 18mm (23mm to outer wall)
 
 Overall dimensions (h,w): 129.51474 mm, 165.5 mm
 
-##### Left half
+##### Enclosure left half
 
 Edge | Length
 --- | ---
@@ -104,7 +104,7 @@ Right | 110 mm
 Corner | 21.53214 mm
 Bottom | 157.61289 mm
 
-##### Right half
+##### Enclosure right half
 
 Overall dimensions (h,w): 129.51474 mm, 203.6 mm
 

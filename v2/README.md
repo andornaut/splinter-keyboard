@@ -48,16 +48,16 @@ Switch (MX) outer size | 15.6mm²
 * [Pro Micro pinout](https://golem.hu/article/pro-micro-pinout/)
 
 Left Arduino | Left AVR | Right Arduino | Right AVR
----      |--- | ---      |---
-1 (TX0)  | D3 | RAW      ||
-0 (RX1)  | D2 | GND      ||
-GND      |    | RST      ||
-GND      |    | VCC      ||
-2 (SDA)  | D1 | A3 (21)  | F4
-3 (SCL)  | D0 | A2 (20)  | F5
-4 (A6)   | D4 | A1 (19)  | F6
-5        | C6 | A0 (18)  | F7
-6 (A7)   | D7 | 15       | B1
-7        | E6 | 14       | B3
-8 (A8)   | B4 | 16       | B2
-9 (A9)   | B5 | 10 (A10) | B6
+--- | --- | --- | ---
+1 (TX0) | D3 | RAW | |
+0 (RX1) | D2 | GND | |
+GND | | RST | |
+GND | | VCC | |
+2 (SDA) | D1 | A3 (21) | F4
+3 (SCL) | D0 | A2 (20) | F5
+4 (A6) | D4 | A1 (19) | F6
+5 | C6 | A0 (18) | F7
+6 (A7) | D7 | 15 | B1
+7 | E6 | 14 | B3
+8 (A8) | B4 | 16 | B2
+9 (A9) | B5 | 10 (A10) | B6
