@@ -28,6 +28,26 @@ Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/produc
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
 TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
 
+### Microcontroller
+
+* [Adafruit KB2040 pinout](https://learn.adafruit.com/adafruit-kb2040/pinouts)
+* [SparkFun Pro Micro RP2040 pinout](https://www.sparkfun.com/sparkfun-pro-micro-rp2040.html)
+
+Left | | | Right
+--- | --- | --- | ---
+P1 (GP1/D1) | | | RAW
+P0 (GP0/D0) | | | GND
+GND | | | RST
+GND | | | VCC
+P2 (GP2) | | | P21 (GP21)
+P3 (GP3) | | | P20 (GP20)
+P4 (GP4) | | | P19 (GP19)
+P5 (GP5) | | | P18 (GP18)
+P6 (GP6) | | | P15 (GP15)
+P7 (GP7) | | | P14 (GP14)
+P8 (GP8) | | | P16 (GP16)
+P9 (GP9) | | | P10 (GP10)
+
 ### Part dimensions
 
 Part | Dimensions

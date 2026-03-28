@@ -478,17 +478,17 @@ pcbs:
           solder: false
           from: "{{column_net}}" # Pin 1
           to: "{{colrow}}" # Pin 2
-      # --- Microcontroller: splitkb Liatris (nice!nano pin-compatible) ---
+      # --- Microcontroller: splitkb Liatris ---
       mcu: &mcu
-        what: ceoloide/mcu_nice_nano
+        what: mcu_liatris
         where:
           ref: matrix_five_number
-          rotate: -90
           shift: [18, -2.25]
         params:
           side: F
           reversible: false
-          reverse_mount: false
+          reverse_mount: true
+          include_extra_pins: true
       # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button
@@ -537,7 +537,7 @@ pcbs:
         <<: *mcu
         where:
           ref: mirror_matrix_five_number
-          rotate: 90
+          rotate: 180
           shift: [18, -2.25]
       reset:
         <<: *reset

@@ -7,7 +7,7 @@ Non-traditional placement of backspace and backslash keys.
 
 ## Changes from v3
 
-The Liatris replaces the KB2040 as the microcontroller. The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
+The Liatris replaces the KB2040 as the microcontroller. The MCU is reverse-mounted (facing the PCB). The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
 
 ### Firmware changes required
 
@@ -31,6 +31,31 @@ Update `keyboard.json`:
 ```json
 "development_board": "liatris"
 ```
+
+### Microcontroller
+
+* [splitkb Liatris pinout](https://docs.splitkb.com/product-guides/liatris/pinout)
+* [Custom Ergogen footprint: `mcu_liatris`](../../ergogen/footprints/mcu_liatris.js) - based on [ceoloide/mcu_nice_nano](../../ergogen/footprints/ceoloide/mcu_nice_nano.js) and [marbastlib KiCad footprint](https://github.com/ebastler/marbastlib), which was used as a reference for bottom pin placement
+
+Left | | | Right
+--- | --- | --- | ---
+P1 (GP0) | | | RAW
+P0 (GP1) | | | GND
+GND | | | RST
+GND | | | VCC
+P2 (GP2) | | | P21 (GP29)
+P3 (GP3) | | | P20 (GP28)
+P4 (GP4) | | | P19 (GP27/VBUS)
+P5 (GP5) | | | P18 (GP26)
+P6 (GP6) | | | P15 (GP22)
+P7 (GP7) | | | P14 (GP20)
+P8 (GP8) | | | P16 (GP23)
+P9 (GP9) | | | P10 (GP21)
+
+Bottom pins:
+
+| GP12 | GP13 | GP14 | GP15 | GP16 |
+| --- | --- | --- | --- | --- |
 
 ## Hardware
 

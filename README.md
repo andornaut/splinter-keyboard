@@ -26,6 +26,7 @@ Install the following tools:
   * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
 * [KiCad](https://www.kicad.org) - PCB editor
   * [KiKit automation tools](https://github.com/yaqwsx/KiKit) - Gerber file generation
+  * [marbastlib](https://github.com/ebastler/marbastlib) - KiCad footprint library (install via KiCad Plugin and Content Manager)
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
 
 ```bash
