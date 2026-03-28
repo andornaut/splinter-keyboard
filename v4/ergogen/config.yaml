@@ -488,7 +488,6 @@ pcbs:
           side: F
           reversible: false
           reverse_mount: true
-          include_extra_pins: true
       # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button

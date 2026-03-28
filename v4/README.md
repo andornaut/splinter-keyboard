@@ -35,7 +35,7 @@ Update `keyboard.json`:
 ### Microcontroller
 
 * [splitkb Liatris pinout](https://docs.splitkb.com/product-guides/liatris/pinout)
-* [Custom Ergogen footprint: `mcu_liatris`](../../ergogen/footprints/mcu_liatris.js) - based on [ceoloide/mcu_nice_nano](../../ergogen/footprints/ceoloide/mcu_nice_nano.js) and [marbastlib KiCad footprint](https://github.com/ebastler/marbastlib), which was used as a reference for bottom pin placement
+* [Custom Ergogen footprint: `mcu_liatris`](../../ergogen/footprints/mcu_liatris.js) - based on [ceoloide/mcu_nice_nano](../../ergogen/footprints/ceoloide/mcu_nice_nano.js) with bottom pin placement referenced from marbastlib [Liatris_AH_USBup](https://github.com/ebastler/marbastlib/blob/main/footprints/marbastlib-xp-promicroish.pretty/Liatris_AH_USBup.kicad_mod) and [Liatris_AH_USBdn](https://github.com/ebastler/marbastlib/blob/main/footprints/marbastlib-xp-promicroish.pretty/Liatris_AH_USBdn.kicad_mod)
 
 Left | | | Right
 --- | --- | --- | ---
