@@ -11,11 +11,6 @@ Non-traditional placement of backspace and backslash keys.
 
 ### Bill of materials (BOM)
 
-Category | Quantity | Part
---- | --- | ---
-Diodes | 62 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)
-Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)
-
 Description | Quantity | Part
 --- | --- | ---
 Diodes | 62 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)

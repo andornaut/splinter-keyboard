@@ -3,7 +3,7 @@
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter)
 
 A 61-key split columnar ergonomic keyboard - Production ready.
-Asymetrical. Traditional key layout.
+Asymmetrical. Traditional key layout.
 
 ![v1](./v1.jpg)
 
@@ -86,7 +86,7 @@ Left | (105,105) (105,208.8)
 Top | (105,105) (298.6,105)
 Right | (298.6, 105) (298.6,167.1)
 Right corner | (263,205.2) (298.6,167.1)
-Buttom | (112,224.1) (263,205.2)
+Bottom | (112,224.1) (263,205.2)
 Left corner | (105, 208.8) (112,224.1)
 PCB outside edge to center of M3 hole | 18mm (23mm to outer wall)
 
@@ -114,5 +114,5 @@ Left | 110 mm
 Top | 203.6 mm
 Right | 110 mm
 Right corner | 55.85994 mm
-Buttom | 157.61289 mm
+Bottom | 157.61289 mm
 Left corner | 21.53214 mm

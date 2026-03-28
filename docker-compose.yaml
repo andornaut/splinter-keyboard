@@ -1,0 +1,10 @@
+name: ergogen
+services:
+  ergogen:
+    build: .
+    container_name: ergogen
+    # Don't map ports to the host to avoid conflicting with other containers.
+    # Instead, install https://github.com/andornaut/docker_etc_hosts to
+    # automatically create/update a "ergogen.internal" entry in /etc/hosts
+    # ports:
+    #   - "${ERGOGEN_PORT:-3000}:3000"
