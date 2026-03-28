@@ -474,15 +474,7 @@ pcbs:
           hotswap: true
           from: "{{column_net}}" # Pin 1
           to: "{{colrow}}" # Pin 2
-      # --- Microcontroller: Adafruit KB2040 ---
-      # mcu: &mcu
-      #   what: ceoloide/backlog/virginia2244/kb2040
-      #   where:
-      #     ref: matrix_five_number
-      #     shift: [18, -2.25]
-      #   params:
-      #     reversable: true
-      # --- Microcontroller: Arduino Pro Micro (ATmega32U4) ---
+      # --- Microcontroller: Pro Micro compatible (KB2040, ATmega32U4, etc.) ---
       mcu: &mcu
         what: promicro
         where:
