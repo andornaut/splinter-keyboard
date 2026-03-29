@@ -5,7 +5,7 @@
 // Description:
 //  A reversible footprint for the splitkb Liatris (https://splitkb.com/products/liatris) RP2040 MCU
 //  The Liatris has 5 extra bottom pins (GP12-GP16) compared to the nice!nano's 3 extra pins.
-
+//
 // Bottom pin positions based on marbastlib KiCad footprint:
 //  https://github.com/ebastler/marbastlib/tree/main/marbastlib-mx.pretty
 //
