@@ -17,7 +17,7 @@ Diodes | 61 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switchin
 Hot swap sockets | 61 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)
 Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 Key switches | 61 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
-Microcontrollers | 2 | [SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file))
+Microcontrollers | 2 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file))
 Reset buttons | 2 | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller)
 Screws | 4 | [M3x12mm screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)
 Silicon bumpers | 10 | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)
@@ -51,7 +51,7 @@ GND | | VCC | |
 Part | Dimensions
 --- | ---
 [Keycap size](https://cdn.matt3o.com/uploads/2018/05/keycap-size-diagram.png) | 18mm²
-[SparkFun Qwiic Pro Micro - USB-C (ATmega32U4)](https://www.sparkfun.com/products/15795) | PCB: width: 17.78mm, length: 33.02; USB: protrusion: 1.27mm
+[SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | PCB: width: 17.78mm, length: 33.02; USB: protrusion: 1.27mm
 Keycap size with padding | 19mm²
 Switch (MX) cutout size | 14mm²
 Switch (MX) outer size | 15.6mm²

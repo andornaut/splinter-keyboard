@@ -7,7 +7,7 @@ Non-traditional placement of backspace and backslash keys.
 
 ## Changes from v3
 
-The Liatris replaces the KB2040 as the microcontroller. The MCU is reverse-mounted (facing the PCB). The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
+The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) as the microcontroller. The MCU is reverse-mounted (facing the PCB). The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
 
 ### Firmware changes required
 
@@ -67,7 +67,7 @@ Diodes | 62 | [Nexperia BAS16H,115](https://www.digikey.ca/en/products/detail/ne
 Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)
 Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
-Microcontrollers | 2 | [splitkb Liatris](https://splitkb.com/products/liatris)
+Microcontrollers | 2 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040)
 Screws | 2 | [M3x8mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG)
 Screws | 2 | [M3x10mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG)
 Silicon bumpers | 8 | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html)
@@ -83,7 +83,7 @@ TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audi
 Part | Dimensions
 --- | ---
 [Keycap size](https://cdn.matt3o.com/uploads/2018/05/keycap-size-diagram.png) | 18mm²
-[splitkb Liatris](https://splitkb.com/products/liatris) | ~33mm × ~18mm × ~3.4mm (1mm PCB)
+[splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | ~33mm × ~18mm × ~3.4mm (1mm PCB)
 Keycap size with padding | 19mm²
 PCB thickness | 1.6mm
 Switch (MX) cutout size | 14mm²
