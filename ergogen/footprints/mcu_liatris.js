@@ -1,13 +1,13 @@
 // Based on ceoloide/mcu_nice_nano.js by Marco Massarelli (@ceoloide) and @infused-kim
 // Original: SPDX-License-Identifier: CC-BY-NC-SA-4.0
-// Modified for splitkb Liatris MCU with 5 bottom pins (GP12-GP16)
+// Modified for splitkb Liatris (RP2040) MCU with 5 bottom pins (GP12-GP16)
 //
 // Description:
-//  A single-side or reversible footprint for the splitkb Liatris (or any pro-micro
-//  compatible controller) that uses jumpers instead of two socket rows to be reversible.
-//
-//  The Liatris has 5 extra bottom pins (GP12-GP16) compared to the nice!nano's 3
-//  (P1.01, P1.02, P1.07). Bottom pin positions based on marbastlib KiCad footprint.
+//  A reversible footprint for the splitkb Liatris (https://splitkb.com/products/liatris) RP2040 MCU
+//  The Liatris has 5 extra bottom pins (GP12-GP16) compared to the nice!nano's 3 extra pins.
+
+// Bottom pin positions based on marbastlib KiCad footprint:
+//  https://github.com/ebastler/marbastlib/tree/main/marbastlib-mx.pretty
 //
 // Pinout and schematics:
 //  https://docs.splitkb.com/product-guides/liatris/pinout
@@ -36,7 +36,7 @@
 //      or above 0.8 (KiCad default), to avoid overlap or DRC errors.
 //    via_drill: default is 0.4
 //      allows to define the size of the drill. Not recommended below 0.3 (JLCPCB minimum),
-//      or above 0.4 (KiCad default), to avoid overlap or DRC errors. 
+//      or above 0.4 (KiCad default), to avoid overlap or DRC errors.
 //    Pxx_label, VCC_label, RAW_label, GND_label, RST_label: default is GPIO name
 //      allows to override the label for each pin
 //    mcu_3dmodel_filename: default is ''
@@ -383,7 +383,7 @@ module.exports = {
     )
           `
         }
-        if (p.reversible|| p.show_silk_labels_on_both_sides || p.side == 'B') {
+        if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'B') {
           // Silkscreen labels - back
           socket_row += `
     (fp_text user "${net_silk_back_left}" (at ${p.reversible ? '-' : ''}${p.reversible && (row_num < 4 || !p.only_required_jumpers) ? (net_silk_back_left.length > 2 ? 1.45 : 2.04) : 4.47} ${-12.7 + row_offset_y} ${p.r}) (layer "B.SilkS")
