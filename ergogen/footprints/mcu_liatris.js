@@ -69,6 +69,9 @@
 //  - Always include bottom pins (GP12-GP16) since they are standard on the Liatris
 //  - Upgrade to KiCad 8
 //
+// @andornaut's improvements:
+//  - Converted to splitkb Liatris (RP2040) MCU
+//
 // # Placement and soldering of jumpers
 //
 // The reversible footprint is meant to be used with jumpers on the
