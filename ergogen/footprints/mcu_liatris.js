@@ -75,7 +75,7 @@
 // # Placement and soldering of jumpers
 //
 // The reversible footprint is meant to be used with jumpers on the
-// OPPOSITE side of where the Liatris (or pro-micro compatible board) is
+// OPPOSITE side of where the nice!nano (or pro-micro compatible board) is
 // installed. The silkscreen labels will also match the board when read on
 // the opposite side. This is to have all jumpers and components to solder on
 // the same side, and be able to read the correct labels of the MCU to do
