@@ -1,20 +1,22 @@
 {
+  "config": {
+    "VERSION": "v4"
+  },
   "dependencies": {
     "ergogen": "^4.2.1"
   },
   "devDependencies": {
-    "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.14"
   },
   "scripts": {
-    "build": "dotenv -- sh -c 'set -vxe;npx ergogen ./${VERSION}/ergogen/ --output dist/${VERSION}/ergogen/ && npm run update-pcbs'",
+    "build": "npx ergogen ./$npm_package_config_VERSION/ergogen/ --output dist/$npm_package_config_VERSION/ergogen/ && npm run update-pcbs",
     "clean": "rm -rf dist",
-    "copy-pcbs-to-kicad": "dotenv -- sh -c 'set -vxe;cp dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb ./${VERSION}/kicad/'",
-    "copy-pcbs-to-routed": "dotenv -- sh -c 'set -vxe;cp ./${VERSION}/kicad/[!_]*.kicad_pcb ./${VERSION}/kicad/routed/'",
-    "copy-traces-from-routed": "dotenv -- sh -c 'set -vxe;for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"${f}\" ./${VERSION}/kicad/$(basename \"${f}\"); done'",
-    "fab-jlcpcb": "dotenv -- sh -c 'set -vxe;for f in ./${VERSION}/kicad/routed/[!_]*.kicad_pcb; do echo \"${f}\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"${f}\" dist/${VERSION}/kicad/jlcpcb/; done'",
-    "update-pcbs": "dotenv -- sh -c 'set -vxe;for f in dist/${VERSION}/ergogen/pcbs/[!_]*.kicad_pcb; do echo ${f} && python3 ./${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb ${f}; done'",
-    "watch": "dotenv -- sh -c 'set -vxe;nodemon --ext .js,.yaml --watch ./${VERSION}/ergogen/config.yaml --exec \"npm run build\"'",
-    "watch-and-copy-pcbs-to-kicad": "dotenv -- sh -c 'set -vxe;nodemon --ext .js,.yaml --watch ./${VERSION}/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-to-kicad\"'"
+    "copy-pcbs-to-kicad": "cp dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/",
+    "copy-pcbs-to-routed": "cp ./$npm_package_config_VERSION/kicad/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/routed/",
+    "copy-traces-from-routed": "for f in ./$npm_package_config_VERSION/kicad/routed/[!_]*.kicad_pcb; do echo \"$f\" && python3 ./$npm_package_config_VERSION/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"$f\" ./$npm_package_config_VERSION/kicad/$(basename \"$f\"); done",
+    "fab-jlcpcb": "for f in ./$npm_package_config_VERSION/kicad/routed/[!_]*.kicad_pcb; do echo \"$f\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"$f\" dist/$npm_package_config_VERSION/kicad/jlcpcb/; done",
+    "update-pcbs": "for f in dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb; do echo $f && python3 ./$npm_package_config_VERSION/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb $f; done",
+    "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
+    "watch-and-copy-pcbs-to-kicad": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-to-kicad\""
   }
 }

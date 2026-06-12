@@ -500,20 +500,45 @@ pcbs:
           to: RST
           side: B
       # --- TRRS Jack: HCTL HC-PJ-320A-4P-D ---
+      # Sleeve carries the half-duplex serial line. DATA_RAW is the un-protected
+      # net between the jack and the data-line protection (TVS + series resistor).
+      # After the resistor, the net becomes P0 and goes to the MCU.
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
           ref: matrix_five_number
           shift: [18 + 13, 15]
         params:
-          TP: VCC # 1
-          R1: VCC # 2
-          R2: GND # 3
-          SL: P0 # 4
+          TP: VCC      # 1
+          R1: VCC      # 2
+          R2: GND      # 3
+          SL: DATA_RAW # 4  Routed via TVS (to GND) and 100Ω resistor (to P0/MCU)
           reversible: true
           side: B
           # Symmetric only works for the "Serial" pinout
           symmetric: true
+      # --- Data-line TVS: Nexperia PESD3V3L1BA (SOD-323, bidirectional, 3.3V) ---
+      # Clamps transients on the TRRS data line (e.g. hot-unplug). Place close to
+      # the jack's SL pad so the transient is suppressed before it reaches the MCU.
+      data_tvs: &data_tvs
+        what: sod-323
+        where:
+          ref: matrix_five_number
+          shift: [18 + 13 + 5, 15 + 3.2]  # PLACEHOLDER: ~5mm right of TRRS SL pad
+        params:
+          from: DATA_RAW
+          to: GND
+      # --- Data-line series resistor: 100Ω 0603 (Panasonic ERJ-3EKF1000V) ---
+      # Limits residual current downstream of the TVS to protect the MCU's GP1
+      # (P0) pin. Place between data_tvs and the MCU pin.
+      data_resistor: &data_resistor
+        what: resistor_0603
+        where:
+          ref: matrix_five_number
+          shift: [18 + 13 + 5, 15 + 6.2]  # PLACEHOLDER: below TVS, between TVS and MCU
+        params:
+          from: DATA_RAW
+          to: P0
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -549,3 +574,13 @@ pcbs:
         where:
           ref: mirror_matrix_five_number
           shift: [18 + 13, 15]
+      data_tvs:
+        <<: *data_tvs
+        where:
+          ref: mirror_matrix_five_number
+          shift: [18 + 13 + 5, 15 + 3.2]
+      data_resistor:
+        <<: *data_resistor
+        where:
+          ref: mirror_matrix_five_number
+          shift: [18 + 13 + 5, 15 + 6.2]

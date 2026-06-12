@@ -56,7 +56,7 @@ Alternatively, you can install OrcaSlicer and Kicad using [these Ansible tasks](
 
 ### Step 1. Configure the environment
 
-Set the `VERSION` environment variable in [`.env`](./.env) to one of v1, v2, v3, or v4
+Set the active version in [`package.json`](./package.json) under `config.VERSION` to one of v1, v2, v3, or v4. You can also override it per-command with `npm run build --VERSION=v3`.
 
 ### Step 2. [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
 
