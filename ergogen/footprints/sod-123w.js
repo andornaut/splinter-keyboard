@@ -9,7 +9,7 @@ module.exports = {
             ${p.at}
             (descr "Nexperia CFP3 (SOD-123W), https://assets.nexperia.com/documents/outline-drawing/SOD123W.pdf")
             (tags "CFP3 SOD-123W")
-            (attr smd)
+            (attr through_hole)
             (fp_text reference "${p.ref}" (at 0 -2 ${p.rot}) (layer "F.SilkS") ${p.ref_hide}
                 (effects (font (size 1 1) (thickness 0.15)))
             )
