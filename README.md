@@ -81,6 +81,8 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 **Notes:**
 
 * The Ergogen GUI is useful for prototyping key placement, layout, and outlines, but it does not render PCB layouts. Use the local npm pipeline to generate PCB files for KiCad.
+* The GUI is client-side only: it has no access to the host filesystem and does not sync with it in either direction. Paste the config in, work on it, then copy/download the result back to `config.yaml` yourself. The host `config.yaml` is the source of truth; do not volume-mount it. For full builds, use `npm run build` (the CLI reads all custom footprints from the filesystem).
+* Custom footprints are baked into the GUI image at build time via the [`Dockerfile`](./Dockerfile), since the browser cannot load them from disk. Each custom `what:` value used in the config (e.g. `sod-123fl`, `infused-kim/smd_0805`, `mcu_liatris`) must be copied in and registered in Ergogen's footprint index there, or the GUI reports an unknown footprint. Rebuild with `docker compose build --no-cache` after adding one.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 

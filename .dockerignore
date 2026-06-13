@@ -1,0 +1,17 @@
+# The image only needs ergogen/footprints/*; everything else just bloats the
+# build context (the repo is ~250MB, ~130MB of it .git).
+.git
+.github
+dist
+node_modules
+**/node_modules
+v1
+v2
+v3
+v4
+*.md
+.gitignore
+.gitmodules
+Dockerfile
+.dockerignore
+docker-compose.yaml
