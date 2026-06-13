@@ -1,8 +1,11 @@
-# The image only needs ergogen/footprints/*; everything else just bloats the
-# build context (the repo is ~250MB, ~130MB of it .git).
+# The image only needs our custom footprints (ergogen/footprints/*.js);
+# everything else just bloats the build context. The ceoloide/infused-kim
+# submodules are cloned by the GUI's own patch flow, not copied from here.
 .git
 .github
 dist
+ergogen/footprints/ceoloide
+ergogen/footprints/infused-kim
 node_modules
 **/node_modules
 v1

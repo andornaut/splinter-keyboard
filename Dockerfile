@@ -5,17 +5,14 @@ RUN chown node:node /app
 USER node
 
 # Clone a pinned ergogen-gui and install deps. The repo's postinstall runs
-# patch_ergogen.sh, which clones the full @ceoloide and @infused-kim libraries
-# and registers them in src/footprints/index.js. We then clear ceoloide so our
-# pinned local copy replaces the unpinned upstream clone.
+# patch_ergogen.sh, which clones the @ceoloide and @infused-kim footprint
+# libraries at HEAD and registers them in src/footprints/index.js. We leave
+# that patch flow untouched and only add our own footprints on top.
 RUN git clone --branch v20251103 --depth 1 https://github.com/ergogen/ergogen-gui.git . && \
-    yarn install --frozen-lockfile && \
-    rm -rf node_modules/ergogen/src/footprints/ceoloide
+    yarn install --frozen-lockfile
 
-# Overlay our local footprints. ceoloide/infused-kim are already registered by
-# the patch above; mcu_liatris, sod-123fl, and sod-123w are ours to register.
-COPY --chown=node:node ergogen/footprints/ceoloide/ node_modules/ergogen/src/footprints/ceoloide/
-COPY --chown=node:node ergogen/footprints/infused-kim/ node_modules/ergogen/src/footprints/infused-kim/
+# Add our custom footprints (not part of any upstream library) so the GUI can
+# render configs that use them.
 COPY --chown=node:node ergogen/footprints/mcu_liatris.js ergogen/footprints/sod-123fl.js ergogen/footprints/sod-123w.js node_modules/ergogen/src/footprints/
 
 # Register our custom footprints; the grep fails the build if the sed no-ops
