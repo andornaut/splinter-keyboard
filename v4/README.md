@@ -68,6 +68,7 @@ Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-det
 Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986)
 Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))
 Microcontrollers | 2 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040)
+Resistors | 2 | [Panasonic ERJ-6ENF1000V](https://www.digikey.ca/en/products?keywords=ERJ-6ENF1000V) (100Ω, 0805, 1%) — TRRS data-line current limit
 Screws | 2 | [M3x8mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG)
 Screws | 2 | [M3x10mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG)
 Silicon bumpers | 8 | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html)
@@ -77,6 +78,7 @@ Switches/buttons | 2 | [E-Switch TL3342F450QG](https://www.digikey.ca/en/product
 Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/products/made-for-voron-gewindeeinsatz-threaded-insert-m3x5x4-100-stk-pcs)
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
 TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
+TVS diodes | 2 | [Littelfuse SMF3.3CA](https://www.digikey.ca/en/products/detail/littelfuse-inc/SMF33CA/11206219) (SOD-123FL, bidirectional 3.3V) — TRRS data-line transient suppression
 
 ### Part dimensions
 

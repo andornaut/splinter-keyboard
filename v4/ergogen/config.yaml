@@ -517,28 +517,30 @@ pcbs:
           side: B
           # Symmetric only works for the "Serial" pinout
           symmetric: true
-      # --- Data-line TVS: Nexperia PESD3V3L1BA (SOD-323, bidirectional, 3.3V) ---
+      # --- Data-line TVS: Littelfuse SMF3.3CA (SOD-123FL, bidirectional, 3.3V) ---
       # Clamps transients on the TRRS data line (e.g. hot-unplug). Place close to
       # the jack's SL pad so the transient is suppressed before it reaches the MCU.
       data_tvs: &data_tvs
-        what: sod-323
+        what: sod-123fl
         where:
           ref: matrix_five_number
-          shift: [18 + 13 + 5, 15 + 3.2]  # PLACEHOLDER: ~5mm right of TRRS SL pad
+          shift: [18 + 13, 15 - 14]  # below TRRS jack body, near SL pad (side B)
         params:
           from: DATA_RAW
           to: GND
-      # --- Data-line series resistor: 100Ω 0603 (Panasonic ERJ-3EKF1000V) ---
+      # --- Data-line series resistor: 100Ω 0805 (Panasonic ERJ-6ENF1000V) ---
       # Limits residual current downstream of the TVS to protect the MCU's GP1
       # (P0) pin. Place between data_tvs and the MCU pin.
       data_resistor: &data_resistor
-        what: resistor_0603
+        what: infused-kim/smd_0805
         where:
           ref: matrix_five_number
-          shift: [18 + 13 + 5, 15 + 6.2]  # PLACEHOLDER: below TVS, between TVS and MCU
+          shift: [18 + 13, 15 - 17]  # below the TVS (side B)
         params:
-          from: DATA_RAW
-          to: P0
+          components: 1
+          net_1_from: DATA_RAW
+          net_1_to: P0
+          side: B
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -578,9 +580,9 @@ pcbs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_number
-          shift: [18 + 13 + 5, 15 + 3.2]
+          shift: [18 + 13, 15 - 14]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_number
-          shift: [18 + 13 + 5, 15 + 6.2]
+          shift: [18 + 13, 15 - 17]
