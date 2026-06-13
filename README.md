@@ -1,6 +1,8 @@
 # Splinter keyboard
 
-A 62-key split columnar ergonomic keyboard
+A 62-key split columnar ergonomic keyboard.
+
+This repo holds the hardware design files. The design pipeline is: Keyboard Layout Editor -> Ergogen -> KiCad -> OnShape -> OrcaSlicer -> QMK firmware (see [Developing](#developing)).
 
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
 * [andornaut@github /til](https://github.com/andornaut/til/)
@@ -50,7 +52,7 @@ sudo pip install kikit --break-system-packages
 git submodule update --recursive --remote
 ```
 
-Alternatively, you can install OrcaSlicer and Kicad using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/master/roles/dev/tasks/hobbies.yml).
+Alternatively, you can install OrcaSlicer and KiCad using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/master/roles/dev/tasks/hobbies.yml).
 
 ## Developing
 
@@ -93,7 +95,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 1. Run `open ./v4/kicad/left.kicad_pcb`
 1. Route the PCBs in [`kicad/`](./v4/kicad/), and then save them to [`kicad/routed/`](./v4/kicad/routed/)
    * Once you're happy with the routing, run `npm run copy-pcbs-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
-   * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-from-routed` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in Kicad.
+   * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-from-routed` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in KiCad.
 1. Run `npm run copy-pcbs-to-routed && npm run fab-jlcpcb` to generate and save gerber and drill files to `dist/v4/kicad/jlcpcb/*.zip`
 1. Print the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
    * Submit the `dist/v4/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)

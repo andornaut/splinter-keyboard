@@ -27,7 +27,7 @@ Threaded inserts | 4 | [M3x3mm (short) threaded inserts](https://cnckitchen.stor
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
 TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
 
-### atmega32u4
+### Microcontroller
 
 * [Pro Micro pinout](https://golem.hu/article/pro-micro-pinout/)
 
@@ -60,8 +60,8 @@ Switch (MX) outer size | 15.6mm²
 
 Position each PCB at (105,105). The left half starts at this position,
 but the right half must be moved before running `npm run copy-traces-from-routed`.
-100mm to provide a buffer around the edges of the document, and 5 mm to account
-for the case walls.
+The 105mm offset is 100mm to provide a buffer around the edges of the document,
+plus 5mm to account for the case walls.
 
 #### Left half
 

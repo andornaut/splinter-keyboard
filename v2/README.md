@@ -27,7 +27,7 @@ Threaded inserts | 4 | [M3x3mm (short) threaded inserts](https://cnckitchen.stor
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
 TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
 
-#### Part dimensions
+### Part dimensions
 
 Part | Dimensions
 --- | ---
