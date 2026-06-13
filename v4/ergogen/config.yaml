@@ -535,7 +535,7 @@ pcbs:
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_number
-          shift: [18 + 13, 15 - 17]  # below the TVS (side B)
+          shift: [18 + 13, 15 - 17.5]  # below the TVS, ~0.66mm courtyard gap (side B)
         params:
           components: 1
           net_1_from: DATA_RAW
@@ -585,4 +585,4 @@ pcbs:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_number
-          shift: [18 + 13, 15 - 17]
+          shift: [18 + 13, 15 - 17.5]
