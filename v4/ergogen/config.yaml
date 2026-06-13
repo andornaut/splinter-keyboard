@@ -518,8 +518,11 @@ pcbs:
           # Symmetric only works for the "Serial" pinout
           symmetric: true
       # --- Data-line TVS: Littelfuse SMF3.3CA (SOD-123FL, bidirectional, 3.3V) ---
-      # Clamps transients on the TRRS data line (e.g. hot-unplug). Place close to
-      # the jack's SL pad so the transient is suppressed before it reaches the MCU.
+      # Clamps transients on the TRRS data line (e.g. hot-unplug) before they
+      # reach the MCU. Reference D<n>; value SMF3.3CA.
+      #   pad "A" (anode)   = from = DATA_RAW  (the un-protected jack-side net)
+      #   pad "K" (cathode) = to   = GND       (clamp return)
+      # Bidirectional, so A/K orientation is electrically irrelevant here.
       data_tvs: &data_tvs
         what: sod-123fl
         where:
@@ -529,14 +532,18 @@ pcbs:
           from: DATA_RAW
           to: GND
       # --- Data-line series resistor: 100Ω 0805 (Panasonic ERJ-6ENF1000V) ---
-      # Limits residual current downstream of the TVS to protect the MCU's GP1
-      # (P0) pin. Place between data_tvs and the MCU pin.
+      # In series between the DATA_RAW node and the MCU's GP1 (P0) pin; limits
+      # residual surge current after the TVS. Reference R<n>; "100R" silk label.
+      #   pad 1 = net_1_from = DATA_RAW (TVS/jack side)
+      #   pad 2 = net_1_to   = P0       (MCU side)
       data_resistor: &data_resistor
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_number
           shift: [18 + 13, 15 - 17.5]  # below the TVS, ~0.66mm courtyard gap (side B)
         params:
+          designator: R       # reference prefix -> R<n> (not the generic "SMD")
+          label_1: '100R'      # value printed on silk
           components: 1
           net_1_from: DATA_RAW
           net_1_to: P0
