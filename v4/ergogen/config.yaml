@@ -28,7 +28,7 @@ points:
     # zones.extra (the right-hand inner columns) and the thumbcluster, so they
     # must not be auto-mirrored or they would be generated twice.
     mirror:
-      ref: matrix_five_number
+      ref: matrix_five_num
       distance: 5u
     key.tags.left: true
     key.mirror.tags:
@@ -37,7 +37,7 @@ points:
     columns:
       zero:
         rows:
-          meta: # LCTRL
+          mod: # LCTRL
             bind: [0, u/4, 0, u/4]
             shift: [-u/4, 0]
             spread: 1.5u
@@ -45,7 +45,7 @@ points:
             column_net: P2
             row_net: P10
             mirror.skip: true
-          bottom: # LSHIFT
+          lower: # LSHIFT
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
@@ -59,25 +59,25 @@ points:
             column_net: P2
             row_net: P14
             mirror.skip: true
-          top: # TAB
+          upper: # TAB
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
             column_net: P2
             row_net: P15
             mirror.skip: true
-          number: # `
+          num: # `
             shift: [u/4, 0]
             column_net: P2
             row_net: P5
             mirror.skip: true
       one:
         rows:
-          meta: # SUPER
+          mod: # SUPER
             column_net: P3
             row_net: P10
             mirror.skip: true
-          bottom: # Z
+          lower: # Z
             column_net: P3
             row_net: P16
             mirror.skip: true
@@ -85,22 +85,22 @@ points:
             column_net: P3
             row_net: P14
             mirror.skip: true
-          top: # Q
+          upper: # Q
             column_net: P3
             row_net: P15
             mirror.skip: true
-          number: # 1
+          num: # 1
             column_net: P3
             row_net: P5
             mirror.skip: true
       two:
         key.stagger: 3
         rows:
-          meta: # LALT
+          mod: # LALT
             mirror.skip: true
             column_net: P9
             row_net: P10
-          bottom: # X
+          lower: # X
             bind: 1
             column_net: P9
             row_net: P16
@@ -113,13 +113,13 @@ points:
             mirror: # L
               column_net: P5
               row_net: P16
-          top: # W
+          upper: # W
             column_net: P9
             row_net: P15
             mirror: # O
               column_net: P5
               row_net: P10
-          number: # 2
+          num: # 2
             column_net: P9
             row_net: P5
             mirror: # 9
@@ -128,8 +128,8 @@ points:
       three:
         key.stagger: 3
         rows:
-          meta.skip: true # No bottom-most (meta-row) key in this column
-          bottom: # C
+          mod.skip: true # No bottom-most (mod-row) key in this column
+          lower: # C
             bind: 0
             column_net: P8
             row_net: P16
@@ -142,13 +142,13 @@ points:
             mirror: # K
               column_net: P4
               row_net: P16
-          top: # E
+          upper: # E
             column_net: P8
             row_net: P15
             mirror: # I
               column_net: P4
               row_net: P10
-          number: # 3
+          num: # 3
             column_net: P8
             row_net: P5
             mirror: # 8
@@ -157,8 +157,8 @@ points:
       four:
         key.stagger: -3
         rows:
-          meta.skip: true
-          bottom: # V
+          mod.skip: true
+          lower: # V
             bind: 0
             column_net: P7
             row_net: P16
@@ -171,13 +171,13 @@ points:
             mirror: # J
               column_net: P3
               row_net: P16
-          top: # R
+          upper: # R
             column_net: P7
             row_net: P15
             mirror: # U
               column_net: P3
               row_net: P10
-          number: # 4
+          num: # 4
             column_net: P7
             row_net: P5
             mirror: # 7
@@ -186,8 +186,8 @@ points:
       five:
         key.stagger: -3
         rows:
-          meta.skip: true
-          bottom: # B
+          mod.skip: true
+          lower: # B
             bind: 0
             column_net: P6
             row_net: P16
@@ -200,24 +200,24 @@ points:
             mirror: # H
               column_net: P20
               row_net: P16
-          top: # T
+          upper: # T
             column_net: P6
             row_net: P15
             mirror: # Y
               column_net: P20
               row_net: P10
-          number: # 5
+          num: # 5
             column_net: P6
             row_net: P5
             mirror: # 6
               column_net: P20
               row_net: P15
     rows:
-      meta:
-      bottom:
+      mod:
+      lower:
       home:
-      top:
-      number:
+      upper:
+      num:
   # --- Extra keys: the right half's inner columns ---
   # These are the right-hand counterparts to the left columns that carry
   # `mirror.skip: true` above. They are defined explicitly (rather than
@@ -226,87 +226,87 @@ points:
   zones.extra:
     key.tags.right: true
     anchor:
-      ref: matrix_five_meta
+      ref: matrix_five_mod
       shift: [9u, 0]
     columns:
       zero:
         rows:
-          meta: # BACKSPACE
+          mod: # BACKSPACE
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
             column_net: P6
             row_net: P9
-          bottom: # /
+          lower: # /
             shift: [-u/4, 0]
             column_net: P6
             row_net: P14
           home: # ;
             column_net: P6
             row_net: P16
-          top: # P
+          upper: # P
             column_net: P6
             row_net: P10
-          number: # 0
+          num: # 0
             column_net: P6
             row_net: P15
       dash:
         rows:
-          meta.skip: true
-          bottom: # \
+          mod.skip: true
+          lower: # \
             column_net: P7
             row_net: P14
           home: # '
             column_net: P7
             row_net: P16
-          top: # [
+          upper: # [
             column_net: P7
             row_net: P10
-          number: # -
+          num: # -
             column_net: P7
             row_net: P15
       equal:
         rows:
-          meta.skip: true
-          bottom: # SHIFT
+          mod.skip: true
+          lower: # SHIFT
             column_net: P8
             row_net: P14
           home: # ENTER
             column_net: P8
             row_net: P16
-          top: # ]
+          upper: # ]
             column_net: P8
             row_net: P10
-          number: # =
+          num: # =
             column_net: P8
             row_net: P15
     rows:
-      meta:
-      bottom:
+      mod:
+      lower:
       home:
-      top:
-      number:
+      upper:
+      num:
   # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
     anchor:
-      ref: matrix_four_bottom
+      ref: matrix_four_lower
       shift: [-3.45, -1u -3]
     key.tags.left: true
     key.mirror.tags:
       left: $unset
       right: true
     mirror:
-      ref: mirror_matrix_five_bottom
+      ref: mirror_matrix_five_lower
       distance: -5u
     columns:
-      three.rows.meta: # BACKSPACE
+      three.rows.mod: # BACKSPACE
         splay: -18.925
         column_net: P8
         row_net: P10
         mirror:
           column_net: P4
           row_net: P9
-      four.rows.meta: # SPACE
+      four.rows.mod: # SPACE
         bind: [0, u/4, 0, u/4]
         spread: 1.25u
         width: 1.5u
@@ -315,7 +315,7 @@ points:
         mirror:
           column_net: P3
           row_net: P9
-      five.rows.meta: # MOD
+      five.rows.mod: # MOD
         shift: [u/4, 0]
         column_net: P6
         row_net: P10
@@ -387,32 +387,32 @@ outlines:
         # Outer (pinky) edge: mirror of the right half's outer edge (the right
         # half sets the 158mm width via its extra inner column). The left pinky
         # ends up well clear of its keys.
-        - ref: matrix_zero_number
+        - ref: matrix_zero_num
           shift: [-u/2 -u +0.475, u/2 +5.729]
 
         # Cutout for USB-c port
         # Centered on the Liatris USB socket, which sits 0.127mm left of the
         # MCU origin (socket outline spans local x -3.81..+3.556). The left MCU
         # is un-rotated, so subtract 0.127 from the 13/23 edges.
-        - ref: matrix_five_number
+        - ref: matrix_five_num
           shift: [13 - 0.127, u/2 +5.729]
-        - ref: matrix_five_number
+        - ref: matrix_five_num
           shift: [13 - 0.127, u/2 -1.271]
-        - ref: matrix_five_number
+        - ref: matrix_five_num
           shift: [23 - 0.127, u/2 -1.271]
-        - ref: matrix_five_number
+        - ref: matrix_five_num
           shift: [23 - 0.127, u/2 +5.729]
 
-        - ref: matrix_five_number
+        - ref: matrix_five_num
           shift: [u + 15.6, u/2 +5.729]
-        - ref: matrix_five_bottom
+        - ref: matrix_five_lower
           shift: [u + 15.6, -1u -1/2u]
-        - ref: matrix_zero_meta
+        - ref: matrix_zero_mod
           shift: [-u/4 -u +0.475, -u/2]
   _boxright:
     - what: polygon
       points:
-        - ref: mirror_matrix_five_number
+        - ref: mirror_matrix_five_num
           shift: [u + 15.6, u/2 +5.729]
 
         # Cutout for USB-c port
@@ -420,13 +420,13 @@ outlines:
         # (ergogen flips the x-shift for mirror_* refs, so the same expression
         # lands at the mirrored position). The right MCU is oriented to put its
         # USB socket at the top, matching the left.
-        - ref: mirror_matrix_five_number
+        - ref: mirror_matrix_five_num
           shift: [23 - 0.127, u/2 +5.729]
-        - ref: mirror_matrix_five_number
+        - ref: mirror_matrix_five_num
           shift: [23 - 0.127, u/2 -1.271]
-        - ref: mirror_matrix_five_number
+        - ref: mirror_matrix_five_num
           shift: [13 - 0.127, u/2 -1.271]
-        - ref: mirror_matrix_five_number
+        - ref: mirror_matrix_five_num
           shift: [13 - 0.127, u/2 +5.729]
 
         # Outer (pinky) edge: the right half is the wider one (it has an extra
@@ -434,11 +434,11 @@ outlines:
         # outer key hull to round the half width down from 158.475 to 158mm.
         # That -0.475 cuts ~0.475 into the outer key's 1u hull but stays ~1mm
         # clear of the switch -- fine in practice. The left half mirrors this.
-        - ref: extra_equal_number
+        - ref: extra_equal_num
           shift: [u/2 -0.475, u/2 +5.729]
-        - ref: extra_equal_bottom
+        - ref: extra_equal_lower
           shift: [u/2 -0.475, -u/2 -u]
-        - ref: mirror_matrix_five_bottom
+        - ref: mirror_matrix_five_lower
           shift: [u + 15.6, -u -1/2u]
   _cutoutsleft:
     - what: rectangle
@@ -539,7 +539,7 @@ pcbs:
       mcu: &mcu
         what: mcu_liatris
         where:
-          ref: matrix_five_number
+          ref: matrix_five_num
           shift: [18, -2.25]
         params:
           side: F
@@ -567,7 +567,7 @@ pcbs:
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
-          ref: matrix_five_number
+          ref: matrix_five_num
           shift: [18 + 13, 15]
         params:
           TP: VCC # 1  Tip
@@ -587,7 +587,7 @@ pcbs:
       data_tvs: &data_tvs
         what: sod-123fl
         where:
-          ref: matrix_five_number
+          ref: matrix_five_num
           shift: [18 + 13, 15 - 16] # below TRRS jack body, near R2 (data) pad (side B)
         params:
           from: DATA_RAW
@@ -600,7 +600,7 @@ pcbs:
       data_resistor: &data_resistor
         what: infused-kim/smd_0805
         where:
-          ref: matrix_five_number
+          ref: matrix_five_num
           shift: [18 + 13, 15 - 22] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
         params:
           designator: R # reference prefix -> R<n> (not the generic "SMD")
@@ -630,7 +630,7 @@ pcbs:
       mcu:
         <<: *mcu
         where:
-          ref: mirror_matrix_five_number
+          ref: mirror_matrix_five_num
           shift: [18, -2.25]
         # Flipped to the back (side B), not the left's front. mcu_liatris can't
         # mirror in-plane, so a side flip is what reflects its pads to mirror
@@ -650,15 +650,15 @@ pcbs:
       trrs:
         <<: *trrs
         where:
-          ref: mirror_matrix_five_number
+          ref: mirror_matrix_five_num
           shift: [18 + 13, 15]
       data_tvs:
         <<: *data_tvs
         where:
-          ref: mirror_matrix_five_number
+          ref: mirror_matrix_five_num
           shift: [18 + 13, 15 - 17]
       data_resistor:
         <<: *data_resistor
         where:
-          ref: mirror_matrix_five_number
+          ref: mirror_matrix_five_num
           shift: [18 + 13, 15 - 21.67]
