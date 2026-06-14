@@ -5,14 +5,28 @@ meta:
 units:
   c: 14 # Cherry MX switch cutout/hole length in mm
   s: 16 # Cherry MX switches are 15.6mm at their widest
-  u: U # "U" was previously 19.05mm, but is now 19mm
+  u: U # Key pitch. Set to ergogen's built-in U (19.05mm); ergogen's own default u is 19mm
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
   # --- Main key matrix: standard alphanumeric and modifier keys ---
   zones.matrix:
     anchor:
-      shift: [68.575, -185 -6.725] # Start (top left corner) at (40,100) in Kicad
+      # --- KiCad sheet placement (cosmetic) ---
+      # This is the only absolute-coordinate value in the config; everything
+      # else is relative, so changing it just slides the whole design around
+      # the KiCad sheet. It centers the left half's bounding box
+      # (158 x 119mm) on KiCad (120, 160). The two trailing constants are
+      # the fixed offset from that center back to the matrix anchor, set by the
+      # key geometry (half-width minus the anchor inset, and half-height minus
+      # the splayed-thumb tail). The right half is mirrored, so it lands offset
+      # to the right in its own PCB file rather than centered.
+      shift: [120 -50.9, -160 -31.954]
+    # The left half is the source of truth; each key is mirrored across the
+    # gap to build the right half. Keys marked `mirror.skip: true` below are
+    # left-only: their right-half counterparts are defined separately in
+    # zones.extra (the right-hand inner columns) and the thumbcluster, so they
+    # must not be auto-mirrored or they would be generated twice.
     mirror:
       ref: matrix_five_number
       distance: 5u
@@ -114,7 +128,7 @@ points:
       three:
         key.stagger: 3
         rows:
-          meta.skip: true
+          meta.skip: true # No bottom-most (meta-row) key in this column
           bottom: # C
             bind: 0
             column_net: P8
@@ -204,7 +218,11 @@ points:
       home:
       top:
       number:
-  # --- Extra keys: right-hand modifiers and special keys ---
+  # --- Extra keys: the right half's inner columns ---
+  # These are the right-hand counterparts to the left columns that carry
+  # `mirror.skip: true` above. They are defined explicitly (rather than
+  # mirrored) because the right inner cluster differs from the left: backspace,
+  # punctuation, and the right modifiers. Anchored 9u right of the left half.
   zones.extra:
     key.tags.right: true
     anchor:
@@ -337,12 +355,28 @@ points:
 
 # --- Outlines: Board shape, cutouts, and geometric features ---
 outlines:
-  _bindingleft:
+  # Binding is scoped to the thumb cluster only. The main matrix is fully
+  # enclosed by the box, so binding those keys would add 1u key-hulls that poke
+  # above the box top edge and pin it 0.271mm high (forcing a subtract to get a
+  # flat 119mm top). The thumb cluster sits below the box bottom, so it still
+  # needs its hull. Scoping the binding here lets the box govern the matrix
+  # outline directly -- no top-trim subtract needed.
+  _thumbbindingleft:
+    - what: rectangle
+      where: /^thumbcluster/
+      size: u
+      bound: true
+  _thumbbindingright:
+    - what: rectangle
+      where: /^mirror_thumbcluster/
+      size: u
+      bound: true
+  outlineleft:
     - what: rectangle
       where: left
       size: u
       bound: true
-  _bindingright:
+  outlineright:
     - what: rectangle
       where: right
       size: u
@@ -350,45 +384,60 @@ outlines:
   _boxleft:
     - what: polygon
       points:
+        # Outer (pinky) edge: mirror of the right half's outer edge (the right
+        # half sets the 158mm width via its extra inner column). The left pinky
+        # ends up well clear of its keys.
         - ref: matrix_zero_number
-          shift: [-u/2 -u, u/2 +6]
+          shift: [-u/2 -u +0.475, u/2 +5.729]
 
         # Cutout for USB-c port
+        # Centered on the Liatris USB socket, which sits 0.127mm left of the
+        # MCU origin (socket outline spans local x -3.81..+3.556). The left MCU
+        # is un-rotated, so subtract 0.127 from the 13/23 edges.
         - ref: matrix_five_number
-          shift: [13, u/2 +6]
+          shift: [13 - 0.127, u/2 +5.729]
         - ref: matrix_five_number
-          shift: [13, u/2 -1]
+          shift: [13 - 0.127, u/2 -1.271]
         - ref: matrix_five_number
-          shift: [23, u/2 -1]
+          shift: [23 - 0.127, u/2 -1.271]
         - ref: matrix_five_number
-          shift: [23, u/2 +6]
+          shift: [23 - 0.127, u/2 +5.729]
 
         - ref: matrix_five_number
-          shift: [u + 15.6, u/2 +6]
+          shift: [u + 15.6, u/2 +5.729]
         - ref: matrix_five_bottom
           shift: [u + 15.6, -1u -1/2u]
         - ref: matrix_zero_meta
-          shift: [-u/4 -u, -u/2]
+          shift: [-u/4 -u +0.475, -u/2]
   _boxright:
     - what: polygon
       points:
         - ref: mirror_matrix_five_number
-          shift: [u + 15.6, u/2 +6]
+          shift: [u + 15.6, u/2 +5.729]
 
         # Cutout for USB-c port
+        # Perfect mirror of the left half: same -0.127 socket-centering offset
+        # (ergogen flips the x-shift for mirror_* refs, so the same expression
+        # lands at the mirrored position). The right MCU is oriented to put its
+        # USB socket at the top, matching the left.
         - ref: mirror_matrix_five_number
-          shift: [23, u/2 +6]
+          shift: [23 - 0.127, u/2 +5.729]
         - ref: mirror_matrix_five_number
-          shift: [23, u/2 -1]
+          shift: [23 - 0.127, u/2 -1.271]
         - ref: mirror_matrix_five_number
-          shift: [13, u/2 -1]
+          shift: [13 - 0.127, u/2 -1.271]
         - ref: mirror_matrix_five_number
-          shift: [13, u/2 +6]
+          shift: [13 - 0.127, u/2 +5.729]
 
+        # Outer (pinky) edge: the right half is the wider one (it has an extra
+        # inner column), so it sets the board width. Pulled in 0.475 from the
+        # outer key hull to round the half width down from 158.475 to 158mm.
+        # That -0.475 cuts ~0.475 into the outer key's 1u hull but stays ~1mm
+        # clear of the switch -- fine in practice. The left half mirrors this.
         - ref: extra_equal_number
-          shift: [u/2, u/2 +6]
+          shift: [u/2 -0.475, u/2 +5.729]
         - ref: extra_equal_bottom
-          shift: [u/2, -u/2 -u]
+          shift: [u/2 -0.475, -u/2 -u]
         - ref: mirror_matrix_five_bottom
           shift: [u + 15.6, -u -1/2u]
   _cutoutsleft:
@@ -415,16 +464,16 @@ outlines:
       size: s
   wallsleft:
     - name: _boxleft
-    - name: _bindingleft
+    - name: _thumbbindingleft
   wallsright:
     - name: _boxright
-    - name: _bindingright
+    - name: _thumbbindingright
   left:
     - name: wallsleft
     - name: switchesleft
       operation: stack
     - name: _cutoutsleft
-      operation: stack # TODO change to subtract after screws are positioned
+      operation: subtract
     - name: _screws
       operation: subtract
   right:
@@ -432,12 +481,20 @@ outlines:
     - name: switchesright
       operation: stack
     - name: _cutoutsright
-      operation: stack # TODO change to subtract after screws are positioned
+      operation: subtract
     - name: _screws
       operation: subtract
   full:
     - name: left
     - name: right
+  testleft:
+    - name: left
+    - name: outlineleft
+      operation: stack
+  testright:
+    - name: right
+    - name: outlineright
+      operation: stack
 
 # Example:
 # https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
@@ -574,8 +631,16 @@ pcbs:
         <<: *mcu
         where:
           ref: mirror_matrix_five_number
-          rotate: 180
           shift: [18, -2.25]
+        # Flipped to the back (side B), not the left's front. mcu_liatris can't
+        # mirror in-plane, so a side flip is what reflects its pads to mirror
+        # the left half while keeping the USB at the top. (rotate: 180 mirrored
+        # x but swung the USB to the bottom.) params is respecified in full
+        # because an explicit `params` replaces the merged *mcu params.
+        params:
+          side: B
+          reversible: false
+          reverse_mount: true
       reset:
         <<: *reset
         where:
