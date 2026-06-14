@@ -511,7 +511,6 @@ pcbs:
           shift: [trrs_x, trrs_y]
         params:
           TP: VCC # 1  Tip
-          R1: VCC # 2  Ring 1 (no pad emitted in symmetric mode)
           R2: DATA_RAW # 3  Ring 2  Routed via TVS (to GND) and 100Ω resistor (to P0/MCU)
           SL: GND # 4  Sleeve
           reversible: true
@@ -575,6 +574,62 @@ pcbs:
         params:
           <<: *credit_params
           text: https://github.com/andornaut/splinter-keyboard
+      # --- Component identification labels (silkscreen, both sides) ---
+      # Small reversible texts placed in the gaps below each component. Anchored
+      # to the same matrix refs as the components; the right half re-anchors to
+      # the mirror_ refs (x-shift auto-flips) for symmetric placement.
+      label_mcu: &label_mcu
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_num
+          shift: [18, -20.7] # below the MCU body, above the reset button
+        params: &label_params
+          reversible: true
+          layer: SilkS
+          height: 0.8
+          width: 0.8
+          thickness: 0.15
+          text: Liatris
+      label_trrs: &label_trrs
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_num
+          shift: [31, 1.4] # in the gap below the TRRS jack, above the TVS
+        params:
+          <<: *label_params
+          text: TRRS
+      label_tvs: &label_tvs
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_num
+          shift: [31, -3.6] # in the gap between the TVS and the resistor
+        params:
+          <<: *label_params
+          text: TVS
+      label_resistor: &label_resistor
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_num
+          shift: [31, -8.5] # below the resistor
+        params:
+          <<: *label_params
+          text: 100R
+      label_reset: &label_reset
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_home
+          shift: [18, 3.4] # below the reset button
+        params:
+          <<: *label_params
+          text: RESET
+      label_screws: &label_screws
+        what: ceoloide/utility_text
+        where: screw_left # one label per mounting hole
+        adjust:
+          shift: [0, -3.2] # below each hole
+        params:
+          <<: *label_params
+          text: M3x0.5
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -640,3 +695,32 @@ pcbs:
         where:
           ref: extra_equal_num
           shift: [credit_x_right, credit_url_y]
+      # Right half component labels: mirror_ refs auto-flip the x-shift.
+      label_mcu:
+        <<: *label_mcu
+        where:
+          ref: mirror_matrix_five_num
+          shift: [18, -20.7]
+      label_trrs:
+        <<: *label_trrs
+        where:
+          ref: mirror_matrix_five_num
+          shift: [31, 1.4]
+      label_tvs:
+        <<: *label_tvs
+        where:
+          ref: mirror_matrix_five_num
+          shift: [31, -3.6]
+      label_resistor:
+        <<: *label_resistor
+        where:
+          ref: mirror_matrix_five_num
+          shift: [31, -8.5]
+      label_reset:
+        <<: *label_reset
+        where:
+          ref: mirror_matrix_five_home
+          shift: [18, 3.4]
+      label_screws:
+        <<: *label_screws
+        where: screw_right
