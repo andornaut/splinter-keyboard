@@ -9,7 +9,9 @@ units:
   # --- MCU/TRRS placement (shifts off matrix_five_num, shared by both halves) ---
   mcu_x: 18 # MCU/reset column x-offset from matrix_five_num
   trrs_x: mcu_x + 13 # TRRS jack x; TVS and resistor stack at the same x
-  trrs_y: 15 # TRRS jack y; TVS sits 16 below, resistor 22 below
+  trrs_y: 15 # TRRS jack y
+  tvs_y: trrs_y - 16 # data-line TVS, below the TRRS jack (near the R2 data pad)
+  resistor_y: trrs_y - 21 # data-line resistor, below the TVS
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
@@ -516,7 +518,7 @@ pcbs:
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [trrs_x, trrs_y - 16] # below TRRS jack body, near R2 (data) pad (reversible THT footprint, no side)
+          shift: [trrs_x, tvs_y] # below TRRS jack body, near R2 (data) pad (reversible THT footprint, no side)
         params:
           from: DATA_RAW
           to: GND
@@ -530,7 +532,7 @@ pcbs:
         where:
           ref: matrix_five_num
           rotate: 90 # P0 pad on the left (pads stack vertically by default)
-          shift: [trrs_x, trrs_y - 22] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
+          shift: [trrs_x, resistor_y] # below the TVS
         params:
           designator: R # reference prefix -> R<n> (not the generic "SMD")
           label_1: "100R" # value printed on silk
@@ -538,6 +540,31 @@ pcbs:
           net_1_from: DATA_RAW
           net_1_to: P0
           side: B
+      # --- Silkscreen credit text: top pinky-side margin, both silk layers ---
+      # Two single-line gr_texts (avoids multi-line newline escaping). reversible
+      # puts a correctly-oriented copy on F.SilkS and B.SilkS. Left half is left-
+      # aligned off the outer (pinky) top corner so it reads inward toward center.
+      credit_name: &credit_name
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_zero_num
+          shift: [-u/2 -u +2, 14.0] # ~1.5mm inset from the outer edge, near the top edge
+        params: &credit_params
+          reversible: true
+          layer: SilkS
+          height: 1.2
+          width: 1.2
+          thickness: 0.18
+          align: left
+          text: '\"Splinter\" keyboard v4 by @andornaut'
+      credit_url: &credit_url
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_zero_num
+          shift: [-u/2 -u +2, 11.5] # second line, just below credit_name
+        params:
+          <<: *credit_params
+          text: https://github.com/andornaut/splinter-keyboard
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -586,10 +613,30 @@ pcbs:
         where:
           ref: mirror_matrix_five_num
           rotate: 180 # flips A/K to mirror the left half (bidirectional TVS, electrically irrelevant)
-          shift: [trrs_x, trrs_y - 16]
+          shift: [trrs_x, tvs_y]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_num
           rotate: 90 # P0 pad toward the MCU, mirroring the left half
-          shift: [trrs_x, trrs_y - 22]
+          shift: [trrs_x, resistor_y]
+      # Right half: right-aligned off the outer (pinky) top corner so it reads
+      # inward toward center, mirroring the left half's placement.
+      credit_name:
+        <<: *credit_name
+        where:
+          ref: extra_equal_num
+          shift: [u/2 -2, 14.0]
+        params:
+          <<: *credit_params
+          align: right
+          text: '\"Splinter\" keyboard v4 by @andornaut'
+      credit_url:
+        <<: *credit_url
+        where:
+          ref: extra_equal_num
+          shift: [u/2 -2, 11.5]
+        params:
+          <<: *credit_params
+          align: right
+          text: https://github.com/andornaut/splinter-keyboard
