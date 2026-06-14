@@ -3,7 +3,7 @@
 
 Routes in place: reads and writes the given working .kicad_pcb (the kicad/ copy).
 It deliberately never touches kicad/routed/ -- promoting a routed board is a manual
-step (npm run copy-pcbs-to-routed).
+step (npm run copy-pcbs-kicad-to-routed).
 
 Tuning via env vars. Defaults favour a fully-connected, DRC-clean board (greedy
 strategy, freerouting's native via cost), which empirically routes the most nets

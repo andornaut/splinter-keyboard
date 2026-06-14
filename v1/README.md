@@ -59,7 +59,7 @@ Switch (MX) outer size | 15.6mm²
 #### PCB dimensions
 
 Position each PCB at (105,105). The left half starts at this position,
-but the right half must be moved before running `npm run copy-traces-from-routed`.
+but the right half must be moved before running `npm run copy-traces-routed-to-kicad`.
 The 105mm offset is 100mm to provide a buffer around the edges of the document,
 plus 5mm to account for the case walls.
 

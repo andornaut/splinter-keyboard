@@ -4,3 +4,4 @@ _autosave*
 */kicad/**/fp-info-cache
 */kicad/**/*.lck
 */kicad/**/*-backups
+*/kicad/backups/

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Copy freshly generated PCBs from dist/ over the working kicad/ copies, first
 # backing up each existing kicad/ PCB into kicad/backups/ (timestamped) so routed
-# work is recoverable. Run via: npm run copy-pcbs-to-kicad
+# work is recoverable. Run via: npm run copy-pcbs-dist-to-kicad
 set -euo pipefail
 
-VERSION="${npm_package_config_VERSION:?set via npm (npm run copy-pcbs-to-kicad)}"
+VERSION="${npm_package_config_VERSION:?set via npm (npm run copy-pcbs-dist-to-kicad)}"
 src_dir="dist/${VERSION}/ergogen/pcbs"
 dst_dir="${VERSION}/kicad"
 backup_dir="${dst_dir}/backups"
