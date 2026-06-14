@@ -544,7 +544,7 @@ pcbs:
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_number
-          shift: [18 + 13, 15 - 21] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
+          shift: [18 + 13, 15 - 22] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
         params:
           designator: R # reference prefix -> R<n> (not the generic "SMD")
           label_1: "100R" # value printed on silk

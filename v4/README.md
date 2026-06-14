@@ -95,8 +95,8 @@ Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/Prod
 Switches/buttons | 2 | [E-Switch TL3342F450QG](https://www.digikey.ca/en/products/detail/e-switch/TL3342F450QG/4029404)
 Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/products/made-for-voron-gewindeeinsatz-threaded-insert-m3x5x4-100-stk-pcs)
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
-TVS diodes | 2 | [Littelfuse SMF3.3CA](https://www.digikey.ca/en/products/detail/littelfuse-inc/SMF33CA/11206219) (SOD-123FL, bidirectional 3.3V) — TRRS data-line transient suppression
 TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
+TVS diodes | 2 | [Littelfuse SMF3.3CA](https://www.digikey.ca/en/products/detail/littelfuse-inc/SMF33CA/11206219) (SOD-123FL, bidirectional 3.3V) — TRRS data-line transient suppression
 
 ### Part dimensions
 
