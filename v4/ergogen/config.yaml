@@ -1,5 +1,5 @@
 meta:
-  engine: 4.1.0 # Min Ergogen version for KiCad 8 footprints
+  engine: 4.2.1 # Min Ergogen version; matches the ergogen dependency in package.json
 
 # --- Units: Common measurements used throughout the config ---
 units:

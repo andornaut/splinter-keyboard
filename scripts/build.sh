@@ -8,7 +8,7 @@ VERSION="${npm_package_config_VERSION:?set via npm (npm run build)}"
 helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"
 out_dir="dist/${VERSION}/ergogen"
 
-git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim
+git submodule update --init --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim
 npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
 for f in "${out_dir}"/pcbs/[!_]*.kicad_pcb; do
   echo "$f"

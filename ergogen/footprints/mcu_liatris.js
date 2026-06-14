@@ -237,6 +237,12 @@ module.exports = {
       return traces
     }
 
+    // The pin matrix in gen_socket_rows is authored for the canonical view:
+    // front side, MCU facing away from the PCB (reverse_mount = false). The
+    // left/right pad columns must be swapped whenever the physical view is
+    // mirrored relative to that canonical case: mounted on the back without
+    // reverse_mount, reverse-mounted on the front (MCU faces the PCB), or a
+    // reversible board mounted MCU-facing-away.
     const invert_pins = (p.side == 'B' && !p.reverse_mount && !p.reversible) || (p.side == 'F' && p.reverse_mount && !p.reversible) || (!p.reverse_mount && p.reversible)
 
     const gen_socket_row = (row_num, pin_name_left, pin_name_right, show_via_labels, show_silk_labels) => {
@@ -601,7 +607,7 @@ module.exports = {
     ${common_top}
     ${socket_rows}
     ${(!p.reversible || (p.reversible && p.only_required_jumpers)) ? extra_pins : ''}
-    ${p.reversible && p.only_required_jumpers ? extra_pins_reversible : ''}
+    ${p.reversible && !p.only_required_jumpers ? extra_pins_reversible : ''}
     ${p.reversible && p.show_instructions ? instructions : ''}
     ${p.mcu_3dmodel_filename ? mcu_3dmodel : ''}
   )
