@@ -74,7 +74,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 ![Ergogen preview](./v4/ergogen/ergogen.png)
 
-1. Run `docker compose up --build` to start Ergogen GUI
+1. Run `docker compose up` to start Ergogen GUI (it builds automatically)
 1. Open <http://ergogen.internal> (install [docker_etc_hosts](https://github.com/andornaut/docker_etc_hosts) to manage `/etc/hosts` entries)
 1. Paste in, work on, and then download and save [`ergogen/config.yaml`](./v4/ergogen/config.yaml)
 1. Run `npm run build` to generate and save outlines and pcbs to `dist/v4/ergogen/` then `npm run copy-pcbs-to-kicad`

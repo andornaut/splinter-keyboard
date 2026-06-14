@@ -4,6 +4,11 @@ services:
     build: .
     container_name: ergogen
 
+    # (Re)build the image on `docker compose up` without needing --build. Uses
+    # the layer cache, so it's fast when nothing changed. Adding a new custom
+    # footprint still needs `docker compose build --no-cache` to bust the cache.
+    pull_policy: build
+
     # The container runs as the unprivileged "node" user; allow it to bind the
     # privileged port 80 so http://ergogen.internal works without a port suffix.
     sysctls:
