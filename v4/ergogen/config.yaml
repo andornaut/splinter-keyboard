@@ -8,10 +8,20 @@ units:
   u: U # Key pitch. Set to ergogen's built-in U (19.05mm); ergogen's own default u is 19mm
   # --- MCU/TRRS placement (shifts off matrix_five_num, shared by both halves) ---
   mcu_x: 18 # MCU/reset column x-offset from matrix_five_num
+  mcu_y: -2.25 # MCU y-offset from matrix_five_num
+  reset_y: 9.525 # Reset button y-offset; level with adjacent mounting hole (screw_*_right)
   trrs_x: mcu_x + 13 # TRRS jack x; TVS and resistor stack at the same x
   trrs_y: 15 # TRRS jack y
   tvs_y: trrs_y - 16 # data-line TVS, below the TRRS jack (near the R2 data pad)
   resistor_y: trrs_y - 21 # data-line resistor, below the TVS
+  # --- Silkscreen credit text offsets (shared by both halves) ---
+  # Text is CENTER-justified so the reversible back copy mirrors onto the same
+  # on-board spot (left/right-justified text mirrors about the anchor, landing
+  # off the board edge). x centers the ~45.6mm URL ~1.5mm inside each pinky edge.
+  credit_name_y: 14.0 # first line, near the top edge
+  credit_url_y: 11.5 # second line, just below credit_name
+  credit_x_left: -u/2 -u +24.775 # rel. matrix_zero_num (left pinky)
+  credit_x_right: u/2 -24.775 # rel. extra_equal_num (right pinky)
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
@@ -294,23 +304,23 @@ outlines:
         # half sets the 158mm width via its extra inner column). The left pinky
         # ends up well clear of its keys.
         - ref: matrix_zero_num
-          shift: [-u/2 -u +0.475, u/2 +5.729]
+          shift: [-u/2 -u +0.475, u/2 +5.75]
 
         # Cutout for USB-c port
         # Centered on the Liatris USB socket, which sits 0.127mm left of the
         # MCU origin (socket outline spans local x -3.81..+3.556). The left MCU
         # is un-rotated, so subtract 0.127 from the 13/23 edges.
         - ref: matrix_five_num
-          shift: [13 - 0.127, u/2 +5.729]
+          shift: [13 - 0.127, u/2 +5.75]
         - ref: matrix_five_num
           shift: [13 - 0.127, u/2 -1.271]
         - ref: matrix_five_num
           shift: [23 - 0.127, u/2 -1.271]
         - ref: matrix_five_num
-          shift: [23 - 0.127, u/2 +5.729]
+          shift: [23 - 0.127, u/2 +5.75]
 
         - ref: matrix_five_num
-          shift: [u + 15.6, u/2 +5.729]
+          shift: [u + 15.6, u/2 +5.75]
         - ref: matrix_five_lower
           shift: [u + 15.6, -1u -1/2u]
         - ref: matrix_zero_mod
@@ -319,7 +329,7 @@ outlines:
     - what: polygon
       points:
         - ref: mirror_matrix_five_num
-          shift: [u + 15.6, u/2 +5.729]
+          shift: [u + 15.6, u/2 +5.75]
 
         # Cutout for USB-c port
         # Perfect mirror of the left half: same -0.127 socket-centering offset
@@ -327,13 +337,13 @@ outlines:
         # lands at the mirrored position). The right MCU is oriented to put its
         # USB socket at the top, matching the left.
         - ref: mirror_matrix_five_num
-          shift: [23 - 0.127, u/2 +5.729]
+          shift: [23 - 0.127, u/2 +5.75]
         - ref: mirror_matrix_five_num
           shift: [23 - 0.127, u/2 -1.271]
         - ref: mirror_matrix_five_num
           shift: [13 - 0.127, u/2 -1.271]
         - ref: mirror_matrix_five_num
-          shift: [13 - 0.127, u/2 +5.729]
+          shift: [13 - 0.127, u/2 +5.75]
 
         # Outer (pinky) edge: the right half is the wider one (it has an extra
         # inner column), so it sets the board width. Pulled in 0.475 from the
@@ -341,7 +351,7 @@ outlines:
         # That -0.475 cuts ~0.475 into the outer key's 1u hull but stays ~1mm
         # clear of the switch -- fine in practice. The left half mirrors this.
         - ref: extra_equal_num
-          shift: [u/2 -0.475, u/2 +5.729]
+          shift: [u/2 -0.475, u/2 +5.75]
         - ref: extra_equal_lower
           shift: [u/2 -0.475, -u/2 -u]
         - ref: mirror_matrix_five_lower
@@ -470,8 +480,8 @@ pcbs:
         what: mcu_liatris
         where:
           ref: matrix_five_num
-          shift: [mcu_x, -2.25]
-        params:
+          shift: [mcu_x, mcu_y]
+        params: &mcu_params
           side: F
           reversible: false
           reverse_mount: true
@@ -481,7 +491,7 @@ pcbs:
         where:
           ref: matrix_five_home
           rotate: 270
-          shift: [mcu_x, 9.525] # level with adjacent mounting hole (screw_left_right)
+          shift: [mcu_x, reset_y]
         params:
           from: GND
           to: RST
@@ -542,26 +552,26 @@ pcbs:
           side: B
       # --- Silkscreen credit text: top pinky-side margin, both silk layers ---
       # Two single-line gr_texts (avoids multi-line newline escaping). reversible
-      # puts a correctly-oriented copy on F.SilkS and B.SilkS. Left half is left-
-      # aligned off the outer (pinky) top corner so it reads inward toward center.
+      # puts a correctly-oriented copy on F.SilkS and B.SilkS. Center-justified so
+      # the back copy mirrors onto the same on-board region; centered over the
+      # pinky (outer) top corner. Left half.
       credit_name: &credit_name
         what: ceoloide/utility_text
         where:
           ref: matrix_zero_num
-          shift: [-u/2 -u +2, 14.0] # ~1.5mm inset from the outer edge, near the top edge
+          shift: [credit_x_left, credit_name_y]
         params: &credit_params
           reversible: true
           layer: SilkS
           height: 1.2
           width: 1.2
           thickness: 0.18
-          align: left
           text: '\"Splinter\" keyboard v4 by @andornaut'
       credit_url: &credit_url
         what: ceoloide/utility_text
         where:
           ref: matrix_zero_num
-          shift: [-u/2 -u +2, 11.5] # second line, just below credit_name
+          shift: [credit_x_left, credit_url_y]
         params:
           <<: *credit_params
           text: https://github.com/andornaut/splinter-keyboard
@@ -587,22 +597,20 @@ pcbs:
         <<: *mcu
         where:
           ref: mirror_matrix_five_num
-          shift: [mcu_x, -2.25]
+          shift: [mcu_x, mcu_y]
         # Flipped to the back (side B), not the left's front. mcu_liatris can't
         # mirror in-plane, so a side flip is what reflects its pads to mirror
         # the left half while keeping the USB at the top. (rotate: 180 mirrored
-        # x but swung the USB to the bottom.) params is respecified in full
-        # because an explicit `params` replaces the merged *mcu params.
+        # x but swung the USB to the bottom.)
         params:
+          <<: *mcu_params
           side: B
-          reversible: false
-          reverse_mount: true
       reset:
         <<: *reset
         where:
           ref: mirror_matrix_five_home
           rotate: 270
-          shift: [mcu_x, 9.525] # level with adjacent mounting hole (screw_right_left)
+          shift: [mcu_x, reset_y]
       trrs:
         <<: *trrs
         where:
@@ -620,23 +628,15 @@ pcbs:
           ref: mirror_matrix_five_num
           rotate: 90 # P0 pad toward the MCU, mirroring the left half
           shift: [trrs_x, resistor_y]
-      # Right half: right-aligned off the outer (pinky) top corner so it reads
-      # inward toward center, mirroring the left half's placement.
+      # Right half: centered over the outer (pinky) top corner, mirroring the
+      # left half's placement.
       credit_name:
         <<: *credit_name
         where:
           ref: extra_equal_num
-          shift: [u/2 -2, 14.0]
-        params:
-          <<: *credit_params
-          align: right
-          text: '\"Splinter\" keyboard v4 by @andornaut'
+          shift: [credit_x_right, credit_name_y]
       credit_url:
         <<: *credit_url
         where:
           ref: extra_equal_num
-          shift: [u/2 -2, 11.5]
-        params:
-          <<: *credit_params
-          align: right
-          text: https://github.com/andornaut/splinter-keyboard
+          shift: [credit_x_right, credit_url_y]
