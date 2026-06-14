@@ -259,7 +259,7 @@ points:
           top: # ]
             column_net: P8
             row_net: P10
-          number: # +
+          number: # =
             column_net: P8
             row_net: P15
     rows:
