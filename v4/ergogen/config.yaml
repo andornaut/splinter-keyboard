@@ -513,10 +513,10 @@ pcbs:
           ref: matrix_five_number
           shift: [18 + 13, 15]
         params:
-          TP: VCC      # 1  Tip
-          R1: VCC      # 2  Ring 1 (no pad emitted in symmetric mode)
+          TP: VCC # 1  Tip
+          R1: VCC # 2  Ring 1 (no pad emitted in symmetric mode)
           R2: DATA_RAW # 3  Ring 2  Routed via TVS (to GND) and 100Ω resistor (to P0/MCU)
-          SL: GND      # 4  Sleeve
+          SL: GND # 4  Sleeve
           reversible: true
           side: B
           # Symmetric uses only TP/R2/SL, which is exactly this 3-net pinout
@@ -531,7 +531,7 @@ pcbs:
         what: sod-123fl
         where:
           ref: matrix_five_number
-          shift: [18 + 13, 15 - 14]  # below TRRS jack body, near R2 (data) pad (side B)
+          shift: [18 + 13, 15 - 16] # below TRRS jack body, near R2 (data) pad (side B)
         params:
           from: DATA_RAW
           to: GND
@@ -544,10 +544,10 @@ pcbs:
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_number
-          shift: [18 + 13, 15 - 17.5]  # below the TVS, ~0.66mm courtyard gap (side B)
+          shift: [18 + 13, 15 - 21] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
         params:
-          designator: R       # reference prefix -> R<n> (not the generic "SMD")
-          label_1: '100R'      # value printed on silk
+          designator: R # reference prefix -> R<n> (not the generic "SMD")
+          label_1: "100R" # value printed on silk
           components: 1
           net_1_from: DATA_RAW
           net_1_to: P0
@@ -591,9 +591,9 @@ pcbs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_number
-          shift: [18 + 13, 15 - 14]
+          shift: [18 + 13, 15 - 17]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_number
-          shift: [18 + 13, 15 - 17.5]
+          shift: [18 + 13, 15 - 21.67]
