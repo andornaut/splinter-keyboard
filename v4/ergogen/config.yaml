@@ -252,36 +252,36 @@ points:
         column_net: P6
         mirror:
           column_net: P20
-  # --- Screw zones: anchor points for mounting holes (left side) ---
+  # --- Screw zones: mounting hole anchors. The left side is the source of
+  # truth; each hole is mirrored across the matrix axis (same ref/distance as
+  # the matrix) to generate its right-half twin (mirror_screw_*). The
+  # screw_left / screw_right tags drive per-PCB footprint placement; the
+  # /screw/ name regex drives the outline cutouts (matches both halves). ---
   zones.screw_left_left:
+    mirror: &screw_mirror
+      ref: matrix_five_num
+      distance: 5u
+    key.tags.screw_left: true
+    key.mirror.tags: &screw_mirror_tags
+      screw_left: $unset
+      screw_right: true
     anchor:
       - ref: matrix_one_home
         shift: [-9.5, 9.525]
-  # --- Screw zones: anchor points for mounting holes (left center) ---
   zones.screw_left_center:
+    mirror: *screw_mirror
+    key.tags.screw_left: true
+    key.mirror.tags: *screw_mirror_tags
     anchor:
       - ref: matrix_three_home
         shift: [-10.15, -12.525]
-  # --- Screw zones: anchor points for mounting holes (left right) ---
   zones.screw_left_right:
+    mirror: *screw_mirror
+    key.tags.screw_left: true
+    key.mirror.tags: *screw_mirror_tags
     anchor:
       - ref: matrix_five_home
         shift: [-8.85, 9.525]
-  # --- Screw zones: anchor points for mounting holes (right left) ---
-  zones.screw_right_left:
-    anchor:
-      - ref: mirror_matrix_five_home
-        shift: [-8.85, 9.525]
-  # --- Screw zones: anchor points for mounting holes (right center) ---
-  zones.screw_right_center:
-    anchor:
-      - ref: mirror_matrix_three_home
-        shift: [-10.15, -12.525]
-  # --- Screw zones: anchor points for mounting holes (right right) ---
-  zones.screw_right_right:
-    anchor:
-      - ref: mirror_matrix_one_home
-        shift: [-9.5, 9.525]
 
 # --- Outlines: Board shape, cutouts, and geometric features ---
 outlines:
@@ -449,7 +449,7 @@ pcbs:
       # --- Mounting Hole: Non-plated through hole for M3 screw ---
       mounting_hole_npth: &mounting_hole_npth
         what: ceoloide/mounting_hole_npth
-        where: /screw_left/
+        where: screw_left
         params:
           hole_drill: 3.5 # M3 is 3.4mm
           hole_size: 3.5
@@ -552,7 +552,7 @@ pcbs:
         where: right
       mounting_hole_npth:
         <<: *mounting_hole_npth
-        where: /screw_right/
+        where: screw_right
       mx:
         <<: *mx
         where: right
