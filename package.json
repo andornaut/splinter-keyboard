@@ -10,13 +10,12 @@
   },
   "scripts": {
     "autoroute": "for f in ./$npm_package_config_VERSION/kicad/[!_]*.kicad_pcb; do echo \"$f\" && python3 ./scripts/autoroute.py \"$f\" dist/$npm_package_config_VERSION/kicad/freerouting/; done",
-    "build": "git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim && npx ergogen ./$npm_package_config_VERSION/ergogen/ --output dist/$npm_package_config_VERSION/ergogen/ && npm run update-pcbs",
+    "build": "git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim && npx ergogen ./$npm_package_config_VERSION/ergogen/ --output dist/$npm_package_config_VERSION/ergogen/ && for f in dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb; do echo $f && python3 ./$npm_package_config_VERSION/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb $f && python3 ./scripts/recenter.py $f; done",
     "clean": "rm -rf dist",
-    "copy-pcbs-to-kicad": "cp dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/",
+    "copy-pcbs-to-kicad": "cp --backup=numbered dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/",
     "copy-pcbs-to-routed": "cp ./$npm_package_config_VERSION/kicad/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/routed/",
     "copy-traces-from-routed": "for f in ./$npm_package_config_VERSION/kicad/routed/[!_]*.kicad_pcb; do echo \"$f\" && python3 ./$npm_package_config_VERSION/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup copy-traces \"$f\" ./$npm_package_config_VERSION/kicad/$(basename \"$f\"); done",
     "fab-jlcpcb": "for f in ./$npm_package_config_VERSION/kicad/routed/[!_]*.kicad_pcb; do echo \"$f\" && kikit fab jlcpcb --nametemplate 'splinter_{boardTitle}_{date}' \"$f\" dist/$npm_package_config_VERSION/kicad/jlcpcb/; done",
-    "update-pcbs": "for f in dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb; do echo $f && python3 ./$npm_package_config_VERSION/ergogen/kb_ergogen_helper/ergogen_helper.py --no-backup update-pcb $f; done",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
     "watch-and-copy-pcbs-to-kicad": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-to-kicad\""
   }

@@ -6,22 +6,24 @@ units:
   c: 14 # Cherry MX switch cutout/hole length in mm
   s: 16 # Cherry MX switches are 15.6mm at their widest
   u: U # Key pitch. Set to ergogen's built-in U (19.05mm); ergogen's own default u is 19mm
+  # --- MCU/TRRS placement (shifts off matrix_five_num, shared by both halves) ---
+  mcu_x: 18 # MCU/reset column x-offset from matrix_five_num
+  trrs_x: mcu_x + 13 # TRRS jack x; TVS and resistor stack at the same x
+  trrs_y: 15 # TRRS jack y; TVS sits 16 below, resistor 22 below
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
   # --- Main key matrix: standard alphanumeric and modifier keys ---
   zones.matrix:
     anchor:
-      # --- KiCad sheet placement (cosmetic) ---
-      # This is the only absolute-coordinate value in the config; everything
-      # else is relative, so changing it just slides the whole design around
-      # the KiCad sheet. It centers the left half's bounding box
-      # (158 x 119mm) on KiCad (120, 160). The two trailing constants are
-      # the fixed offset from that center back to the matrix anchor, set by the
-      # key geometry (half-width minus the anchor inset, and half-height minus
-      # the splayed-thumb tail). The right half is mirrored, so it lands offset
-      # to the right in its own PCB file rather than centered.
-      shift: [120 -50.9, -160 -31.954]
+      # --- Absolute origin (cosmetic) ---
+      # The only absolute-coordinate value in the config; every other point is
+      # relative to the matrix, so this just slides the whole design around the
+      # sheet. Its exact value does not matter: scripts/recenter.py (run by
+      # `npm run build`) re-centers each PCB on its own sheet afterward. It used
+      # to carry fractional offsets to land the bbox center on (120, 160), but
+      # recenter.py makes that unnecessary, so it's kept to whole numbers.
+      shift: [69, -192]
     # The left half is the source of truth; each key is mirrored across the
     # gap to build the right half. Keys marked `mirror.skip: true` below are
     # left-only: their right-half counterparts are defined separately in
@@ -36,178 +38,157 @@ points:
       right: true
     columns:
       zero:
+        key.column_net: P2
         rows:
           mod: # LCTRL
             bind: [0, u/4, 0, u/4]
             shift: [-u/4, 0]
             spread: 1.5u
             width: 1.5u
-            column_net: P2
             row_net: P10
             mirror.skip: true
           lower: # LSHIFT
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P2
             row_net: P16
             mirror.skip: true
           home: # ESC
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P2
             row_net: P14
             mirror.skip: true
           upper: # TAB
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            column_net: P2
             row_net: P15
             mirror.skip: true
           num: # `
             shift: [u/4, 0]
-            column_net: P2
             row_net: P5
             mirror.skip: true
       one:
+        key.column_net: P3
         rows:
           mod: # SUPER
-            column_net: P3
             row_net: P10
             mirror.skip: true
           lower: # Z
-            column_net: P3
             row_net: P16
             mirror.skip: true
           home: # A
-            column_net: P3
             row_net: P14
             mirror.skip: true
           upper: # Q
-            column_net: P3
             row_net: P15
             mirror.skip: true
           num: # 1
-            column_net: P3
             row_net: P5
             mirror.skip: true
       two:
         key.stagger: 3
+        key.column_net: P9
         rows:
           mod: # LALT
             mirror.skip: true
-            column_net: P9
             row_net: P10
           lower: # X
             bind: 1
-            column_net: P9
             row_net: P16
             mirror: # .
               column_net: P5
               row_net: P14
           home: # S
-            column_net: P9
             row_net: P14
             mirror: # L
               column_net: P5
               row_net: P16
           upper: # W
-            column_net: P9
             row_net: P15
             mirror: # O
               column_net: P5
               row_net: P10
           num: # 2
-            column_net: P9
             row_net: P5
             mirror: # 9
               column_net: P5
               row_net: P15
       three:
         key.stagger: 3
+        key.column_net: P8
         rows:
           mod.skip: true # No bottom-most (mod-row) key in this column
           lower: # C
             bind: 0
-            column_net: P8
             row_net: P16
             mirror: # ,
               column_net: P4
               row_net: P14
           home: # D
-            column_net: P8
             row_net: P14
             mirror: # K
               column_net: P4
               row_net: P16
           upper: # E
-            column_net: P8
             row_net: P15
             mirror: # I
               column_net: P4
               row_net: P10
           num: # 3
-            column_net: P8
             row_net: P5
             mirror: # 8
               column_net: P4
               row_net: P15
       four:
         key.stagger: -3
+        key.column_net: P7
         rows:
           mod.skip: true
           lower: # V
             bind: 0
-            column_net: P7
             row_net: P16
             mirror: # M
               column_net: P3
               row_net: P14
           home: # F
-            column_net: P7
             row_net: P14
             mirror: # J
               column_net: P3
               row_net: P16
           upper: # R
-            column_net: P7
             row_net: P15
             mirror: # U
               column_net: P3
               row_net: P10
           num: # 4
-            column_net: P7
             row_net: P5
             mirror: # 7
               column_net: P3
               row_net: P15
       five:
         key.stagger: -3
+        key.column_net: P6
         rows:
           mod.skip: true
           lower: # B
             bind: 0
-            column_net: P6
             row_net: P16
             mirror: # N
               column_net: P20
               row_net: P14
           home: # G
-            column_net: P6
             row_net: P14
             mirror: # H
               column_net: P20
               row_net: P16
           upper: # T
-            column_net: P6
             row_net: P15
             mirror: # Y
               column_net: P20
               row_net: P10
           num: # 5
-            column_net: P6
             row_net: P5
             mirror: # 6
               column_net: P20
@@ -230,55 +211,45 @@ points:
       shift: [9u, 0]
     columns:
       zero:
+        key.column_net: P6
         rows:
           mod: # BACKSPACE
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
-            column_net: P6
             row_net: P9
           lower: # /
             shift: [-u/4, 0]
-            column_net: P6
             row_net: P14
           home: # ;
-            column_net: P6
             row_net: P16
           upper: # P
-            column_net: P6
             row_net: P10
           num: # 0
-            column_net: P6
             row_net: P15
       dash:
+        key.column_net: P7
         rows:
           mod.skip: true
           lower: # \
-            column_net: P7
             row_net: P14
           home: # '
-            column_net: P7
             row_net: P16
           upper: # [
-            column_net: P7
             row_net: P10
           num: # -
-            column_net: P7
             row_net: P15
       equal:
+        key.column_net: P8
         rows:
           mod.skip: true
           lower: # SHIFT
-            column_net: P8
             row_net: P14
           home: # ENTER
-            column_net: P8
             row_net: P16
           upper: # ]
-            column_net: P8
             row_net: P10
           num: # =
-            column_net: P8
             row_net: P15
     rows:
       mod:
@@ -355,32 +326,6 @@ points:
 
 # --- Outlines: Board shape, cutouts, and geometric features ---
 outlines:
-  # Binding is scoped to the thumb cluster only. The main matrix is fully
-  # enclosed by the box, so binding those keys would add 1u key-hulls that poke
-  # above the box top edge and pin it 0.271mm high (forcing a subtract to get a
-  # flat 119mm top). The thumb cluster sits below the box bottom, so it still
-  # needs its hull. Scoping the binding here lets the box govern the matrix
-  # outline directly -- no top-trim subtract needed.
-  _thumbbindingleft:
-    - what: rectangle
-      where: /^thumbcluster/
-      size: u
-      bound: true
-  _thumbbindingright:
-    - what: rectangle
-      where: /^mirror_thumbcluster/
-      size: u
-      bound: true
-  outlineleft:
-    - what: rectangle
-      where: left
-      size: u
-      bound: true
-  outlineright:
-    - what: rectangle
-      where: right
-      size: u
-      bound: true
   _boxleft:
     - what: polygon
       points:
@@ -440,60 +385,84 @@ outlines:
           shift: [u/2 -0.475, -u/2 -u]
         - ref: mirror_matrix_five_lower
           shift: [u + 15.6, -u -1/2u]
-  _cutoutsleft:
+  _boundsleft:
     - what: rectangle
       where: left
-      size: c
-  _cutoutsright:
+      size: u
+      bound: true
+  _boundsright:
     - what: rectangle
       where: right
-      size: c
+      size: u
+      bound: true
   _screws:
     - what: circle
       where: /screw/
       radius: 1.75
-  switchesleft:
+  _switchholesleft:
+    - what: rectangle
+      where: left
+      size: c
+  _switchholesright:
+    - what: rectangle
+      where: right
+      size: c
+  # Binding is scoped to the thumb cluster only. The main matrix is fully
+  # enclosed by the box, so binding those keys would add 1u key-hulls that poke
+  # above the box top edge and pin it 0.271mm high (forcing a subtract to get a
+  # flat 119mm top). The thumb cluster sits below the box bottom, so it still
+  # needs its hull. Scoping the binding here lets the box govern the matrix
+  # outline directly -- no top-trim subtract needed.
+  _thumbbindingleft:
+    - what: rectangle
+      where: /^thumbcluster/
+      size: u
+      bound: true
+  _thumbbindingright:
+    - what: rectangle
+      where: /^mirror_thumbcluster/
+      size: u
+      bound: true
+  _switchoutlinesleft:
     - what: rectangle
       where: left
       fillet: 1
       size: s
-  switchesright:
+  _switchoutlinesright:
     - what: rectangle
       where: right
       fillet: 1
       size: s
-  wallsleft:
+  _wallsleft:
     - name: _boxleft
     - name: _thumbbindingleft
-  wallsright:
+  _wallsright:
     - name: _boxright
     - name: _thumbbindingright
   left:
-    - name: wallsleft
-    - name: switchesleft
+    - name: _wallsleft
+    - name: _switchoutlinesleft
       operation: stack
-    - name: _cutoutsleft
+    - name: _switchholesleft
       operation: subtract
     - name: _screws
       operation: subtract
   right:
-    - name: wallsright
-    - name: switchesright
+    - name: _wallsright
+    - name: _switchoutlinesright
       operation: stack
-    - name: _cutoutsright
+    - name: _switchholesright
       operation: subtract
     - name: _screws
       operation: subtract
   full:
     - name: left
     - name: right
-  testleft:
-    - name: left
-    - name: outlineleft
+  bounds:
+    - name: full
+    - name: _boundsleft
       operation: stack
-  testright:
-    - name: right
-    - name: outlineright
+    - name: _boundsright
       operation: stack
 
 # Example:
@@ -502,9 +471,9 @@ pcbs:
   left:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
-      main.outline: wallsleft
+      main.outline: _wallsleft
       keycaps:
-        outline: switchesleft
+        outline: _switchoutlinesleft
         layer: Eco1.User
     footprints:
       # --- Diode: Nexperia BAS16H,115 (SOD-123) ---
@@ -540,7 +509,7 @@ pcbs:
         what: mcu_liatris
         where:
           ref: matrix_five_num
-          shift: [18, -2.25]
+          shift: [mcu_x, -2.25]
         params:
           side: F
           reversible: false
@@ -550,8 +519,8 @@ pcbs:
         what: button
         where:
           ref: matrix_five_home
-          rotate: 90
-          shift: [18, 9.525] # level with adjacent mounting hole (screw_left_right)
+          rotate: 270
+          shift: [mcu_x, 9.525] # level with adjacent mounting hole (screw_left_right)
         params:
           from: GND
           to: RST
@@ -568,7 +537,7 @@ pcbs:
         what: ceoloide/trrs_pj320a
         where:
           ref: matrix_five_num
-          shift: [18 + 13, 15]
+          shift: [trrs_x, trrs_y]
         params:
           TP: VCC # 1  Tip
           R1: VCC # 2  Ring 1 (no pad emitted in symmetric mode)
@@ -588,7 +557,7 @@ pcbs:
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [18 + 13, 15 - 16] # below TRRS jack body, near R2 (data) pad (side B)
+          shift: [trrs_x, trrs_y - 16] # below TRRS jack body, near R2 (data) pad (reversible THT footprint, no side)
         params:
           from: DATA_RAW
           to: GND
@@ -601,7 +570,8 @@ pcbs:
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_num
-          shift: [18 + 13, 15 - 22] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
+          rotate: 90 # P0 pad on the left (pads stack vertically by default)
+          shift: [trrs_x, trrs_y - 22] # below the TVS, ~2.38mm gap == MCU-TVS gap (side B)
         params:
           designator: R # reference prefix -> R<n> (not the generic "SMD")
           label_1: "100R" # value printed on silk
@@ -612,9 +582,9 @@ pcbs:
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
-      main.outline: wallsright
+      main.outline: _wallsright
       keycaps:
-        outline: switchesright
+        outline: _switchoutlinesright
         layer: Eco1.User
     footprints:
       # See left for footprint details
@@ -631,7 +601,7 @@ pcbs:
         <<: *mcu
         where:
           ref: mirror_matrix_five_num
-          shift: [18, -2.25]
+          shift: [mcu_x, -2.25]
         # Flipped to the back (side B), not the left's front. mcu_liatris can't
         # mirror in-plane, so a side flip is what reflects its pads to mirror
         # the left half while keeping the USB at the top. (rotate: 180 mirrored
@@ -646,19 +616,21 @@ pcbs:
         where:
           ref: mirror_matrix_five_home
           rotate: -90
-          shift: [18, 9.525] # level with adjacent mounting hole (screw_right_left)
+          shift: [mcu_x, 9.525] # level with adjacent mounting hole (screw_right_left)
       trrs:
         <<: *trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [18 + 13, 15]
+          shift: [trrs_x, trrs_y]
       data_tvs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_num
-          shift: [18 + 13, 15 - 17]
+          rotate: 180 # flips A/K to mirror the left half (bidirectional TVS, electrically irrelevant)
+          shift: [trrs_x, trrs_y - 16]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_num
-          shift: [18 + 13, 15 - 21.67]
+          rotate: 90 # P0 pad toward the MCU, mirroring the left half
+          shift: [trrs_x, trrs_y - 22]
