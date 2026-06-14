@@ -45,47 +45,37 @@ points:
             shift: [-u/4, 0]
             spread: 1.5u
             width: 1.5u
-            row_net: P10
             mirror.skip: true
           lower: # LSHIFT
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            row_net: P16
             mirror.skip: true
           home: # ESC
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            row_net: P14
             mirror.skip: true
           upper: # TAB
             bind: [0, u/4, 0, u/4]
             spread: 1.5u
             width: 1.5u
-            row_net: P15
             mirror.skip: true
           num: # `
             shift: [u/4, 0]
-            row_net: P5
             mirror.skip: true
       one:
         key.column_net: P3
         rows:
           mod: # SUPER
-            row_net: P10
             mirror.skip: true
           lower: # Z
-            row_net: P16
             mirror.skip: true
           home: # A
-            row_net: P14
             mirror.skip: true
           upper: # Q
-            row_net: P15
             mirror.skip: true
           num: # 1
-            row_net: P5
             mirror.skip: true
       two:
         key.stagger: 3
@@ -93,25 +83,20 @@ points:
         rows:
           mod: # LALT
             mirror.skip: true
-            row_net: P10
           lower: # X
             bind: 1
-            row_net: P16
             mirror: # .
               column_net: P5
               row_net: P14
           home: # S
-            row_net: P14
             mirror: # L
               column_net: P5
               row_net: P16
           upper: # W
-            row_net: P15
             mirror: # O
               column_net: P5
               row_net: P10
           num: # 2
-            row_net: P5
             mirror: # 9
               column_net: P5
               row_net: P15
@@ -122,22 +107,18 @@ points:
           mod.skip: true # No bottom-most (mod-row) key in this column
           lower: # C
             bind: 0
-            row_net: P16
             mirror: # ,
               column_net: P4
               row_net: P14
           home: # D
-            row_net: P14
             mirror: # K
               column_net: P4
               row_net: P16
           upper: # E
-            row_net: P15
             mirror: # I
               column_net: P4
               row_net: P10
           num: # 3
-            row_net: P5
             mirror: # 8
               column_net: P4
               row_net: P15
@@ -148,22 +129,18 @@ points:
           mod.skip: true
           lower: # V
             bind: 0
-            row_net: P16
             mirror: # M
               column_net: P3
               row_net: P14
           home: # F
-            row_net: P14
             mirror: # J
               column_net: P3
               row_net: P16
           upper: # R
-            row_net: P15
             mirror: # U
               column_net: P3
               row_net: P10
           num: # 4
-            row_net: P5
             mirror: # 7
               column_net: P3
               row_net: P15
@@ -174,31 +151,29 @@ points:
           mod.skip: true
           lower: # B
             bind: 0
-            row_net: P16
             mirror: # N
               column_net: P20
               row_net: P14
           home: # G
-            row_net: P14
             mirror: # H
               column_net: P20
               row_net: P16
           upper: # T
-            row_net: P15
             mirror: # Y
               column_net: P20
               row_net: P10
           num: # 5
-            row_net: P5
             mirror: # 6
               column_net: P20
               row_net: P15
+    # row_net is constant per row across the matrix (left/base mapping); the
+    # mirrored right-half keys override it in their per-key `mirror:` blocks.
     rows:
-      mod:
-      lower:
-      home:
-      upper:
-      num:
+      mod.row_net: P10
+      lower.row_net: P16
+      home.row_net: P14
+      upper.row_net: P15
+      num.row_net: P5
   # --- Extra keys: the right half's inner columns ---
   # These are the right-hand counterparts to the left columns that carry
   # `mirror.skip: true` above. They are defined explicitly (rather than
@@ -217,55 +192,45 @@ points:
             bind: [0, u/4, 0, u/4]
             shift: [u/4, 0]
             width: 1.5u
-            row_net: P9
           lower: # /
             shift: [-u/4, 0]
-            row_net: P14
           home: # ;
-            row_net: P16
           upper: # P
-            row_net: P10
           num: # 0
-            row_net: P15
       dash:
         key.column_net: P7
         rows:
           mod.skip: true
           lower: # \
-            row_net: P14
           home: # '
-            row_net: P16
           upper: # [
-            row_net: P10
           num: # -
-            row_net: P15
       equal:
         key.column_net: P8
         rows:
           mod.skip: true
           lower: # SHIFT
-            row_net: P14
           home: # ENTER
-            row_net: P16
           upper: # ]
-            row_net: P10
           num: # =
-            row_net: P15
+    # Right-half row->net mapping (differs from the main matrix's left mapping).
     rows:
-      mod:
-      lower:
-      home:
-      upper:
-      num:
+      mod.row_net: P9
+      lower.row_net: P14
+      home.row_net: P16
+      upper.row_net: P10
+      num.row_net: P15
   # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
     anchor:
       ref: matrix_four_lower
       shift: [-3.45, -1u -3]
     key.tags.left: true
+    key.row_net: P10 # every thumb key is on the mod row (left/base mapping)
     key.mirror.tags:
       left: $unset
       right: true
+    key.mirror.row_net: P9 # right-half mod row
     mirror:
       ref: mirror_matrix_five_lower
       distance: -5u
@@ -273,26 +238,20 @@ points:
       three.rows.mod: # BACKSPACE
         splay: -18.925
         column_net: P8
-        row_net: P10
         mirror:
           column_net: P4
-          row_net: P9
       four.rows.mod: # SPACE
         bind: [0, u/4, 0, u/4]
         spread: 1.25u
         width: 1.5u
         column_net: P7
-        row_net: P10
         mirror:
           column_net: P3
-          row_net: P9
       five.rows.mod: # MOD
         shift: [u/4, 0]
         column_net: P6
-        row_net: P10
         mirror:
           column_net: P20
-          row_net: P9
   # --- Screw zones: anchor points for mounting holes (left side) ---
   zones.screw_left_left:
     anchor:
@@ -615,7 +574,7 @@ pcbs:
         <<: *reset
         where:
           ref: mirror_matrix_five_home
-          rotate: -90
+          rotate: 270
           shift: [mcu_x, 9.525] # level with adjacent mounting hole (screw_right_left)
       trrs:
         <<: *trrs
