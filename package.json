@@ -9,6 +9,7 @@
     "nodemon": "^3.1.14"
   },
   "scripts": {
+    "autoroute": "for f in ./$npm_package_config_VERSION/kicad/[!_]*.kicad_pcb; do echo \"$f\" && python3 ./scripts/autoroute.py \"$f\" dist/$npm_package_config_VERSION/kicad/freerouting/; done",
     "build": "git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim && npx ergogen ./$npm_package_config_VERSION/ergogen/ --output dist/$npm_package_config_VERSION/ergogen/ && npm run update-pcbs",
     "clean": "rm -rf dist",
     "copy-pcbs-to-kicad": "cp dist/$npm_package_config_VERSION/ergogen/pcbs/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/",
