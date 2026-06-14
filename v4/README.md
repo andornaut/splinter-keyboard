@@ -7,6 +7,13 @@ Non-traditional placement of backspace and backslash keys.
 
 ## Changes from v3
 
+Change | Details
+--- | ---
+The reverse-mounted [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) MCU | [Microcontroller](#microcontroller)
+A TVS diode and series resistor protect the TRRS serial line from hot-unplug transients | [TRRS data-line protection](#trrs-data-line-protection)
+
+## Microcontroller
+
 The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) as the microcontroller. The MCU is reverse-mounted (facing the PCB). The Liatris exposes a `USB_VBUS_PIN` (GP19), which allows QMK to detect USB connectivity via a dedicated GPIO rather than the `SPLIT_USB_DETECT` polling loop. This eliminates the ~2-second unresponsive window at boot and improves reliability after KVM switches.
 
 ### Firmware changes required
@@ -32,7 +39,7 @@ Update `keyboard.json`:
 "development_board": "liatris"
 ```
 
-### Microcontroller
+### Pinout
 
 * [splitkb Liatris pinout](https://docs.splitkb.com/product-guides/liatris/pinout)
 * [Custom Ergogen footprint: `mcu_liatris`](../../ergogen/footprints/mcu_liatris.js) - based on [ceoloide/mcu_nice_nano](../../ergogen/footprints/ceoloide/mcu_nice_nano.js) and [marbastlib KiCad footprint](https://github.com/ebastler/marbastlib), which was used as a reference for bottom pin placement
@@ -52,10 +59,21 @@ P7 (GP7) | | | P14 (GP20)
 P8 (GP8) | | | P16 (GP23)
 P9 (GP9) | | | P10 (GP21)
 
-Bottom pins:
+## TRRS data-line protection
 
-| GP12 | GP13 | GP14 | GP15 | GP16 |
-| --- | --- | --- | --- | --- |
+v4 adds a TVS diode and series resistor on the TRRS data line to protect the MCU's serial GPIO from hot-unplug transients. A bidirectional 3.3V TVS clamps the data line to GND, and a 100Ω series resistor limits inrush into the MCU pin. Each half:
+
+```text
+TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P0)-- MCU GP1
+                          |
+                         TVS (clamps to GND)
+                          |
+                         GND
+```
+
+The connector pinout also moved: GND on the sleeve, serial data on ring R2, VCC on the tip. The sleeve is the last contact to break on withdrawal, so the two halves keep a common ground throughout the disconnect, and the data line sits on an interior ring rather than the exposed tip.
+
+Both changes are electrically transparent to firmware — same serial pin (GP1).
 
 ## Hardware
 
@@ -77,8 +95,8 @@ Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/Prod
 Switches/buttons | 2 | [E-Switch TL3342F450QG](https://www.digikey.ca/en/products/detail/e-switch/TL3342F450QG/4029404)
 Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/products/made-for-voron-gewindeeinsatz-threaded-insert-m3x5x4-100-stk-pcs)
 TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)
-TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
 TVS diodes | 2 | [Littelfuse SMF3.3CA](https://www.digikey.ca/en/products/detail/littelfuse-inc/SMF33CA/11206219) (SOD-123FL, bidirectional 3.3V) — TRRS data-line transient suppression
+TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)
 
 ### Part dimensions
 
