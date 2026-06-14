@@ -494,7 +494,7 @@ pcbs:
         where:
           ref: matrix_five_home
           rotate: 90
-          shift: [18, u/4]
+          shift: [18, 9.525] # level with adjacent mounting hole (screw_left_right)
         params:
           from: GND
           to: RST
@@ -581,7 +581,7 @@ pcbs:
         where:
           ref: mirror_matrix_five_home
           rotate: -90
-          shift: [18, u/4]
+          shift: [18, 9.525] # level with adjacent mounting hole (screw_right_left)
       trrs:
         <<: *trrs
         where:
