@@ -22,6 +22,14 @@ units:
   credit_url_y: 11.5 # second line, just below credit_name
   credit_x_left: -u/2 -u +24.775 # rel. matrix_zero_num (left pinky)
   credit_x_right: u/2 -24.775 # rel. extra_equal_num (right pinky)
+  # --- Component silk label offsets (shared by both halves; x reuses mcu_x/trrs_x
+  # since each label is centered under its component) ---
+  label_mcu_y: -20.7 # below the MCU body
+  label_trrs_y: 1.4 # below the TRRS jack
+  label_tvs_y: -5.2 # below the TVS
+  label_resistor_y: -19.2 # below the resistor
+  label_reset_y: 2.0 # below the reset button
+  screw_label_dx: 4.6 # M3 label offset to the side of each hole
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
@@ -583,7 +591,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [18, -20.7] # below the MCU body, above the reset button
+          shift: [mcu_x, label_mcu_y] # below the MCU body, above the reset button
         params: &label_params
           reversible: true
           layer: SilkS
@@ -595,7 +603,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [31, 1.4] # in the gap below the TRRS jack, above the TVS
+          shift: [trrs_x, label_trrs_y] # in the gap below the TRRS jack, above the TVS
         params:
           <<: *label_params
           text: TRRS
@@ -603,7 +611,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [31, -5.2] # below the TVS (resistor moved down, so room here now)
+          shift: [trrs_x, label_tvs_y] # below the TVS (resistor moved down, so room here now)
         params:
           <<: *label_params
           text: 'TVS\nLittelfuse\nSMF3.3CA'
@@ -611,7 +619,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [31, -19.2] # directly below the resistor
+          shift: [trrs_x, label_resistor_y] # directly below the resistor
         params:
           <<: *label_params
           text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split so each line fits the narrow channel
@@ -619,7 +627,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_home
-          shift: [18, 2.0] # below the reset button
+          shift: [mcu_x, label_reset_y] # below the reset button
         params:
           <<: *label_params
           text: 'Reset switch\nE-Switch\nTL3342F450QG'
@@ -630,7 +638,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: screw_left_left
-          shift: [-4.6, 0] # left of the hole (open border side)
+          shift: [-screw_label_dx, 0] # left of the hole (open border side)
         params:
           reversible: true
           layer: SilkS
@@ -642,12 +650,12 @@ pcbs:
         <<: *label_screw_ll
         where:
           ref: screw_left_center
-          shift: [-4.6, 0]
+          shift: [-screw_label_dx, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: screw_left_right
-          shift: [4.6, 0] # right of the hole
+          shift: [screw_label_dx, 0] # right of the hole
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -718,39 +726,39 @@ pcbs:
         <<: *label_mcu
         where:
           ref: mirror_matrix_five_num
-          shift: [18, -20.7]
+          shift: [mcu_x, label_mcu_y]
       label_trrs:
         <<: *label_trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [31, 1.4]
+          shift: [trrs_x, label_trrs_y]
       label_tvs:
         <<: *label_tvs
         where:
           ref: mirror_matrix_five_num
-          shift: [31, -5.2]
+          shift: [trrs_x, label_tvs_y]
       label_resistor:
         <<: *label_resistor
         where:
           ref: mirror_matrix_five_num
-          shift: [31, -19.2]
+          shift: [trrs_x, label_resistor_y]
       label_reset:
         <<: *label_reset
         where:
           ref: mirror_matrix_five_home
-          shift: [18, 2.0]
+          shift: [mcu_x, label_reset_y]
       label_screw_ll:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_left
-          shift: [-4.6, 0]
+          shift: [-screw_label_dx, 0]
       label_screw_lc:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_center
-          shift: [-4.6, 0]
+          shift: [-screw_label_dx, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_right
-          shift: [4.6, 0]
+          shift: [screw_label_dx, 0]
