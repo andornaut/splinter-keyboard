@@ -401,7 +401,7 @@ pcbs:
         outline: _switchoutlinesleft
         layer: Eco1.User
     footprints:
-      # --- Diode: Nexperia BAS16H,115 (SOD-123) ---
+      # --- Diode: 1N4148W (SOD-123) ---
       diode: &diode
         what: ceoloide/diode_tht_sod123
         where: left
@@ -441,7 +441,7 @@ pcbs:
           reverse_mount: true
           include_extra_pins: false # GP12-GP16 unused
           show_silk_labels_on_both_sides: true # MCU hides its mounting-side silk; mirror pin labels to the exposed side too
-      # --- Reset Button: E-Switch TL3342F450QG ---
+      # --- Reset Button: ALPS SKQGABE010 ---
       reset: &reset
         what: button
         where:
@@ -469,7 +469,7 @@ pcbs:
           side: B
           # Symmetric uses only TP/R2/SL, which is exactly this 3-net pinout
           symmetric: true
-      # --- Data-line TVS: Littelfuse SMF3.3CA (SOD-123FL, bidirectional 3.3V) ---
+      # --- Data-line TVS: SMF5.0CA (SOD-123FL, bidirectional, 5V standoff) ---
       # Clamps data-line transients (e.g. hot-unplug) before the MCU.
       # from=A=DATA_RAW, to=K=GND; bidirectional so A/K orientation is irrelevant.
       data_tvs: &data_tvs
@@ -480,7 +480,7 @@ pcbs:
         params:
           from: DATA_RAW
           to: GND
-      # --- Data-line series resistor: 100Ω 0805 (Panasonic ERJ-6ENF1000V) ---
+      # --- Data-line series resistor: 100Ω 0805 1% ---
       # In series from DATA_RAW (net_1_from) to the MCU's P0/GP1 (net_1_to);
       # limits residual surge current after the TVS.
       data_resistor: &data_resistor
@@ -541,7 +541,7 @@ pcbs:
           shift: [trrs_tvs_resistor_x, label_tvs_y]
         params:
           <<: *label_params
-          text: 'TVS\nLittelfuse\nSMF3.3CA'
+          text: 'TVS\nSMF5.0CA'
       label_resistor: &label_resistor
         what: ceoloide/utility_text
         where:
@@ -549,7 +549,7 @@ pcbs:
           shift: [trrs_tvs_resistor_x, label_resistor_y]
         params:
           <<: *label_params
-          text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split to fit the narrow channel
+          text: '100R\n0805 1%'
       label_reset: &label_reset
         what: ceoloide/utility_text
         where:
@@ -557,7 +557,7 @@ pcbs:
           shift: [mcu_reset_x, label_reset_y]
         params:
           <<: *label_params
-          text: 'Reset switch\nE-Switch\nTL3342F450QG'
+          text: 'Reset switch\nALPS\nSKQGABE010'
       # Screw labels: beside each hole (directly below is blocked by keys),
       # anchored per-hole so each goes to its open side.
       label_screw_ll: &label_screw_ll

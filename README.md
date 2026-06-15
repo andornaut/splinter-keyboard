@@ -51,7 +51,7 @@ Alternatively, you can install OrcaSlicer, KiCad, and Freerouting using [these A
 
 ### Updating footprint submodules
 
-`npm run build` uses the vendored footprint submodules (`ceoloide`, `infused-kim`) at their pinned, checked-out revision -- it does not advance them, so builds stay reproducible. To intentionally pull the latest upstream footprints and re-pin them:
+`npm run build` uses the vendored footprint submodules (`ceoloide`, `infused-kim`) at their pinned revision and does not advance them, so builds stay reproducible. To pull the latest upstream footprints and re-pin them:
 
 ```bash
 git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim
@@ -87,8 +87,8 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 **Notes:**
 
-* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It is client-side only: no host filesystem access, no sync. Edit there, then copy the result back to `config.yaml` (the source of truth). Use `npm run build` for full builds and PCB generation.
-* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) (the browser can't load them from disk). It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries. Any custom `what:` not registered there reports as unknown; rebuild with `docker compose build --no-cache` after adding one.
+* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It runs client-side only: no host filesystem access, no sync. Edit there, then copy the result back to `config.yaml` (the source of truth). Use `npm run build` for full builds and PCB generation.
+* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile), since the browser can't load them from disk. It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries. Any custom `what:` not registered there shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 
@@ -98,7 +98,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 1. Run `npm run copy-pcbs-dist-to-kicad` to copy Ergogen's `dist/v4/ergogen/pcbs/*.kicad_pcb` to [`kicad/`](./v4/kicad/) (existing boards are backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb` first).
 1. Run `open ./v4/kicad/left.kicad_pcb`
 1. Route the PCBs in [`kicad/`](./v4/kicad/), and then save them to [`kicad/routed/`](./v4/kicad/routed/)
-   * KiCad has no built-in autorouter. Run `npm run autoroute` to route the working `kicad/*.kicad_pcb` boards in place with [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import). Intermediate files go to `dist/v4/kicad/freerouting/`; it never writes to `kicad/routed/`. Expect to hand-clean the result (the matrix is usually nicer hand-routed), then File > Revert to load it. Tune with the env vars below; defaults favour a fully-connected, DRC-clean board. Raising via cost trades vias for *unrouted nets*, not a low-via topology, so it can't beat hand-routing for via count.
+   * KiCad has no built-in autorouter. Run `npm run autoroute` to route the working `kicad/*.kicad_pcb` boards in place with [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import). Intermediate files go to `dist/v4/kicad/freerouting/`; it never writes to `kicad/routed/`. Expect to hand-clean the result (the matrix usually routes nicer by hand), then File > Revert to load it. Tune with the env vars below; the defaults aim for a fully-connected, DRC-clean board. Raising via cost trades vias for *unrouted nets* rather than a lower-via layout, so it can't beat hand-routing on via count.
 
      | Env var | Default |
      | --- | --- |
@@ -111,7 +111,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
    * Once you're happy with the routing, run `npm run copy-pcbs-kicad-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
    * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-routed-to-kicad` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in KiCad.
-1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate fab files per board into `dist/v4/kicad/jlcpcb/<name>/`: `<name>-gerber.zip` (gerbers + drill) plus, when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present, `<name>-BOM.csv` and `<name>-CPL.csv` for assembly. See [AGENTS.md](./AGENTS.md) ("v4: JLCPCB assembly").
+1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate fab files per board into `dist/v4/kicad/jlcpcb/<name>/`. You get `<name>-gerber.zip` (gerbers + drill), plus `<name>-BOM.csv` and `<name>-CPL.csv` for assembly when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
 1. Print (and optionally assemble) the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
    * For bare boards, submit each `dist/v4/kicad/jlcpcb/<name>/<name>-gerber.zip` to [JLCPCB](https://jlcpcb.com/).
    * For assembly (PCBA), also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`, and verify every LCSC part in `jlcpcb-parts.json` is in stock first.

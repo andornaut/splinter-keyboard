@@ -1,33 +1,33 @@
 {
-  "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column of `kicad-cli pcb export pos`). Source of truth for assembly: lives here, not in the .kicad_pcb, so it survives Ergogen regeneration. scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. Rules: a footprint NOT listed here is Do-Not-Place (MCU, TRRS, mounting holes, and the Kailh hotswap sockets - we hand-solder/insert those). A footprint listed with an empty `lcsc` is an error (BOM/CPL generation fails, writing nothing) until you fill it in. `rotation` is added to KiCad's rotation to correct for JLCPCB pick-and-place orientation; start at 0 and adjust after checking the DFM preview. NOTE: the Kailh hotswap sockets are hand-soldered (Do-Not-Place), not assembled by JLCPCB -- they are 0-stock for JLC assembly and Standard-only anyway. With them off the assembly BOM, every remaining placed part is Economic-PCBA-eligible, so the board can use JLCPCB's cheaper Economic service. VERIFY every `lcsc` is in-stock at https://jlcpcb.com/parts before ordering.",
+  "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column from `kicad-cli pcb export pos`). scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. See v4/README.md 'How parts are assigned' for the full rules.",
   "parts": {
     "diode_tht_sod123": {
       "lcsc": "C81598",
       "comment": "1N4148W",
       "package": "SOD-123",
       "rotation": 0,
-      "note": "1N4148W SOD-123 switching diode (ST/Semtech, JLC C81598). Confirmed in stock. Verify rotation matches diode polarity in DFM preview."
+      "note": "ST(Semtech) 1N4148W. JLCPCB Basic part. Alt: Jingdao C115103. Set rotation to match diode polarity in DFM."
     },
     "smd_805": {
       "lcsc": "C17408",
       "comment": "100R",
       "package": "R0805",
       "rotation": 0,
-      "note": "100ohm 0805 1% data-line series resistor (UNI-ROYAL 0805W8F1000T5E, JLC C17408). Confirmed JLCPCB Basic part."
+      "note": "UNI-ROYAL 0805W8F1000T5E. JLCPCB Basic part. Alt: YAGEO C105577."
     },
     "D_SOD-123FL_HandSolder": {
-      "lcsc": "C782876",
-      "comment": "SMF3.3CA",
+      "lcsc": "C1851363",
+      "comment": "SMF5.0CA",
       "package": "SOD-123FL",
       "rotation": 0,
-      "note": "Bidirectional 3.3V TVS, SOD-123FL. C782876 is the Leiditech SMF3.3CA equivalent, confirmed available for JLC SMT assembly (genuine Littelfuse is not stocked; ZHIDE C2917876 is an LCSC alternative). Bidirectional, so polarity/rotation is electrically irrelevant; set rotation so the body sits within the pads in DFM."
+      "note": "Littelfuse SMF5.0CA. JLCPCB Extended part, low stock (~449), re-confirm before ordering. Alt: MDD C364279, TWGMC C726939. Bidirectional, so rotation is irrelevant."
     },
     "SW_TACT_ALPS_SKQGABE010": {
       "lcsc": "C115351",
-      "comment": "Reset tact switch",
+      "comment": "SKQGABE010",
       "package": "SW_SKQG",
       "rotation": 0,
-      "note": "ALPS SKQGABE010 SMD tact switch (JLC C115351), genuine ALPS - exact match for this footprint. Note the config's reset silk label still reads TL3342F450QG (stale); the physical part is this ALPS SKQG."
+      "note": "ALPS SKQGABE010. JLCPCB Extended part. Alt: ALPS SKQGAFE010 C202424. Footprint-exact match."
     }
   }
 }
