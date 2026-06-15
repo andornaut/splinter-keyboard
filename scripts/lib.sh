@@ -19,6 +19,11 @@ require_pcbs() {
   fi
 }
 
+# Print a uniform success line. Call as a wrapper's final statement: under
+# `set -e` it is reached only when every prior step succeeded, so it doubles as
+# the script's success signal. Goes to stdout (errors already go to stderr).
+ok() { echo "OK: $*"; }
+
 # KiCad's pcbnew module prints a harmless PROPERTY_ENUM wxASSERT to stderr every
 # time it is imported (directly, or via kb_ergogen_helper). Drop just those lines
 # from a command's stderr, preserving all other output and its exit code. The

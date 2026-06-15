@@ -32,3 +32,5 @@ done
 python3 ./scripts/apply-project-settings.py \
   "${out_dir}"/pcbs/[!_]*.kicad_pro \
   "${VERSION}"/kicad/[!_]*.kicad_pro
+
+ok "build: ${#files[@]} PCB(s) generated and post-processed in ${out_dir}/pcbs/"

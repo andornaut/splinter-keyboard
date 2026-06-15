@@ -6,6 +6,13 @@ units:
   c: 14 # MX cutout/hole length
   s: 16 # MX widest is 15.6mm
   u: U # key pitch (ergogen U = 19.05mm)
+  # Thumbcluster splay angle (deg). One source of truth: the thumb keys splay by
+  # this, and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
+  thumb_splay: -19.111732
+  # Lateral nudge that re-centers the horizontal thumb diode under its splayed
+  # switch (the -5 y-shift, rotated by the splay, drifts it ~1.64mm to the side).
+  # = -5 * tan(thumb_splay); auto-flips x on the mirrored right half.
+  thumb_diode_dx: 1.733
   # --- MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves) ---
   # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
   mcu_reset_x: 18
@@ -23,7 +30,7 @@ units:
   # --- Component label y-offsets (silkscreen) ---
   # Each label reuses its component's x var (same column); these set y only.
   # Hugging labels are relative to the component's y, so they track the part;
-  # label_mcu_y is absolute (parked ~19mm below the MCU, not hugging it).
+  # label_mcu_y is absolute.
   label_mcu_y: -20
   label_trrs_y: trrs_y - 13
   label_tvs_y: tvs_y - 4
@@ -227,7 +234,7 @@ points:
       distance: -5u
     columns:
       three.rows.mod: # BACKSPACE
-        splay: -19.111732
+        splay: thumb_splay
         column_net: P8
         mirror:
           column_net: P4
@@ -412,9 +419,10 @@ pcbs:
         layer: Eco1.User
     footprints:
       # --- Diode: 1N4148W (SOD-123) ---
+      # Matrix diodes inherit each key's rotation (axis-aligned on the matrix).
       diode: &diode
-        what: ceoloide/diode_tht_sod123
-        where: left
+        what: diode_sod123
+        where: /^matrix_/
         adjust:
           shift: [0, -5]
         params:
@@ -424,6 +432,14 @@ pcbs:
           include_traces_vias: true # via per pad, net routes on either layer (single-side assembly unchanged)
           from: "{{colrow}}"
           to: "{{row_net}}"
+      # Thumb diodes: counter-rotate by -thumb_splay to cancel the thumbcluster
+      # splay so they sit horizontal (matrix-aligned) instead of following it.
+      diode_thumb:
+        <<: *diode
+        where: /^thumbcluster_/
+        adjust:
+          shift: [thumb_diode_dx, -5]
+          rotate: -1 * thumb_splay
       # --- Mounting Hole: Non-plated through hole for M3 screw ---
       mounting_hole_npth: &mounting_hole_npth
         what: ceoloide/mounting_hole_npth
@@ -640,7 +656,15 @@ pcbs:
       # See left for footprint details
       diode:
         <<: *diode
-        where: right
+        where: /^(mirror_matrix|extra)_/
+      # Thumb diodes: counter-rotate to horizontal. Same -1 * thumb_splay input as
+      # the left; ergogen's mirror negates it to cancel the mirrored +splay here.
+      diode_thumb:
+        <<: *diode
+        where: /^mirror_thumbcluster_/
+        adjust:
+          shift: [thumb_diode_dx, -5]
+          rotate: -1 * thumb_splay
       mounting_hole_npth:
         <<: *mounting_hole_npth
         where: screw_right

@@ -164,3 +164,4 @@ if __name__ == "__main__":
         sys.exit(f"No PCBs in {version}/kicad/ -- nothing to do.")
     for pcb in pcbs:
         autoroute(pcb, work_dir, passes)
+    print(f"OK: autoroute: {len(pcbs)} PCB(s) routed in place.")

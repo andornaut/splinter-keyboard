@@ -22,3 +22,5 @@ for f in "${files[@]}"; do
   fi
   cp "$f" "$existing"
 done
+
+ok "copy-pcbs-dist-to-kicad: ${#files[@]} PCB(s) copied to ${dst_dir}/ (backups in ${backup_dir}/)"

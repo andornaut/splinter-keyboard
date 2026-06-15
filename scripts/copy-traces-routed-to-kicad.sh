@@ -12,3 +12,5 @@ for f in "${files[@]}"; do
   echo "$f"
   mute_pcbnew_noise python3 "$helper" --no-backup copy-traces "$f" "./${VERSION}/kicad/$(basename "$f")"
 done
+
+ok "copy-traces-routed-to-kicad: traces copied for ${#files[@]} PCB(s) into ${VERSION}/kicad/"

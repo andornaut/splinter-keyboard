@@ -20,3 +20,5 @@ for f in "${files[@]}"; do
   cp "$f" "$dst"
   mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
 done
+
+ok "copy-pcbs-kicad-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour"

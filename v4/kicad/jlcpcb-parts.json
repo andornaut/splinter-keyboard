@@ -1,12 +1,12 @@
 {
   "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column from `kicad-cli pcb export pos`). scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. See v4/README.md 'How parts are assigned' for the full rules.",
   "parts": {
-    "diode_tht_sod123": {
+    "diode_sod123": {
       "lcsc": "C81598",
       "comment": "1N4148W",
       "package": "SOD-123",
-      "rotation": 0,
-      "note": "ST(Semtech) 1N4148W. Set rotation to match diode polarity in DFM. Tier/alternates: see v4/README.md BOM."
+      "rotation": 180,
+      "note": "ST(Semtech) 1N4148W. 180 corrects JLC's C81598 0-deg orientation (cathode opposite end) vs this footprint, so the band lands on pad 1 (cathode/row net). Verify in DFM. Tier/alternates: see v4/README.md BOM."
     },
     "R_0805": {
       "lcsc": "C17408",

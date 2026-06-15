@@ -49,3 +49,5 @@ for f in "${files[@]}"; do
     echo "  no ${parts} -- gerbers only (no assembly BOM/CPL)"
   fi
 done
+
+ok "fab-jlcpcb: ${#files[@]} board(s) exported to dist/${VERSION}/kicad/jlcpcb/"
