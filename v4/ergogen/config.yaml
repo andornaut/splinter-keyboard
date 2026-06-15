@@ -9,10 +9,12 @@ units:
   # Thumbcluster splay angle (deg). One source of truth: the thumb keys splay by
   # this, and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
   thumb_splay: -19.111732
-  # Lateral nudge that re-centers the horizontal thumb diode under its splayed
-  # switch (the -5 y-shift, rotated by the splay, drifts it ~1.64mm to the side).
-  # = -5 * tan(thumb_splay); auto-flips x on the mirrored right half.
-  thumb_diode_dx: 1.733
+  # Thumb diode offset from its switch, in the splayed key frame. dy sets how far
+  # below the switch it sits; dx re-centers it laterally (the rotated dy would
+  # otherwise drift it sideways). Keep dx = dy * tan(thumb_splay) so it stays
+  # centered when dy changes; dx auto-flips x on the mirrored right half.
+  thumb_diode_dy: -4.7
+  thumb_diode_dx: 1.629
   # --- MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves) ---
   # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
   mcu_reset_x: 18
@@ -438,7 +440,7 @@ pcbs:
         <<: *diode
         where: /^thumbcluster_/
         adjust:
-          shift: [thumb_diode_dx, -5]
+          shift: [thumb_diode_dx, thumb_diode_dy]
           rotate: -1 * thumb_splay
       # --- Mounting Hole: Non-plated through hole for M3 screw ---
       mounting_hole_npth: &mounting_hole_npth
@@ -663,7 +665,7 @@ pcbs:
         <<: *diode
         where: /^mirror_thumbcluster_/
         adjust:
-          shift: [thumb_diode_dx, -5]
+          shift: [thumb_diode_dx, thumb_diode_dy]
           rotate: -1 * thumb_splay
       mounting_hole_npth:
         <<: *mounting_hole_npth
