@@ -12,7 +12,7 @@ and writes the two files JLCPCB's assembly service expects:
 
 Placement rules (see jlcpcb-parts.json `_comment`):
   - footprint absent from the JSON  -> Do-Not-Place (skipped silently)
-  - footprint present, empty `lcsc` -> skipped with a warning (fill it in)
+  - footprint present, empty `lcsc` -> error; nothing is written until you fill it in
   - footprint present, `lcsc` set    -> placed; `rotation` is added to KiCad's
                                         angle to correct pick-and-place orientation
 
@@ -59,6 +59,14 @@ def main():
         else:
             placed.append((r, spec))
 
+    # A footprint listed without an lcsc is a mistake: fail before writing any
+    # output rather than silently dropping the part from the assembly.
+    if no_lcsc:
+        for pkg, refs in sorted(no_lcsc.items()):
+            print(f"  ERROR: no lcsc for '{pkg}' ({len(refs)} part(s)); "
+                  f"set it in {args.parts}", file=sys.stderr)
+        sys.exit(1)
+
     # CPL: one row per placed footprint, rotation corrected.
     with open(args.cpl, "w", newline="") as f:
         w = csv.writer(f)
@@ -85,9 +93,6 @@ def main():
 
     print(f"  placed {len(placed)} parts in {len(refs_by_lcsc)} BOM lines; "
           f"{len(dnp)} do-not-place")
-    for pkg, refs in sorted(no_lcsc.items()):
-        print(f"  WARNING: no lcsc for '{pkg}' ({len(refs)} part(s)) -- skipped; "
-              f"set it in {args.parts}", file=sys.stderr)
 
 
 if __name__ == "__main__":
