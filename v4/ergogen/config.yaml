@@ -213,9 +213,14 @@ points:
       num.row_net: P15
   # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
+    # The anchor shift and the column-three splay below are jointly solved (not
+    # hand-tuned): they pin the rightmost thumb key's top-right hull corner to the
+    # box's bottom-right corner (198.9, -201.525) and drop its bottom-right corner
+    # to y=-219.525, making the board exactly 158 x 119mm. Re-solve all three
+    # together if any changes; tweaking one alone breaks the corner fit.
     anchor:
       ref: matrix_four_lower
-      shift: [-3.45, -1u -3]
+      shift: [-3.418594, -1u -2.813439]
     key.tags.left: true
     key.row_net: P10 # all thumb keys on the mod row
     key.mirror.tags:
@@ -227,7 +232,7 @@ points:
       distance: -5u
     columns:
       three.rows.mod: # BACKSPACE
-        splay: -18.925
+        splay: -19.111732
         column_net: P8
         mirror:
           column_net: P4
@@ -524,9 +529,8 @@ pcbs:
       # --- Component labels (silkscreen) ---
       # Each label sits below its component on the same ref; the right half re-anchors
       # to mirror_ refs (x-shift auto-flips). Every label is single-sided, on the side
-      # its component mounts. MCU+TRRS follow the MCU: side F here (left), overridden to
-      # side B in the right half (where that MCU mounts). SMD-part labels use
-      # label_params_b (back side, where their pads are).
+      # its component mounts. MCU, TRRS, and the SMD parts all mount/solder on side B,
+      # so every component label is side B, mirrored (reads correctly from the back).
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:
@@ -534,7 +538,8 @@ pcbs:
           shift: [mcu_reset_x, label_mcu_y]
         params: &label_params
           reversible: false
-          side: F
+          side: B
+          mirrored: true
           layer: SilkS
           height: 0.8
           width: 0.8
@@ -691,9 +696,8 @@ pcbs:
         where:
           ref: extra_equal_num
           shift: [label_credit_x_right, label_credit_y]
-      # Right half component labels: mirror_ refs auto-flip the x-shift. MCU and TRRS
-      # stay on the front (label_params, inherited) on both halves, opposite the
-      # back-side SMD labels.
+      # Right half component labels: mirror_ refs auto-flip the x-shift. All component
+      # labels (MCU, TRRS, SMD parts) are side B on both halves.
       label_mcu:
         <<: *label_mcu
         where:
