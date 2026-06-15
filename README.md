@@ -12,12 +12,12 @@ This repo holds the hardware design files. The design pipeline is: Keyboard Layo
 
 ## Versions
 
-Version | Keys | MCU | Features | Firmware | Photo
---- | --- | --- | --- | --- | ---
-[v4](./v4) | 62 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | Symmetrical enclosures, USB VBUS detection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | [![v4](./v4/v4-300width.jpg)](./v4/v4.jpg)
-[v3](./v3) | 62 | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | Symmetrical enclosures | [splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg)
-[v2](./v2) | 62 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Symmetrical enclosures | [splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg)
-[v1](./v1) | 61 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Asymmetrical enclosures, traditional layout | [splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg)
+| Version | Keys | MCU | Features | Firmware | Photo |
+| --- | --- | --- | --- | --- | --- |
+| [v4](./v4) | 62 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | Symmetrical enclosures, USB VBUS detection, TRRS data-line protection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | [![v4](./v4/v4-300width.jpg)](./v4/v4.jpg) |
+| [v3](./v3) | 62 | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | Symmetrical enclosures | [splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg) |
+| [v2](./v2) | 62 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Symmetrical enclosures | [splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg) |
+| [v1](./v1) | 61 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Asymmetrical enclosures, traditional layout | [splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg) |
 
 ## Installation
 
@@ -48,11 +48,21 @@ sudo apt install kicad
 # Must use the same Python interpreter as KiCad (will not work in a venv)
 sudo pip install kikit --break-system-packages
 
-# Update submodules
-git submodule update --recursive --remote
+# Check out the pinned submodule revisions
+git submodule update --init --recursive
 ```
 
 Alternatively, you can install OrcaSlicer, KiCad, and Freerouting using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/master/roles/hobbies/tasks/main.yml) (tags `orcaslicer`, `kicad`, `freerouting`).
+
+### Updating footprint submodules
+
+`npm run build` uses the vendored footprint submodules (`ceoloide`, `infused-kim`) at their pinned, checked-out revision -- it does not advance them, so builds stay reproducible. To intentionally pull the latest upstream footprints and re-pin them:
+
+```bash
+git submodule update --remote ergogen/footprints/ceoloide ergogen/footprints/infused-kim
+git add ergogen/footprints/ceoloide ergogen/footprints/infused-kim
+git commit -m "Bump footprint submodules"
+```
 
 ## Developing
 
@@ -82,36 +92,33 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 **Notes:**
 
-* The Ergogen GUI is useful for prototyping key placement, layout, and outlines, but it does not render PCB layouts. Use the local npm pipeline to generate PCB files for KiCad.
-* The GUI is client-side only: it has no access to the host filesystem and does not sync with it in either direction. Paste the config in, work on it, then copy/download the result back to `config.yaml` yourself. The host `config.yaml` is the source of truth; do not volume-mount it. For full builds, use `npm run build` (the CLI reads all custom footprints from the filesystem).
-* Custom footprints are baked into the GUI image at build time via the [`Dockerfile`](./Dockerfile), since the browser cannot load them from disk. The upstream `ergogen-gui` postinstall registers the `ceoloide` and `infused-kim` libraries; the `Dockerfile` adds this repo's own footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top. Each custom `what:` value used in the config must be registered in Ergogen's footprint index there, or the GUI reports an unknown footprint. Rebuild with `docker compose build --no-cache` after adding one.
+* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It is client-side only: no host filesystem access, no sync. Edit there, then copy the result back to `config.yaml` (the source of truth). Use `npm run build` for full builds and PCB generation.
+* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) (the browser can't load them from disk). It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries. Any custom `what:` not registered there reports as unknown; rebuild with `docker compose build --no-cache` after adding one.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 
 ![KiCad preview](./v4/kicad/kicad.png)
 
 1. Design the PCBs using [KiCad](https://www.kicad.org/)
-1. Run `npm run copy-pcbs-dist-to-kicad` to copy the `dist/v4/ergogen/pcbs/*.kicad_pcb` files generated by Ergogen to [`kicad/`](./v4/kicad/). Any existing `kicad/*.kicad_pcb` is first backed up to `kicad/backups/<name>-<timestamp>.kicad_pcb` (gitignored), so routing work overwritten by the freshly generated boards is recoverable.
+1. Run `npm run copy-pcbs-dist-to-kicad` to copy Ergogen's `dist/v4/ergogen/pcbs/*.kicad_pcb` to [`kicad/`](./v4/kicad/) (existing boards are backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb` first).
 1. Run `open ./v4/kicad/left.kicad_pcb`
 1. Route the PCBs in [`kicad/`](./v4/kicad/), and then save them to [`kicad/routed/`](./v4/kicad/routed/)
-   * KiCad has no built-in autorouter. Run `npm run autoroute` to autoroute the working `kicad/*.kicad_pcb` boards in place with [Freerouting](https://github.com/freerouting/freerouting) (export Specctra DSN -> route headless -> import the SES session back). Intermediate files go to `dist/v4/kicad/freerouting/`; it never writes to `kicad/routed/`. Expect to clean up the result by hand -- the regular matrix is usually nicer hand-routed -- then revert in KiCad (File > Revert) to load the routed board. Tune via env vars (defaults favour a fully-connected, DRC-clean board): `FREEROUTING_PASSES` (100), `FREEROUTING_STRATEGY` (greedy), `FREEROUTING_SELECTION` (prioritized), `FREEROUTING_VIA_COST` (50), `FREEROUTING_UNDESIRED_DIR_COST` (unset), `FREEROUTING_LOG_LEVEL` (WARN). Note: raising via cost trades vias for *unrouted nets* rather than a low-via topology, so it cannot beat hand-routing for a low via count.
+   * KiCad has no built-in autorouter. Run `npm run autoroute` to route the working `kicad/*.kicad_pcb` boards in place with [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import). Intermediate files go to `dist/v4/kicad/freerouting/`; it never writes to `kicad/routed/`. Expect to hand-clean the result (the matrix is usually nicer hand-routed), then File > Revert to load it. Tune with the env vars below; defaults favour a fully-connected, DRC-clean board. Raising via cost trades vias for *unrouted nets*, not a low-via topology, so it can't beat hand-routing for via count.
+
+     | Env var | Default |
+     | --- | --- |
+     | `FREEROUTING_PASSES` | 100 |
+     | `FREEROUTING_STRATEGY` | greedy |
+     | `FREEROUTING_SELECTION` | prioritized |
+     | `FREEROUTING_VIA_COST` | 50 |
+     | `FREEROUTING_UNDESIRED_DIR_COST` | unset |
+     | `FREEROUTING_LOG_LEVEL` | WARN |
+
    * Once you're happy with the routing, run `npm run copy-pcbs-kicad-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
    * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-routed-to-kicad` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in KiCad.
 1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate and save gerber and drill files to `dist/v4/kicad/jlcpcb/*.zip`
 1. Print the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
    * Submit the `dist/v4/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)
-
-#### Customize net classes
-
-1. Navigate to File > Board Setup... > Design Rules > Net Classes
-1. Update the "Default" netclass
-1. Click the "+" button to add a "VCC" net class
-1. Configure a pattern to match nets with the text "VCC" to the VCC net class
-
-Configuration | Description
---- | ---
-Default | Clearance: 0.20mm, Track width: 0.20mm
-VCC | Clearance: 0.25mm, Track width: 0.25mm
 
 ### Step 5. [OnShape](https://cad.onshape.com)
 
