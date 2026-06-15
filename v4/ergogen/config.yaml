@@ -108,7 +108,7 @@ points:
       two:
         key.stagger: 3
         key.column_net: P6
-        key.mirror.column_net: P5
+        key.mirror.column_net: P6
         rows:
           mod: # LALT
             mirror.skip: true
@@ -120,7 +120,7 @@ points:
       three:
         key.stagger: 3
         key.column_net: &col_three_left P7
-        key.mirror.column_net: &col_three_right P6
+        key.mirror.column_net: &col_three_right P7
         rows:
           mod.skip: true # no mod-row key here
           lower: # C -> ,
@@ -131,7 +131,7 @@ points:
       four:
         key.stagger: -3
         key.column_net: &col_four_left P8
-        key.mirror.column_net: &col_four_right P7
+        key.mirror.column_net: &col_four_right P8
         rows:
           mod.skip: true
           lower: # V -> M
@@ -142,7 +142,7 @@ points:
       five:
         key.stagger: -3
         key.column_net: &col_five_left P10
-        key.mirror.column_net: &col_five_right P10 # self-mirror: same net both halves
+        key.mirror.column_net: &col_five_right P19
         rows:
           mod.skip: true
           lower: # B -> N
@@ -165,19 +165,17 @@ points:
         mirror.row_net: P16
       upper:
         row_net: P15
-        mirror.row_net: P18 # off the col-five net to keep the column mirror
+        mirror.row_net: P10
       num:
         row_net: P18
         mirror.row_net: P15
   # --- Extra keys: the right half's inner columns ---
   # Right counterparts to the left's mirror.skip columns, defined explicitly
   # because they differ (backspace, punctuation, right mods). 9u right.
-  # Column nets continue the right MCU far-bank fan past the mirrored matrix
-  # columns (..P7,P6,P5) with P4,P3, then P0 for the extra pinky column, so the
-  # whole right routes as a mirror of the left's column fan, extended one pad.
-  # The pinky uses P0 (GP1), not the fan's next pad P2 (GP2): on the right, P2 is
-  # the TRRS serial pin (so one firmware split.serial.pin = GP2 fits both halves),
-  # so the pinky column and the serial pin swap pads here (see data_resistor).
+  # Right matrix columns: five..two -> P19,P8,P7,P6, with P5,P4,P3 for the three
+  # extra inner columns. P2 (GP2) is left free for the TRRS serial pin, so one
+  # firmware split.serial.pin = GP2 fits both halves (see data_resistor); P0 (GP1),
+  # P18 (GP26), and P20 (GP28) are unused on the right.
   zones.extra:
     key.tags.right: true
     anchor:
@@ -185,7 +183,7 @@ points:
       shift: [9u, 0]
     columns:
       zero:
-        key.column_net: P4
+        key.column_net: P5
         rows:
           mod: # BACKSPACE
             bind: [0, u/4, 0, u/4]
@@ -197,7 +195,7 @@ points:
           upper: # P
           num: # 0
       dash:
-        key.column_net: P3
+        key.column_net: P4
         rows:
           mod.skip: true
           lower: # \
@@ -205,7 +203,7 @@ points:
           upper: # [
           num: # -
       equal:
-        key.column_net: P0 # GP1: swapped with the serial pin (was P2/GP2)
+        key.column_net: P3
         rows:
           mod.skip: true
           lower: # SHIFT
@@ -220,7 +218,7 @@ points:
       mod.row_net: &mod_row_right P9
       lower.row_net: P14
       home.row_net: P16
-      upper.row_net: P18 # matches the matrix's upper mirror row
+      upper.row_net: P10 # matches the matrix's upper mirror row
       num.row_net: P15
   # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
@@ -509,9 +507,8 @@ pcbs:
           to: GND
       # In series from DATA_RAW to the MCU serial pin, limiting residual surge current
       # after the TVS. Non-polar, so from/to is electrically arbitrary. Both halves
-      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both. The left
-      # has P2 free; the right frees it by swapping its extra pinky column onto P0
-      # (GP1) (see zones.extra equal and the right override).
+      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both. Neither
+      # half's matrix uses P2, so it stays free for serial on both (see zones.extra).
       data_resistor: &data_resistor
         what: r_0805
         where:
