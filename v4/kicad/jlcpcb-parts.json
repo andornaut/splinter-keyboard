@@ -1,0 +1,40 @@
+{
+  "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column of `kicad-cli pcb export pos`). Source of truth for assembly: lives here, not in the .kicad_pcb, so it survives Ergogen regeneration. scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. Rules: a footprint NOT listed here is Do-Not-Place (MCU, TRRS, mounting holes - we hand-solder/insert those). A footprint listed with an empty `lcsc` is skipped with a warning until you fill it in. `rotation` is added to KiCad's rotation to correct for JLCPCB pick-and-place orientation; start at 0 and adjust after checking the DFM preview. NOTE: the Kailh socket (C5184526) is Standard-Only PCBA and needs an assembly fixture, so the whole board must use JLCPCB's Standard (not Economic) assembly service -- under Standard, every part type incurs the feeder loading fee. VERIFY every `lcsc` is in-stock at https://jlcpcb.com/parts before ordering.",
+  "parts": {
+    "diode_tht_sod123": {
+      "lcsc": "C81598",
+      "comment": "1N4148W",
+      "package": "SOD-123",
+      "rotation": 0,
+      "note": "1N4148W SOD-123 switching diode (ST/Semtech, JLC C81598). Confirmed in stock. Verify rotation matches diode polarity in DFM preview."
+    },
+    "smd_805": {
+      "lcsc": "C17408",
+      "comment": "100R",
+      "package": "R0805",
+      "rotation": 0,
+      "note": "100ohm 0805 1% data-line series resistor (UNI-ROYAL 0805W8F1000T5E, JLC C17408). Confirmed JLCPCB Basic part."
+    },
+    "D_SOD-123FL_HandSolder": {
+      "lcsc": "C782876",
+      "comment": "SMF3.3CA",
+      "package": "SOD-123FL",
+      "rotation": 0,
+      "note": "Bidirectional 3.3V TVS, SOD-123FL. C782876 is the Leiditech SMF3.3CA equivalent, confirmed available for JLC SMT assembly (genuine Littelfuse is not stocked; ZHIDE C2917876 is an LCSC alternative). Bidirectional, so polarity/rotation is electrically irrelevant; set rotation so the body sits within the pads in DFM."
+    },
+    "switch_mx": {
+      "lcsc": "C5184526",
+      "comment": "Kailh MX hotswap socket",
+      "package": "SocketKailhMX",
+      "rotation": 0,
+      "note": "Kailh CPG151101S11-1 MX hotswap socket (the SMD part JLC solders; the keyswitch is hand-inserted later). STANDARD-ONLY PCBA + needs an assembly fixture, so it forces the whole order onto Standard assembly. Verify rotation in DFM."
+    },
+    "SW_TACT_ALPS_SKQGABE010": {
+      "lcsc": "C115351",
+      "comment": "Reset tact switch",
+      "package": "SW_SKQG",
+      "rotation": 0,
+      "note": "ALPS SKQGABE010 SMD tact switch (JLC C115351), genuine ALPS - exact match for this footprint. Note the config's reset silk label still reads TL3342F450QG (stale); the physical part is this ALPS SKQG."
+    }
+  }
+}

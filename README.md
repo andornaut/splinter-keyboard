@@ -26,8 +26,7 @@ Install the following tools:
 * [Ergogen](https://github.com/ergogen/ergogen) - PCB generation from YAML config
   * [Footprints by ceoloide](https://github.com/ceoloide/ergogen-footprints)
   * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
-* [KiCad](https://www.kicad.org) - PCB editor
-  * [KiKit automation tools](https://github.com/yaqwsx/KiKit) - Gerber file generation
+* [KiCad 10](https://www.kicad.org) - PCB editor; its bundled `kicad-cli` generates the gerber/drill and assembly (BOM/CPL) files
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
 * [Freerouting](https://github.com/freerouting/freerouting) (optional) - PCB autorouter; KiCad has no built-in autorouter
 
@@ -40,13 +39,9 @@ cd splinter-keyboard
 nvm use
 npm install
 
-# Install KiCad
-sudo add-apt-repository ppa:kicad/kicad-8.0-releases
+# Install KiCad 10 (provides kicad-cli, used for fab file generation)
+sudo add-apt-repository ppa:kicad/kicad-10.0-releases
 sudo apt install kicad
-
-# Install KiKit
-# Must use the same Python interpreter as KiCad (will not work in a venv)
-sudo pip install kikit --break-system-packages
 
 # Check out the pinned submodule revisions
 git submodule update --init --recursive
@@ -116,9 +111,10 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
    * Once you're happy with the routing, run `npm run copy-pcbs-kicad-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
    * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-routed-to-kicad` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in KiCad.
-1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate and save gerber and drill files to `dist/v4/kicad/jlcpcb/*.zip`
-1. Print the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
-   * Submit the `dist/v4/kicad/jlcpcb/*.zip` files to [JLCPCB](https://jlcpcb.com/)
+1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate fab files per board into `dist/v4/kicad/jlcpcb/<name>/`: `<name>-gerber.zip` (gerbers + drill) plus, when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present, `<name>-BOM.csv` and `<name>-CPL.csv` for assembly. See [AGENTS.md](./AGENTS.md) ("v4: JLCPCB assembly").
+1. Print (and optionally assemble) the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
+   * For bare boards, submit each `dist/v4/kicad/jlcpcb/<name>/<name>-gerber.zip` to [JLCPCB](https://jlcpcb.com/).
+   * For assembly (PCBA), also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`, and verify every LCSC part in `jlcpcb-parts.json` is in stock first.
 
 ### Step 5. [OnShape](https://cad.onshape.com)
 

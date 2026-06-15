@@ -65,9 +65,8 @@ def add_gnd_zone(path):
     for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
         outline.Append(x, y)
 
-    zone.SetIsFilled(False)
     board.Add(zone)
-    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # sets the zone's filled state
 
     board.Save(path)
     print(f"  added B.Cu GND pour ({(x1 - x0) / MM:.1f} x {(y1 - y0) / MM:.1f}mm "

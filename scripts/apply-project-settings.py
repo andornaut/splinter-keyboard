@@ -48,7 +48,10 @@ def ensure_vcc(net_settings):
             vcc["name"] = "VCC"
             vcc["clearance"] = VCC_CLEARANCE
             vcc["track_width"] = VCC_TRACK_WIDTH
-            vcc["priority"] = 0  # lower number = higher priority than Default
+            # Default ships with priority 2147483647 (KiCad's lowest-priority
+            # sentinel), which dict(default) copies in. Lower number = higher
+            # priority, so 0 makes the VCC pattern win over Default for the VCC net.
+            vcc["priority"] = 0
             classes.append(vcc)
             changed = True
 

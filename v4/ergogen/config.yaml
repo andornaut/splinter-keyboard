@@ -6,22 +6,25 @@ units:
   c: 14 # MX cutout/hole length
   s: 16 # MX widest is 15.6mm
   u: U # key pitch (ergogen U = 19.05mm)
-  # --- MCU/TRRS placement (off matrix_five_num, both halves) ---
-  mcu_x: 18 # MCU/reset x
-  mcu_y: -2.25 # MCU y
+  # --- MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves) ---
+  # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
+  mcu_reset_x: 18
+  mcu_y: -2.25
   reset_y: 9.525 # level with the screw_*_right hole
-  trrs_x: mcu_x + 13 # TRRS/TVS/resistor x
-  trrs_y: 15 # TRRS y
+  trrs_tvs_resistor_x: mcu_reset_x + 13
+  trrs_y: 15
   tvs_y: trrs_y - 16 # TVS, near the R2 data pad
   resistor_y: trrs_y - 30 # dropped low so its label fits below the MCU
   # --- Silkscreen credit text offsets (shared by both halves) ---
-  # Center-justified so the reversible back copy mirrors onto the same spot
-  # (left/right-justify would land it off the edge). x centers the URL ~1.5mm in.
-  credit_name_y: 14.0 # line 1
-  credit_url_y: 11.5 # line 2
-  credit_x_left: -u/2 -u +24.775 # left pinky
-  credit_x_right: u/2 -24.775 # right pinky
-  # --- Component label offsets (x reuses mcu_x/trrs_x; labels centered on the component) ---
+  # Single two-line text (name + URL on a \n). Center-justified so the reversible
+  # back copy mirrors onto the same spot (left/right-justify would land it off the
+  # edge). y anchors the block center; x centers the wider URL line (~1.5mm in).
+  label_credit_y: 12.75
+  label_credit_x_left: -u/2 -u +24.775 # left pinky
+  label_credit_x_right: u/2 -24.775 # right pinky
+  # --- Component label y-offsets (silkscreen). Each label reuses its component's
+  # x var, so it sits in the same column; only y here places it above/below.
+  # (label_screw_dx is the exception: a horizontal offset beside each screw hole.) ---
   label_mcu_y: -20
   label_trrs_y: 1.5
   label_tvs_y: -4.5
@@ -89,102 +92,71 @@ points:
             mirror.skip: true
           num: # 1
             mirror.skip: true
+      # Columns two-five are mirrored to the right half. The mirror nets are
+      # constant per column (column_net) and per row (row_net, set in `rows`
+      # below), so they're declared once via key.mirror.* rather than per key.
+      # Comments show left key -> right (mirrored) key.
       two:
         key.stagger: 3
         key.column_net: P9
+        key.mirror.column_net: P5
         rows:
           mod: # LALT
             mirror.skip: true
-          lower: # X
+          lower: # X -> .
             bind: 1
-            mirror: # .
-              column_net: P5
-              row_net: P14
-          home: # S
-            mirror: # L
-              column_net: P5
-              row_net: P16
-          upper: # W
-            mirror: # O
-              column_net: P5
-              row_net: P10
-          num: # 2
-            mirror: # 9
-              column_net: P5
-              row_net: P15
+          home: # S -> L
+          upper: # W -> O
+          num: # 2 -> 9
       three:
         key.stagger: 3
         key.column_net: P8
+        key.mirror.column_net: P4
         rows:
           mod.skip: true # no mod-row key here
-          lower: # C
+          lower: # C -> ,
             bind: 0
-            mirror: # ,
-              column_net: P4
-              row_net: P14
-          home: # D
-            mirror: # K
-              column_net: P4
-              row_net: P16
-          upper: # E
-            mirror: # I
-              column_net: P4
-              row_net: P10
-          num: # 3
-            mirror: # 8
-              column_net: P4
-              row_net: P15
+          home: # D -> K
+          upper: # E -> I
+          num: # 3 -> 8
       four:
         key.stagger: -3
         key.column_net: P7
+        key.mirror.column_net: P3
         rows:
           mod.skip: true
-          lower: # V
+          lower: # V -> M
             bind: 0
-            mirror: # M
-              column_net: P3
-              row_net: P14
-          home: # F
-            mirror: # J
-              column_net: P3
-              row_net: P16
-          upper: # R
-            mirror: # U
-              column_net: P3
-              row_net: P10
-          num: # 4
-            mirror: # 7
-              column_net: P3
-              row_net: P15
+          home: # F -> J
+          upper: # R -> U
+          num: # 4 -> 7
       five:
         key.stagger: -3
         key.column_net: P6
+        key.mirror.column_net: P20
         rows:
           mod.skip: true
-          lower: # B
+          lower: # B -> N
             bind: 0
-            mirror: # N
-              column_net: P20
-              row_net: P14
-          home: # G
-            mirror: # H
-              column_net: P20
-              row_net: P16
-          upper: # T
-            mirror: # Y
-              column_net: P20
-              row_net: P10
-          num: # 5
-            mirror: # 6
-              column_net: P20
-              row_net: P15
-    # row_net is constant per row (left mapping); mirrored keys override it.
+          home: # G -> H
+          upper: # T -> Y
+          num: # 5 -> 6
+    # Per-row nets: row_net is the left mapping; mirror.row_net the right half's.
+    # (The matrix mod row is never mirrored, so it needs no mirror.row_net.)
     rows:
       mod.row_net: P10
-      lower.row_net: P16
-      home.row_net: P14
-      upper.row_net: P15
-      num.row_net: P5
+      lower:
+        row_net: P16
+        mirror.row_net: P14
+      home:
+        row_net: P14
+        mirror.row_net: P16
+      upper:
+        row_net: P15
+        mirror.row_net: P10
+      num:
+        row_net: P5
+        mirror.row_net: P15
   # --- Extra keys: the right half's inner columns ---
   # Right counterparts to the left's mirror.skip columns, defined explicitly
   # because they differ (backspace, punctuation, right mods). 9u right.
@@ -273,22 +245,22 @@ points:
       screw_left: $unset
       screw_right: true
     anchor:
-      - ref: matrix_one_home
-        shift: [-9.5, 9.525]
+      ref: matrix_one_home
+      shift: [-9.5, 9.525]
   zones.screw_left_center:
     mirror: *screw_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
-      - ref: matrix_three_home
-        shift: [-10.15, -12.525]
+      ref: matrix_three_home
+      shift: [-10.15, -12.525]
   zones.screw_left_right:
     mirror: *screw_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
-      - ref: matrix_five_home
-        shift: [-8.85, 9.525]
+      ref: matrix_five_home
+      shift: [-8.85, 9.525]
 
 # --- Outlines: Board shape, cutouts, and geometric features ---
 outlines:
@@ -420,8 +392,6 @@ outlines:
     - name: _boundsright
       operation: stack
 
-# Example:
-# https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
 pcbs:
   left:
     template: kicad8 # ceoloide footprints need KiCad 8
@@ -464,7 +434,7 @@ pcbs:
         what: mcu_liatris
         where:
           ref: matrix_five_num
-          shift: [mcu_x, mcu_y]
+          shift: [mcu_reset_x, mcu_y]
         params: &mcu_params
           side: F
           reversible: false
@@ -477,7 +447,7 @@ pcbs:
         where:
           ref: matrix_five_home
           rotate: 270
-          shift: [mcu_x, reset_y]
+          shift: [mcu_reset_x, reset_y]
         params:
           from: GND
           to: RST
@@ -490,7 +460,7 @@ pcbs:
         what: ceoloide/trrs_pj320a
         where:
           ref: matrix_five_num
-          shift: [trrs_x, trrs_y]
+          shift: [trrs_tvs_resistor_x, trrs_y]
         params:
           TP: VCC # 1  Tip
           R2: DATA_RAW # 3 Ring 2 (via TVS to GND, 100Ω to P0)
@@ -506,7 +476,7 @@ pcbs:
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [trrs_x, tvs_y] # near the R2 pad (reversible THT, no side)
+          shift: [trrs_tvs_resistor_x, tvs_y] # near the R2 pad (reversible THT, no side)
         params:
           from: DATA_RAW
           to: GND
@@ -518,7 +488,7 @@ pcbs:
         where:
           ref: matrix_five_num
           rotate: 90 # P0 pad on the left
-          shift: [trrs_x, resistor_y]
+          shift: [trrs_tvs_resistor_x, resistor_y]
         params:
           designator: R # ref prefix R<n>
           label_1: "" # value+part shown by the silk label instead
@@ -529,26 +499,18 @@ pcbs:
       # --- Silkscreen credit text: top pinky-side margin, both silk layers ---
       # reversible -> a copy on F+B silk. Center-justified so the back copy
       # mirrors onto the same spot. Centered over the pinky top corner. Left half.
-      credit_name: &credit_name
+      label_credit: &label_credit
         what: ceoloide/utility_text
         where:
           ref: matrix_zero_num
-          shift: [credit_x_left, credit_name_y]
-        params: &credit_params
+          shift: [label_credit_x_left, label_credit_y]
+        params:
           reversible: true
           layer: SilkS
           height: 1.2
           width: 1.2
           thickness: 0.18
-          text: '\"Splinter\" keyboard v4 by @andornaut'
-      credit_url: &credit_url
-        what: ceoloide/utility_text
-        where:
-          ref: matrix_zero_num
-          shift: [credit_x_left, credit_url_y]
-        params:
-          <<: *credit_params
-          text: https://github.com/andornaut/splinter-keyboard
+          text: '\"Splinter\" keyboard v4 by @andornaut\nhttps://github.com/andornaut/splinter-keyboard'
       # --- Component labels (silkscreen, both sides) ---
       # Reversible texts below each component, on the same refs; the right half
       # re-anchors to mirror_ refs (x-shift auto-flips).
@@ -556,7 +518,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [mcu_x, label_mcu_y]
+          shift: [mcu_reset_x, label_mcu_y]
         params: &label_params
           reversible: true
           layer: SilkS
@@ -568,7 +530,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_trrs_y]
+          shift: [trrs_tvs_resistor_x, label_trrs_y]
         params:
           <<: *label_params
           text: TRRS
@@ -576,7 +538,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_tvs_y]
+          shift: [trrs_tvs_resistor_x, label_tvs_y]
         params:
           <<: *label_params
           text: 'TVS\nLittelfuse\nSMF3.3CA'
@@ -584,7 +546,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_resistor_y]
+          shift: [trrs_tvs_resistor_x, label_resistor_y]
         params:
           <<: *label_params
           text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split to fit the narrow channel
@@ -592,7 +554,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_home
-          shift: [mcu_x, label_reset_y]
+          shift: [mcu_reset_x, label_reset_y]
         params:
           <<: *label_params
           text: 'Reset switch\nE-Switch\nTL3342F450QG'
@@ -642,7 +604,7 @@ pcbs:
         <<: *mcu
         where:
           ref: mirror_matrix_five_num
-          shift: [mcu_x, mcu_y]
+          shift: [mcu_reset_x, mcu_y]
         # Side B (not the left's F): mcu_liatris can't mirror in-plane, so the
         # side flip reflects its pads while keeping the USB at the top.
         params:
@@ -653,62 +615,60 @@ pcbs:
         where:
           ref: mirror_matrix_five_home
           rotate: 270
-          shift: [mcu_x, reset_y]
+          shift: [mcu_reset_x, reset_y]
       trrs:
         <<: *trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_x, trrs_y]
+          shift: [trrs_tvs_resistor_x, trrs_y]
       data_tvs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_num
           rotate: 180 # mirror A/K (bidirectional, irrelevant)
-          shift: [trrs_x, tvs_y]
+          shift: [trrs_tvs_resistor_x, tvs_y]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_num
-          rotate: 90 # mirror of the left
-          shift: [trrs_x, resistor_y]
+          # Same value as the left, NOT 270: the mirror_ ref auto-negates the
+          # rotation (renders as -90), so this is already the left's mirror image
+          # and P0 still faces the MCU. Setting 270 here would double-flip it.
+          rotate: 90
+          shift: [trrs_tvs_resistor_x, resistor_y]
       # Right half: centered over the outer (pinky) top corner, mirroring the
       # left half's placement.
-      credit_name:
-        <<: *credit_name
+      label_credit:
+        <<: *label_credit
         where:
           ref: extra_equal_num
-          shift: [credit_x_right, credit_name_y]
-      credit_url:
-        <<: *credit_url
-        where:
-          ref: extra_equal_num
-          shift: [credit_x_right, credit_url_y]
+          shift: [label_credit_x_right, label_credit_y]
       # Right half component labels: mirror_ refs auto-flip the x-shift.
       label_mcu:
         <<: *label_mcu
         where:
           ref: mirror_matrix_five_num
-          shift: [mcu_x, label_mcu_y]
+          shift: [mcu_reset_x, label_mcu_y]
       label_trrs:
         <<: *label_trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_x, label_trrs_y]
+          shift: [trrs_tvs_resistor_x, label_trrs_y]
       label_tvs:
         <<: *label_tvs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_x, label_tvs_y]
+          shift: [trrs_tvs_resistor_x, label_tvs_y]
       label_resistor:
         <<: *label_resistor
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_x, label_resistor_y]
+          shift: [trrs_tvs_resistor_x, label_resistor_y]
       label_reset:
         <<: *label_reset
         where:
           ref: mirror_matrix_five_home
-          shift: [mcu_x, label_reset_y]
+          shift: [mcu_reset_x, label_reset_y]
       label_screw_ll:
         <<: *label_screw_ll
         where:
