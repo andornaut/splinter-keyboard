@@ -24,12 +24,12 @@ units:
   credit_x_right: u/2 -24.775 # rel. extra_equal_num (right pinky)
   # --- Component silk label offsets (shared by both halves; x reuses mcu_x/trrs_x
   # since each label is centered under its component) ---
-  label_mcu_y: -20.7 # below the MCU body
+  label_mcu_y: -20 # below the MCU body
   label_trrs_y: 1.4 # below the TRRS jack
-  label_tvs_y: -5.2 # below the TVS
+  label_tvs_y: -4.5 # below the TVS
   label_resistor_y: -19.2 # below the resistor
-  label_reset_y: 2.0 # below the reset button
-  screw_label_dx: 4.6 # M3 label offset to the side of each hole
+  label_reset_y: 1.5 # below the reset button
+  label_screw_dx: 4.6 # M3 label offset to the side of each hole
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
@@ -638,7 +638,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: screw_left_left
-          shift: [-screw_label_dx, 0] # left of the hole (open border side)
+          shift: [-label_screw_dx, 0] # left of the hole (open border side)
         params:
           reversible: true
           layer: SilkS
@@ -650,12 +650,12 @@ pcbs:
         <<: *label_screw_ll
         where:
           ref: screw_left_center
-          shift: [-screw_label_dx, 0]
+          shift: [-label_screw_dx, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: screw_left_right
-          shift: [screw_label_dx, 0] # right of the hole
+          shift: [label_screw_dx, 0] # right of the hole
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -751,14 +751,14 @@ pcbs:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_left
-          shift: [-screw_label_dx, 0]
+          shift: [-label_screw_dx, 0]
       label_screw_lc:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_center
-          shift: [-screw_label_dx, 0]
+          shift: [-label_screw_dx, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_right
-          shift: [screw_label_dx, 0]
+          shift: [label_screw_dx, 0]
