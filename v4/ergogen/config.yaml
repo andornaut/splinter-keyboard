@@ -1,29 +1,27 @@
 meta:
-  engine: 4.2.1 # Min Ergogen version; matches the ergogen dependency in package.json
+  engine: 4.2.1 # min; matches package.json ergogen dep
 
 # --- Units: Common measurements used throughout the config ---
 units:
-  c: 14 # Cherry MX switch cutout/hole length in mm
-  s: 16 # Cherry MX switches are 15.6mm at their widest
-  u: U # Key pitch. Set to ergogen's built-in U (19.05mm); ergogen's own default u is 19mm
-  # --- MCU/TRRS placement (shifts off matrix_five_num, shared by both halves) ---
-  mcu_x: 18 # MCU/reset column x-offset from matrix_five_num
-  mcu_y: -2.25 # MCU y-offset from matrix_five_num
-  reset_y: 9.525 # Reset button y-offset; level with adjacent mounting hole (screw_*_right)
-  trrs_x: mcu_x + 13 # TRRS jack x; TVS and resistor stack at the same x
-  trrs_y: 15 # TRRS jack y
-  tvs_y: trrs_y - 16 # data-line TVS, below the TRRS jack (near the R2 data pad)
-  resistor_y: trrs_y - 30 # data-line resistor; dropped beside the MCU's lower edge so its 0.8mm part-number label fits full-width below the MCU
+  c: 14 # MX cutout/hole length
+  s: 16 # MX widest is 15.6mm
+  u: U # key pitch (ergogen U = 19.05mm)
+  # --- MCU/TRRS placement (off matrix_five_num, both halves) ---
+  mcu_x: 18 # MCU/reset x
+  mcu_y: -2.25 # MCU y
+  reset_y: 9.525 # level with the screw_*_right hole
+  trrs_x: mcu_x + 13 # TRRS/TVS/resistor x
+  trrs_y: 15 # TRRS y
+  tvs_y: trrs_y - 16 # TVS, near the R2 data pad
+  resistor_y: trrs_y - 30 # dropped low so its label fits below the MCU
   # --- Silkscreen credit text offsets (shared by both halves) ---
-  # Text is CENTER-justified so the reversible back copy mirrors onto the same
-  # on-board spot (left/right-justified text mirrors about the anchor, landing
-  # off the board edge). x centers the ~45.6mm URL ~1.5mm inside each pinky edge.
-  credit_name_y: 14.0 # first line, near the top edge
-  credit_url_y: 11.5 # second line, just below credit_name
-  credit_x_left: -u/2 -u +24.775 # rel. matrix_zero_num (left pinky)
-  credit_x_right: u/2 -24.775 # rel. extra_equal_num (right pinky)
-  # --- Component silk label offsets (shared by both halves; x reuses mcu_x/trrs_x
-  # since each label is centered under its component) ---
+  # Center-justified so the reversible back copy mirrors onto the same spot
+  # (left/right-justify would land it off the edge). x centers the URL ~1.5mm in.
+  credit_name_y: 14.0 # line 1
+  credit_url_y: 11.5 # line 2
+  credit_x_left: -u/2 -u +24.775 # left pinky
+  credit_x_right: u/2 -24.775 # right pinky
+  # --- Component label offsets (x reuses mcu_x/trrs_x; labels centered on the component) ---
   label_mcu_y: -20
   label_trrs_y: 1.5
   label_tvs_y: -4.5
@@ -36,19 +34,13 @@ points:
   # --- Main key matrix: standard alphanumeric and modifier keys ---
   zones.matrix:
     anchor:
-      # --- Absolute origin (cosmetic) ---
-      # The only absolute-coordinate value in the config; every other point is
-      # relative to the matrix, so this just slides the whole design around the
-      # sheet. Its exact value does not matter: scripts/recenter.py (run by
-      # `npm run build`) re-centers each PCB on its own sheet afterward. It used
-      # to carry fractional offsets to land the bbox center on (120, 160), but
-      # recenter.py makes that unnecessary, so it's kept to whole numbers.
+      # Absolute origin (cosmetic): the only absolute coord; just slides the
+      # design on the sheet. recenter.py (run by `npm run build`) re-centers each
+      # PCB afterward, so the exact value doesn't matter.
       shift: [69, -192]
-    # The left half is the source of truth; each key is mirrored across the
-    # gap to build the right half. Keys marked `mirror.skip: true` below are
-    # left-only: their right-half counterparts are defined separately in
-    # zones.extra (the right-hand inner columns) and the thumbcluster, so they
-    # must not be auto-mirrored or they would be generated twice.
+    # Left half is the source of truth, mirrored to build the right. Keys marked
+    # `mirror.skip: true` are left-only; their right counterparts live in
+    # zones.extra and the thumbcluster, so must not be auto-mirrored.
     mirror:
       ref: matrix_five_num
       distance: 5u
@@ -124,7 +116,7 @@ points:
         key.stagger: 3
         key.column_net: P8
         rows:
-          mod.skip: true # No bottom-most (mod-row) key in this column
+          mod.skip: true # no mod-row key here
           lower: # C
             bind: 0
             mirror: # ,
@@ -186,8 +178,7 @@ points:
             mirror: # 6
               column_net: P20
               row_net: P15
-    # row_net is constant per row across the matrix (left/base mapping); the
-    # mirrored right-half keys override it in their per-key `mirror:` blocks.
+    # row_net is constant per row (left mapping); mirrored keys override it.
     rows:
       mod.row_net: P10
       lower.row_net: P16
@@ -195,10 +186,8 @@ points:
       upper.row_net: P15
       num.row_net: P5
   # --- Extra keys: the right half's inner columns ---
-  # These are the right-hand counterparts to the left columns that carry
-  # `mirror.skip: true` above. They are defined explicitly (rather than
-  # mirrored) because the right inner cluster differs from the left: backspace,
-  # punctuation, and the right modifiers. Anchored 9u right of the left half.
+  # Right counterparts to the left's mirror.skip columns, defined explicitly
+  # because they differ (backspace, punctuation, right mods). 9u right.
   zones.extra:
     key.tags.right: true
     anchor:
@@ -246,7 +235,7 @@ points:
       ref: matrix_four_lower
       shift: [-3.45, -1u -3]
     key.tags.left: true
-    key.row_net: P10 # every thumb key is on the mod row (left/base mapping)
+    key.row_net: P10 # all thumb keys on the mod row
     key.mirror.tags:
       left: $unset
       right: true
@@ -272,11 +261,9 @@ points:
         column_net: P6
         mirror:
           column_net: P20
-  # --- Screw zones: mounting hole anchors. The left side is the source of
-  # truth; each hole is mirrored across the matrix axis (same ref/distance as
-  # the matrix) to generate its right-half twin (mirror_screw_*). The
-  # screw_left / screw_right tags drive per-PCB footprint placement; the
-  # /screw/ name regex drives the outline cutouts (matches both halves). ---
+  # --- Screw zones: mounting-hole anchors. Left is the source of truth, mirrored
+  # across the matrix axis to the right (mirror_screw_*). screw_left/screw_right
+  # tags drive per-PCB footprints; the /screw/ regex drives the outline cutouts. ---
   zones.screw_left_left:
     mirror: &screw_mirror
       ref: matrix_five_num
@@ -308,16 +295,13 @@ outlines:
   _boxleft:
     - what: polygon
       points:
-        # Outer (pinky) edge: mirror of the right half's outer edge (the right
-        # half sets the 158mm width via its extra inner column). The left pinky
-        # ends up well clear of its keys.
+        # Outer (pinky) edge: mirror of the right's outer edge (right sets the
+        # 158mm width). Left pinky ends up well clear of its keys.
         - ref: matrix_zero_num
           shift: [-u/2 -u +0.475, u/2 +5.75]
 
-        # Cutout for USB-c port
-        # Centered on the Liatris USB socket, which sits 0.127mm left of the
-        # MCU origin (socket outline spans local x -3.81..+3.556). The left MCU
-        # is un-rotated, so subtract 0.127 from the 13/23 edges.
+        # USB-C cutout, centered on the Liatris socket (0.127mm left of the MCU
+        # origin). Left MCU un-rotated, so subtract 0.127 from the 13/23 edges.
         - ref: matrix_five_num
           shift: [13 - 0.127, u/2 +5.75]
         - ref: matrix_five_num
@@ -339,11 +323,8 @@ outlines:
         - ref: mirror_matrix_five_num
           shift: [u + 15.6, u/2 +5.75]
 
-        # Cutout for USB-c port
-        # Perfect mirror of the left half: same -0.127 socket-centering offset
-        # (ergogen flips the x-shift for mirror_* refs, so the same expression
-        # lands at the mirrored position). The right MCU is oriented to put its
-        # USB socket at the top, matching the left.
+        # USB-C cutout, mirror of the left (ergogen flips x-shift for mirror_*
+        # refs). Right MCU oriented to put the USB at the top, matching the left.
         - ref: mirror_matrix_five_num
           shift: [23 - 0.127, u/2 +5.75]
         - ref: mirror_matrix_five_num
@@ -353,11 +334,9 @@ outlines:
         - ref: mirror_matrix_five_num
           shift: [13 - 0.127, u/2 +5.75]
 
-        # Outer (pinky) edge: the right half is the wider one (it has an extra
-        # inner column), so it sets the board width. Pulled in 0.475 from the
-        # outer key hull to round the half width down from 158.475 to 158mm.
-        # That -0.475 cuts ~0.475 into the outer key's 1u hull but stays ~1mm
-        # clear of the switch -- fine in practice. The left half mirrors this.
+        # Outer (pinky) edge: the right is wider (extra inner column), so it sets
+        # the board width. Pulled in 0.475 to round 158.475 -> 158mm; cuts into
+        # the key hull but stays ~1mm clear of the switch. Left mirrors this.
         - ref: extra_equal_num
           shift: [u/2 -0.475, u/2 +5.75]
         - ref: extra_equal_lower
@@ -386,12 +365,9 @@ outlines:
     - what: rectangle
       where: right
       size: c
-  # Binding is scoped to the thumb cluster only. The main matrix is fully
-  # enclosed by the box, so binding those keys would add 1u key-hulls that poke
-  # above the box top edge and pin it 0.271mm high (forcing a subtract to get a
-  # flat 119mm top). The thumb cluster sits below the box bottom, so it still
-  # needs its hull. Scoping the binding here lets the box govern the matrix
-  # outline directly -- no top-trim subtract needed.
+  # Binding scoped to the thumb cluster only: the matrix is enclosed by the box,
+  # so binding it would poke 1u hulls above the top edge (needing a trim). The
+  # thumb cluster sits below the box, so it still needs its hull.
   _thumbbindingleft:
     - what: rectangle
       where: /^thumbcluster/
@@ -448,7 +424,7 @@ outlines:
 # https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
 pcbs:
   left:
-    template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
+    template: kicad8 # ceoloide footprints need KiCad 8
     outlines:
       main.outline: _wallsleft
       keycaps:
@@ -493,7 +469,7 @@ pcbs:
           side: F
           reversible: false
           reverse_mount: true
-          include_extra_pins: false # GP12-GP16 are unused; omit pads + silk labels
+          include_extra_pins: false # GP12-GP16 unused
       # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button
@@ -506,13 +482,9 @@ pcbs:
           to: RST
           side: B
       # --- TRRS Jack: HCTL HC-PJ-320A-4P-D ---
-      # Hot-unplug mitigation: GND on the sleeve (last contact to break on
-      # withdrawal, so the two halves keep a common ground/return path), serial
-      # data on an interior ring (R2), VCC on the tip. Matches the footprint
-      # header recommendation in ceoloide/trrs_pj320a.js.
-      # DATA_RAW is the un-protected net between the jack ring and the data-line
-      # protection (TVS + series resistor); after the resistor it becomes P0 and
-      # goes to the MCU.
+      # Hot-unplug mitigation: GND on the sleeve (last to break), data on ring R2,
+      # VCC on the tip (per ceoloide/trrs_pj320a.js). DATA_RAW is the unprotected
+      # jack-side net; after the TVS+resistor it becomes P0 to the MCU.
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
@@ -520,49 +492,42 @@ pcbs:
           shift: [trrs_x, trrs_y]
         params:
           TP: VCC # 1  Tip
-          R2: DATA_RAW # 3  Ring 2  Routed via TVS (to GND) and 100Ω resistor (to P0/MCU)
+          R2: DATA_RAW # 3 Ring 2 (via TVS to GND, 100Ω to P0)
           SL: GND # 4  Sleeve
           reversible: true
           side: B
           # Symmetric uses only TP/R2/SL, which is exactly this 3-net pinout
           symmetric: true
-      # --- Data-line TVS: Littelfuse SMF3.3CA (SOD-123FL, bidirectional, 3.3V) ---
-      # Clamps transients on the TRRS data line (e.g. hot-unplug) before they
-      # reach the MCU. Reference D<n>; value SMF3.3CA.
-      #   pad "A" (anode)   = from = DATA_RAW  (the un-protected jack-side net)
-      #   pad "K" (cathode) = to   = GND       (clamp return)
-      # Bidirectional, so A/K orientation is electrically irrelevant here.
+      # --- Data-line TVS: Littelfuse SMF3.3CA (SOD-123FL, bidirectional 3.3V) ---
+      # Clamps data-line transients (e.g. hot-unplug) before the MCU.
+      # from=A=DATA_RAW, to=K=GND; bidirectional so A/K orientation is irrelevant.
       data_tvs: &data_tvs
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [trrs_x, tvs_y] # below TRRS jack body, near R2 (data) pad (reversible THT footprint, no side)
+          shift: [trrs_x, tvs_y] # near the R2 pad (reversible THT, no side)
         params:
           from: DATA_RAW
           to: GND
       # --- Data-line series resistor: 100Ω 0805 (Panasonic ERJ-6ENF1000V) ---
-      # In series between the DATA_RAW node and the MCU's GP1 (P0) pin; limits
-      # residual surge current after the TVS. Reference R<n>; "100R" silk label.
-      #   pad 1 = net_1_from = DATA_RAW (TVS/jack side)
-      #   pad 2 = net_1_to   = P0       (MCU side)
+      # In series from DATA_RAW (net_1_from) to the MCU's P0/GP1 (net_1_to);
+      # limits residual surge current after the TVS.
       data_resistor: &data_resistor
         what: infused-kim/smd_0805
         where:
           ref: matrix_five_num
-          rotate: 90 # P0 pad on the left (pads stack vertically by default)
+          rotate: 90 # P0 pad on the left
           shift: [trrs_x, resistor_y]
         params:
-          designator: R # reference prefix -> R<n> (not the generic "SMD")
-          label_1: "" # value+part are on the 100R/ERJ-6ENF1000V silk label below the MCU
+          designator: R # ref prefix R<n>
+          label_1: "" # value+part shown by the silk label instead
           components: 1
           net_1_from: DATA_RAW
           net_1_to: P0
           side: B
       # --- Silkscreen credit text: top pinky-side margin, both silk layers ---
-      # Two single-line gr_texts (avoids multi-line newline escaping). reversible
-      # puts a correctly-oriented copy on F.SilkS and B.SilkS. Center-justified so
-      # the back copy mirrors onto the same on-board region; centered over the
-      # pinky (outer) top corner. Left half.
+      # reversible -> a copy on F+B silk. Center-justified so the back copy
+      # mirrors onto the same spot. Centered over the pinky top corner. Left half.
       credit_name: &credit_name
         what: ceoloide/utility_text
         where:
@@ -583,10 +548,9 @@ pcbs:
         params:
           <<: *credit_params
           text: https://github.com/andornaut/splinter-keyboard
-      # --- Component identification labels (silkscreen, both sides) ---
-      # Small reversible texts placed in the gaps below each component. Anchored
-      # to the same matrix refs as the components; the right half re-anchors to
-      # the mirror_ refs (x-shift auto-flips) for symmetric placement.
+      # --- Component labels (silkscreen, both sides) ---
+      # Reversible texts below each component, on the same refs; the right half
+      # re-anchors to mirror_ refs (x-shift auto-flips).
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:
@@ -622,7 +586,7 @@ pcbs:
           shift: [trrs_x, label_resistor_y]
         params:
           <<: *label_params
-          text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split so each line fits the narrow channel
+          text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split to fit the narrow channel
       label_reset: &label_reset
         what: ceoloide/utility_text
         where:
@@ -631,9 +595,8 @@ pcbs:
         params:
           <<: *label_params
           text: 'Reset switch\nE-Switch\nTL3342F450QG'
-      # Screw labels: one per hole, placed beside each hole (directly below is
-      # blocked by the surrounding key field). Anchored to each screw point
-      # individually so each goes to its hole's open side.
+      # Screw labels: beside each hole (directly below is blocked by keys),
+      # anchored per-hole so each goes to its open side.
       label_screw_ll: &label_screw_ll
         what: ceoloide/utility_text
         where:
@@ -679,10 +642,8 @@ pcbs:
         where:
           ref: mirror_matrix_five_num
           shift: [mcu_x, mcu_y]
-        # Flipped to the back (side B), not the left's front. mcu_liatris can't
-        # mirror in-plane, so a side flip is what reflects its pads to mirror
-        # the left half while keeping the USB at the top. (rotate: 180 mirrored
-        # x but swung the USB to the bottom.)
+        # Side B (not the left's F): mcu_liatris can't mirror in-plane, so the
+        # side flip reflects its pads while keeping the USB at the top.
         params:
           <<: *mcu_params
           side: B
@@ -701,13 +662,13 @@ pcbs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_num
-          rotate: 180 # flips A/K to mirror the left half (bidirectional TVS, electrically irrelevant)
+          rotate: 180 # mirror A/K (bidirectional, irrelevant)
           shift: [trrs_x, tvs_y]
       data_resistor:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_num
-          rotate: 90 # P0 pad toward the MCU, mirroring the left half
+          rotate: 90 # mirror of the left
           shift: [trrs_x, resistor_y]
       # Right half: centered over the outer (pinky) top corner, mirroring the
       # left half's placement.
