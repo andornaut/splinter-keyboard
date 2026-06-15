@@ -80,26 +80,26 @@ Neither change affects firmware: the serial pin is still GP1.
 
 | Description | Quantity | Part |
 | --- | --- | --- |
-| Diodes | 62 | [1N4148W](https://www.lcsc.com/product-detail/C81598.html) (C81598, SOD-123 switching) |
+| Diodes | 62 | [1N4148W](https://www.lcsc.com/product-detail/C81598.html) (C81598, SOD-123 switching; JLCPCB Basic, alt Jingdao C115103) |
 | Hot swap sockets | 62 | [Adafruit 4958](https://www.digikey.ca/en/products/detail/adafruit-industries-llc/4958/13997772) (Kailh CPG151101S11 MX hotswap socket; DigiKey 1528-4958-ND, 20/pack) |
 | Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986) |
 | Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) |
 | Microcontrollers | 2 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) |
-| Resistors | 2 | [100Ω 0805 1%](https://www.lcsc.com/product-detail/C17408.html) (C17408, UNI-ROYAL 0805W8F1000T5E) |
+| Resistors | 2 | [100Ω 0805 1%](https://www.lcsc.com/product-detail/C17408.html) (C17408, UNI-ROYAL 0805W8F1000T5E; JLCPCB Basic, alt YAGEO C105577) |
 | Screws | 2 | [M3x8mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG) |
 | Screws | 2 | [M3x10mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG) |
 | Silicon bumpers | 8 | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html) |
 | Sockets (12-pin) | 4 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000) ([Series documentation](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2481/310%2C%20311%2C%20315%20Series%20%28in.%29.pdf)) |
 | Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030) |
-| Switches/buttons (reset) | 2 | [5.2mm SMD tact switch](https://www.lcsc.com/product-detail/C115351.html) (C115351, SKQG package) |
+| Switches/buttons (reset) | 2 | [5.2mm SMD tact switch](https://www.lcsc.com/product-detail/C115351.html) (C115351, ALPS SKQGABE010; JLCPCB Extended, alt ALPS SKQGAFE010 C202424; hand-soldered, not JLC-assembled) |
 | Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/products/made-for-voron-gewindeeinsatz-threaded-insert-m3x5x4-100-stk-pcs) |
 | TRRS cables | 1 | [King Cables TRRS Cable](https://www.kingcables.org/) |
 | TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html) |
-| TVS diodes | 2 | [Littelfuse SMF5.0CA](https://www.lcsc.com/product-detail/C1851363.html) (C1851363, SOD-123FL bidirectional, 5V standoff) |
+| TVS diodes | 2 | [Littelfuse SMF5.0CA](https://www.lcsc.com/product-detail/C1851363.html) (C1851363, SOD-123FL bidirectional, 5V standoff; JLCPCB Extended, low stock, re-confirm before ordering; alt MDD C364279, TWGMC C726939) |
 
 ## Fabrication (JLCPCB)
 
-JLCPCB assembles the four SMD parts that have an LCSC link (diode, resistor, TVS, reset switch). Everything else is sourced separately and hand-soldered or hand-assembled. The MCU (Liatris), TRRS jack, and hotswap sockets are **Do-Not-Place**; their LCSC/vendor links are for sourcing only. The hotswap sockets stay off the assembly BOM on purpose: they are Standard-only and not stocked for JLC assembly, so including them would push the order to JLCPCB's pricier **Standard** PCBA service instead of the cheaper **Economic** one.
+JLCPCB assembles the three SMD parts that have an LCSC link (diode, resistor, TVS). Everything else is sourced separately and hand-soldered or hand-assembled. The MCU (Liatris), TRRS jack, reset switch, and hotswap sockets are **Do-Not-Place**; their LCSC/vendor links are for sourcing only. The hotswap sockets stay off the assembly BOM on purpose: they are Standard-only and not stocked for JLC assembly, so including them would push the order to JLCPCB's pricier **Standard** PCBA service instead of the cheaper **Economic** one.
 
 `npm run fab-jlcpcb` exports everything JLCPCB needs from the routed masters `v4/kicad/routed/{left,right}.kicad_pcb` to `dist/v4/kicad/jlcpcb/{left,right}/`:
 
@@ -110,7 +110,7 @@ JLCPCB assembles the four SMD parts that have an LCSC link (diode, resistor, TVS
 
 LCSC part numbers live in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json), not in the `.kicad_pcb`, so they survive when Ergogen regenerates the boards. The file is keyed by **footprint name** (the `Package` column of the position file), because the generated footprints have empty `Value` fields. Each entry has `lcsc`, `comment` (BOM Comment), `package` (BOM Footprint), and `rotation` (added to KiCad's angle to fix pick-and-place orientation). `scripts/gen-jlcpcb-bom-cpl.py` joins this against the position file:
 
-* footprint **absent** from the JSON → Do-Not-Place (MCU, TRRS jack, mounting holes)
+* footprint **absent** from the JSON → Do-Not-Place (MCU, TRRS jack, reset switch, mounting holes)
 * footprint present with **empty `lcsc`** → error; nothing is written until you fill it in
 * footprint present with **`lcsc` set** → placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
 
