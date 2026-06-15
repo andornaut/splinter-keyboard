@@ -1,3 +1,22 @@
+// sod-123w: reversible, side-agnostic SOD-123W diode (the matrix diode in v3).
+// Silk and fab are drawn on both F and B, and the two pads are plated through
+// holes (0.3mm drill on *.Cu), so the same land works whichever side the diode
+// is hand-soldered to.
+//
+// Source: silk, fab, courtyard, and pad geometry copied verbatim from KiCad's
+//   stock Diode_SMD:Nexperia_CFP3_SOD-123W footprint, then wrapped as an Ergogen
+//   JS footprint and made reversible (both-side graphics, through-hole pads).
+//   Package outline:
+//   https://assets.nexperia.com/documents/outline-drawing/SOD123W.pdf
+// License: derived from the KiCad library footprints, CC-BY-SA-4.0 with the
+//   KiCad library exception (https://www.kicad.org/libraries/license/).
+//
+// Superseded in v4 by ceoloide/diode_tht_sod123 (SMD, single-side, side-aware);
+// kept for v3, which still references it.
+//
+// Params:
+//   from / to   pad nets. Pad "1" = cathode (banded end) = `to`; pad "2" = anode
+//               = `from`.
 module.exports = {
     params: {
         designator: 'D',

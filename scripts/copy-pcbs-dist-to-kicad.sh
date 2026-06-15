@@ -13,7 +13,7 @@ backup_dir="${dst_dir}/backups"
 
 require_pcbs "$src_dir" "No generated PCBs in ${src_dir}/ -- run 'npm run build' first."
 mkdir -p "$backup_dir"
-stamp="$(date +%Y%m%d-%H%M%S)"
+stamp="$(date +%Y-%m-%d_%H%M%S)"
 for f in "${files[@]}"; do
   name="$(basename "$f")"
   existing="${dst_dir}/${name}"

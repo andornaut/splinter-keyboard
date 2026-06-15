@@ -3,6 +3,5 @@ _autosave*
 */kicad/temp-freerouting.dsn
 */kicad/**/fp-info-cache
 */kicad/**/*.lck
-*/kicad/**/*-backups
-*/kicad/backups/
+*/kicad/**/*backups
 */kicad/.history/

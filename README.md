@@ -12,42 +12,42 @@ This repo holds the hardware design files. The design pipeline is: Keyboard Layo
 
 ## Versions
 
-| Version | Keys | MCU | Features | Firmware | Photo |
-| --- | --- | --- | --- | --- | --- |
-| [v4](./v4) | 62 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | Symmetrical enclosures, USB VBUS detection, TRRS data-line protection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | [![v4](./v4/v4-300width.jpg)](./v4/v4.jpg) |
-| [v3](./v3) | 62 | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | Symmetrical enclosures | [splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg) |
-| [v2](./v2) | 62 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Symmetrical enclosures | [splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg) |
-| [v1](./v1) | 61 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Asymmetrical enclosures, traditional layout | [splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg) |
+| Version | MCU | Changes from previous | Firmware | Photo |
+| --- | --- | --- | --- | --- |
+| [v4](./v4) | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | New MCU; added USB VBUS detection and TRRS data-line protection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | [![v4](./v4/v4-300width.jpg)](./v4/v4.jpg) |
+| [v3](./v3) | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | New MCU; switched from AVR to RP2040 | [splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg) |
+| [v2](./v2) | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Switched to columnar layout and symmetrical enclosures; 62 keys | [splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg) |
+| [v1](./v1) | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Initial version: 61 keys, asymmetrical enclosures, traditional staggered layout | [splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg) |
 
 ## Installation
 
 Install the following tools:
 
-* [Ergogen](https://github.com/ergogen/ergogen) - PCB generation from YAML config
-  * [Footprints by ceoloide](https://github.com/ceoloide/ergogen-footprints)
-  * [Helper scripts](https://github.com/infused-kim/kb_ergogen_helper)
-* [KiCad 10](https://www.kicad.org) - PCB editor; its bundled `kicad-cli` generates the gerber/drill and assembly (BOM/CPL) files
+* [KiCad 10](https://www.kicad.org)
+* [Node.js](https://nodejs.org) via [nvm](https://github.com/nvm-sh/nvm)
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
-* [Freerouting](https://github.com/freerouting/freerouting) (optional) - PCB autorouter; KiCad has no built-in autorouter
+* [Python 3](https://www.python.org)
+* [Freerouting](https://github.com/freerouting/freerouting) (optional)
 
 ```bash
 # Include submodules when cloning
 git clone --recursive git@github.com:andornaut/splinter-keyboard.git
 cd splinter-keyboard
 
-# Install dependencies, including Ergogen
-nvm use
+# Install the Node version from .nvmrc, then the deps (including Ergogen)
+nvm install
 npm install
 
 # Install KiCad 10 (provides kicad-cli, used for fab file generation)
+# Or use the Ansible task: https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/electronics.yml
 sudo add-apt-repository ppa:kicad/kicad-10.0-releases
 sudo apt install kicad
 
-# Check out the pinned submodule revisions
+# Fallback only if you cloned without --recursive: fetch the submodules
 git submodule update --init --recursive
 ```
 
-Alternatively, you can install OrcaSlicer, KiCad, and Freerouting using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/master/roles/hobbies/tasks/main.yml) (tags `orcaslicer`, `kicad`, `freerouting`).
+Alternatively, you can install OrcaSlicer, KiCad, and Freerouting using [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/main.yml) (tags `orcaslicer`, `kicad`, `freerouting`).
 
 ### Updating footprint submodules
 
@@ -69,9 +69,9 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 ![Keyboard Layout preview](./v4/keyboard-layout-editor/keyboard-layout-editor.png)
 
-1. Prototype a keyboard layout using [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
-1. Export the layout configuration to [`keyboard-layout-editor/keyboard-layout-editor.json`](./v4/keyboard-layout-editor/keyboard-layout-editor.json), so that you can import it and iterate on it in the future
-1. Use the prototype as inspiration for creating a production-ready design using Ergogen
+1. Prototype a layout in [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/).
+1. Export it to [`keyboard-layout-editor/keyboard-layout-editor.json`](./v4/keyboard-layout-editor/keyboard-layout-editor.json) so you can re-import and iterate later.
+1. Use it as the basis for the production Ergogen design.
 
 ### Step 3. [Ergogen](https://github.com/ergogen/ergogen)
 
@@ -79,26 +79,22 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 ![Ergogen preview](./v4/ergogen/ergogen.png)
 
-1. Run `docker compose up` to start Ergogen GUI (it builds automatically)
-1. Open <http://ergogen.internal> (install [docker_etc_hosts](https://github.com/andornaut/docker_etc_hosts) to manage `/etc/hosts` entries)
-1. Paste in, work on, and then download and save [`ergogen/config.yaml`](./v4/ergogen/config.yaml)
-1. Run `npm run build` to generate and save outlines and pcbs to `dist/v4/ergogen/` then `npm run copy-pcbs-dist-to-kicad`
-    * Alternatively, run `npm run watch` or `npm run watch-and-copy-pcbs-to-kicad`
+1. Run `docker compose up` to start the Ergogen GUI (it builds automatically), then open <http://ergogen.internal> (needs [docker_etc_hosts](https://github.com/andornaut/docker_etc_hosts) for the `/etc/hosts` entry).
+1. Paste in, edit, then download [`ergogen/config.yaml`](./v4/ergogen/config.yaml).
+1. Run `npm run build` to generate outlines and PCBs into `dist/v4/ergogen/`, then `npm run copy-pcbs-dist-to-kicad`. Or use `npm run watch` / `npm run watch-and-copy-pcbs-to-kicad`.
 
 **Notes:**
 
-* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It runs client-side only: no host filesystem access, no sync. Edit there, then copy the result back to `config.yaml` (the source of truth). Use `npm run build` for full builds and PCB generation.
-* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile), since the browser can't load them from disk. It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries. Any custom `what:` not registered there shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
+* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It runs client-side only (no filesystem access, no sync), so edit there and copy back to `config.yaml`, the source of truth. Use `npm run build` for full builds and PCB generation.
+* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) since the browser can't load them from disk. It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries; any unregistered `what:` shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 
 ![KiCad preview](./v4/kicad/kicad.png)
 
-1. Design the PCBs using [KiCad](https://www.kicad.org/)
-1. Run `npm run copy-pcbs-dist-to-kicad` to copy Ergogen's `dist/v4/ergogen/pcbs/*.kicad_pcb` to [`kicad/`](./v4/kicad/) (existing boards are backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb` first).
-1. Run `open ./v4/kicad/left.kicad_pcb`
-1. Route the PCBs in [`kicad/`](./v4/kicad/), and then save them to [`kicad/routed/`](./v4/kicad/routed/)
-   * KiCad has no built-in autorouter. Run `npm run autoroute` to route the working `kicad/*.kicad_pcb` boards in place with [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import). Intermediate files go to `dist/v4/kicad/freerouting/`; it never writes to `kicad/routed/`. Expect to hand-clean the result (the matrix usually routes nicer by hand), then File > Revert to load it. Tune with the env vars below; the defaults aim for a fully-connected, DRC-clean board. Raising via cost trades vias for *unrouted nets* rather than a lower-via layout, so it can't beat hand-routing on via count.
+1. Copy Ergogen's generated boards into [`kicad/`](./v4/kicad/) with `npm run copy-pcbs-dist-to-kicad` (existing boards are first backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb`), then open one: `open ./v4/kicad/left.kicad_pcb`.
+1. Route the boards in [`kicad/`](./v4/kicad/), then `npm run copy-pcbs-kicad-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
+   * KiCad has no built-in autorouter. `npm run autoroute` routes the `kicad/*.kicad_pcb` boards in place via [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import); intermediate files go to `dist/v4/kicad/freerouting/`, never `kicad/routed/`. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. Defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
 
      | Env var | Default |
      | --- | --- |
@@ -109,30 +105,25 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
      | `FREEROUTING_UNDESIRED_DIR_COST` | unset |
      | `FREEROUTING_LOG_LEVEL` | WARN |
 
-   * Once you're happy with the routing, run `npm run copy-pcbs-kicad-to-routed` to copy the PCBs to [`kicad/routed/`](./v4/kicad/routed/)
-   * If you've generated new PCB files using Ergogen, then you can run `npm run copy-traces-routed-to-kicad` to copy traces from the PCBs in [`kicad/routed/`](./v4/kicad/routed/) back to those of the same name in [`kicad/`](./v4/kicad/). Select File > Revert > Yes to refresh the PCB in KiCad.
-1. Run `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` to generate fab files per board into `dist/v4/kicad/jlcpcb/<name>/`. You get `<name>-gerber.zip` (gerbers + drill), plus `<name>-BOM.csv` and `<name>-CPL.csv` for assembly when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
-1. Print (and optionally assemble) the PCBs using [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/) or [PCBWay](https://www.pcbway.com/))
-   * For bare boards, submit each `dist/v4/kicad/jlcpcb/<name>/<name>-gerber.zip` to [JLCPCB](https://jlcpcb.com/).
-   * For assembly (PCBA), also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`, and verify every LCSC part in `jlcpcb-parts.json` is in stock first.
+   * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-kicad` copies traces from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/`](./v4/kicad/) (then File > Revert in KiCad).
+1. Generate fab files with `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` into `dist/v4/kicad/jlcpcb/<name>/`: `<name>-gerber.zip` (gerbers + drill), plus `<name>-BOM.csv` and `<name>-CPL.csv` for assembly when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
+1. Order from [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/), [PCBWay](https://www.pcbway.com/)):
+   * Bare boards: submit each `<name>-gerber.zip`.
+   * Assembly (PCBA): also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`; verify every LCSC part in `jlcpcb-parts.json` is in stock first.
 
 ### Step 5. [OnShape](https://cad.onshape.com)
 
 ![OnShape preview](./v4/onshape/onshape.png)
 
-1. Model the case using [OnShape](https://cad.onshape.com)
-1. Create a new document
-1. Start a new sketch
-1. Select "Insert a DXF or DWG file" > "Import ..." (at the bottom of the dialog) > Select `dist/v4/ergogen/outlines/full.dxf`
-1. Design a keyboard case
-1. Export `*.step` files to [`onshape/`](./v4/onshape/)
+1. In [OnShape](https://cad.onshape.com), create a document and start a sketch.
+1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/v4/ergogen/outlines/full.dxf`.
+1. Design the case, then export `*.step` files to [`onshape/`](./v4/onshape/).
 
 ### Step 6. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
-1. Print the case using [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
-1. Open or create an OrcaSlicer project file
-1. Import `*.step` files from [`onshape/`](./v4/onshape/)
-1. Print the keyboard case
+1. Open or create an OrcaSlicer project.
+1. Import the `*.step` files from [`onshape/`](./v4/onshape/).
+1. Slice and print the case.
 
 ### Step 7. [QMK Firmware](https://qmk.fm/)
 

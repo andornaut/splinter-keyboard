@@ -13,43 +13,39 @@ units:
   reset_y: 9.525 # level with the screw_*_right hole
   trrs_tvs_resistor_x: mcu_reset_x + 13
   trrs_y: 15
-  tvs_y: trrs_y - 16 # TVS, near the R2 data pad
-  resistor_y: trrs_y - 30 # dropped low so its label fits below the MCU
-  # --- Silkscreen credit text offsets (shared by both halves) ---
-  # Single two-line text (name + URL on a \n). Center-justified so the reversible
-  # back copy mirrors onto the same spot (left/right-justify would land it off the
-  # edge). y anchors the block center; x centers the wider URL line (~1.5mm in).
-  label_credit_y: 12.75
-  label_credit_x_left: -u/2 -u +24.775 # left pinky
-  label_credit_x_right: u/2 -24.775 # right pinky
-  # --- Component label y-offsets (silkscreen). Each label reuses its component's
-  # x var, so it sits in the same column; only y here places it above/below.
-  # (label_screw_dx is the exception: a horizontal offset beside each screw hole.) ---
-  label_mcu_y: -21
-  label_trrs_y: 1.7
-  label_tvs_y: -5.0
-  label_resistor_y: -20.0
-  label_reset_y: 3.0
-  # Horizontal offset for the reset pad-net labels, placed just outside the switch
-  # outline at its vertical center beside their pad columns. After the 270/90
-  # rotation the GND column lands on the right of the left half (RST on the left),
-  # so GND uses +dx and RST -dx. The mirror_ ref on the right half auto-flips x,
-  # matching that half's mirrored GND/RST pads.
+  tvs_y: trrs_y - 16
+  resistor_y: tvs_y - 9
+  # --- Silkscreen credit text offsets ---
+  # y is the block center; x centers the wider URL line. Center-justified (see footprint).
+  label_credit_y: 12
+  label_credit_x_left: -u/2 -u +25 # left pinky
+  label_credit_x_right: u/2 -25 # right pinky
+  # --- Component label y-offsets (silkscreen) ---
+  # Each label reuses its component's x var (same column); these set y only.
+  # Hugging labels are relative to the component's y, so they track the part;
+  # label_mcu_y is absolute (parked ~19mm below the MCU, not hugging it).
+  label_mcu_y: -20
+  label_trrs_y: trrs_y - 13
+  label_tvs_y: tvs_y - 4
+  label_resistor_y: resistor_y - 5
+  label_reset_y: reset_y - 6
+  # Reset pad-net label offset. After the 270 rotation GND lands right of the pad
+  # column, RST left, so GND uses +dx and RST -dx; the right half's mirror_ ref flips x.
   label_reset_pad_dx: 4.5
-  label_diode_left_x: -14.3
-  label_diode_left_y: -2.95
-  label_diode_right_x: 0
-  label_diode_right_y: -22
-  label_screw_dx: 4.6
+  # Diode/socket block: one shift off the pinky-side screw hole (a mirror pair),
+  # so both halves share it and ergogen auto-flips x for the right (like the
+  # screw labels). Lands the block in the bottom-pinky margin on each half.
+  label_diode_x: -30
+  label_diode_y: -51
+  label_screw_dx: 5
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
   # --- Main key matrix: standard alphanumeric and modifier keys ---
   zones.matrix:
     anchor:
-      # Absolute origin (cosmetic): the only absolute coord; just slides the
-      # design on the sheet. recenter.py (run by `npm run build`) re-centers each
-      # PCB afterward, so the exact value doesn't matter.
+      # Absolute origin (cosmetic): the only absolute coord. recenter.py (npm run
+      # build) re-centers each PCB afterward, so the value doesn't matter.
       shift: [69, -192]
     # Left half is the source of truth, mirrored to build the right. Keys marked
     # `mirror.skip: true` are left-only; their right counterparts live in
@@ -102,9 +98,8 @@ points:
             mirror.skip: true
           num: # 1
             mirror.skip: true
-      # Columns two-five are mirrored to the right half. The mirror nets are
-      # constant per column (column_net) and per row (row_net, set in `rows`
-      # below), so they're declared once via key.mirror.* rather than per key.
+      # Columns two-five mirror to the right half. Mirror nets are constant per
+      # column/row, so they're declared once via key.mirror.* not per key.
       # Comments show left key -> right (mirrored) key.
       two:
         key.stagger: 3
@@ -425,6 +420,8 @@ pcbs:
         params:
           side: B
           include_tht: false
+          reversible: true # both-side pads so include_traces_vias can route on either layer
+          include_traces_vias: true # via per pad, net routes on either layer (single-side assembly unchanged)
           from: "{{colrow}}"
           to: "{{row_net}}"
       # --- Mounting Hole: Non-plated through hole for M3 screw ---
@@ -491,29 +488,30 @@ pcbs:
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, tvs_y] # near the R2 pad (reversible THT, no side)
+          shift: [trrs_tvs_resistor_x, tvs_y]
         params:
+          side: B # single-side SMD, same side as the diodes (Economic PCBA)
+          include_traces_vias: true # via per pad so the net routes on either layer
           from: DATA_RAW
           to: GND
       # --- Data-line series resistor: 100Ω 0805 1% ---
-      # In series from DATA_RAW (net_1_from) to the MCU's P0/GP1 (net_1_to);
-      # limits residual surge current after the TVS.
+      # In series from DATA_RAW to the MCU's P0/GP1, limiting residual surge current
+      # after the TVS. Non-polar, so from/to is electrically arbitrary.
       data_resistor: &data_resistor
-        what: infused-kim/smd_0805
+        what: r_0805
         where:
           ref: matrix_five_num
-          rotate: 90 # P0 pad on the left
+          rotate: 90 # lays the vertical-default footprint horizontal
           shift: [trrs_tvs_resistor_x, resistor_y]
         params:
           designator: R # ref prefix R<n>
-          label_1: "" # value+part shown by the silk label instead
-          components: 1
-          net_1_from: DATA_RAW
-          net_1_to: P0
-          side: B
+          side: B # single-side SMD, same side as the diodes (Economic PCBA)
+          include_traces_vias: true # via per pad so the net routes on either layer
+          from: DATA_RAW
+          to: P0
       # --- Silkscreen credit text: top pinky-side margin, both silk layers ---
-      # reversible -> a copy on F+B silk. Center-justified so the back copy
-      # mirrors onto the same spot. Centered over the pinky top corner. Left half.
+      # reversible -> copy on F+B silk. Center-justified so the back copy mirrors
+      # onto the same spot. Centered over the pinky top corner.
       label_credit: &label_credit
         what: ceoloide/utility_text
         where:
@@ -527,10 +525,9 @@ pcbs:
           thickness: 0.18
           text: '\"Splinter\" keyboard v4 by @andornaut\nhttps://github.com/andornaut/splinter-keyboard'
       # --- Component labels (silkscreen) ---
-      # Each label sits below its component on the same ref; the right half re-anchors
-      # to mirror_ refs (x-shift auto-flips). Every label is single-sided, on the side
-      # its component mounts. MCU, TRRS, and the SMD parts all mount/solder on side B,
-      # so every component label is side B, mirrored (reads correctly from the back).
+      # Each label sits by its component on the same ref; the right half re-anchors to
+      # mirror_ refs (x auto-flips). Every label is side B + mirrored, so it reads
+      # correctly from the back.
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:
@@ -553,19 +550,15 @@ pcbs:
         params:
           <<: *label_params
           text: 'TRRS\nPJ-320A'
-      # SMD-part labels live only on side B (where their pads are), so they use
-      # label_params_b: single-sided, mirrored so the back-silk text reads correctly
-      # from the back. (Credit/screw labels stay reversible via their own params.)
+      # SMD and reset labels reuse label_params (side B, mirrored) with their own
+      # text. Credit and screw labels use their own reversible params instead.
       label_tvs: &label_tvs
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_tvs_y]
-        params: &label_params_b
+        params:
           <<: *label_params
-          reversible: false
-          side: B
-          mirrored: true
           text: 'TVS\nLittelfuse\nSMF5.0CA\nSOD-123FL'
       label_resistor: &label_resistor
         what: ceoloide/utility_text
@@ -573,7 +566,7 @@ pcbs:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_resistor_y]
         params:
-          <<: *label_params_b
+          <<: *label_params
           text: 'Resistor\n100R 1%\nUNI-ROYAL\n0805W8F-\n1000T5E\n0805'
       label_reset: &label_reset
         what: ceoloide/utility_text
@@ -581,16 +574,16 @@ pcbs:
           ref: matrix_five_home
           shift: [mcu_reset_x, label_reset_y]
         params:
-          <<: *label_params_b
+          <<: *label_params
           text: 'Reset switch\nALPS SKQGABE010\n5.2mm'
-      # Reset pad-net labels: GND flanks the left pad column, RST the right.
+      # Reset pad-net labels: +dx puts GND right of the pad column, -dx puts RST left.
       label_reset_gnd: &label_reset_gnd
         what: ceoloide/utility_text
         where:
           ref: matrix_five_home
           shift: [mcu_reset_x + label_reset_pad_dx, reset_y]
         params:
-          <<: *label_params_b
+          <<: *label_params
           text: GND
       label_reset_rst: &label_reset_rst
         what: ceoloide/utility_text
@@ -598,18 +591,19 @@ pcbs:
           ref: matrix_five_home
           shift: [mcu_reset_x - label_reset_pad_dx, reset_y]
         params:
-          <<: *label_params_b
+          <<: *label_params
           text: RST
       # Diode + hotswap-socket part reference. Side B (where both parts mount) via
-      # label_params_b, so it appears only on the pad side. Left: rotated, in the
-      # left-edge margin strip beside the bottom-pinky key (no room below it).
+      # label_params, so it appears only on the pad side. Anchored to the
+      # pinky-side screw hole (a mirror pair) with a single shared shift, so the
+      # right half mirrors it automatically; lands in the bottom-pinky margin.
       label_diode: &label_diode
         what: ceoloide/utility_text
         where:
-          ref: matrix_zero_mod
-          shift: [label_diode_left_x, label_diode_left_y]
+          ref: screw_left_left
+          shift: [label_diode_x, label_diode_y]
         params:
-          <<: *label_params_b
+          <<: *label_params
           text: 'Socket\nKailh CPG151101S11\nMX hotswap\n\nDiode\n1N4148W\nSOD-123'
       # Screw labels: beside each hole (directly below is blocked by keys),
       # anchored per-hole so each goes to its open side.
@@ -636,7 +630,7 @@ pcbs:
           ref: screw_left_right
           shift: [label_screw_dx, 0]
   right:
-    template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
+    template: kicad8 # ceoloide footprints need KiCad 8
     outlines:
       main.outline: _wallsright
       keycaps:
@@ -736,8 +730,8 @@ pcbs:
       label_diode:
         <<: *label_diode
         where:
-          ref: extra_equal_lower
-          shift: [label_diode_right_x, label_diode_right_y]
+          ref: mirror_screw_left_left
+          shift: [label_diode_x, label_diode_y]
       label_screw_ll:
         <<: *label_screw_ll
         where:

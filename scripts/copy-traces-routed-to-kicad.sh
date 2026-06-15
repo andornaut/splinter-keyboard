@@ -10,5 +10,5 @@ helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"
 require_pcbs "./${VERSION}/kicad/routed"
 for f in "${files[@]}"; do
   echo "$f"
-  python3 "$helper" --no-backup copy-traces "$f" "./${VERSION}/kicad/$(basename "$f")"
+  mute_pcbnew_noise python3 "$helper" --no-backup copy-traces "$f" "./${VERSION}/kicad/$(basename "$f")"
 done

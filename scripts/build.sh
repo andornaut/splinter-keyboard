@@ -20,14 +20,15 @@ npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
 require_pcbs "${out_dir}/pcbs" "ergogen produced no PCBs in ${out_dir}/pcbs/ -- check the config."
 for f in "${files[@]}"; do
   echo "$f"
-  python3 "$helper" --no-backup update-pcb "$f"
-  python3 ./scripts/recenter.py "$f"
+  mute_pcbnew_noise python3 "$helper" --no-backup update-pcb "$f"
+  mute_pcbnew_noise python3 ./scripts/recenter.py "$f"
 done
 
 # Idempotently apply the VCC net class and DRC floors to the generated and routed
 # KiCad projects (these live in .kicad_pro, which ergogen does not maintain).
 # Missing globs are tolerated by the helper, so this is safe before a version is
-# routed.
+# routed. (No mute_pcbnew_noise: this script edits .kicad_pro JSON and never
+# imports pcbnew, so it emits no PROPERTY_ENUM noise.)
 python3 ./scripts/apply-project-settings.py \
   "${out_dir}"/pcbs/[!_]*.kicad_pro \
   "${VERSION}"/kicad/[!_]*.kicad_pro

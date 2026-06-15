@@ -18,5 +18,5 @@ mkdir -p "$dst_dir"
 for f in "${files[@]}"; do
   dst="${dst_dir}/$(basename "$f")"
   cp "$f" "$dst"
-  python3 ./scripts/add-gnd-zone.py "$dst"
+  mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
 done

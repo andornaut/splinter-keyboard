@@ -47,13 +47,13 @@ def main():
         rows = list(csv.DictReader(f))
 
     placed = []                          # (pos_row, spec) for footprints we place
-    dnp = []                             # refs with no JSON entry
+    dnp = defaultdict(list)              # package -> refs with no JSON entry
     no_lcsc = defaultdict(list)          # package -> refs listed but unassigned
 
     for r in rows:
         spec = parts.get(r["Package"])
         if spec is None:
-            dnp.append(r["Ref"])
+            dnp[r["Package"]].append(r["Ref"])
         elif not spec.get("lcsc"):
             no_lcsc[r["Package"]].append(r["Ref"])
         else:
@@ -91,8 +91,17 @@ def main():
             w.writerow([spec.get("comment", ""), designators,
                         spec.get("package", ""), lcsc])
 
+    # List the Do-Not-Place footprints (grouped by package) so a part that fell
+    # through unintentionally -- e.g. a renamed footprint no longer matching a
+    # jlcpcb-parts.json key -- is visible here rather than silently omitted from
+    # assembly. Expected DNP: MCU, TRRS, reset switch, mounting holes, hotswap
+    # sockets.
+    dnp_items = sorted(dnp.items())
+    n_dnp = sum(len(refs) for _, refs in dnp_items)
     print(f"  placed {len(placed)} parts in {len(refs_by_lcsc)} BOM lines; "
-          f"{len(dnp)} do-not-place")
+          f"{n_dnp} do-not-place")
+    for pkg, refs in dnp_items:
+        print(f"    DNP: {pkg} ({len(refs)})")
 
 
 if __name__ == "__main__":

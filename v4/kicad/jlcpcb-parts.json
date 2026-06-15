@@ -8,14 +8,14 @@
       "rotation": 0,
       "note": "ST(Semtech) 1N4148W. Set rotation to match diode polarity in DFM. Tier/alternates: see v4/README.md BOM."
     },
-    "smd_805": {
+    "R_0805": {
       "lcsc": "C17408",
       "comment": "100R",
       "package": "R0805",
       "rotation": 0,
-      "note": "UNI-ROYAL 0805W8F1000T5E, 100R 0805 1%. Tier/alternates: see v4/README.md BOM."
+      "note": "UNI-ROYAL 0805W8F1000T5E, 100R 0805 1%. Non-polar, so rotation is irrelevant. Tier/alternates: see v4/README.md BOM."
     },
-    "D_SOD-123FL_HandSolder": {
+    "D_SOD-123FL": {
       "lcsc": "C1851363",
       "comment": "SMF5.0CA",
       "package": "SOD-123FL",

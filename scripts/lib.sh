@@ -18,3 +18,10 @@ require_pcbs() {
     exit 1
   fi
 }
+
+# KiCad's pcbnew module prints a harmless PROPERTY_ENUM wxASSERT to stderr every
+# time it is imported (directly, or via kb_ergogen_helper). Drop just those lines
+# from a command's stderr, preserving all other output and its exit code. The
+# match is the full distinctive assert tail (not the bare "No enum choices
+# defined") so a real error happening to contain that phrase is not swallowed.
+mute_pcbnew_noise() { "$@" 2> >(grep -vF 'PROPERTY_ENUM(): No enum choices defined' >&2); }

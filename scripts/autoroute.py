@@ -36,7 +36,19 @@ import subprocess
 import sys
 import uuid
 
-import pcbnew
+# pcbnew prints a harmless "No enum choices defined" wxASSERT to stderr at import,
+# before wx logging is configured below. Silence stderr across just the import
+# (nothing else useful is emitted there); a real import failure still surfaces via
+# the traceback the interpreter prints after fd 2 is restored.
+_saved_stderr_fd = os.dup(2)
+_devnull_fd = os.open(os.devnull, os.O_WRONLY)
+os.dup2(_devnull_fd, 2)
+try:
+    import pcbnew
+finally:
+    os.dup2(_saved_stderr_fd, 2)
+    os.close(_devnull_fd)
+    os.close(_saved_stderr_fd)
 import wx
 
 # Single tuneable log level (env FREEROUTING_LOG_LEVEL, default WARN) applied to

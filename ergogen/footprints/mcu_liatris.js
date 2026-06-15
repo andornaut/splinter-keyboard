@@ -1,16 +1,14 @@
-// Based on ceoloide/mcu_nice_nano.js by Marco Massarelli (@ceoloide) and @infused-kim
-// Original: SPDX-License-Identifier: CC-BY-NC-SA-4.0
-// Modified for splitkb Liatris (RP2040) MCU with 5 bottom pins (GP12-GP16)
+// mcu_liatris: reversible footprint for the splitkb Liatris (RP2040) MCU.
+// https://splitkb.com/products/liatris
 //
-// Description:
-//  A reversible footprint for the splitkb Liatris (https://splitkb.com/products/liatris) RP2040 MCU
-//  The Liatris has 5 extra bottom pins (GP12-GP16) compared to the nice!nano's 3 extra pins.
-//
-// Bottom pin positions based on marbastlib KiCad footprint:
-//  https://github.com/ebastler/marbastlib/tree/main/marbastlib-mx.pretty
-//
-// Pinout and schematics:
-//  https://docs.splitkb.com/product-guides/liatris/pinout
+// Source: derived from ceoloide/mcu_nice_nano.js by Marco Massarelli (@ceoloide),
+//   https://github.com/ceoloide/ergogen-footprints, which @ceoloide built on
+//   @infused-kim's nice!nano footprint. Adapted by @andornaut for the Liatris,
+//   which has 5 extra bottom pins (GP12-GP16) vs the nice!nano's 3. Bottom-pin
+//   positions follow the marbastlib KiCad footprint,
+//   https://github.com/ebastler/marbastlib. Pinout:
+//   https://docs.splitkb.com/product-guides/liatris/pinout
+// License: CC-BY-NC-SA-4.0 (inherited from ceoloide/mcu_nice_nano.js).
 //
 // Params:
 //    side: default is F for Front
@@ -57,41 +55,19 @@
 //      xyz rotation (in degrees), used to adjust the orientation of the 3d
 //      model relative the footprint.
 //
-// @infused-kim's improvements:
-//  - Use real traces instead of pads, which gets rid of hundreds of DRC errors.
-//  - Leave more space between the vias to allow easier routing through the middle
-//    of the footprint
+// Placement of jumpers:
+//  The reversible footprint is meant to be used with jumpers on the OPPOSITE
+//  side from where the Liatris (or pro-micro-compatible board) is installed. The
+//  silkscreen labels match the board when read on that opposite side, so all
+//  jumpers and components solder on one side while the MCU labels stay readable
+//  for multimeter testing.
 //
-// @ceoloide's improvements:
-//  - Move vias closer to the pads to clear up more space for silkscreen
-//  - Add ability to use rectangular jumpers instead of chevron-style
-//  - Add ability to control via size, to free up space for routing if needed
-//  - Add ability to only have required jumpers and let the rest be handled in firmware
-//  - Add single side (non-reversible) support
-//  - Add ability to mount with MCU facing towards or away from PCB
-//  - Add ability to show silkscreen labels on both sides for single side footprint
-//  - Always include bottom pins (GP12-GP16) since they are standard on the Liatris
-//  - Upgrade to KiCad 8
-//
-// @andornaut's improvements:
-//  - Converted to splitkb Liatris (RP2040) MCU
-//
-// # Placement and soldering of jumpers
-//
-// The reversible footprint is meant to be used with jumpers on the
-// OPPOSITE side of where the nice!nano (or pro-micro compatible board) is
-// installed. The silkscreen labels will also match the board when read on
-// the opposite side. This is to have all jumpers and components to solder on
-// the same side, and be able to read the correct labels of the MCU to do
-// tests with a multimeter.
-//
-// # Further credits
-//
-// The original footprint was created from scratch by @infused-kim, but was based on the ideas from
-// these other footprints:
-//
-// https://github.com/Albert-IV/ergogen-contrib/blob/main/src/footprints/promicro_pretty.js
-// https://github.com/50an6xy06r6n/keyboard_reversible.pretty
+// Credits: the upstream footprint was created from scratch by @infused-kim
+//  (using ideas from Albert-IV/ergogen-contrib promicro_pretty.js and
+//  50an6xy06r6n/keyboard_reversible.pretty), with later improvements by @ceoloide
+//  (vias closer to pads, rectangular jumpers, configurable via size, required-only
+//  jumpers, single-side support, reverse-mount, both-side silk labels, KiCad 8)
+//  and @andornaut (port to the splitkb Liatris).
 
 module.exports = {
   params: {

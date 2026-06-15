@@ -13,7 +13,7 @@ A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-t
 
 ## Microcontroller
 
-The reverse-mounted (facing the PCB) [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). It has a `USB_VBUS_PIN` (GP19), so QMK detects USB on a dedicated GPIO instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
+The reverse-mounted (facing the PCB) [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). Its USB VBUS line is wired to GP19, so QMK senses USB presence via `USB_VBUS_PIN` (GP19) instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
 ### Firmware changes required
 
@@ -74,9 +74,7 @@ The connector pinout also changed: GND on the sleeve, serial data on ring R2, VC
 
 Neither change affects firmware: the serial pin is still GP1.
 
-## Hardware
-
-### Bill of materials (BOM)
+## Bill of materials (BOM)
 
 | Description | Quantity | Part |
 | --- | --- | --- |
@@ -110,9 +108,9 @@ JLCPCB assembles the three SMD parts that have an LCSC link (diode, resistor, TV
 
 LCSC part numbers live in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json), not in the `.kicad_pcb`, so they survive when Ergogen regenerates the boards. The file is keyed by **footprint name** (the `Package` column of the position file), because the generated footprints have empty `Value` fields. Each entry has `lcsc`, `comment` (BOM Comment), `package` (BOM Footprint), and `rotation` (added to KiCad's angle to fix pick-and-place orientation). `scripts/gen-jlcpcb-bom-cpl.py` joins this against the position file:
 
-* footprint **absent** from the JSON → Do-Not-Place (MCU, TRRS jack, reset switch, mounting holes)
-* footprint present with **empty `lcsc`** → error; nothing is written until you fill it in
-* footprint present with **`lcsc` set** → placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
+* footprint **absent** from the JSON -> Do-Not-Place (MCU, TRRS jack, reset switch, hotswap sockets, mounting holes)
+* footprint present with **empty `lcsc`** -> error; nothing is written until you fill it in
+* footprint present with **`lcsc` set** -> placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
 
 ### Ordering
 
