@@ -19,11 +19,16 @@ Caveat: cranking via cost trades vias for *unrouted nets*, not a cleverer low-vi
 topology -- freerouting abandons nets before it routes them with fewer vias. On a
 regular matrix, hand-routing still beats this for a low via count. See README.
 
-Usage: autoroute.py <pcb_path> <work_dir> [passes]
-  pcb_path  working .kicad_pcb to route (overwritten in place)
-  work_dir  directory for intermediate .dsn/.ses files and the freerouting config
-  passes    freerouting max passes (default 100; env FREEROUTING_PASSES overrides)
+Run via: npm run autoroute (sets npm_package_config_VERSION from package.json).
+With no arguments it routes every working .kicad_pcb for the active version
+(${VERSION}/kicad/[!_]*.kicad_pcb) in place; intermediates go to
+dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
+
+  autoroute.py [pcb_path ...]
+  pcb_path  working .kicad_pcb to route in place (default: all for the version)
+            FREEROUTING_PASSES sets freerouting max passes (default 100)
 """
+import glob
 import json
 import os
 import shutil
@@ -95,7 +100,7 @@ def autoroute(pcb_path, work_dir, passes):
     strategy = os.environ.get("FREEROUTING_STRATEGY", "greedy")
     selection = os.environ.get("FREEROUTING_SELECTION", "prioritized")
     via_cost = int(os.environ.get("FREEROUTING_VIA_COST", "50"))
-    scoring = {"via_costs": via_cost, "plane_via_costs": via_cost}
+    scoring: dict[str, float] = {"via_costs": via_cost, "plane_via_costs": via_cost}
     # Only impose a direction penalty when asked; freerouting's default has no
     # strong preference, which routes cleaner here.
     undesired_dir_cost = os.environ.get("FREEROUTING_UNDESIRED_DIR_COST")
@@ -126,9 +131,9 @@ def autoroute(pcb_path, work_dir, passes):
     if not os.path.exists(ses_path):
         sys.exit(f"Freerouting did not produce {ses_path}")
 
-    # Re-load the board so the session import applies to a clean copy, then save
-    # back over the working file.
-    board = pcbnew.LoadBoard(pcb_path)
+    # Import onto the board already in memory: ExportSpecctraDSN only serialized
+    # it (no mutation) and pcb_path is untouched until the Save below, so this is
+    # the same unrouted board a reload would give. Then save over the working file.
     if not pcbnew.ImportSpecctraSES(board, ses_path):
         sys.exit(f"Failed to import Specctra SES into {pcb_path}")
     board.Save(pcb_path)
@@ -136,7 +141,14 @@ def autoroute(pcb_path, work_dir, passes):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        sys.exit(__doc__)
-    passes = sys.argv[3] if len(sys.argv) > 3 else os.environ.get("FREEROUTING_PASSES", "100")
-    autoroute(sys.argv[1], sys.argv[2], passes)
+    version = os.environ.get("npm_package_config_VERSION")
+    if not version:
+        sys.exit("npm_package_config_VERSION unset -- run via npm (npm run autoroute).")
+    passes = os.environ.get("FREEROUTING_PASSES", "100")
+    work_dir = f"dist/{version}/kicad/freerouting"
+
+    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/[!_]*.kicad_pcb"))
+    if not pcbs:
+        sys.exit(f"No PCBs in {version}/kicad/ -- nothing to do.")
+    for pcb in pcbs:
+        autoroute(pcb, work_dir, passes)

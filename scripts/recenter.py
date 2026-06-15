@@ -25,8 +25,9 @@ PAGE_SIZES = {
 
 def page_center(path):
     """Read the (paper ...) line and return the page center (x, y) in mm."""
-    text = open(path).read()
-    m = re.search(r'\(paper\s+"?([A-Z0-9]+)"?(.*?)\)', text)
+    with open(path) as f:
+        text = f.read()
+    m = re.search(r'\(paper\s+"?([A-Za-z0-9]+)"?(.*?)\)', text)
     if not m:
         raise SystemExit(f"{path}: no (paper ...) line found")
     name, rest = m.group(1), m.group(2)
@@ -47,8 +48,9 @@ def recenter(path):
     bbox = None
     for d in board.GetDrawings():
         if d.GetLayerName() == "Edge.Cuts":
-            bbox = d.GetBoundingBox() if bbox is None else bbox
-            if d.GetBoundingBox() is not bbox:
+            if bbox is None:
+                bbox = d.GetBoundingBox()
+            else:
                 bbox.Merge(d.GetBoundingBox())
     if bbox is None:
         raise SystemExit(f"{path}: no Edge.Cuts geometry found")

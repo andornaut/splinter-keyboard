@@ -8,10 +8,7 @@ ergogen/footprints/ceoloide
 ergogen/footprints/infused-kim
 node_modules
 **/node_modules
-v1
-v2
-v3
-v4
+v[0-9]*
 *.md
 .gitignore
 .gitmodules

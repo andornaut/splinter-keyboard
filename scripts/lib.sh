@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Shared helpers for the per-stage pipeline wrappers in scripts/. Source near the
+# top of a wrapper, after `set -euo pipefail` and `shopt -s nullglob`:
+#   source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+# Each wrapper still owns its source dir and per-file command (mapping 1:1 to an
+# npm script); this only factors out the require-inputs-or-fail pattern they share.
+
+# Populate the caller's `files` array with the non-underscore .kicad_pcb files in
+# $1, or print $2 (default message) to stderr and exit 1. Named "require" because
+# every wrapper is a deliberate transform step: a missing input is a mistake to
+# surface, not a benign skip. Requires `shopt -s nullglob` in the caller.
+require_pcbs() {
+  local dir="$1"
+  local msg="${2:-No PCBs found in ${dir}/.}"
+  files=("$dir"/[!_]*.kicad_pcb)
+  if [ ${#files[@]} -eq 0 ]; then
+    echo "$msg" >&2
+    exit 1
+  fi
+}

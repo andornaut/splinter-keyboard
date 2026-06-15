@@ -1,4 +1,10 @@
 {
+  "name": "splinter-keyboard",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "config": {
     "VERSION": "v4"
   },
@@ -9,11 +15,11 @@
     "nodemon": "^3.1.14"
   },
   "scripts": {
-    "autoroute": "./scripts/autoroute.sh",
+    "autoroute": "python3 ./scripts/autoroute.py",
     "build": "./scripts/build.sh",
     "clean": "rm -rf dist",
     "copy-pcbs-dist-to-kicad": "./scripts/copy-pcbs-dist-to-kicad.sh",
-    "copy-pcbs-kicad-to-routed": "cp ./$npm_package_config_VERSION/kicad/[!_]*.kicad_pcb ./$npm_package_config_VERSION/kicad/routed/",
+    "copy-pcbs-kicad-to-routed": "./scripts/copy-pcbs-kicad-to-routed.sh",
     "copy-traces-routed-to-kicad": "./scripts/copy-traces-routed-to-kicad.sh",
     "fab-jlcpcb": "./scripts/fab-jlcpcb.sh",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
