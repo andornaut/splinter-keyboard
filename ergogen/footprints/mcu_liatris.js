@@ -26,6 +26,10 @@
 //    include_traces: default is true
 //      if true it will include traces that connect the jumper pads to the vias
 //      and the through-holes for the MCU
+//    include_extra_pins: default is true
+//      if true it will include the Liatris's 5 bottom pins (GP12-GP16) along with
+//      their silkscreen labels. Set to false to omit them when those pins are unused,
+//      which also frees up the silkscreen area below the MCU.
 //    only_required_jumpers: default is false
 //      if true, it will only place jumpers on the first 4 rows of pins, which can't be
 //      reversed in firmware, i.e. RAW and P1, GND and P0, GND and RST, GND and VCC.
@@ -96,6 +100,7 @@ module.exports = {
     reversible: false,
     reverse_mount: false,
     include_traces: true,
+    include_extra_pins: true,
     invert_jumpers_position: false,
     only_required_jumpers: false,
     use_rectangular_jumpers: false,
@@ -606,8 +611,8 @@ module.exports = {
     ${''/* Controller*/}
     ${common_top}
     ${socket_rows}
-    ${(!p.reversible || (p.reversible && p.only_required_jumpers)) ? extra_pins : ''}
-    ${p.reversible && !p.only_required_jumpers ? extra_pins_reversible : ''}
+    ${p.include_extra_pins && (!p.reversible || p.only_required_jumpers) ? extra_pins : ''}
+    ${p.include_extra_pins && p.reversible && !p.only_required_jumpers ? extra_pins_reversible : ''}
     ${p.reversible && p.show_instructions ? instructions : ''}
     ${p.mcu_3dmodel_filename ? mcu_3dmodel : ''}
   )

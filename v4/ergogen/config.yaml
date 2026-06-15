@@ -470,6 +470,7 @@ pcbs:
           reversible: false
           reverse_mount: true
           include_extra_pins: false # GP12-GP16 unused
+          show_silk_labels_on_both_sides: true # MCU hides its mounting-side silk; mirror pin labels to the exposed side too
       # --- Reset Button: E-Switch TL3342F450QG ---
       reset: &reset
         what: button
