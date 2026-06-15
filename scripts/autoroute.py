@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Autoroute a KiCad PCB with Freerouting via the Specctra DSN/SES round-trip.
 
-Routes in place: reads and writes the given working .kicad_pcb (the kicad/ copy).
-It deliberately never touches kicad/routed/ -- promoting a routed board is a manual
-step (npm run copy-pcbs-kicad-to-routed).
+Routes in place: reads and writes the given working .kicad_pcb (the kicad/unrouted/
+copy). It deliberately never touches kicad/routed/ -- promoting a routed board is a
+manual step (npm run copy-pcbs-unrouted-to-routed).
 
 Tuning via env vars. Defaults favour a fully-connected, DRC-clean board (greedy
 strategy, freerouting's native via cost), which empirically routes the most nets
@@ -21,7 +21,7 @@ regular matrix, hand-routing still beats this for a low via count. See README.
 
 Run via: npm run autoroute (sets npm_package_config_VERSION from package.json).
 With no arguments it routes every working .kicad_pcb for the active version
-(${VERSION}/kicad/[!_]*.kicad_pcb) in place; intermediates go to
+(${VERSION}/kicad/unrouted/[!_]*.kicad_pcb) in place; intermediates go to
 dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
 
   autoroute.py [pcb_path ...]
@@ -159,9 +159,9 @@ if __name__ == "__main__":
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
-    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/[!_]*.kicad_pcb"))
+    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb"))
     if not pcbs:
-        sys.exit(f"No PCBs in {version}/kicad/ -- nothing to do.")
+        sys.exit(f"No PCBs in {version}/kicad/unrouted/ -- nothing to do.")
     for pcb in pcbs:
         autoroute(pcb, work_dir, passes)
     print(f"OK: autoroute: {len(pcbs)} PCB(s) routed in place.")

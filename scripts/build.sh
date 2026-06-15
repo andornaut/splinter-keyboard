@@ -2,7 +2,7 @@
 # Generate outlines/PCBs from the active version's ergogen config, then
 # post-process each PCB (update footprints via kb_ergogen_helper, recenter on
 # the sheet) and ensure custom project settings (net class + DRC floors) in the
-# KiCad project files. The GND pour is added later, at copy-pcbs-kicad-to-routed,
+# KiCad project files. The GND pour is added later, at copy-pcbs-unrouted-to-routed,
 # so routing happens on a clean board. Run via: npm run build
 #
 # Footprint submodules are used at their pinned (checked-out) revision; this
@@ -31,6 +31,6 @@ done
 # imports pcbnew, so it emits no PROPERTY_ENUM noise.)
 python3 ./scripts/apply-project-settings.py \
   "${out_dir}"/pcbs/[!_]*.kicad_pro \
-  "${VERSION}"/kicad/[!_]*.kicad_pro
+  "${VERSION}"/kicad/unrouted/[!_]*.kicad_pro
 
 ok "build: ${#files[@]} PCB(s) generated and post-processed in ${out_dir}/pcbs/"

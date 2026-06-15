@@ -68,7 +68,7 @@ points:
       right: true
     columns:
       zero:
-        key.column_net: P3
+        key.column_net: P4
         key.mirror.skip: true
         rows:
           mod: # LCTRL
@@ -91,7 +91,7 @@ points:
           num: # `
             shift: [u/4, 0]
       one:
-        key.column_net: P4
+        key.column_net: P5
         key.mirror.skip: true
         rows:
           mod: # SUPER
@@ -107,7 +107,7 @@ points:
       # columns automatically.
       two:
         key.stagger: 3
-        key.column_net: P5
+        key.column_net: P6
         key.mirror.column_net: P5
         rows:
           mod: # LALT
@@ -119,8 +119,8 @@ points:
           num: # 2 -> 9
       three:
         key.stagger: 3
-        key.column_net: &col_three_left P6
-        key.mirror.column_net: &col_three_right P6 # = left col three (exact mirror)
+        key.column_net: &col_three_left P7
+        key.mirror.column_net: &col_three_right P6
         rows:
           mod.skip: true # no mod-row key here
           lower: # C -> ,
@@ -130,8 +130,8 @@ points:
           num: # 3 -> 8
       four:
         key.stagger: -3
-        key.column_net: &col_four_left P7
-        key.mirror.column_net: &col_four_right P7 # = left col four (exact mirror)
+        key.column_net: &col_four_left P8
+        key.mirror.column_net: &col_four_right P7
         rows:
           mod.skip: true
           lower: # V -> M
@@ -142,7 +142,7 @@ points:
       five:
         key.stagger: -3
         key.column_net: &col_five_left P10
-        key.mirror.column_net: &col_five_right P10 # = left col five (exact mirror)
+        key.mirror.column_net: &col_five_right P10 # self-mirror: same net both halves
         rows:
           mod.skip: true
           lower: # B -> N
@@ -153,10 +153,9 @@ points:
     # Per-row nets: row_net is the left mapping; mirror.row_net the right half's.
     # (The matrix mod row is never mirrored, so it needs no mirror.row_net.)
     rows:
-      # &mod_row_left: left-half mod row, P10 (GP21). Aliased by the thumbcluster's
-      # left keys so the left thumbs share the matrix mod row. The matrix mod row is
-      # never mirrored; the right half's mod row is a different net (&mod_row_right,
-      # P9, in zones.extra) because each MCU scans the mod row on a different GPIO.
+      # &mod_row_left: left-half mod row, aliased by the thumbcluster's left keys so
+      # the left thumbs share the matrix mod row. The matrix mod row is never
+      # mirrored; the right half's mod row is &mod_row_right (in zones.extra).
       mod.row_net: &mod_row_left P9
       lower:
         row_net: P16
@@ -166,7 +165,7 @@ points:
         mirror.row_net: P16
       upper:
         row_net: P15
-        mirror.row_net: P18 # off P10 (now right col five) to keep the column mirror
+        mirror.row_net: P18 # off the col-five net to keep the column mirror
       num:
         row_net: P18
         mirror.row_net: P15
@@ -174,8 +173,11 @@ points:
   # Right counterparts to the left's mirror.skip columns, defined explicitly
   # because they differ (backspace, punctuation, right mods). 9u right.
   # Column nets continue the right MCU far-bank fan past the mirrored matrix
-  # columns (..P7,P6,P5) with P4,P3,P2, so the whole right routes as a mirror
-  # of the left's column fan, extended one pad for the extra pinky column.
+  # columns (..P7,P6,P5) with P4,P3, then P0 for the extra pinky column, so the
+  # whole right routes as a mirror of the left's column fan, extended one pad.
+  # The pinky uses P0 (GP1), not the fan's next pad P2 (GP2): on the right, P2 is
+  # the TRRS serial pin (so one firmware split.serial.pin = GP2 fits both halves),
+  # so the pinky column and the serial pin swap pads here (see data_resistor).
   zones.extra:
     key.tags.right: true
     anchor:
@@ -203,7 +205,7 @@ points:
           upper: # [
           num: # -
       equal:
-        key.column_net: P2
+        key.column_net: P0 # GP1: swapped with the serial pin (was P2/GP2)
         rows:
           mod.skip: true
           lower: # SHIFT
@@ -212,15 +214,13 @@ points:
           num: # =
     # Right-half row->net mapping (differs from the main matrix's left mapping).
     rows:
-      # &mod_row_right: right-half mod row, P9 (GP9). Distinct from the left's
-      # &mod_row_left (P10): each MCU scans the mod row on a different GPIO (firmware
-      # split rows index 4 = GP21 left, GP9 right). Aliased by the thumbcluster's
-      # mirrored (right) keys. A YAML anchor, not a units/variables entry: ergogen
-      # units are math-evaluated, so a net-name string would not parse.
+      # &mod_row_right: right-half mod row, aliased by the thumbcluster's mirrored
+      # (right) keys. A YAML anchor, not a units/variables entry: ergogen units are
+      # math-evaluated, so a net-name string would not parse.
       mod.row_net: &mod_row_right P9
       lower.row_net: P14
       home.row_net: P16
-      upper.row_net: P18 # matches matrix mirror.row_net upper; off P10 (now col five)
+      upper.row_net: P18 # matches the matrix's upper mirror row
       num.row_net: P15
   # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
   zones.thumbcluster:
@@ -482,7 +482,7 @@ pcbs:
           side: B
       # Hot-unplug mitigation: GND on the sleeve (last to break), data on ring R2,
       # VCC on the tip (per ceoloide/trrs_pj320a.js). DATA_RAW is the unprotected
-      # jack-side net; after the TVS+resistor it becomes P0 to the MCU.
+      # jack-side net; after the TVS+resistor it reaches the MCU serial pin.
       trrs: &trrs
         what: ceoloide/trrs_pj320a
         where:
@@ -490,14 +490,14 @@ pcbs:
           shift: [trrs_tvs_resistor_x, trrs_y]
         params:
           TP: VCC # 1  Tip
-          R2: DATA_RAW # 3 Ring 2 (via TVS to GND, 100Ω to P0)
+          R2: DATA_RAW # 3 Ring 2 (data; to GND via TVS, to MCU via resistor)
           SL: GND # 4  Sleeve
           reversible: true
           side: B
           # Symmetric uses only TP/R2/SL, which is exactly this 3-net pinout
           symmetric: true
       # Clamps data-line transients (e.g. hot-unplug) before the MCU.
-      # from=A=DATA_RAW, to=K=GND; bidirectional so A/K orientation is irrelevant.
+      # from=anode, to=cathode; bidirectional, so A/K orientation is irrelevant.
       data_tvs: &data_tvs
         what: sod-123fl
         where:
@@ -508,8 +508,10 @@ pcbs:
           from: DATA_RAW
           to: GND
       # In series from DATA_RAW to the MCU serial pin, limiting residual surge current
-      # after the TVS. Non-polar, so from/to is electrically arbitrary. The output net
-      # differs per half: left -> P2 (GP2), right -> P0 (GP1) (see the right override).
+      # after the TVS. Non-polar, so from/to is electrically arbitrary. Both halves
+      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both. The left
+      # has P2 free; the right frees it by swapping its extra pinky column onto P0
+      # (GP1) (see zones.extra equal and the right override).
       data_resistor: &data_resistor
         what: r_0805
         where:
@@ -698,12 +700,14 @@ pcbs:
           ref: mirror_matrix_five_num
           # Same value as the left, NOT 270: the mirror_ ref auto-negates the
           # rotation (renders as -90), so this is already the left's mirror image
-          # and P0 still faces the MCU. Setting 270 here would double-flip it.
+          # and the output pad still faces the MCU. Setting 270 here would
+          # double-flip it.
           rotate: 90
           shift: [trrs_tvs_resistor_x, resistor_y]
         params:
           <<: *data_resistor_params
-          to: P0 # right half serial data -> GP1 (left uses P2)
+          # to: P2 inherited (not overridden) so both halves use the same serial
+          # pin; see the left data_resistor for why P2.
       # Right half: centered over the outer (pinky) top corner, mirroring the
       # left half's placement.
       label_credit:

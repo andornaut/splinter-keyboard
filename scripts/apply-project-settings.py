@@ -3,7 +3,7 @@
 
 These live only in the .kicad_pro project JSON (not in the .kicad_pcb or the
 ergogen config), so ergogen-generated and freshly-opened projects start without
-them. This applies two things:
+them. This applies three things:
 
   * A "VCC" net class (wider clearance/track for the power nets) plus a pattern
     that assigns the "VCC" net to it, matching the manual Board Setup > Net
@@ -12,6 +12,11 @@ them. This applies two things:
     (0.0) by default. Setting them to the fab's recommended minimum makes DRC
     flag any accidental sub-fab feature without touching the intentional 0.20mm+
     widths. Only filled when currently disabled, so an explicit floor is kept.
+  * DRC severity overrides. The footprints are embedded ergogen-generated parts
+    whose library nicknames (ceoloide, splinter, E73) are not in any footprint
+    library table, so KiCad raises a "library not included" warning per part.
+    There is no on-disk library to register, so the check is downgraded to
+    "ignore". Only set when not already "ignore", so a manual override is kept.
 
 Re-running is a no-op: each piece is only added when absent/disabled, and a file
 is rewritten only when it actually changed. Missing files are skipped quietly,
@@ -31,6 +36,10 @@ VCC_PATTERN = {"netclass": "VCC", "pattern": "VCC"}
 # JLCPCB's recommended 2-layer minimum; below the intentional 0.20mm features, so
 # it acts purely as a guardrail against accidental hair-thin tracks/gaps.
 DRC_FLOORS = {"min_track_width": 0.15, "min_clearance": 0.15}
+
+# Generated footprints carry library nicknames (ceoloide, splinter, E73) that are
+# not in any footprint library table; the parts are embedded so this is harmless.
+SEVERITY_OVERRIDES = {"lib_footprint_issues": "ignore"}
 
 
 def ensure_vcc(net_settings):
@@ -74,17 +83,26 @@ def ensure_drc_floors(rules):
     return changed
 
 
+def ensure_severity_overrides(severities):
+    """Set DRC severities to the desired value in place; return True if changed."""
+    changed = False
+    for key, value in SEVERITY_OVERRIDES.items():
+        if severities.get(key) != value:  # respect an existing matching override
+            severities[key] = value
+            changed = True
+    return changed
+
+
 def apply(path):
     with open(path) as f:
         project = json.load(f)
     net_settings = project.setdefault("net_settings", {})
-    rules = (
-        project.setdefault("board", {})
-        .setdefault("design_settings", {})
-        .setdefault("rules", {})
-    )
+    design_settings = project.setdefault("board", {}).setdefault("design_settings", {})
+    rules = design_settings.setdefault("rules", {})
+    severities = design_settings.setdefault("rule_severities", {})
     changed = ensure_vcc(net_settings)
     changed = ensure_drc_floors(rules) or changed
+    changed = ensure_severity_overrides(severities) or changed
     if changed:
         with open(path, "w") as f:
             json.dump(project, f, indent=2)

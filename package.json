@@ -18,11 +18,11 @@
     "autoroute": "python3 ./scripts/autoroute.py",
     "build": "./scripts/build.sh",
     "clean": "rm -rf dist && echo 'OK: clean: removed dist/'",
-    "copy-pcbs-dist-to-kicad": "./scripts/copy-pcbs-dist-to-kicad.sh",
-    "copy-pcbs-kicad-to-routed": "./scripts/copy-pcbs-kicad-to-routed.sh",
-    "copy-traces-routed-to-kicad": "./scripts/copy-traces-routed-to-kicad.sh",
+    "copy-pcbs-dist-to-unrouted": "./scripts/copy-pcbs-dist-to-unrouted.sh",
+    "copy-pcbs-unrouted-to-routed": "./scripts/copy-pcbs-unrouted-to-routed.sh",
+    "copy-traces-routed-to-unrouted": "./scripts/copy-traces-routed-to-unrouted.sh",
     "fab-jlcpcb": "./scripts/fab-jlcpcb.sh",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
-    "watch-and-copy-pcbs-to-kicad": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-dist-to-kicad\""
+    "watch-and-copy-pcbs-to-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-dist-to-unrouted\""
   }
 }

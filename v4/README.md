@@ -63,7 +63,7 @@ Update `keyboard.json`:
 v4 adds a TVS diode and series resistor on the TRRS data line to protect the MCU's serial GPIO when the cable is hot-unplugged. The TVS (bidirectional, 5V standoff) clamps the line to GND; the 100Ω resistor limits current into the MCU pin. Each half:
 
 ```text
-TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P0)-- MCU GP1
+TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P2)-- MCU GP2
                           |
                          TVS (clamps to GND)
                           |
@@ -72,7 +72,7 @@ TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P0)-- MCU GP1
 
 The connector pinout also changed: GND on the sleeve, serial data on ring R2, VCC on the tip. The sleeve breaks last when you unplug, so the halves keep a common ground through the disconnect, and the data line sits on an inner ring instead of the exposed tip.
 
-Neither change affects firmware: the serial pin is still GP1.
+Neither change affects firmware: the data line still terminates at the MCU serial pin (GP2).
 
 ## Bill of materials (BOM)
 
@@ -93,27 +93,12 @@ Neither change affects firmware: the serial pin is still GP1.
 | Threaded inserts | 4 | [M3x5x4 threaded inserts](https://cnckitchen.store/products/made-for-voron-gewindeeinsatz-threaded-insert-m3x5x4-100-stk-pcs) |
 | TRRS cables | 1 | [King Cables TRRS Cable](https://www.kingcables.org/) |
 | TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html) |
-| TVS diodes | 2 | [Littelfuse SMF5.0CA](https://www.lcsc.com/product-detail/C1851363.html) (C1851363, SOD-123FL bidirectional, 5V standoff; JLCPCB Extended, low stock, re-confirm before ordering; alt MDD C364279, TWGMC C726939) |
+| TVS diodes | 2 | [Littelfuse SMF5.0CA](https://www.lcsc.com/product-detail/C1851363.html) (C1851363, SOD-123FL bidirectional, 5V standoff; JLCPCB Extended; alt MDD C364279, TWGMC C726939) |
 
 ## Fabrication (JLCPCB)
 
-JLCPCB assembles the three SMD parts that have an LCSC link (diode, resistor, TVS). Everything else is sourced separately and hand-soldered or hand-assembled. The MCU (Liatris), TRRS jack, reset switch, and hotswap sockets are **Do-Not-Place**; their LCSC/vendor links are for sourcing only. The hotswap sockets stay off the assembly BOM on purpose: they are Standard-only and not stocked for JLC assembly, so including them would push the order to JLCPCB's pricier **Standard** PCBA service instead of the cheaper **Economic** one.
+See the root README's [Fabrication step](../README.md#step-5-fabrication-jlcpcb) for how `npm run fab-jlcpcb`, the DRC gate, and [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) work. This section covers only what is v4-specific.
 
-`npm run fab-jlcpcb` exports everything JLCPCB needs from the routed masters `v4/kicad/routed/{left,right}.kicad_pcb` to `dist/v4/kicad/jlcpcb/{left,right}/`:
+JLCPCB assembles the three SMD parts that have an LCSC link: the matrix diodes, the 100Ω data-line resistor, and the TVS. Everything else is sourced separately and hand-soldered or hand-assembled. The MCU (Liatris), TRRS jack, reset switch, and hotswap sockets are **Do-Not-Place**; their LCSC/vendor links in the [BOM](#bill-of-materials-bom) are for sourcing only. The hotswap sockets are the parts kept off the assembly BOM to stay on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly.
 
-* **Gerbers + drill**: zipped per board; upload this to order the bare PCB.
-* **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): assembly files for JLCPCB PCBA. Generated only when [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) is present; without it, the script produces gerbers only.
-
-### How parts are assigned
-
-LCSC part numbers live in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json), not in the `.kicad_pcb`, so they survive when Ergogen regenerates the boards. The file is keyed by **footprint name** (the `Package` column of the position file), because the generated footprints have empty `Value` fields. Each entry has `lcsc`, `comment` (BOM Comment), `package` (BOM Footprint), and `rotation` (added to KiCad's angle to fix pick-and-place orientation). `scripts/gen-jlcpcb-bom-cpl.py` joins this against the position file:
-
-* footprint **absent** from the JSON -> Do-Not-Place (MCU, TRRS jack, reset switch, hotswap sockets, mounting holes)
-* footprint present with **empty `lcsc`** -> error; nothing is written until you fill it in
-* footprint present with **`lcsc` set** -> placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
-
-### Ordering
-
-1. Route `v4/kicad/{left,right}.kicad_pcb`, copy them to the routed masters with `npm run copy-pcbs-kicad-to-routed`, then run `npm run fab-jlcpcb`.
-2. Order the bare PCB: upload the gerber zip (`dist/v4/kicad/jlcpcb/{left,right}/{left,right}-gerber.zip`). For PCBA: also upload the per-board BOM/CPL (`{left,right}-BOM.csv` and `{left,right}-CPL.csv`, in the same `dist/v4/kicad/jlcpcb/<name>/` dir).
-3. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree). If a part is mis-oriented, adjust its `rotation` in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) and re-run.
+The diode (`diode_sod123`) carries `rotation: 180` in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) so the cathode band lands on pad 1 (the cathode/row net); the resistor and TVS are non-polar, so their rotation is irrelevant. After uploading, confirm orientation in JLCPCB's DFM viewer.

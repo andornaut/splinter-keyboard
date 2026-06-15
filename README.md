@@ -2,7 +2,7 @@
 
 A 62-key split columnar ergonomic keyboard.
 
-This repo holds the hardware design files. The design pipeline is: Keyboard Layout Editor -> Ergogen -> KiCad -> OnShape -> OrcaSlicer -> QMK firmware (see [Developing](#developing)).
+This repo holds the hardware design files. The design pipeline is: Keyboard Layout Editor -> Ergogen -> KiCad -> Fabrication -> Onshape -> OrcaSlicer -> QMK firmware (see [Developing](#developing)).
 
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
 * [andornaut@github /til](https://github.com/andornaut/til/)
@@ -81,7 +81,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 1. Run `docker compose up` to start the Ergogen GUI (it builds automatically), then open <http://ergogen.internal> (needs [docker_etc_hosts](https://github.com/andornaut/docker_etc_hosts) for the `/etc/hosts` entry).
 1. Paste in, edit, then download [`ergogen/config.yaml`](./v4/ergogen/config.yaml).
-1. Run `npm run build` to generate outlines and PCBs into `dist/v4/ergogen/`, then `npm run copy-pcbs-dist-to-kicad`. Or use `npm run watch` / `npm run watch-and-copy-pcbs-to-kicad`.
+1. Run `npm run build` to generate outlines and PCBs into `dist/v4/ergogen/`, then `npm run copy-pcbs-dist-to-unrouted`. Or use `npm run watch` / `npm run watch-and-copy-pcbs-to-unrouted`.
 
 **Notes:**
 
@@ -92,9 +92,15 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 ![KiCad preview](./v4/kicad/kicad.png)
 
-1. Copy Ergogen's generated boards into [`kicad/`](./v4/kicad/) with `npm run copy-pcbs-dist-to-kicad` (existing boards are first backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb`), then open one: `open ./v4/kicad/left.kicad_pcb`.
-1. Route the boards in [`kicad/`](./v4/kicad/), then `npm run copy-pcbs-kicad-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
-   * KiCad has no built-in autorouter. `npm run autoroute` routes the `kicad/*.kicad_pcb` boards in place via [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import); intermediate files go to `dist/v4/kicad/freerouting/`, never `kicad/routed/`. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. Defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
+1. Copy Ergogen's generated boards into [`kicad/unrouted/`](./v4/kicad/unrouted/) with `npm run copy-pcbs-dist-to-unrouted` (existing boards are first backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb`), then open one in KiCad, e.g. [`left.kicad_pcb`](./v4/kicad/unrouted/left.kicad_pcb).
+1. Route the boards in [`kicad/unrouted/`](./v4/kicad/unrouted/). Once routing is done, clean each board up before saving:
+   * **Cleanup Tracks & Vias** (Tools > Cleanup Tracks & Vias): enable all options to merge collinear segments, delete redundant/dangling tracks and vias, and remove tracks inside pads.
+   * **Add Teardrops** (Edit > Edit Teardrops, with nothing selected to apply board-wide): smooths track-to-pad/via junctions for stronger joints and better DFM. Re-run after any reroute.
+   * **Run DRC** (Inspect > Design Rules Checker) with "Refill all zones before performing DRC" checked: resolve every violation and confirm there are no unrouted nets. `npm run fab-jlcpcb` re-runs this same check headlessly and refuses to emit gerbers if it fails (see [Step 5](#step-5-fabrication-jlcpcb)), but fixing violations interactively in KiCad is far easier than reading the JSON report.
+   * **Check copper/silk** visually: confirm the GND zone has no isolated islands or stranded pads, and that silkscreen text and reference designators clear pads and the board edge.
+
+   Then `npm run copy-pcbs-unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
+   * KiCad has no built-in autorouter. `npm run autoroute` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) `*.kicad_pcb` boards in place via [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import); intermediate files go to `dist/v4/kicad/freerouting/`, never `kicad/routed/`. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. Defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
 
      | Env var | Default |
      | --- | --- |
@@ -105,26 +111,46 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
      | `FREEROUTING_UNDESIRED_DIR_COST` | unset |
      | `FREEROUTING_LOG_LEVEL` | WARN |
 
-   * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-kicad` copies traces from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/`](./v4/kicad/) (then File > Revert in KiCad).
-1. Generate fab files with `npm run copy-pcbs-kicad-to-routed && npm run fab-jlcpcb` into `dist/v4/kicad/jlcpcb/<name>/`: `<name>-gerber.zip` (gerbers + drill), plus `<name>-BOM.csv` and `<name>-CPL.csv` for assembly when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
-1. Order from [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/), [PCBWay](https://www.pcbway.com/)):
-   * Bare boards: submit each `<name>-gerber.zip`.
-   * Assembly (PCBA): also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`; verify every LCSC part in `jlcpcb-parts.json` is in stock first.
+   * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-unrouted` copies traces from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
 
-### Step 5. [OnShape](https://cad.onshape.com)
+### Step 5. Fabrication (JLCPCB)
 
-![OnShape preview](./v4/onshape/onshape.png)
+With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports everything a fab house needs from the routed masters [`v4/kicad/routed/`](./v4/kicad/routed/) into `dist/v4/kicad/jlcpcb/<name>/`:
 
-1. In [OnShape](https://cad.onshape.com), create a document and start a sketch.
+* **Gerbers + drill** (`<name>-gerber.zip`): upload to order the bare PCB.
+* **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): assembly files for JLCPCB PCBA, generated only when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present; without it the script produces gerbers only.
+* **DRC report** (`<name>-drc.json`): before exporting each board, `fab-jlcpcb` runs a headless DRC gate (`kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations`) on the routed master and aborts the whole fab (no gerbers written) if any error-level violation or unrouted net remains, so a board that isn't fully routed and clean never reaches a gerber. `--refill-zones` is in-memory only, so the master is untouched. The report is written whether the gate passes or fails. No schematic-parity check: the Ergogen boards have no `.kicad_sch`.
+
+**How parts are assigned (PCBA).** LCSC part numbers live in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), not in the `.kicad_pcb`, so they survive when Ergogen regenerates the boards. The file is keyed by **footprint name** (the `Package` column of the position file), because the generated footprints have empty `Value` fields, which rules out value-based keying. Each entry has `lcsc`, `comment` (BOM Comment), `package` (BOM Footprint), and `rotation` (added to KiCad's angle to fix pick-and-place orientation). [`scripts/gen-jlcpcb-bom-cpl.py`](./scripts/gen-jlcpcb-bom-cpl.py) joins this against the position file:
+
+* footprint **absent** from the JSON -> Do-Not-Place (hand-soldered or hand-assembled)
+* footprint present with **empty `lcsc`** -> error; nothing is written until you fill it in
+* footprint present with **`lcsc` set** -> placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
+
+Keep a part off the assembly BOM (mark it Do-Not-Place) when assembling it would raise the order cost: JLCPCB's cheaper **Economic** PCBA service only places parts JLC stocks for it, so a part that is Standard-only or out of stock forces the whole order onto the pricier **Standard** service. Hand-solder those instead.
+
+**Ordering** from [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/), [PCBWay](https://www.pcbway.com/)):
+
+1. Bare boards: submit each `<name>-gerber.zip`.
+1. Assembly (PCBA): also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`; verify every LCSC part in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is in stock first.
+1. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree). If a part is mis-oriented, adjust its `rotation` in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) and re-run.
+
+Which components are placed vs. hand-soldered, and their sourcing, are version-specific; see the version README (e.g. [v4](./v4/README.md#fabrication-jlcpcb)).
+
+### Step 6. [Onshape](https://cad.onshape.com)
+
+![Onshape preview](./v4/onshape/onshape.png)
+
+1. In [Onshape](https://cad.onshape.com), create a document and start a sketch.
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/v4/ergogen/outlines/full.dxf`.
 1. Design the case, then export `*.step` files to [`onshape/`](./v4/onshape/).
 
-### Step 6. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
+### Step 7. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 
 1. Open or create an OrcaSlicer project.
 1. Import the `*.step` files from [`onshape/`](./v4/onshape/).
 1. Slice and print the case.
 
-### Step 7. [QMK Firmware](https://qmk.fm/)
+### Step 8. [QMK Firmware](https://qmk.fm/)
 
 1. Install the [custom QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
