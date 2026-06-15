@@ -24,12 +24,12 @@ units:
   credit_x_right: u/2 -24.775 # rel. extra_equal_num (right pinky)
   # --- Component silk label offsets (shared by both halves; x reuses mcu_x/trrs_x
   # since each label is centered under its component) ---
-  label_mcu_y: -20 # below the MCU body
-  label_trrs_y: 1.4 # below the TRRS jack
-  label_tvs_y: -4.5 # below the TVS
-  label_resistor_y: -19.2 # below the resistor
-  label_reset_y: 1.5 # below the reset button
-  label_screw_dx: 4.6 # M3 label offset to the side of each hole
+  label_mcu_y: -20
+  label_trrs_y: 1.5
+  label_tvs_y: -4.5
+  label_resistor_y: -19.2
+  label_reset_y: 3
+  label_screw_dx: 4.6
 
 # --- Points: Key matrix, thumb cluster, and mounting hole locations ---
 points:
@@ -591,7 +591,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [mcu_x, label_mcu_y] # below the MCU body, above the reset button
+          shift: [mcu_x, label_mcu_y]
         params: &label_params
           reversible: true
           layer: SilkS
@@ -603,7 +603,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_trrs_y] # in the gap below the TRRS jack, above the TVS
+          shift: [trrs_x, label_trrs_y]
         params:
           <<: *label_params
           text: TRRS
@@ -611,7 +611,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_tvs_y] # below the TVS (resistor moved down, so room here now)
+          shift: [trrs_x, label_tvs_y]
         params:
           <<: *label_params
           text: 'TVS\nLittelfuse\nSMF3.3CA'
@@ -619,7 +619,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_x, label_resistor_y] # directly below the resistor
+          shift: [trrs_x, label_resistor_y]
         params:
           <<: *label_params
           text: '100R\nPanasonic\nERJ-6ENF\n1000V' # split so each line fits the narrow channel
@@ -627,18 +627,18 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_home
-          shift: [mcu_x, label_reset_y] # below the reset button
+          shift: [mcu_x, label_reset_y]
         params:
           <<: *label_params
           text: 'Reset switch\nE-Switch\nTL3342F450QG'
-      # Screw labels: one per hole, shrunk to 0.7mm and placed beside each hole
-      # (directly below is blocked by the surrounding key field). Anchored to each
-      # screw point individually so each goes to its hole's open side.
+      # Screw labels: one per hole, placed beside each hole (directly below is
+      # blocked by the surrounding key field). Anchored to each screw point
+      # individually so each goes to its hole's open side.
       label_screw_ll: &label_screw_ll
         what: ceoloide/utility_text
         where:
           ref: screw_left_left
-          shift: [-label_screw_dx, 0] # left of the hole (open border side)
+          shift: [-label_screw_dx, 0]
         params:
           reversible: true
           layer: SilkS
@@ -655,7 +655,7 @@ pcbs:
         <<: *label_screw_ll
         where:
           ref: screw_left_right
-          shift: [label_screw_dx, 0] # right of the hole
+          shift: [label_screw_dx, 0]
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
