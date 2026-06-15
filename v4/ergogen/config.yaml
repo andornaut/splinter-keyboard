@@ -611,10 +611,10 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [29, -20.7] # below the MCU (full width for the long part number)
+          shift: [31, -19.2] # directly below the resistor
         params:
           <<: *label_params
-          text: '100R\nERJ-6ENF1000V'
+          text: '100R\nERJ-6ENF\n1000V' # split 3 lines so each fits the narrow channel
       label_reset: &label_reset
         what: ceoloide/utility_text
         where:
@@ -733,7 +733,7 @@ pcbs:
         <<: *label_resistor
         where:
           ref: mirror_matrix_five_num
-          shift: [29, -20.7]
+          shift: [31, -19.2]
       label_reset:
         <<: *label_reset
         where:
