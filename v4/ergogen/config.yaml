@@ -13,7 +13,7 @@ units:
   trrs_x: mcu_x + 13 # TRRS jack x; TVS and resistor stack at the same x
   trrs_y: 15 # TRRS jack y
   tvs_y: trrs_y - 16 # data-line TVS, below the TRRS jack (near the R2 data pad)
-  resistor_y: trrs_y - 21 # data-line resistor, below the TVS
+  resistor_y: trrs_y - 30 # data-line resistor; dropped beside the MCU's lower edge so its 0.8mm part-number label fits full-width below the MCU
   # --- Silkscreen credit text offsets (shared by both halves) ---
   # Text is CENTER-justified so the reversible back copy mirrors onto the same
   # on-board spot (left/right-justified text mirrors about the anchor, landing
@@ -602,21 +602,17 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [31, -3.6] # in the gap between the TVS and the resistor
+          shift: [31, -5.2] # below the TVS (resistor moved down, so room here now)
         params:
           <<: *label_params
-          height: 0.5 # smaller so the part number fits the narrow channel
-          width: 0.5
           text: 'TVS\nSMF3.3CA'
       label_resistor: &label_resistor
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [31, -9.5] # below the resistor
+          shift: [29, -20.7] # below the MCU (full width for the long part number)
         params:
           <<: *label_params
-          height: 0.5 # smaller so the part number fits the narrow channel
-          width: 0.5
           text: '100R\nERJ-6ENF1000V'
       label_reset: &label_reset
         what: ceoloide/utility_text
@@ -633,24 +629,24 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: screw_left_left
-          shift: [-4.2, 0] # left of the hole (open border side)
+          shift: [-4.6, 0] # left of the hole (open border side)
         params:
           reversible: true
           layer: SilkS
-          height: 0.7
-          width: 0.7
+          height: 0.8
+          width: 0.8
           thickness: 0.15
           text: M3x0.5
       label_screw_lc:
         <<: *label_screw_ll
         where:
           ref: screw_left_center
-          shift: [-4.2, 0]
+          shift: [-4.6, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: screw_left_right
-          shift: [4.2, 0] # right of the hole
+          shift: [4.6, 0] # right of the hole
   right:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only
     outlines:
@@ -736,7 +732,7 @@ pcbs:
         <<: *label_resistor
         where:
           ref: mirror_matrix_five_num
-          shift: [31, -9.5]
+          shift: [29, -20.7]
       label_reset:
         <<: *label_reset
         where:
@@ -746,14 +742,14 @@ pcbs:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_left
-          shift: [-4.2, 0]
+          shift: [-4.6, 0]
       label_screw_lc:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_center
-          shift: [-4.2, 0]
+          shift: [-4.6, 0]
       label_screw_lr:
         <<: *label_screw_ll
         where:
           ref: mirror_screw_left_right
-          shift: [4.2, 0]
+          shift: [4.6, 0]
