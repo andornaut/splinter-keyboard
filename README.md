@@ -136,7 +136,7 @@ LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.js
 
 #### Panelization (optional, for PCBA cost)
 
-`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA. It reads the routed masters, lays both halves in a frame with mouse-bite tabs, prefixes refs/nets (`left_`/`right_`) so they stay unique, and exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. The panel's own DRC is advisory; the per-half `fab-jlcpcb` stays the strict gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) git-master in a `/opt/kikit` venv (see the Ansible `kicad` tag); override with `KIKIT_PYTHON`.
+`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA. It reads the routed masters, lays both halves in a frame with mouse-bite tabs, prefixes refs/nets (`left_`/`right_`) so they stay unique, and exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. The panel's own DRC is advisory; the per-half `fab-jlcpcb` stays the strict gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) (git-master build for KiCad 10 support); point `panelize.sh` at its interpreter with `KIKIT_PYTHON`.
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 
