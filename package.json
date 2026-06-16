@@ -15,18 +15,18 @@
     "nodemon": "^3.1.14"
   },
   "scripts": {
-    "autoroute": "python3 ./scripts/autoroute.py",
-    "build": "./scripts/build.sh",
     "clean": "rm -rf dist && echo 'OK: clean: removed dist/'",
-    "copy-pcbs-dist-to-unrouted": "./scripts/copy-pcbs-dist-to-unrouted.sh",
-    "copy-pcbs-unrouted-to-routed": "./scripts/copy-pcbs-unrouted-to-routed.sh",
-    "copy-traces-routed-to-unrouted": "./scripts/copy-traces-routed-to-unrouted.sh",
-    "fab-jlcpcb": "./scripts/fab-jlcpcb.sh",
+    "copy:dist-to-unrouted": "./scripts/copy-dist-to-unrouted.sh",
+    "copy:traces-to-unrouted": "./scripts/copy-traces-to-unrouted.sh",
+    "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
+    "ergogen": "./scripts/ergogen.sh",
+    "fab": "./scripts/fab.sh",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
-    "validate-fab": "python3 ./scripts/validate-fab.py",
-    "validate-provenance": "python3 ./scripts/validate-provenance.py",
-    "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
-    "watch-and-copy-pcbs-to-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-dist-to-unrouted\""
+    "route": "python3 ./scripts/route.py",
+    "validate:fab": "python3 ./scripts/validate-fab.py",
+    "validate:provenance": "python3 ./scripts/validate-provenance.py",
+    "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen\"",
+    "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\""
   }
 }

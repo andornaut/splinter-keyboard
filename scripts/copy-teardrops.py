@@ -7,7 +7,7 @@ so copy-traces alone never carries them across. This complements it: it removes
 any teardrop zones already on the destination (so re-runs are idempotent and do
 not stack duplicates), then copies the source's teardrop zones over.
 
-Invoked per board from copy-traces-routed-to-unrouted.sh right after the trace
+Invoked per board from copy-traces-to-unrouted.sh right after the trace
 copy. Usage: copy-teardrops.py <src.kicad_pcb> <dst.kicad_pcb>
 """
 import sys

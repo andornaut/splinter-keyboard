@@ -76,7 +76,7 @@ Neither change affects firmware: the data line still terminates at the MCU seria
 
 ## Fabrication (JLCPCB)
 
-See the root README's [Fabrication step](../README.md#step-5-fabrication-jlcpcb) for how `npm run fab-jlcpcb`, the DRC gate, and [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) work. This section covers only what is v4-specific.
+See the root README's [Fabrication step](../README.md#step-5-fabrication-jlcpcb) for how `npm run fab`, the DRC gate, and [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) work. This section covers only what is v4-specific.
 
 JLCPCB assembles the three SMD parts that have an LCSC link: the matrix diodes, the 100Ω data-line resistor, and the TVS. Everything else is sourced separately and hand-soldered or hand-assembled. The MCU (Liatris), TRRS jack, reset switch, and hotswap sockets are **Do-Not-Place**; their LCSC/vendor links in the [BOM](#bill-of-materials-bom) are for sourcing only. The hotswap sockets are the parts kept off the assembly BOM to stay on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly.
 

@@ -4,12 +4,12 @@
 # manual routing, rather than at build time so routing happens on a clean board;
 # the cp overwrites each master with the pour-free working copy first, so the
 # pour is always freshly flowed around the current traces. Run via:
-# npm run copy-pcbs-unrouted-to-routed
+# npm run copy:unrouted-to-routed
 set -euo pipefail
 shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-VERSION="${npm_package_config_VERSION:?set via npm (npm run copy-pcbs-unrouted-to-routed)}"
+VERSION="${npm_package_config_VERSION:?set via npm (npm run copy:unrouted-to-routed)}"
 kicad_dir="${VERSION}/kicad"
 src_dir="${kicad_dir}/unrouted"
 dst_dir="${kicad_dir}/routed"
@@ -23,8 +23,8 @@ for f in "${files[@]}"; do
 done
 
 # Apply project settings to the routed/ projects (this copy step owns the routed
-# tier, the fab source whose DRC floors fab-jlcpcb's DRC gate reads). See
+# tier, the fab source whose DRC floors fab's DRC gate reads). See
 # apply_project_settings in lib.sh.
 apply_project_settings "$dst_dir"
 
-ok "copy-pcbs-unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour"
+ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour"

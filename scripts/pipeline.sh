@@ -5,14 +5,14 @@
 # plus the output files produced. Run via: npm run pipeline
 #
 # Order (each step is also its own npm script):
-#   1 build                          regenerate boards from config.yaml
-#   2 copy-pcbs-dist-to-unrouted     dist/ -> kicad/unrouted/ (backs up first)
-#   3 copy-traces-routed-to-unrouted routed/ traces+teardrops -> unrouted/
-#   4 copy-pcbs-unrouted-to-routed   unrouted/ -> routed/ (adds GND pour)
-#   5 validate-provenance            unrouted/ + routed/ match current config
-#   6 fab-jlcpcb                      per-half gerbers/drill (+ assembly BOM/CPL)
-#   7 validate-fab                    audit the fab outputs (GND plane, gerber set, BOM/CPL)
-#   8 panelize                       combined left+right PCBA panel (optional)
+#   1 ergogen               regenerate boards from config.yaml
+#   2 copy:dist-to-unrouted dist/ -> kicad/unrouted/ (backs up first)
+#   3 copy:traces-to-unrouted routed/ traces+teardrops -> unrouted/
+#   4 copy:unrouted-to-routed unrouted/ -> routed/ (adds GND pour)
+#   5 validate:provenance   unrouted/ + routed/ match current config
+#   6 fab                   per-half gerbers/drill (+ assembly BOM/CPL)
+#   7 validate:fab          audit the fab outputs (GND plane, gerber set, BOM/CPL)
+#   8 panelize              combined left+right PCBA panel (optional)
 #
 # panelize needs the KiKit venv (see panelize.sh). When it is absent the pipeline
 # skips that step with a note instead of failing -- the per-half fab output from
@@ -48,13 +48,13 @@ run_step() {
 }
 
 SECONDS=0
-run_step 1 "build"                          ./scripts/build.sh
-run_step 2 "copy-pcbs-dist-to-unrouted"     ./scripts/copy-pcbs-dist-to-unrouted.sh
-run_step 3 "copy-traces-routed-to-unrouted" ./scripts/copy-traces-routed-to-unrouted.sh
-run_step 4 "copy-pcbs-unrouted-to-routed"   ./scripts/copy-pcbs-unrouted-to-routed.sh
-run_step 5 "validate-provenance"            python3 ./scripts/validate-provenance.py
-run_step 6 "fab-jlcpcb"                      ./scripts/fab-jlcpcb.sh
-run_step 7 "validate-fab"                    python3 ./scripts/validate-fab.py
+run_step 1 "ergogen"                 ./scripts/ergogen.sh
+run_step 2 "copy:dist-to-unrouted"   ./scripts/copy-dist-to-unrouted.sh
+run_step 3 "copy:traces-to-unrouted" ./scripts/copy-traces-to-unrouted.sh
+run_step 4 "copy:unrouted-to-routed" ./scripts/copy-unrouted-to-routed.sh
+run_step 5 "validate:provenance"     python3 ./scripts/validate-provenance.py
+run_step 6 "fab"                     ./scripts/fab.sh
+run_step 7 "validate:fab"            python3 ./scripts/validate-fab.py
 
 # Step 8 (panelize) is optional: run it only when the KiKit venv is present and
 # importable (the same probe panelize.sh does), otherwise skip with a note so a
@@ -101,7 +101,7 @@ panel="dist/${VERSION}/kicad/panelize/panel.kicad_pcb"
 
 # Provenance stamp of what was just fabbed: the title-block comment 1 of a routed
 # board (the fab source). All halves share one stamp, so any routed board serves.
-# Read by regex, no pcbnew load -- same field validate-provenance compares.
+# Read by regex, no pcbnew load -- same field validate:provenance compares.
 stamp_board=("${VERSION}/kicad/routed"/[!_]*.kicad_pcb)
 if [ ${#stamp_board[@]} -gt 0 ]; then
   stamp=$(grep -oE '\(comment 1 "[^"]*"\)' "${stamp_board[0]}" | head -1 \

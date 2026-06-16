@@ -25,7 +25,7 @@ require_pcbs() {
 ok() { echo "OK: $*"; }
 
 # Fail early with a clear message if any named runtime dependency is missing from
-# PATH. Shared by the wrappers that shell out to external tools (fab-jlcpcb,
+# PATH. Shared by the wrappers that shell out to external tools (fab,
 # panelize). Call as `require_cmds kicad-cli zip python3`.
 require_cmds() {
   local cmd
@@ -54,7 +54,7 @@ mute_kikit_noise() {
   "$@" 2> >(grep -vF -e "$PCBNEW_NOISE" -e 'Debug: Adding duplicate image handler' >&2)
 }
 
-# Provenance gate shared by fab-jlcpcb.sh and panelize.sh: refuse to proceed if any
+# Provenance gate shared by fab.sh and panelize.sh: refuse to proceed if any
 # routed board drifted from the current config.yaml (or is unstamped). Scoped to
 # routed/ (the fab source) so unrouted/ drift never blocks a legitimate fab/panel
 # of a current routed master. Under `set -e` a nonzero exit aborts the caller.
@@ -62,8 +62,8 @@ provenance_gate_routed() { python3 ./scripts/validate-provenance.py routed; }
 
 # Apply the custom KiCad project settings (VCC net class + DRC floors) to the
 # [!_]*.kicad_pro files under $1. Called by each step that writes a board tier so
-# that tier owns its project file: build -> dist/, copy-pcbs-dist-to-unrouted ->
-# unrouted/, copy-pcbs-unrouted-to-routed -> routed/. apply-project-settings.py is
+# that tier owns its project file: ergogen -> dist/, copy:dist-to-unrouted ->
+# unrouted/, copy:unrouted-to-routed -> routed/. apply-project-settings.py is
 # idempotent and skips non-matching paths, so a no-op call (or empty glob under
 # nullglob) is safe. No mute_pcbnew_noise: it edits .kicad_pro JSON and never
 # imports pcbnew, so it emits no PROPERTY_ENUM noise.
@@ -74,7 +74,7 @@ JLCPCB_LAYERS="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask
 
 # Export one board's JLCPCB fab set: gerbers + drill (zipped to <name>-gerber.zip)
 # always, plus pos + assembly BOM/CPL when a parts file exists. Shared by
-# fab-jlcpcb.sh (per routed half) and panelize.sh (the combined panel) so the
+# fab.sh (per routed half) and panelize.sh (the combined panel) so the
 # kicad-cli flags and the BOM/CPL join stay in one place.
 # Args: <board.kicad_pcb> <out_dir> <name> <parts_json>
 export_jlcpcb_fab() {

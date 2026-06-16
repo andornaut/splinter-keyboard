@@ -6,12 +6,12 @@
 # coordinate origin (required for the CPL to line up). LCSC part assignments live
 # in ${VERSION}/kicad/jlcpcb-parts.json (keyed by footprint name) and are joined
 # against the position file by gen-jlcpcb-bom-cpl.py -- outside the .kicad_pcb, so
-# they survive Ergogen regeneration. Run via: npm run fab-jlcpcb
+# they survive Ergogen regeneration. Run via: npm run fab
 set -euo pipefail
 shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-VERSION="${npm_package_config_VERSION:?set via npm (npm run fab-jlcpcb)}"
+VERSION="${npm_package_config_VERSION:?set via npm (npm run fab)}"
 parts="./${VERSION}/kicad/jlcpcb-parts.json"
 
 require_cmds kicad-cli zip python3
@@ -19,7 +19,7 @@ require_cmds kicad-cli zip python3
 # Provenance gate: refuse to fab if any routed board drifted from the current
 # config.yaml (or is unstamped). Only routed/ is checked -- it is the fab source;
 # unrouted/ drift is irrelevant to fab (the full sync check is the bare
-# `npm run validate-provenance`). Under set -e a nonzero exit aborts the whole
+# `npm run validate:provenance`). Under set -e a nonzero exit aborts the whole
 # fab before any gerber is written. See provenance_gate_routed in lib.sh.
 provenance_gate_routed
 
@@ -44,4 +44,4 @@ for f in "${files[@]}"; do
   export_jlcpcb_fab "$f" "$out" "$name" "$parts"
 done
 
-ok "fab-jlcpcb: ${#files[@]} board(s) exported to dist/${VERSION}/kicad/jlcpcb/"
+ok "fab: ${#files[@]} board(s) exported to dist/${VERSION}/kicad/jlcpcb/"

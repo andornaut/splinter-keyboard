@@ -5,14 +5,14 @@ Reads the provenance stamp (title_block comment 1) from every working board and
 compares its config= hash against a fresh hash of the active version's config.yaml.
 A mismatch means the board was generated from a different config than is on disk
 now (edit config, forgot to rebuild + re-route); a missing stamp means the board
-predates stamping or was never built through build.sh. Either way the routed
-master is not safe to fab, so this exits nonzero. fab-jlcpcb runs it as a gate.
+predates stamping or was never built through ergogen.sh. Either way the routed
+master is not safe to fab, so this exits nonzero. fab runs it as a gate.
 
 Active version comes from npm_package_config_VERSION, so run via npm:
-  npm run validate-provenance
+  npm run validate:provenance
 
 By default both stages are checked; pass stage names to narrow it (the fab gate
-passes `routed`, since fab-jlcpcb only consumes routed/ -- validating unrouted/
+passes `routed`, since fab only consumes routed/ -- validating unrouted/
 there would block a legitimate fab of a current routed master on unrelated
 unrouted/ drift):
   validate-provenance.py routed
@@ -47,7 +47,7 @@ def main():
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate-provenance)")
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)")
 
     config = f"{version}/ergogen/config.yaml"
     if not os.path.isfile(config):
@@ -73,11 +73,11 @@ def main():
             failures += 1
 
     if failures:
-        print(f"validate-provenance: {failures}/{len(boards)} board(s) stale or unstamped "
+        print(f"validate:provenance: {failures}/{len(boards)} board(s) stale or unstamped "
               f"for {version} (config={expected}). Rebuild, re-copy, and re-route to clear.",
               file=sys.stderr)
         sys.exit(1)
-    print(f"OK: validate-provenance: {len(boards)} board(s) match {config} (config={expected})")
+    print(f"OK: validate:provenance: {len(boards)} board(s) match {config} (config={expected})")
 
 
 if __name__ == "__main__":

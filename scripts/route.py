@@ -3,7 +3,7 @@
 
 Routes in place: reads and writes the given working .kicad_pcb (the kicad/unrouted/
 copy). It deliberately never touches kicad/routed/ -- promoting a routed board is a
-manual step (npm run copy-pcbs-unrouted-to-routed).
+manual step (npm run copy:unrouted-to-routed).
 
 Tuning via env vars. Defaults favour a fully-connected, DRC-clean board (greedy
 strategy, freerouting's native via cost), which empirically routes the most nets
@@ -19,12 +19,12 @@ Caveat: cranking via cost trades vias for *unrouted nets*, not a cleverer low-vi
 topology -- freerouting abandons nets before it routes them with fewer vias. On a
 regular matrix, hand-routing still beats this for a low via count. See README.
 
-Run via: npm run autoroute (sets npm_package_config_VERSION from package.json).
+Run via: npm run route (sets npm_package_config_VERSION from package.json).
 With no arguments it routes every working .kicad_pcb for the active version
 (${VERSION}/kicad/unrouted/[!_]*.kicad_pcb) in place; intermediates go to
 dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
 
-  autoroute.py [pcb_path ...]
+  route.py [pcb_path ...]
   pcb_path  working .kicad_pcb to route in place (default: all for the version)
 """
 import glob
@@ -154,7 +154,7 @@ def autoroute(pcb_path, work_dir, passes):
 if __name__ == "__main__":
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION unset -- run via npm (npm run autoroute).")
+        sys.exit("npm_package_config_VERSION unset -- run via npm (npm run route).")
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
@@ -163,4 +163,4 @@ if __name__ == "__main__":
         sys.exit(f"No PCBs in {version}/kicad/unrouted/ -- nothing to do.")
     for pcb in pcbs:
         autoroute(pcb, work_dir, passes)
-    print(f"OK: autoroute: {len(pcbs)} PCB(s) routed in place.")
+    print(f"OK: route: {len(pcbs)} PCB(s) routed in place.")

@@ -6,13 +6,13 @@ provenance.py for the format), and also draws the stamp onto silkscreen (both
 F.SilkS and B.SilkS) in the top corner on the pinky (outer) side so the provenance
 is visible on the fabricated board. The pinky side is detected per board as the
 side opposite the TRRS jack, so the left half stamps top-left and the right half
-stamps top-right. Run at the end of build.sh, after recenter.py, on each
+stamps top-right. Run at the end of ergogen.sh, after recenter.py, on each
 dist/ board; the stamp then rides the plain cp steps unchanged into
 kicad/unrouted and kicad/routed, and survives manual routing and the GND-zone
 resave because every script round-trips the board via LoadBoard()/Save(), which
 preserves both the title block and board drawings.
 
-The title-block comment is the only field validate-provenance reads; the silk text
+The title-block comment is the only field validate:provenance reads; the silk text
 is human-facing. The silk copy drops the 'splinter v=<ver>' prefix (already on the
 credit label) and is re-stamped idempotently each run (prior silk stamps, matched
 by their leading 'built=', are removed first), so rebuilding does not stack

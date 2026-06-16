@@ -10,8 +10,8 @@ inspecting the routed masters and the dist/ fab outputs directly. It is the reas
 a board with no ground plane could pass every other gate and still ship (a filled
 zone the guard skipped left GND "connected" by thin traces, so DRC stayed clean).
 
-Run it standalone after fab-jlcpcb, or as the validate-fab pipeline step:
-  npm run validate-fab
+Run it standalone after fab, or as the validate:fab pipeline step:
+  npm run validate:fab
 
 Active version comes from npm_package_config_VERSION, so run via npm.
 
@@ -37,7 +37,7 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
   WARNING (reported, never fatal):
   4. Provenance clean flag -- warn if a routed master was built from an uncommitted
      tree (clean=no/unknown), which makes its commit= stamp meaningless; the config=
-     hash match says nothing about it, so validate-provenance never flags it.
+     hash match says nothing about it, so validate:provenance never flags it.
 """
 import glob
 import os
@@ -46,7 +46,7 @@ import sys
 import zipfile
 
 # pcbnew prints a harmless "No enum choices defined" wxASSERT to stderr at import.
-# Silence stderr across just the import (see autoroute.py for the same pattern); a
+# Silence stderr across just the import (see route.py for the same pattern); a
 # real import failure still surfaces via the traceback after fd 2 is restored.
 _saved_stderr_fd = os.dup(2)
 _devnull_fd = os.open(os.devnull, os.O_WRONLY)
@@ -221,7 +221,7 @@ def csv_designators(path, column):
 def main():
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate-fab)")
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:fab)")
 
     config = f"{version}/ergogen/config.yaml"
     routed = sorted(glob.glob(f"{version}/kicad/routed/[!_]*.kicad_pcb"))
@@ -245,7 +245,7 @@ def main():
         print(f"  {pcb} -> {out}/")
 
         if not os.path.isdir(out):
-            failures.append(f"{name}: no fab output at {out}/ -- run `npm run fab-jlcpcb` first")
+            failures.append(f"{name}: no fab output at {out}/ -- run `npm run fab` first")
             continue
 
         board = pcbnew.LoadBoard(pcb)
@@ -314,7 +314,7 @@ def main():
         if config_mtime and pcb_mtime < config_mtime:
             failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
         if os.path.isfile(zip_path) and os.path.getmtime(zip_path) < pcb_mtime:
-            failures.append(f"{name}: gerber zip older than the routed master -- re-run fab-jlcpcb (stale)")
+            failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
 
     for w in warnings:
         print(f"  WARN: {w}")
@@ -322,9 +322,9 @@ def main():
         print(file=sys.stderr)
         for fmsg in failures:
             print(f"  FAIL: {fmsg}", file=sys.stderr)
-        print(f"validate-fab: {len(failures)} check(s) failed for {version}.", file=sys.stderr)
+        print(f"validate:fab: {len(failures)} check(s) failed for {version}.", file=sys.stderr)
         sys.exit(1)
-    print(f"OK: validate-fab: {len(routed)} board(s) passed all gates for {version}"
+    print(f"OK: validate:fab: {len(routed)} board(s) passed all gates for {version}"
           f"{f' ({len(warnings)} warning(s))' if warnings else ''}")
 
 
