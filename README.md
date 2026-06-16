@@ -99,7 +99,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
    * **Check copper/silk** visually: confirm the GND zone has no isolated islands or stranded pads, and that silkscreen text and reference designators clear pads and the board edge.
 
    Then `npm run copy-pcbs-unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
-   * KiCad has no built-in autorouter. `npm run autoroute` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) `*.kicad_pcb` boards in place via [Freerouting](https://github.com/freerouting/freerouting) (DSN export -> headless route -> SES import); intermediate files go to `dist/v4/kicad/freerouting/`, never `kicad/routed/`. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. Defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
+   * KiCad has no built-in autorouter. `npm run autoroute` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) boards in place via [Freerouting](https://github.com/freerouting/freerouting), leaving `kicad/routed/` untouched. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. The defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
 
      | Env var | Default |
      | --- | --- |
@@ -110,17 +110,13 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
      | `FREEROUTING_UNDESIRED_DIR_COST` | unset |
      | `FREEROUTING_LOG_LEVEL` | WARN |
 
-   * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-unrouted` copies traces from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
+   * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-unrouted` copies the traces and teardrops from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
 
 ### Provenance stamp (keeping routed/ in sync with config.yaml)
 
-The `cp` steps and manual routing let `routed/` silently drift from `config.yaml`, so you could fab a stale board. To guard against this, `npm run build` stamps each board's title block (and a human-readable copy on silkscreen); the stamp rides the `cp` steps and survives routing:
+The `cp` steps and manual routing let `routed/` silently drift from `config.yaml`, so you could fab a stale board. To guard against this, `npm run build` stamps each board with a hash of `config.yaml`, and `npm run fab-jlcpcb` checks that stamp (scoped to `routed/`) before it fabs, refusing a drifted or unstamped master. Run `npm run validate-provenance` any time to check without fabbing.
 
-```text
-splinter v=v4 built=2026-06-15T17:30:00Z config=a1b2c3d4e5f6 commit=bf4e6c2 clean=yes
-```
-
-Only `config=` (`sha256(config.yaml)` to 12 hex chars) is compared; the rest is informational. `npm run validate-provenance` re-hashes `config.yaml` and fails on any stale or unstamped board; `npm run fab-jlcpcb` runs it as a gate scoped to `routed/` so a drifted master never reaches fab. Clear a mismatch by re-running the pipeline (`build`, `copy-pcbs-dist-to-unrouted`, re-route, `copy-pcbs-unrouted-to-routed`). Caveat: the key is `config.yaml` only, so a footprint `.js` or Ergogen-version change can move geometry without tripping it, while a comment-only config edit trips a false "stale".
+Clear a mismatch by re-running the pipeline (`build`, `copy-pcbs-dist-to-unrouted`, re-route, `copy-pcbs-unrouted-to-routed`); when the existing routing still applies, `npm run rebuild` does that whole chain in one step. Caveat: only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
 
 ### Step 5. Fabrication (JLCPCB)
 
@@ -130,13 +126,13 @@ With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports from [
 * **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): JLCPCB PCBA assembly files, generated only when [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
 * **DRC report** (`<name>-drc.json`): a headless DRC gate runs first and aborts the whole fab (no gerbers written) on any error-level violation or unrouted net.
 
-LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) (not the `.kicad_pcb`, so they survive Ergogen regen), keyed by footprint name. [`scripts/gen-jlcpcb-bom-cpl.py`](./scripts/gen-jlcpcb-bom-cpl.py) joins it against the position file: a footprint absent from the JSON is Do-Not-Place (hand-soldered), an empty `lcsc` is an error, a set `lcsc` is placed. Which parts are placed vs. hand-soldered is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
+LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), kept out of the `.kicad_pcb` so they survive Ergogen regen. Which parts JLCPCB places vs. which you hand-solder is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
 
 **Ordering** from [JLCPCB](https://jlcpcb.com/): upload each `<name>-gerber.zip` for bare boards, plus the matching `<name>-BOM.csv` / `<name>-CPL.csv` for assembly. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree); fix a mis-oriented part via its `rotation` in the JSON and re-run.
 
 #### Panelization (optional, for PCBA cost)
 
-`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA. It reads the routed masters, lays both halves in a frame with mouse-bite tabs, prefixes refs/nets (`left_`/`right_`) so they stay unique, and exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. The panel's own DRC is advisory; the per-half `fab-jlcpcb` stays the strict gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) (git-master build for KiCad 10 support); point `panelize.sh` at its interpreter with `KIKIT_PYTHON`.
+`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA orders; skip it for bare boards. It exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`, with the per-half `fab-jlcpcb` staying the strict DRC gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) (git-master build for KiCad 10 support); point `panelize.sh` at its interpreter with `KIKIT_PYTHON`.
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 
