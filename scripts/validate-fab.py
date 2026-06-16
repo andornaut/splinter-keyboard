@@ -33,6 +33,10 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      routed board must not be newer than its gerber zip (either inversion means a
      stale artifact was not regenerated). Mtime-based, so a git checkout that shuffles
      file times without rebuilding can trip it; regenerate to clear.
+  6. Teardrop consistency -- the mirrored routed masters should carry comparable
+     teardrop counts, so flag any board below TEARDROP_MIN_FRAC of the best-teardropped
+     board (catches a half that lost its teardrops in a re-route or a lossy copy).
+     Self-skips when teardrops are off everywhere (max count 0).
 
   WARNING (reported, never fatal):
   4. Provenance clean flag -- warn if a routed master was built from an uncommitted
@@ -82,6 +86,14 @@ COPPER_LAYERS = (pcbnew.B_Cu, pcbnew.F_Cu)
 FLOOD_SPAN_FRAC = 0.5
 ZONE_AREA_FRAC = 0.30
 
+# Teardrops are applied per junction, so the mirrored left/right halves should carry
+# comparable counts. A board with far fewer than the best-teardropped board lost them
+# (a re-route without re-teardropping, or a lossy trace copy). Flag any board below
+# this fraction of the run's max count. Scales with whatever the design uses, and
+# self-skips when teardrops are off everywhere (max=0), so it never false-positives
+# on an intentionally teardrop-free design.
+TEARDROP_MIN_FRAC = 0.5
+
 FS_RE = re.compile(r"%FS[LT][AI]X\d(\d)Y\d\d\*%")
 MO_RE = re.compile(r"%MO(MM|IN)\*%")
 COORD_X_RE = re.compile(r"X(-?\d+)")
@@ -120,6 +132,11 @@ def gnd_zone_master(board):
             if area is not None and (best_area is None or area > best_area):
                 best_area = area
     return present, filled, best_area
+
+
+def teardrop_count(board):
+    """Number of teardrop zones on the board."""
+    return sum(1 for z in board.Zones() if z.IsTeardropArea())
 
 
 def _parse_format(text):
@@ -237,6 +254,7 @@ def main():
 
     config_mtime = os.path.getmtime(config) if os.path.isfile(config) else 0
     failures, warnings = [], []
+    teardrop_counts = {}
 
     for pcb in routed:
         name = os.path.splitext(os.path.basename(pcb))[0]
@@ -301,6 +319,10 @@ def main():
                 else:
                     print(f"    assembly: ok ({len(expected)} placements in CPL)")
 
+        # 6. teardrop count: collect per board; the consistency gate runs after the loop.
+        teardrop_counts[name] = teardrop_count(board)
+        print(f"    teardrops: {teardrop_counts[name]}")
+
         # 4. provenance clean flag (warning).
         # Read the stamp off the already-loaded board (title_block comment 1 = index 0,
         # per provenance.py) instead of re-reading the file.
@@ -315,6 +337,17 @@ def main():
             failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
         if os.path.isfile(zip_path) and os.path.getmtime(zip_path) < pcb_mtime:
             failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
+
+    # 6. teardrop consistency (gate): the mirrored halves should carry comparable
+    # teardrop counts; a board far below the best-teardropped one lost them.
+    max_count = max(teardrop_counts.values(), default=0)
+    if max_count > 0:
+        floor = TEARDROP_MIN_FRAC * max_count
+        for name, count in sorted(teardrop_counts.items()):
+            if count < floor:
+                failures.append(
+                    f"{name}: only {count} teardrops vs {max_count} on the best-teardropped "
+                    f"board (< {TEARDROP_MIN_FRAC:.0%}); teardrops were lost -- restore the master")
 
     for w in warnings:
         print(f"  WARN: {w}")
