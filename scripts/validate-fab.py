@@ -29,46 +29,34 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      and are non-empty, and every assembled footprint on the board appears in the CPL
      exactly once (catches a part silently dropping out of the pos/CPL join, which
      gen-jlcpcb-bom-cpl.py does not count-check).
-  5. Freshness ordering -- config.yaml must not be newer than a routed board, and a
+  4. Freshness ordering -- config.yaml must not be newer than a routed board, and a
      routed board must not be newer than its gerber zip (either inversion means a
      stale artifact was not regenerated). Mtime-based, so a git checkout that shuffles
      file times without rebuilding can trip it; regenerate to clear.
-  6. Teardrop consistency -- the mirrored routed masters should carry comparable
+  5. Teardrop consistency -- the mirrored routed masters should carry comparable
      teardrop counts, so flag any board below TEARDROP_MIN_FRAC of the best-teardropped
      board (catches a half that lost its teardrops in a re-route or a lossy copy).
      Self-skips when teardrops are off everywhere (max count 0).
 
   WARNING (reported, never fatal):
-  4. Provenance clean flag -- warn if a routed master was built from an uncommitted
+  6. Provenance clean flag -- warn if a routed master was built from an uncommitted
      tree (clean=no/unknown), which makes its commit= stamp meaningless; the config=
      hash match says nothing about it, so validate:provenance never flags it.
 """
+import csv
 import glob
+import json
 import os
 import re
 import sys
 import zipfile
 
-# pcbnew prints a harmless "No enum choices defined" wxASSERT to stderr at import.
-# Silence stderr across just the import (see route.py for the same pattern); a
-# real import failure still surfaces via the traceback after fd 2 is restored.
-_saved_stderr_fd = os.dup(2)
-_devnull_fd = os.open(os.devnull, os.O_WRONLY)
-os.dup2(_devnull_fd, 2)
-try:
-    import pcbnew
-finally:
-    os.dup2(_saved_stderr_fd, 2)
-    os.close(_devnull_fd)
-    os.close(_saved_stderr_fd)
+from pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
 
 # Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
 # emits to stderr each time it re-inits image handlers on a board load.
 import wx
 wx.Log.SetLogLevel(wx.LOG_Warning)
-
-import csv
-import json
 
 # Gerber filename fragments for the lib.sh JLCPCB_LAYERS set (layer name dots ->
 # underscores, as kicad-cli writes them). Keep in sync with JLCPCB_LAYERS in lib.sh.
@@ -319,11 +307,11 @@ def main():
                 else:
                     print(f"    assembly: ok ({len(expected)} placements in CPL)")
 
-        # 6. teardrop count: collect per board; the consistency gate runs after the loop.
+        # 5. teardrop count: collect per board; the consistency gate runs after the loop.
         teardrop_counts[name] = teardrop_count(board)
         print(f"    teardrops: {teardrop_counts[name]}")
 
-        # 4. provenance clean flag (warning).
+        # 6. provenance clean flag (warning).
         # Read the stamp off the already-loaded board (title_block comment 1 = index 0,
         # per provenance.py) instead of re-reading the file.
         stamp = board.GetTitleBlock().GetComment(0)
@@ -331,14 +319,14 @@ def main():
         if not clean or clean.group(1) != "yes":
             warnings.append(f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})")
 
-        # 5. freshness ordering (gate).
+        # 4. freshness ordering (gate).
         pcb_mtime = os.path.getmtime(pcb)
         if config_mtime and pcb_mtime < config_mtime:
             failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
         if os.path.isfile(zip_path) and os.path.getmtime(zip_path) < pcb_mtime:
             failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
 
-    # 6. teardrop consistency (gate): the mirrored halves should carry comparable
+    # 5. teardrop consistency (gate): the mirrored halves should carry comparable
     # teardrop counts; a board far below the best-teardropped one lost them.
     max_count = max(teardrop_counts.values(), default=0)
     if max_count > 0:

@@ -24,11 +24,12 @@ panel="dist/${VERSION}/kicad/panelize/panel.kicad_pcb"
 
 require_cmds kicad-cli zip python3
 
-# Resolve the KiKit interpreter: KIKIT_PYTHON override, else the dedicated venv,
-# else fail with a pointer to the installer (the ansible hobbies role, kicad tag).
-kikit_py="${KIKIT_PYTHON:-/opt/kikit/bin/python}"
+# Resolve the KiKit interpreter (KIKIT_PYTHON override, else the dedicated venv)
+# and probe it, failing with a pointer to the installer (the ansible hobbies role,
+# kicad tag). See kikit_python / kikit_importable in lib.sh.
+kikit_py="$(kikit_python)"
 [ -x "$kikit_py" ] || { echo "KiKit venv python not found at ${kikit_py}. Install it (ansible-ctrl hobbies role, kicad tag) or set KIKIT_PYTHON." >&2; exit 1; }
-PYTHONNOUSERSITE=1 "$kikit_py" -c 'import kikit.panelize' 2>/dev/null \
+kikit_importable "$kikit_py" \
   || { echo "KiKit not importable under ${kikit_py} (needs KiCad 10 git-master KiKit + pcbnewTransition). Reinstall via the ansible hobbies role." >&2; exit 1; }
 
 # Provenance gate: same as fab, refuse to panel if routed/ drifted from

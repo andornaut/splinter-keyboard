@@ -69,6 +69,20 @@ provenance_gate_routed() { python3 ./scripts/validate-provenance.py routed; }
 # imports pcbnew, so it emits no PROPERTY_ENUM noise.
 apply_project_settings() { python3 ./scripts/apply-project-settings.py "$1"/[!_]*.kicad_pro; }
 
+# Resolve the KiKit interpreter: the KIKIT_PYTHON override, else the dedicated
+# venv panelize.py needs (KiCad 10 KiKit is git-master only, so it lives in its
+# own venv). Echoes the path; callers test it with kikit_importable. Shared by
+# pipeline.sh (probe-and-skip) and panelize.sh (hard-fail) so both resolve the
+# same interpreter.
+kikit_python() { echo "${KIKIT_PYTHON:-/opt/kikit/bin/python}"; }
+
+# True if $1 is an executable interpreter that can import kikit.panelize.
+# PYTHONNOUSERSITE=1 so a stale ~/.local pcbnewTransition cannot shadow the venv.
+# The one place the import probe lives, so pipeline.sh and panelize.sh agree.
+kikit_importable() {
+  [ -x "$1" ] && PYTHONNOUSERSITE=1 "$1" -c 'import kikit.panelize' 2>/dev/null
+}
+
 # Standard JLCPCB 2-layer set (paste included for the assembly stencil).
 JLCPCB_LAYERS="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
 

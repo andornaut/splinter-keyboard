@@ -61,8 +61,8 @@ run_step 7 "validate:fab"            python3 ./scripts/validate-fab.py
 # machine without KiKit still gets a complete per-half fab from steps 6-7.
 current_step="panelize"
 printf '\n%s==> [%d/%d] %s%s\n' "$B" "$total_steps" "$total_steps" "panelize (optional)" "$R"
-kikit_py="${KIKIT_PYTHON:-/opt/kikit/bin/python}"
-if [ -x "$kikit_py" ] && PYTHONNOUSERSITE=1 "$kikit_py" -c 'import kikit.panelize' 2>/dev/null; then
+kikit_py="$(kikit_python)"
+if kikit_importable "$kikit_py"; then
   t0=$SECONDS
   ./scripts/panelize.sh
   summary+=("ok|panelize|$(( SECONDS - t0 ))s")

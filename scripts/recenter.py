@@ -32,10 +32,12 @@ def page_center(path):
     if name == "User":
         nums = re.findall(r"[\d.]+", rest)
         w, h = float(nums[0]), float(nums[1])
-    else:
+    elif name in PAGE_SIZES:
         w, h = PAGE_SIZES[name]
         if "portrait" in rest:
             w, h = h, w
+    else:
+        raise SystemExit(f"{path}: unsupported page size {name!r}")
     return w / 2, h / 2
 
 

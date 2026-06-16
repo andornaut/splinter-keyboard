@@ -85,7 +85,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 **Notes:**
 
 * The GUI prototypes key placement, layout, and outlines but does not render PCBs. It runs client-side only (no filesystem access, no sync), so edit there and copy back to `config.yaml`, the source of truth. Use `npm run ergogen` for full builds and PCB generation.
-* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) since the browser can't load them from disk. It registers this repo's footprints (`mcu_liatris`, `sod-123fl`, `sod-123w`) on top of the upstream `ceoloide` and `infused-kim` libraries; any unregistered `what:` shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
+* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) since the browser can't load them from disk. It registers this repo's [custom footprints](./ergogen/footprints/) on top of the upstream `ceoloide` and `infused-kim` libraries; any unregistered `what:` shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 
