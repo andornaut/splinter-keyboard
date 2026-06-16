@@ -26,7 +26,7 @@ units:
   resistor_y: tvs_y - 9
   # --- Silkscreen credit text offsets ---
   # y is the block center; x centers the wider URL line. Center-justified (see footprint).
-  label_credit_y: 12
+  label_credit_y: 11
   label_credit_x_left: -u/2 -u +25 # left pinky
   label_credit_x_right: u/2 -25 # right pinky
   # --- Component label y-offsets (silkscreen) ---

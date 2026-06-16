@@ -20,21 +20,24 @@ for cmd in kicad-cli zip python3; do
   command -v "$cmd" >/dev/null || { echo "Missing required command: $cmd" >&2; exit 1; }
 done
 
-# Standard JLCPCB 2-layer set (paste included for the assembly stencil).
-layers="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
+# Provenance gate: refuse to fab if any routed board drifted from the current
+# config.yaml (or is unstamped). Only routed/ is checked here -- it is the fab
+# source; unrouted/ drift is irrelevant to fab (the full sync check is the
+# bare `npm run validate-provenance`). Under set -e a nonzero exit aborts the
+# whole fab before any gerber is written.
+python3 "${here}/validate-provenance.py" routed
 
 require_pcbs "./${VERSION}/kicad/routed"
 for f in "${files[@]}"; do
   name="$(basename "${f%.kicad_pcb}")"
   out="dist/${VERSION}/kicad/jlcpcb/${name}"
-  gerber_dir="${out}/gerber"
   mkdir -p "$out"
   echo "$f -> $out"
 
   # DRC gate: refill the GND pour, then fail the fab on any error-level violation
-  # or unrouted net BEFORE clearing this board's prior output (the gate runs ahead
-  # of the rm -rf below), so a failing run never destroys its last-good gerbers. On
-  # failure print where to look; the || keeps the abort hard despite the redirect.
+  # or unrouted net BEFORE export_jlcpcb_fab clears this board's prior output, so a
+  # failing run never destroys its last-good gerbers. On failure print where to
+  # look; the || keeps the abort hard despite the redirect.
   # No --schematic-parity: the Ergogen-generated boards have no .kicad_sch.
   # --refill-zones is in-memory only (no --save-board), so the master is untouched.
   mute_pcbnew_noise kicad-cli pcb drc --refill-zones --severity-error \
@@ -42,28 +45,7 @@ for f in "${files[@]}"; do
     --output "${out}/${name}-drc.json" "$f" >/dev/null \
     || { echo "DRC failed for ${name}: see ${out}/${name}-drc.json" >&2; exit 1; }
 
-  # DRC passed: rebuild gerbers from scratch (clear the stale set and any old zip,
-  # so the fresh zip is not appended to a previous one).
-  rm -rf "$gerber_dir"
-  mkdir -p "$gerber_dir"
-  rm -f "${out}/${name}-gerber.zip"
-
-  kicad-cli pcb export gerbers --no-protel-ext --layers "$layers" \
-    --output "${gerber_dir}/" "$f" >/dev/null
-  kicad-cli pcb export drill --format excellon --drill-origin absolute \
-    --output "${gerber_dir}/" "$f" >/dev/null
-  ( cd "$gerber_dir" && zip -qr "../${name}-gerber.zip" . )
-
-  # Assembly files are optional per version: emit them only where a parts file exists.
-  if [ -f "$parts" ]; then
-    pos="${out}/${name}-pos.csv"
-    kicad-cli pcb export pos --format csv --units mm --output "$pos" "$f" >/dev/null
-    python3 "${here}/gen-jlcpcb-bom-cpl.py" \
-      --pos "$pos" --parts "$parts" \
-      --bom "${out}/${name}-BOM.csv" --cpl "${out}/${name}-CPL.csv"
-  else
-    echo "  no ${parts} -- gerbers only (no assembly BOM/CPL)"
-  fi
+  export_jlcpcb_fab "$f" "$out" "$name" "$parts" "$here"
 done
 
 ok "fab-jlcpcb: ${#files[@]} board(s) exported to dist/${VERSION}/kicad/jlcpcb/"

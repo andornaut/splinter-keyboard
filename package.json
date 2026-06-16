@@ -22,6 +22,8 @@
     "copy-pcbs-unrouted-to-routed": "./scripts/copy-pcbs-unrouted-to-routed.sh",
     "copy-traces-routed-to-unrouted": "./scripts/copy-traces-routed-to-unrouted.sh",
     "fab-jlcpcb": "./scripts/fab-jlcpcb.sh",
+    "panelize": "./scripts/panelize.sh",
+    "validate-provenance": "python3 ./scripts/validate-provenance.py",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build\"",
     "watch-and-copy-pcbs-to-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run build && npm run copy-pcbs-dist-to-unrouted\""
   }

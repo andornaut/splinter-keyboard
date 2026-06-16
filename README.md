@@ -28,6 +28,7 @@ Install the following tools:
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
 * [Python 3](https://www.python.org)
 * [Freerouting](https://github.com/freerouting/freerouting) (optional)
+* [KiKit](https://github.com/yaqwsx/KiKit) (optional, for `npm run panelize`; needs the git-master build, see below)
 
 ```bash
 # Include submodules when cloning
@@ -111,6 +112,24 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
    * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-unrouted` copies traces from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
 
+### Provenance stamp (keeping routed/ in sync with config.yaml)
+
+The two `cp` steps and the manual routing between `config.yaml` and the routed masters mean `routed/` can silently drift from the config: edit `config.yaml`, forget to rebuild and re-route, and you would fab a stale board. A provenance stamp guards against this.
+
+`npm run build` writes a stamp into each generated board's title block (`title_block` comment 1), where it rides the `cp` steps into `unrouted/` and `routed/` unchanged and survives manual routing and the GND-pour resave (every script round-trips the board through KiCad, which preserves the title block):
+
+```text
+splinter v=v4 built=2026-06-15T17:30:00Z config=a1b2c3d4e5f6 commit=bf4e6c2 clean=yes
+```
+
+Only `config=` is compared: it is `sha256(config.yaml)` truncated to 12 hex chars. The rest is provenance and is never compared (`built=` build time, `commit=` short git HEAD, `clean=yes` when the working tree was fully committed at build time, `no` when it had uncommitted changes).
+
+`build` also draws the stamp onto silkscreen (both `F.SilkS` and `B.SilkS`, the back copy mirrored) in the top corner on the pinky (outer) side, so the provenance is readable on the fabricated board. The pinky side is detected per board as the side opposite the TRRS jack (left half stamps top-left, right half top-right). The silk copy drops the `splinter v=v4` prefix (already on the credit label), and is re-drawn idempotently each build, so rebuilds do not stack duplicates. The silk text is human-facing only; `validate-provenance` reads the title-block comment, not the silk.
+
+`npm run validate-provenance` re-hashes the active version's `config.yaml` and compares it against the stamp in every `unrouted/` and `routed/` board, exiting nonzero if any board is stale (stamp hash differs) or unstamped. `npm run fab-jlcpcb` runs the same check as a gate before the DRC check, but scoped to `routed/` only (the fab source), so a routed master that drifted from the current config can never reach fab; `unrouted/` drift does not block a fab. To clear a mismatch, run the full pipeline again: `npm run build`, `npm run copy-pcbs-dist-to-unrouted`, re-route, then `npm run copy-pcbs-unrouted-to-routed`.
+
+The match key is `config.yaml` only, which keeps validation cheap (no Ergogen re-run). The trade-off: a change to a footprint `.js`, `recenter.py`, or the Ergogen version can move geometry without tripping the stamp, while a cosmetic or comment-only edit to `config.yaml` does trip it (a conservative false "stale").
+
 ### Step 5. Fabrication (JLCPCB)
 
 With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports everything a fab house needs from the routed masters [`v4/kicad/routed/`](./v4/kicad/routed/) into `dist/v4/kicad/jlcpcb/<name>/`:
@@ -134,6 +153,16 @@ Keep a part off the assembly BOM (mark it Do-Not-Place) when assembling it would
 1. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree). If a part is mis-oriented, adjust its `rotation` in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) and re-run.
 
 Which components are placed vs. hand-soldered, and their sourcing, are version-specific; see the version README (e.g. [v4](./v4/README.md#fabrication-jlcpcb)).
+
+#### Panelization (optional, for PCBA cost)
+
+Ordering the two halves as separate designs pays JLCPCB's per-order assembly setup fee and stencil fee twice (the cart consolidates shipping, but not those fixed fees). `npm run panelize` combines `left` + `right` into one panel-by-customer board so JLC treats them as a single design and those fees are paid once. It is only worthwhile for PCBA; bare-board-only orders gain little.
+
+`npm run panelize` reads the routed masters, lays both halves side-by-side in a frame joined by mouse-bite tabs (the curved board outline rules out V-cuts), adds corner fiducials and tooling holes for assembly, prefixes each half's references and nets (`left_`/`right_`) so they stay unique in the CPL, then exports the panel's gerbers/drill/pos + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. Upload `panel-gerber.zip` plus `panel-BOM.csv` / `panel-CPL.csv`.
+
+The per-half `npm run fab-jlcpcb` remains the strict-DRC gate and source of truth. The panel's own DRC (`panel-drc.json`) is advisory only, written but never aborting, because panels routinely trip board-to-board and tab clearance rules.
+
+Requires [KiKit](https://github.com/yaqwsx/KiKit). KiCad 10 support is only in KiKit + `pcbnewTransition` **git master** (no PyPI release has it yet), so it is installed into a dedicated venv (`/opt/kikit`, see the Ansible `kicad` tag) that `panelize.sh` runs with `PYTHONNOUSERSITE=1`. Override the interpreter with `KIKIT_PYTHON=/path/to/venv/bin/python`.
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 

@@ -24,6 +24,12 @@ for f in "${files[@]}"; do
   mute_pcbnew_noise python3 ./scripts/recenter.py "$f"
 done
 
+# Stamp config provenance into the title block of every board in one invocation,
+# so all halves share one build stamp (timestamp/commit/hash). It rides the cp
+# steps into unrouted/ and routed/ unchanged; validate-provenance checks it before fab.
+mute_pcbnew_noise python3 ./scripts/stamp-provenance.py \
+  --version "${VERSION}" --config "${VERSION}/ergogen/config.yaml" "${files[@]}"
+
 # Idempotently apply the VCC net class and DRC floors to the generated and routed
 # KiCad projects (these live in .kicad_pro, which ergogen does not maintain).
 # Missing globs are tolerated by the helper, so this is safe before a version is

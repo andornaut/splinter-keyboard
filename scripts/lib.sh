@@ -30,3 +30,39 @@ ok() { echo "OK: $*"; }
 # match is the full distinctive assert tail (not the bare "No enum choices
 # defined") so a real error happening to contain that phrase is not swallowed.
 mute_pcbnew_noise() { "$@" 2> >(grep -vF 'PROPERTY_ENUM(): No enum choices defined' >&2); }
+
+# Standard JLCPCB 2-layer set (paste included for the assembly stencil).
+JLCPCB_LAYERS="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
+
+# Export one board's JLCPCB fab set: gerbers + drill (zipped to <name>-gerber.zip)
+# always, plus pos + assembly BOM/CPL when a parts file exists. Shared by
+# fab-jlcpcb.sh (per routed half) and panelize.sh (the combined panel) so the
+# kicad-cli flags and the BOM/CPL join stay in one place.
+# Args: <board.kicad_pcb> <out_dir> <name> <parts_json> <scripts_dir>
+export_jlcpcb_fab() {
+  local board="$1" out="$2" name="$3" parts="$4" scripts_dir="$5"
+  local gerber_dir="${out}/gerber"
+
+  # Rebuild gerbers from scratch (clear the stale set and any old zip, so the
+  # fresh zip is not appended to a previous one).
+  rm -rf "$gerber_dir"
+  mkdir -p "$gerber_dir"
+  rm -f "${out}/${name}-gerber.zip"
+
+  kicad-cli pcb export gerbers --no-protel-ext --layers "$JLCPCB_LAYERS" \
+    --output "${gerber_dir}/" "$board" >/dev/null
+  kicad-cli pcb export drill --format excellon --drill-origin absolute \
+    --output "${gerber_dir}/" "$board" >/dev/null
+  ( cd "$gerber_dir" && zip -qr "../${name}-gerber.zip" . )
+
+  # Assembly files are optional: emit them only where a parts file exists.
+  if [ -f "$parts" ]; then
+    local pos="${out}/${name}-pos.csv"
+    kicad-cli pcb export pos --format csv --units mm --output "$pos" "$board" >/dev/null
+    python3 "${scripts_dir}/gen-jlcpcb-bom-cpl.py" \
+      --pos "$pos" --parts "$parts" \
+      --bom "${out}/${name}-BOM.csv" --cpl "${out}/${name}-CPL.csv"
+  else
+    echo "  no ${parts} -- gerbers only (no assembly BOM/CPL)"
+  fi
+}
