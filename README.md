@@ -114,55 +114,29 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 ### Provenance stamp (keeping routed/ in sync with config.yaml)
 
-The two `cp` steps and the manual routing between `config.yaml` and the routed masters mean `routed/` can silently drift from the config: edit `config.yaml`, forget to rebuild and re-route, and you would fab a stale board. A provenance stamp guards against this.
-
-`npm run build` writes a stamp into each generated board's title block (`title_block` comment 1), where it rides the `cp` steps into `unrouted/` and `routed/` unchanged and survives manual routing and the GND-pour resave (every script round-trips the board through KiCad, which preserves the title block):
+The `cp` steps and manual routing let `routed/` silently drift from `config.yaml`, so you could fab a stale board. To guard against this, `npm run build` stamps each board's title block (and a human-readable copy on silkscreen); the stamp rides the `cp` steps and survives routing:
 
 ```text
 splinter v=v4 built=2026-06-15T17:30:00Z config=a1b2c3d4e5f6 commit=bf4e6c2 clean=yes
 ```
 
-Only `config=` is compared: it is `sha256(config.yaml)` truncated to 12 hex chars. The rest is provenance and is never compared (`built=` build time, `commit=` short git HEAD, `clean=yes` when the working tree was fully committed at build time, `no` when it had uncommitted changes).
-
-`build` also draws the stamp onto silkscreen (both `F.SilkS` and `B.SilkS`, the back copy mirrored) in the top corner on the pinky (outer) side, so the provenance is readable on the fabricated board. The pinky side is detected per board as the side opposite the TRRS jack (left half stamps top-left, right half top-right). The silk copy drops the `splinter v=v4` prefix (already on the credit label), and is re-drawn idempotently each build, so rebuilds do not stack duplicates. The silk text is human-facing only; `validate-provenance` reads the title-block comment, not the silk.
-
-`npm run validate-provenance` re-hashes the active version's `config.yaml` and compares it against the stamp in every `unrouted/` and `routed/` board, exiting nonzero if any board is stale (stamp hash differs) or unstamped. `npm run fab-jlcpcb` runs the same check as a gate before the DRC check, but scoped to `routed/` only (the fab source), so a routed master that drifted from the current config can never reach fab; `unrouted/` drift does not block a fab. To clear a mismatch, run the full pipeline again: `npm run build`, `npm run copy-pcbs-dist-to-unrouted`, re-route, then `npm run copy-pcbs-unrouted-to-routed`.
-
-The match key is `config.yaml` only, which keeps validation cheap (no Ergogen re-run). The trade-off: a change to a footprint `.js`, `recenter.py`, or the Ergogen version can move geometry without tripping the stamp, while a cosmetic or comment-only edit to `config.yaml` does trip it (a conservative false "stale").
+Only `config=` (`sha256(config.yaml)` to 12 hex chars) is compared; the rest is informational. `npm run validate-provenance` re-hashes `config.yaml` and fails on any stale or unstamped board; `npm run fab-jlcpcb` runs it as a gate scoped to `routed/` so a drifted master never reaches fab. Clear a mismatch by re-running the pipeline (`build`, `copy-pcbs-dist-to-unrouted`, re-route, `copy-pcbs-unrouted-to-routed`). Caveat: the key is `config.yaml` only, so a footprint `.js` or Ergogen-version change can move geometry without tripping it, while a comment-only config edit trips a false "stale".
 
 ### Step 5. Fabrication (JLCPCB)
 
-With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports everything a fab house needs from the routed masters [`v4/kicad/routed/`](./v4/kicad/routed/) into `dist/v4/kicad/jlcpcb/<name>/`:
+With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports from [`kicad/routed/`](./v4/kicad/routed/) into `dist/v4/kicad/jlcpcb/<name>/`:
 
-* **Gerbers + drill** (`<name>-gerber.zip`): upload to order the bare PCB.
-* **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): assembly files for JLCPCB PCBA, generated only when [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present; without it the script produces gerbers only.
-* **DRC report** (`<name>-drc.json`): before exporting each board, `fab-jlcpcb` runs a headless DRC gate (`kicad-cli pcb drc --refill-zones --severity-error --exit-code-violations`) on the routed master and aborts the whole fab (no gerbers written) if any error-level violation or unrouted net remains, so a board that isn't fully routed and clean never reaches a gerber. `--refill-zones` is in-memory only, so the master is untouched. The report is written whether the gate passes or fails. No schematic-parity check: the Ergogen boards have no `.kicad_sch`.
+* **Gerbers + drill** (`<name>-gerber.zip`): the bare PCB.
+* **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): JLCPCB PCBA assembly files, generated only when [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
+* **DRC report** (`<name>-drc.json`): a headless DRC gate runs first and aborts the whole fab (no gerbers written) on any error-level violation or unrouted net.
 
-**How parts are assigned (PCBA).** LCSC part numbers live in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), not in the `.kicad_pcb`, so they survive when Ergogen regenerates the boards. The file is keyed by **footprint name** (the `Package` column of the position file), because the generated footprints have empty `Value` fields, which rules out value-based keying. Each entry has `lcsc`, `comment` (BOM Comment), `package` (BOM Footprint), and `rotation` (added to KiCad's angle to fix pick-and-place orientation). [`scripts/gen-jlcpcb-bom-cpl.py`](./scripts/gen-jlcpcb-bom-cpl.py) joins this against the position file:
+LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) (not the `.kicad_pcb`, so they survive Ergogen regen), keyed by footprint name. [`scripts/gen-jlcpcb-bom-cpl.py`](./scripts/gen-jlcpcb-bom-cpl.py) joins it against the position file: a footprint absent from the JSON is Do-Not-Place (hand-soldered), an empty `lcsc` is an error, a set `lcsc` is placed. Which parts are placed vs. hand-soldered is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
 
-* footprint **absent** from the JSON -> Do-Not-Place (hand-soldered or hand-assembled)
-* footprint present with **empty `lcsc`** -> error; nothing is written until you fill it in
-* footprint present with **`lcsc` set** -> placed in both the BOM (grouped by LCSC) and CPL (rotation-corrected)
-
-Keep a part off the assembly BOM (mark it Do-Not-Place) when assembling it would raise the order cost: JLCPCB's cheaper **Economic** PCBA service only places parts JLC stocks for it, so a part that is Standard-only or out of stock forces the whole order onto the pricier **Standard** service. Hand-solder those instead.
-
-**Ordering** from [JLCPCB](https://jlcpcb.com/) (or [OSH Park](https://oshpark.com/), [PCBWay](https://www.pcbway.com/)):
-
-1. Bare boards: submit each `<name>-gerber.zip`.
-1. Assembly (PCBA): also upload the matching `<name>-BOM.csv` and `<name>-CPL.csv`; verify every LCSC part in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is in stock first.
-1. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree). If a part is mis-oriented, adjust its `rotation` in [`v4/kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) and re-run.
-
-Which components are placed vs. hand-soldered, and their sourcing, are version-specific; see the version README (e.g. [v4](./v4/README.md#fabrication-jlcpcb)).
+**Ordering** from [JLCPCB](https://jlcpcb.com/): upload each `<name>-gerber.zip` for bare boards, plus the matching `<name>-BOM.csv` / `<name>-CPL.csv` for assembly. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree); fix a mis-oriented part via its `rotation` in the JSON and re-run.
 
 #### Panelization (optional, for PCBA cost)
 
-Ordering the two halves as separate designs pays JLCPCB's per-order assembly setup fee and stencil fee twice (the cart consolidates shipping, but not those fixed fees). `npm run panelize` combines `left` + `right` into one panel-by-customer board so JLC treats them as a single design and those fees are paid once. It is only worthwhile for PCBA; bare-board-only orders gain little.
-
-`npm run panelize` reads the routed masters, lays both halves side-by-side in a frame joined by mouse-bite tabs (the curved board outline rules out V-cuts), adds corner fiducials and tooling holes for assembly, prefixes each half's references and nets (`left_`/`right_`) so they stay unique in the CPL, then exports the panel's gerbers/drill/pos + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. Upload `panel-gerber.zip` plus `panel-BOM.csv` / `panel-CPL.csv`.
-
-The per-half `npm run fab-jlcpcb` remains the strict-DRC gate and source of truth. The panel's own DRC (`panel-drc.json`) is advisory only, written but never aborting, because panels routinely trip board-to-board and tab clearance rules.
-
-Requires [KiKit](https://github.com/yaqwsx/KiKit). KiCad 10 support is only in KiKit + `pcbnewTransition` **git master** (no PyPI release has it yet), so it is installed into a dedicated venv (`/opt/kikit`, see the Ansible `kicad` tag) that `panelize.sh` runs with `PYTHONNOUSERSITE=1`. Override the interpreter with `KIKIT_PYTHON=/path/to/venv/bin/python`.
+`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA. It reads the routed masters, lays both halves in a frame with mouse-bite tabs, prefixes refs/nets (`left_`/`right_`) so they stay unique, and exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`. The panel's own DRC is advisory; the per-half `fab-jlcpcb` stays the strict gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) git-master in a `/opt/kikit` venv (see the Ansible `kicad` tag); override with `KIKIT_PYTHON`.
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 
