@@ -2,20 +2,17 @@
 
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter)
 
-A 61-key split columnar ergonomic keyboard - Production ready.
-Asymmetrical. Traditional key layout.
+A 61-key split columnar ergonomic keyboard with asymmetrical enclosures and a traditional key layout. Production ready.
 
 ![v1](./v1.jpg)
 
-## Hardware
-
-### Bill of materials (BOM)
+## Bill of materials (BOM)
 
 | Description | Quantity | Part |
 | --- | --- | --- |
 | Diodes | 61 | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html) |
 | Hot swap sockets | 61 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html) |
-| Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986) |
+| Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) |
 | Key switches | 61 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) |
 | Microcontrollers | 2 | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file)) |
 | Reset buttons | 2 | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller) |
@@ -23,11 +20,11 @@ Asymmetrical. Traditional key layout.
 | Silicon bumpers | 10 | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html) |
 | Sockets (12-pin) | 4 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000) |
 | Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030) |
-| Threaded inserts | 4 | [M3x3mm (short) threaded inserts](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m3-short-100-stk-pcs) |
+| Threaded inserts | 4 | [M3x3mm (short) threaded inserts](https://cnckitchen.store/products/heat-set-insert-m3-x-3-short-version-100-pieces) |
 | TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632) |
 | TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html) |
 
-### Microcontroller
+## Microcontroller
 
 * [Pro Micro pinout](https://golem.hu/article/pro-micro-pinout/)
 
@@ -45,74 +42,3 @@ Asymmetrical. Traditional key layout.
 | 7 | E6 | 14 | B3 |
 | 8 (A8) | B4 | 16 | B2 |
 | 9 (A9) | B5 | 10 (A10) | B6 |
-
-### Part dimensions
-
-| Part | Dimensions |
-| --- | --- |
-| [Keycap size](https://cdn.matt3o.com/uploads/2018/05/keycap-size-diagram.png) | 18mm² |
-| [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | PCB: width: 17.78mm, length: 33.02; USB: protrusion: 1.27mm |
-| Keycap size with padding | 19mm² |
-| Switch (MX) cutout size | 14mm² |
-| Switch (MX) outer size | 15.6mm² |
-
-#### PCB dimensions
-
-Position each PCB at (105,105). The left half starts at this position,
-but the right half must be moved before running `npm run copy-traces-routed-to-unrouted`.
-The 105mm offset is 100mm to provide a buffer around the edges of the document,
-plus 5mm to account for the case walls.
-
-#### Left half
-
-Overall (h,w): 122.1 mm, 155.5 mm
-
-| Edge | Start and end (x,y) coordinates |
-| --- | --- |
-| Left | (105,105) (105,205.5) |
-| Top | (105,105) (260.5,105) |
-| Right | (260.5,105) (260.5,208.8) |
-| Corner | (253.4,224.1) (260.5,208.8) |
-| Bottom | (105,205.5) (253.4,224.1) |
-| PCB edge to center of M3 hole | 23mm (28mm to outer wall) |
-
-#### Right half
-
-Overall (h,w): 122.1 mm, 193.6 mm
-
-| Edge | Start and end (x,y) coordinates |
-| --- | --- |
-| Left | (105,105) (105,208.8) |
-| Top | (105,105) (298.6,105) |
-| Right | (298.6, 105) (298.6,167.1) |
-| Right corner | (263,205.2) (298.6,167.1) |
-| Bottom | (112,224.1) (263,205.2) |
-| Left corner | (105, 208.8) (112,224.1) |
-| PCB outside edge to center of M3 hole | 18mm (23mm to outer wall) |
-
-#### Enclosure
-
-Overall dimensions (h,w): 129.51474 mm, 165.5 mm
-
-##### Enclosure left half
-
-| Edge | Length |
-| --- | --- |
-| Left | 110 mm |
-| Top | 165.5 mm |
-| Right | 110 mm |
-| Corner | 21.53214 mm |
-| Bottom | 157.61289 mm |
-
-##### Enclosure right half
-
-Overall dimensions (h,w): 129.51474 mm, 203.6 mm
-
-| Edge | Start and end (x,y) coordinates |
-| --- | --- |
-| Left | 110 mm |
-| Top | 203.6 mm |
-| Right | 110 mm |
-| Right corner | 55.85994 mm |
-| Bottom | 157.61289 mm |
-| Left corner | 21.53214 mm |

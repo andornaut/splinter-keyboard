@@ -2,20 +2,17 @@
 
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter)
 
-A 62-key split columnar ergonomic keyboard - Symmetrical enclosures.
-Non-traditional placement of backspace and backslash keys.
+A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-traditional backspace and backslash placement.
 
 ![v3](./v3.jpg)
 
-## Hardware
-
-### Bill of materials (BOM)
+## Bill of materials (BOM)
 
 | Description | Quantity | Part |
 | --- | --- | --- |
 | Diodes | 62 | [Nexperia BAS16H,115](https://www.digikey.ca/en/products/detail/nexperia-usa-inc/BAS16H-115/1163692) |
 | Hot swap sockets | 62 | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html) |
-| Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes?variant=39360309329986) |
+| Keycap set | 1 | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) |
 | Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) |
 | Microcontrollers | 2 | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) or [SparkFun Pro Micro](https://www.sparkfun.com/sparkfun-pro-micro-rp2040.html) (RP2040) |
 | Screws | 2 | [M3x8mm screws](https://www.amazon.ca/1021Pcs-Stainless-Assortment-Machinery-Furniture/dp/B0B292QDWG) |
@@ -28,7 +25,7 @@ Non-traditional placement of backspace and backslash keys.
 | TRRS cables | 1 | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632) |
 | TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html) |
 
-### Microcontroller
+## Microcontroller
 
 * [Adafruit KB2040 pinout](https://learn.adafruit.com/adafruit-kb2040/pinouts)
 * [SparkFun Pro Micro RP2040 pinout](https://www.sparkfun.com/sparkfun-pro-micro-rp2040.html)
@@ -47,15 +44,3 @@ Non-traditional placement of backspace and backslash keys.
 | P7 (GP7) | | | P14 (GP14) |
 | P8 (GP8) | | | P16 (GP16) |
 | P9 (GP9) | | | P10 (GP10) |
-
-### Part dimensions
-
-| Part | Dimensions |
-| --- | --- |
-| [Keycap size](https://cdn.matt3o.com/uploads/2018/05/keycap-size-diagram.png) | 18mm² |
-| [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | 35.0mm × 17.8mm × 4.9mm |
-| [SparkFun Pro Micro](https://www.sparkfun.com/sparkfun-pro-micro-rp2040.html) (RP2040) | 33.02mm × 17.78 mm,  USB protrusion: 1.27mm |
-| Keycap size with padding | 19mm² |
-| PCB thickness | 1.6mm |
-| Switch (MX) cutout size | 14mm² |
-| Switch (MX) outer size | 15.6mm² |
