@@ -156,6 +156,24 @@ LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.js
 1. Import the `*.step` files from [`onshape/`](./v4/onshape/).
 1. Slice and print the case.
 
+#### Alternative: machined aluminium case (JLCCNC)
+
+Instead of 3D printing, the case can be CNC-machined in aluminium via [JLCCNC](https://jlccnc.com). Upload each half's `*.step` and set:
+
+* **Material:** 6061 aluminium (JLCCNC's standard alloy; 6063 is the equivalent keyboard-typical option, marginally more even anodize color).
+* **Surface finish:** Bead blasting + Anodizing (matte) is the recommended premium-keyboard finish: smooth, uniform, fingerprint resistant. For a glossier sheen, choose Anodizing without bead blasting. Pick a color (black is the safe default).
+* **Tolerance:** the default (ISO 2768 medium) is fine for a case.
+* **Quantity:** left and right are two separate mirrored parts, so set quantity per file.
+* **Threaded holes:** tap the M3 mounting holes directly (the heat-set inserts in the [BOM](./v4/README.md#bill-of-materials-bom) are only for the printed case). A STEP can't carry threads, so model each hole at the ~2.5mm tap-drill diameter and also upload a 2D drawing (PDF) with an `M3x0.5` thread callout (depth, through/blind) for JLCCNC to tap to.
+
+To make the thread drawing in Onshape:
+
+1. From the case Part Studio, create a **Drawing** and place a top (or section) view of the half.
+1. Add a **Hole/thread callout** (right-click the hole edge > Callout) on a mounting hole; it reads the hole and emits `M3x0.5`. Add the thread depth and through/blind.
+1. Export the drawing to PDF and upload it with the `.step`.
+
+Since every mounting hole shares one spec, a full dimensioned drawing is optional: a single PDF or screenshot noting "All mounting holes: M3x0.5 tapped, N mm deep" is accepted, and JLCCNC's order interface can also tag threaded holes in its 3D viewer. The STEP still needs the holes at ~2.5mm tap-drill either way.
+
 ### Step 8. [QMK Firmware](https://qmk.fm/)
 
 1. Install the [custom QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
