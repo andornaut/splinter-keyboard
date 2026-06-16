@@ -141,7 +141,7 @@ points:
           num: # 4 -> 7
       five:
         key.stagger: -3
-        key.column_net: &col_five_left P10
+        key.column_net: &col_five_left P15
         key.mirror.column_net: &col_five_right P19
         rows:
           mod.skip: true
@@ -158,13 +158,13 @@ points:
       # mirrored; the right half's mod row is &mod_row_right (in zones.extra).
       mod.row_net: &mod_row_left P9
       lower:
-        row_net: P16
+        row_net: P14
         mirror.row_net: P14
       home:
-        row_net: P14
+        row_net: P16
         mirror.row_net: P16
       upper:
-        row_net: P15
+        row_net: P10
         mirror.row_net: P10
       num:
         row_net: P18

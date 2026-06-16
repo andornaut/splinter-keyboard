@@ -122,16 +122,16 @@ def add_gnd_zone(path):
     # Exclude teardrops: they are ZONE objects too, and a teardrop on a GND track
     # is a GND zone on its layer. Counting them here made the guard see a "GND
     # pour" that was never flooded and skip the actual fill once teardrop-copying
-    # entered the pipeline (copy-traces-routed-to-unrouted carries GND teardrops in).
+    # entered the pipeline (copy:traces-to-unrouted carries GND teardrops in).
     existing = [board.GetLayerName(cand) for cand in CANDIDATE_LAYERS
                 if any(z.GetNetname() == "GND" and z.IsOnLayer(cand)
                        and not z.IsTeardropArea()
                        for z in board.Zones())]
     if existing:
-        msg = f"GND pour already present on {', '.join(existing)}"
+        msg = f"GND pour already present on {', '.join(existing)}, leaving as-is"
         if layer_name not in existing:
             msg += f"; analysis preferred {layer_name}, not re-pouring an already-poured board"
-        print(f"  ok ({msg}): {path}")
+        print(f"  UNCHANGED: {msg}: {path}")
         return
 
     bb = board.GetBoardEdgesBoundingBox()
@@ -156,7 +156,7 @@ def add_gnd_zone(path):
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # sets the zone's filled state
 
     board.Save(path)
-    print(f"  added {layer_name} GND pour ({pcbnew.ToMM(x1 - x0):.1f} x "
+    print(f"  ADDED new {layer_name} GND pour ({pcbnew.ToMM(x1 - x0):.1f} x "
           f"{pcbnew.ToMM(y1 - y0):.1f}mm outline): {path}")
 
 
