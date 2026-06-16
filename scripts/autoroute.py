@@ -26,7 +26,6 @@ dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
 
   autoroute.py [pcb_path ...]
   pcb_path  working .kicad_pcb to route in place (default: all for the version)
-            FREEROUTING_PASSES sets freerouting max passes (default 100)
 """
 import glob
 import json

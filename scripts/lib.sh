@@ -24,12 +24,50 @@ require_pcbs() {
 # the script's success signal. Goes to stdout (errors already go to stderr).
 ok() { echo "OK: $*"; }
 
-# KiCad's pcbnew module prints a harmless PROPERTY_ENUM wxASSERT to stderr every
-# time it is imported (directly, or via kb_ergogen_helper). Drop just those lines
-# from a command's stderr, preserving all other output and its exit code. The
-# match is the full distinctive assert tail (not the bare "No enum choices
-# defined") so a real error happening to contain that phrase is not swallowed.
-mute_pcbnew_noise() { "$@" 2> >(grep -vF 'PROPERTY_ENUM(): No enum choices defined' >&2); }
+# Fail early with a clear message if any named runtime dependency is missing from
+# PATH. Shared by the wrappers that shell out to external tools (fab-jlcpcb,
+# panelize). Call as `require_cmds kicad-cli zip python3`.
+require_cmds() {
+  local cmd
+  for cmd in "$@"; do
+    command -v "$cmd" >/dev/null || { echo "Missing required command: $cmd" >&2; exit 1; }
+  done
+}
+
+# The distinctive tail of the harmless PROPERTY_ENUM wxASSERT KiCad's pcbnew module
+# prints to stderr every time it is imported (directly, or via kb_ergogen_helper).
+# Matched as a fixed string (not the bare "No enum choices defined") so a real
+# error happening to contain that phrase is not swallowed. Defined once so both
+# mute helpers below share the one pattern.
+PCBNEW_NOISE='PROPERTY_ENUM(): No enum choices defined'
+
+# Drop just the pcbnew import noise from a command's stderr, preserving all other
+# output and its exit code (the grep runs in a process substitution, so the
+# wrapped command's status is what propagates).
+mute_pcbnew_noise() { "$@" 2> >(grep -vF -e "$PCBNEW_NOISE" >&2); }
+
+# Like mute_pcbnew_noise, but also drops the "Adding duplicate image handler" wx
+# debug line KiKit emits on top of the pcbnew noise. Wrap KiKit invocations with
+# this; prefix any env-var assignment with `env` so it stays a command word
+# (e.g. `mute_kikit_noise env PYTHONNOUSERSITE=1 "$kikit_py" ...`).
+mute_kikit_noise() {
+  "$@" 2> >(grep -vF -e "$PCBNEW_NOISE" -e 'Debug: Adding duplicate image handler' >&2)
+}
+
+# Provenance gate shared by fab-jlcpcb.sh and panelize.sh: refuse to proceed if any
+# routed board drifted from the current config.yaml (or is unstamped). Scoped to
+# routed/ (the fab source) so unrouted/ drift never blocks a legitimate fab/panel
+# of a current routed master. Under `set -e` a nonzero exit aborts the caller.
+provenance_gate_routed() { python3 ./scripts/validate-provenance.py routed; }
+
+# Apply the custom KiCad project settings (VCC net class + DRC floors) to the
+# [!_]*.kicad_pro files under $1. Called by each step that writes a board tier so
+# that tier owns its project file: build -> dist/, copy-pcbs-dist-to-unrouted ->
+# unrouted/, copy-pcbs-unrouted-to-routed -> routed/. apply-project-settings.py is
+# idempotent and skips non-matching paths, so a no-op call (or empty glob under
+# nullglob) is safe. No mute_pcbnew_noise: it edits .kicad_pro JSON and never
+# imports pcbnew, so it emits no PROPERTY_ENUM noise.
+apply_project_settings() { python3 ./scripts/apply-project-settings.py "$1"/[!_]*.kicad_pro; }
 
 # Standard JLCPCB 2-layer set (paste included for the assembly stencil).
 JLCPCB_LAYERS="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
@@ -38,9 +76,9 @@ JLCPCB_LAYERS="F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask
 # always, plus pos + assembly BOM/CPL when a parts file exists. Shared by
 # fab-jlcpcb.sh (per routed half) and panelize.sh (the combined panel) so the
 # kicad-cli flags and the BOM/CPL join stay in one place.
-# Args: <board.kicad_pcb> <out_dir> <name> <parts_json> <scripts_dir>
+# Args: <board.kicad_pcb> <out_dir> <name> <parts_json>
 export_jlcpcb_fab() {
-  local board="$1" out="$2" name="$3" parts="$4" scripts_dir="$5"
+  local board="$1" out="$2" name="$3" parts="$4"
   local gerber_dir="${out}/gerber"
 
   # Rebuild gerbers from scratch (clear the stale set and any old zip, so the
@@ -59,7 +97,7 @@ export_jlcpcb_fab() {
   if [ -f "$parts" ]; then
     local pos="${out}/${name}-pos.csv"
     kicad-cli pcb export pos --format csv --units mm --output "$pos" "$board" >/dev/null
-    python3 "${scripts_dir}/gen-jlcpcb-bom-cpl.py" \
+    python3 ./scripts/gen-jlcpcb-bom-cpl.py \
       --pos "$pos" --parts "$parts" \
       --bom "${out}/${name}-BOM.csv" --cpl "${out}/${name}-CPL.csv"
   else

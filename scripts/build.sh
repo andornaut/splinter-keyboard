@@ -30,13 +30,9 @@ done
 mute_pcbnew_noise python3 ./scripts/stamp-provenance.py \
   --version "${VERSION}" --config "${VERSION}/ergogen/config.yaml" "${files[@]}"
 
-# Idempotently apply the VCC net class and DRC floors to the generated and routed
-# KiCad projects (these live in .kicad_pro, which ergogen does not maintain).
-# Missing globs are tolerated by the helper, so this is safe before a version is
-# routed. (No mute_pcbnew_noise: this script edits .kicad_pro JSON and never
-# imports pcbnew, so it emits no PROPERTY_ENUM noise.)
-python3 ./scripts/apply-project-settings.py \
-  "${out_dir}"/pcbs/[!_]*.kicad_pro \
-  "${VERSION}"/kicad/unrouted/[!_]*.kicad_pro
+# Apply project settings to the generated dist/ projects (build owns this tier;
+# unrouted/ and routed/ are owned by the copy steps). See apply_project_settings
+# in lib.sh.
+apply_project_settings "${out_dir}/pcbs"
 
 ok "build: ${#files[@]} PCB(s) generated and post-processed in ${out_dir}/pcbs/"

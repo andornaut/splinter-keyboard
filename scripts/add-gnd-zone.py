@@ -19,13 +19,11 @@ Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 import sys
 import pcbnew
 
-MM = 1_000_000  # nanometers per millimeter
-
-CLEARANCE = int(0.25 * MM)
-MIN_THICKNESS = int(0.25 * MM)
-THERMAL_GAP = int(0.30 * MM)
-THERMAL_SPOKE = int(0.30 * MM)
-MARGIN = int(1 * MM)  # inflate the outline past the edge; fill clips to Edge.Cuts
+CLEARANCE = pcbnew.FromMM(0.25)
+MIN_THICKNESS = pcbnew.FromMM(0.25)
+THERMAL_GAP = pcbnew.FromMM(0.30)
+THERMAL_SPOKE = pcbnew.FromMM(0.30)
+MARGIN = pcbnew.FromMM(1)  # inflate the outline past the edge; fill clips to Edge.Cuts
 
 
 def _try_set(obj, name, *args):
@@ -69,7 +67,7 @@ def add_gnd_zone(path):
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # sets the zone's filled state
 
     board.Save(path)
-    print(f"  added B.Cu GND pour ({(x1 - x0) / MM:.1f} x {(y1 - y0) / MM:.1f}mm "
+    print(f"  added B.Cu GND pour ({pcbnew.ToMM(x1 - x0):.1f} x {pcbnew.ToMM(y1 - y0):.1f}mm "
           f"outline): {path}")
 
 

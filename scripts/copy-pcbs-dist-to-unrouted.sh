@@ -24,4 +24,8 @@ for f in "${files[@]}"; do
   cp "$f" "$existing"
 done
 
+# Apply project settings to the unrouted/ projects (this copy step owns the
+# unrouted tier). See apply_project_settings in lib.sh.
+apply_project_settings "$dst_dir"
+
 ok "copy-pcbs-dist-to-unrouted: ${#files[@]} PCB(s) copied to ${dst_dir}/ (backups in ${backup_dir}/)"

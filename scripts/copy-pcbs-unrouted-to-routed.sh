@@ -22,4 +22,9 @@ for f in "${files[@]}"; do
   mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
 done
 
+# Apply project settings to the routed/ projects (this copy step owns the routed
+# tier, the fab source whose DRC floors fab-jlcpcb's DRC gate reads). See
+# apply_project_settings in lib.sh.
+apply_project_settings "$dst_dir"
+
 ok "copy-pcbs-unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour"

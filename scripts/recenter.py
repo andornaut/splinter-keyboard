@@ -13,8 +13,6 @@ import re
 import sys
 import pcbnew
 
-MM = 1_000_000  # nanometers per millimeter
-
 # Standard KiCad page sizes in landscape orientation (width, height) mm.
 PAGE_SIZES = {
     "A5": (210.0, 148.0), "A4": (297.0, 210.0), "A3": (420.0, 297.0),
@@ -54,14 +52,14 @@ def recenter(path):
                 bbox.Merge(d.GetBoundingBox())
     if bbox is None:
         raise SystemExit(f"{path}: no Edge.Cuts geometry found")
-    cx, cy = bbox.GetCenter().x / MM, bbox.GetCenter().y / MM
+    cx, cy = pcbnew.ToMM(bbox.GetCenter().x), pcbnew.ToMM(bbox.GetCenter().y)
 
     # Page center (A3 etc.), parsed from the file's (paper ...) line.
     px, py = page_center(path)
 
     # Whole-millimeter translation toward the page center.
     dx, dy = round(px - cx), round(py - cy)
-    offset = pcbnew.VECTOR2I(dx * MM, dy * MM)
+    offset = pcbnew.VECTOR2I(pcbnew.FromMM(dx), pcbnew.FromMM(dy))
 
     for item in list(board.GetFootprints()) + list(board.GetDrawings()) \
             + list(board.GetTracks()) + list(board.Zones()):

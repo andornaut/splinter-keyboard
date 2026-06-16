@@ -9,23 +9,19 @@
 # they survive Ergogen regeneration. Run via: npm run fab-jlcpcb
 set -euo pipefail
 shopt -s nullglob
-here="$(dirname "${BASH_SOURCE[0]}")"
-source "${here}/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run fab-jlcpcb)}"
 parts="./${VERSION}/kicad/jlcpcb-parts.json"
 
-# Fail early with a clear message if a runtime dependency is missing.
-for cmd in kicad-cli zip python3; do
-  command -v "$cmd" >/dev/null || { echo "Missing required command: $cmd" >&2; exit 1; }
-done
+require_cmds kicad-cli zip python3
 
 # Provenance gate: refuse to fab if any routed board drifted from the current
-# config.yaml (or is unstamped). Only routed/ is checked here -- it is the fab
-# source; unrouted/ drift is irrelevant to fab (the full sync check is the
-# bare `npm run validate-provenance`). Under set -e a nonzero exit aborts the
-# whole fab before any gerber is written.
-python3 "${here}/validate-provenance.py" routed
+# config.yaml (or is unstamped). Only routed/ is checked -- it is the fab source;
+# unrouted/ drift is irrelevant to fab (the full sync check is the bare
+# `npm run validate-provenance`). Under set -e a nonzero exit aborts the whole
+# fab before any gerber is written. See provenance_gate_routed in lib.sh.
+provenance_gate_routed
 
 require_pcbs "./${VERSION}/kicad/routed"
 for f in "${files[@]}"; do
@@ -45,7 +41,7 @@ for f in "${files[@]}"; do
     --output "${out}/${name}-drc.json" "$f" >/dev/null \
     || { echo "DRC failed for ${name}: see ${out}/${name}-drc.json" >&2; exit 1; }
 
-  export_jlcpcb_fab "$f" "$out" "$name" "$parts" "$here"
+  export_jlcpcb_fab "$f" "$out" "$name" "$parts"
 done
 
 ok "fab-jlcpcb: ${#files[@]} board(s) exported to dist/${VERSION}/kicad/jlcpcb/"

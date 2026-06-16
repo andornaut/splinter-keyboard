@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Copy manual traces from the routed/ masters back onto the working kicad/unrouted/ PCBs.
+# Copy manual traces (and teardrops) from the routed/ masters back onto the working
+# kicad/unrouted/ PCBs. kb_ergogen_helper copy-traces handles the tracks (segments,
+# arcs, vias); copy-teardrops.py handles the teardrop zones it leaves behind.
 # Run via: npm run copy-traces-routed-to-unrouted
 set -euo pipefail
 shopt -s nullglob
@@ -31,7 +33,9 @@ for f in "${files[@]}"; do
     echo "ERROR: $f has no human routing (only footprint stubs); refusing to copy. Restore the routed master (e.g. git checkout HEAD -- $f)." >&2
     exit 1
   fi
-  mute_pcbnew_noise python3 "$helper" --no-backup copy-traces "$f" "./${VERSION}/kicad/unrouted/$(basename "$f")"
+  dst="./${VERSION}/kicad/unrouted/$(basename "$f")"
+  mute_pcbnew_noise python3 "$helper" --no-backup copy-traces "$f" "$dst"
+  mute_pcbnew_noise python3 ./scripts/copy-teardrops.py "$f" "$dst"
 done
 
-ok "copy-traces-routed-to-unrouted: traces copied for ${#files[@]} PCB(s) into ${VERSION}/kicad/unrouted/"
+ok "copy-traces-routed-to-unrouted: traces + teardrops copied for ${#files[@]} PCB(s) into ${VERSION}/kicad/unrouted/"
