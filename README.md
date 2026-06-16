@@ -24,11 +24,11 @@ This repo holds the hardware design files. The design pipeline is: Keyboard Layo
 Install the following tools:
 
 * [KiCad 10](https://www.kicad.org)
-* [Node.js](https://nodejs.org) via [nvm](https://github.com/nvm-sh/nvm)
-* [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) - 3D printing slicer
+* [Node.js](https://nodejs.org)
+* [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 * [Python 3](https://www.python.org)
 * [Freerouting](https://github.com/freerouting/freerouting) (optional)
-* [KiKit](https://github.com/yaqwsx/KiKit) (optional, for `npm run panelize`; needs the git-master build, see below)
+* [KiKit](https://github.com/yaqwsx/KiKit) (optional, for `npm run panelize`; needs the git-master build, see [Panelization](#panelization-optional-for-pcba-cost) below)
 
 ```bash
 # Include submodules when cloning
@@ -112,11 +112,17 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
    * After regenerating boards with Ergogen, `npm run copy-traces-routed-to-unrouted` copies the traces and teardrops from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
 
+### One-command pipeline
+
+`npm run pipeline` re-syncs already-routed boards after a config change. **It requires existing routed masters in [`kicad/routed/`](./v4/kicad/routed/)**: the `copy-traces-routed-to-unrouted` step copies their traces back onto the freshly generated boards, and it aborts if a master has no human routing. It does not route for you, so use it only for updates where the existing routing still applies; for a first route (or when geometry changes enough that the old traces no longer fit), route by hand in KiCad (Step 4) instead.
+
+It runs the whole hardware path in order: `build`, `copy-pcbs-dist-to-unrouted`, `copy-traces-routed-to-unrouted`, `copy-pcbs-unrouted-to-routed`, `validate-provenance`, `fab-jlcpcb`, `validate-fab`, then `panelize`. It prints a per-step banner and a closing summary of the artifacts produced. Each step is a hard gate except the final `panelize`, which is skipped with a note when [KiKit](#panelization-optional-for-pcba-cost) is not installed (the per-half fab from `fab-jlcpcb` is complete on its own).
+
 ### Provenance stamp (keeping routed/ in sync with config.yaml)
 
 The `cp` steps and manual routing let `routed/` silently drift from `config.yaml`, so you could fab a stale board. To guard against this, `npm run build` stamps each board with a hash of `config.yaml`, and `npm run fab-jlcpcb` checks that stamp (scoped to `routed/`) before it fabs, refusing a drifted or unstamped master. Run `npm run validate-provenance` any time to check without fabbing.
 
-Clear a mismatch by re-running the pipeline (`build`, `copy-pcbs-dist-to-unrouted`, re-route, `copy-pcbs-unrouted-to-routed`); when the existing routing still applies, `npm run rebuild` does that whole chain in one step. Caveat: only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
+Clear a mismatch by re-running the pipeline (`build`, `copy-pcbs-dist-to-unrouted`, re-route, `copy-pcbs-unrouted-to-routed`); when the existing routing still applies, `npm run pipeline` does that whole chain in one step. Caveat: only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
 
 ### Step 5. Fabrication (JLCPCB)
 
@@ -125,6 +131,8 @@ With the boards saved to `routed/` (Step 4), `npm run fab-jlcpcb` exports from [
 * **Gerbers + drill** (`<name>-gerber.zip`): the bare PCB.
 * **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): JLCPCB PCBA assembly files, generated only when [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
 * **DRC report** (`<name>-drc.json`): a headless DRC gate runs first and aborts the whole fab (no gerbers written) on any error-level violation or unrouted net.
+
+After fab-jlcpcb, run `npm run validate-fab` to audit the outputs against design intent the DRC and provenance gates miss: that the routed master and the exported gerbers both carry a board-spanning GND ground plane, that the gerber zip has every expected layer plus drill, and that every assembled part made it into the BOM/CPL. It is step 7 of `npm run pipeline`. (This guards the failure where a board with no ground plane passed every other gate and still shipped.)
 
 LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), kept out of the `.kicad_pcb` so they survive Ergogen regen. Which parts JLCPCB places vs. which you hand-solder is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
 

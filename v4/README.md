@@ -15,28 +15,7 @@ A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-t
 
 The reverse-mounted (facing the PCB) [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). Its USB VBUS line is wired to GP19, so QMK senses USB presence via `USB_VBUS_PIN` (GP19) instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
-### Firmware changes required
-
-Add to `config.h`:
-
-```c
-#define USB_VBUS_PIN GP19
-```
-
-Remove from `config.h` (no longer needed):
-
-```c
-#define SPLIT_WATCHDOG_ENABLE
-#define SPLIT_WATCHDOG_TIMEOUT 3000
-```
-
-Remove the `SPLIT_USB_DETECT` comment block from `config.h`: VBUS detection replaces the polling loop, so it no longer applies.
-
-Update `keyboard.json`:
-
-```json
-"development_board": "liatris"
-```
+The firmware config for this (the `USB_VBUS_PIN GP19` define and the matching `development_board`/split settings) lives in the [firmware repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).
 
 ### Pinout
 

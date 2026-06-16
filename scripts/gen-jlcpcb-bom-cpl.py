@@ -28,8 +28,9 @@ from collections import defaultdict
 
 
 def ref_key(ref):
-    """Natural sort key for a reference designator (D2 before D10)."""
-    m = re.match(r"([A-Za-z]+)(\d+)", ref)
+    """Natural sort key for a reference designator (D2 before D10). Allows a
+    panelize prefix (left_D2, right_D10) so panel BOM refs also sort naturally."""
+    m = re.match(r"([A-Za-z_]+)(\d+)", ref)
     return (m.group(1), int(m.group(2))) if m else (ref, 0)
 
 
