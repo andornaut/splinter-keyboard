@@ -17,13 +17,13 @@ units:
   thumb_diode_dx: 1.629
   # --- MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves) ---
   # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
-  mcu_reset_x: 18
-  mcu_y: -2.25
+  mcu_reset_x: 17.75 # was 18; net -0.25 moves MCU+reset left (left half) / right (right half)
+  mcu_y: -2
   reset_y: 9.525 # level with the screw_*_right hole
-  trrs_tvs_resistor_x: mcu_reset_x + 13
-  trrs_y: 15
-  tvs_y: trrs_y - 16
-  resistor_y: tvs_y - 9
+  trrs_tvs_resistor_x: mcu_reset_x + 12.75 # offset absorbs mcu_reset_x's 0.25 bump so TRRS/TVS/resistor stay at 30.5
+  trrs_y: 15.125
+  tvs_y: trrs_y - 17
+  resistor_y: tvs_y - 8
   # --- Silkscreen credit text offsets ---
   # y is the block center; x centers the wider URL line. Center-justified (see footprint).
   label_credit_y: 11
@@ -34,7 +34,7 @@ units:
   # Hugging labels are relative to the component's y, so they track the part;
   # label_mcu_y is absolute.
   label_mcu_y: -20
-  label_trrs_y: trrs_y - 13
+  label_trrs_y: trrs_y - 13.5
   label_tvs_y: tvs_y - 4
   label_resistor_y: resistor_y - 5
   label_reset_y: reset_y - 6
@@ -292,17 +292,9 @@ outlines:
         - ref: matrix_zero_num
           shift: [-u/2 -u +0.475, u/2 +5.75]
 
-        # USB-C cutout, centered on the Liatris socket (0.127mm left of the MCU
-        # origin). Left MCU un-rotated, so subtract 0.127 from the 13/23 edges.
-        - ref: matrix_five_num
-          shift: [13 - 0.127, u/2 +5.75]
-        - ref: matrix_five_num
-          shift: [13 - 0.127, u/2 -1.271]
-        - ref: matrix_five_num
-          shift: [23 - 0.127, u/2 -1.271]
-        - ref: matrix_five_num
-          shift: [23 - 0.127, u/2 +5.75]
-
+        # Top edge runs straight across here; the USB-C notch is subtracted
+        # separately (_usbleft) after the exterior fillet so its corners stay
+        # square (the fillet rounds only the true outer corners of this box).
         - ref: matrix_five_num
           shift: [u + 15.6, u/2 +5.75]
         - ref: matrix_five_lower
@@ -315,16 +307,9 @@ outlines:
         - ref: mirror_matrix_five_num
           shift: [u + 15.6, u/2 +5.75]
 
-        # USB-C cutout, mirror of the left (ergogen flips x-shift for mirror_*
-        # refs). Right MCU oriented to put the USB at the top, matching the left.
-        - ref: mirror_matrix_five_num
-          shift: [23 - 0.127, u/2 +5.75]
-        - ref: mirror_matrix_five_num
-          shift: [23 - 0.127, u/2 -1.271]
-        - ref: mirror_matrix_five_num
-          shift: [13 - 0.127, u/2 -1.271]
-        - ref: mirror_matrix_five_num
-          shift: [13 - 0.127, u/2 +5.75]
+        # Top edge runs straight across here; the USB-C notch is subtracted
+        # separately (_usbright) after the exterior fillet so its corners stay
+        # square (mirror of the left).
 
         # Outer (pinky) edge: the right is wider (extra inner column), so it sets
         # the board width. Pulled in 0.475 to round 158.475 -> 158mm; cuts into
@@ -335,6 +320,33 @@ outlines:
           shift: [u/2 -0.475, -u/2 -u]
         - ref: mirror_matrix_five_lower
           shift: [u + 15.6, -u -1/2u]
+  # USB-C cutouts, subtracted from the walls after the exterior fillet so the
+  # notch keeps square corners. Centered on the Liatris socket (0.127mm left of
+  # the MCU origin): the +-5 span is tied to mcu_reset_x so the notch tracks the
+  # MCU if it moves. The top edge (y u/2 +8) overshoots the board edge (u/2
+  # +5.75) so the subtraction cuts cleanly through it. Right is the mirror.
+  _usbleft:
+    - what: polygon
+      points:
+        - ref: matrix_five_num
+          shift: [mcu_reset_x - 5 - 0.127, u/2 +8]
+        - ref: matrix_five_num
+          shift: [mcu_reset_x - 5 - 0.127, u/2 -1.271]
+        - ref: matrix_five_num
+          shift: [mcu_reset_x + 5 - 0.127, u/2 -1.271]
+        - ref: matrix_five_num
+          shift: [mcu_reset_x + 5 - 0.127, u/2 +8]
+  _usbright:
+    - what: polygon
+      points:
+        - ref: mirror_matrix_five_num
+          shift: [mcu_reset_x + 5 - 0.127, u/2 +8]
+        - ref: mirror_matrix_five_num
+          shift: [mcu_reset_x + 5 - 0.127, u/2 -1.271]
+        - ref: mirror_matrix_five_num
+          shift: [mcu_reset_x - 5 - 0.127, u/2 -1.271]
+        - ref: mirror_matrix_five_num
+          shift: [mcu_reset_x - 5 - 0.127, u/2 +8]
   _boundsleft:
     - what: rectangle
       where: left
@@ -380,12 +392,24 @@ outlines:
       where: right
       fillet: 1
       size: s
+  # fillet on the thumb-binding part rounds every corner of the accumulated
+  # exterior outline (box + thumb binding). No internal cutouts exist at that
+  # stage (screws/switch holes are subtracted later in left/right), so only the
+  # exterior edge is rounded, easing the fit into a CNC-routed pocket whose
+  # internal corners carry the end-mill radius. The USB-C notch is subtracted
+  # AFTER the fillet so it keeps square corners (the box top edge is straight).
   _wallsleft:
     - name: _boxleft
     - name: _thumbbindingleft
+      fillet: 1.5
+    - name: _usbleft
+      operation: subtract
   _wallsright:
     - name: _boxright
     - name: _thumbbindingright
+      fillet: 1.5
+    - name: _usbright
+      operation: subtract
   left:
     - name: _wallsleft
     - name: _switchoutlinesleft

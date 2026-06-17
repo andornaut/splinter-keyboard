@@ -28,7 +28,14 @@ import json
 import os
 import sys
 
-# Wider than Default (0.20mm) to give the power nets more copper / clearance.
+# Spacing between routes. Raised from KiCad's 0.20mm default to give the
+# hand-routed matrix more yield margin at JLCPCB. Track width stays 0.20mm (the
+# matrix nets carry ~no current, and a fatter track would eat the new spacing in
+# the tight MCU pin field); only the gap grows.
+DEFAULT_CLEARANCE = 0.25
+
+# Track stays wider than Default to give the power nets more copper; clearance
+# now matches Default (both 0.25mm), unifying the gap across the board.
 VCC_CLEARANCE = 0.25
 VCC_TRACK_WIDTH = 0.25
 VCC_PATTERN = {"netclass": "VCC", "pattern": "VCC"}
@@ -40,6 +47,15 @@ DRC_FLOORS = {"min_track_width": 0.15, "min_clearance": 0.15}
 # Generated footprints carry library nicknames (ceoloide, splinter, E73) that are
 # not in any footprint library table; the parts are embedded so this is harmless.
 SEVERITY_OVERRIDES = {"lib_footprint_issues": "ignore"}
+
+
+def ensure_default_clearance(net_settings):
+    """Set the Default net class clearance in place; return True if changed."""
+    for c in net_settings.get("classes") or []:
+        if c.get("name") == "Default" and c.get("clearance") != DEFAULT_CLEARANCE:
+            c["clearance"] = DEFAULT_CLEARANCE
+            return True
+    return False
 
 
 def ensure_vcc(net_settings):
@@ -100,7 +116,8 @@ def apply(path):
     design_settings = project.setdefault("board", {}).setdefault("design_settings", {})
     rules = design_settings.setdefault("rules", {})
     severities = design_settings.setdefault("rule_severities", {})
-    changed = ensure_vcc(net_settings)
+    changed = ensure_default_clearance(net_settings)
+    changed = ensure_vcc(net_settings) or changed
     changed = ensure_drc_floors(rules) or changed
     changed = ensure_severity_overrides(severities) or changed
     if changed:
