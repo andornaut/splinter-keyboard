@@ -1,10 +1,11 @@
 meta:
   engine: 4.2.1 # min; matches package.json ergogen dep
 
-# --- Units: Common measurements used throughout the config ---
+# --- Units ---
 units:
-  c: 14 # MX cutout/hole length
+  c: 14.5 # MX cutout/hole length: 14mm nominal + 0.5mm to clear the 1mm CNC corner fillet
   s: 16 # MX widest is 15.6mm
+  cnc_fillet: 1 # internal corner radius on the switch cutouts/recesses for a 2mm CNC end mill (c is sized to clear it)
   u: U # key pitch (ergogen U = 19.05mm)
   # Thumbcluster splay angle (deg). One source of truth: the thumb keys splay by
   # this, and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
@@ -48,13 +49,13 @@ units:
   label_diode_y: -51
   label_screw_dx: 5
 
-# --- Points: Key matrix, thumb cluster, and mounting hole locations ---
+# --- Points: key matrix, thumbcluster, mounting holes ---
 points:
-  # --- Main key matrix: standard alphanumeric and modifier keys ---
+  # --- Main key matrix ---
   zones.matrix:
     anchor:
-      # Absolute origin (cosmetic): the only absolute coord. recenter.py (npm run
-      # build) re-centers each PCB afterward, so the value doesn't matter.
+      # The only absolute coordinate, and cosmetic: npm run ergogen re-centers
+      # each PCB (recenter.py) afterward, so the value doesn't matter.
       shift: [69, -192]
     # Left half is the source of truth, mirrored to build the right. Keys marked
     # `mirror.skip: true` are left-only; their right counterparts live in
@@ -220,7 +221,7 @@ points:
       home.row_net: P16
       upper.row_net: P10 # matches the matrix's upper mirror row
       num.row_net: P15
-  # --- Thumbcluster: keys for thumbs, mirrored for both hands ---
+  # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
     # The anchor shift and the column-three splay below are jointly solved (not
     # hand-tuned): they pin the rightmost thumb key's top-right hull corner to the
@@ -282,7 +283,7 @@ points:
       ref: matrix_five_home
       shift: [-8.85, 9.525]
 
-# --- Outlines: Board shape, cutouts, and geometric features ---
+# --- Outlines: board shape and cutouts ---
 outlines:
   _boxleft:
     - what: polygon
@@ -361,13 +362,21 @@ outlines:
     - what: circle
       where: /screw/
       radius: 1.75
+  # fillet rounds the cutout corners inward for a CNC end mill (internal corners
+  # can't be cut sharp). 1mm radius is JLCCNC's price-friendly floor (a sturdy
+  # 2mm tool; 0.5mm needs a costlier micro mill). The hole is enlarged to c=14.5
+  # to clear that 1mm round: a Cherry MX housing fits a 14.0mm/0.3mm-corner cutout
+  # (datasheet), so the sharp-corner-equivalent boss is ~13.82mm, needing
+  # 13.82 + 0.586*1 = ~14.41mm min; 14.5 adds margin. Verified by test print.
   _switchholesleft:
     - what: rectangle
       where: left
+      fillet: cnc_fillet
       size: c
   _switchholesright:
     - what: rectangle
       where: right
+      fillet: cnc_fillet
       size: c
   # Binding scoped to the thumb cluster only: the matrix is enclosed by the box,
   # so binding it would poke 1u hulls above the top edge (needing a trim). The
@@ -385,12 +394,12 @@ outlines:
   _switchoutlinesleft:
     - what: rectangle
       where: left
-      fillet: 1
+      fillet: cnc_fillet
       size: s
   _switchoutlinesright:
     - what: rectangle
       where: right
-      fillet: 1
+      fillet: cnc_fillet
       size: s
   # fillet on the thumb-binding part rounds every corner of the accumulated
   # exterior outline (box + thumb binding). No internal cutouts exist at that
@@ -410,12 +419,20 @@ outlines:
       fillet: 1.5
     - name: _usbright
       operation: subtract
+  # These outlines feed the DXF case export only (the PCB edge cut uses _walls*
+  # directly). Both switch profiles are stacked, not subtracted, so the export
+  # carries both curve sets for the 3D case model: the 16mm filleted switch
+  # outlines (recess pockets) AND the 14.5mm switch cutouts (through holes).
+  # The 14.5mm holes MUST be stacked, not subtracted: subtracting them while the
+  # 16mm outline is also stacked at the same spot cancels the coincident hole
+  # edges and the cutouts vanish from the export. Screws stay subtracted (they
+  # sit on solid wall, not inside a stacked square, so they survive as circles).
   left:
     - name: _wallsleft
     - name: _switchoutlinesleft
       operation: stack
     - name: _switchholesleft
-      operation: subtract
+      operation: stack
     - name: _screws
       operation: subtract
   right:
@@ -423,7 +440,7 @@ outlines:
     - name: _switchoutlinesright
       operation: stack
     - name: _switchholesright
-      operation: subtract
+      operation: stack
     - name: _screws
       operation: subtract
   full:
