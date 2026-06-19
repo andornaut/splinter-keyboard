@@ -257,8 +257,11 @@ points:
         mirror:
           column_net: *col_five_right
   # --- Screw zones: mounting-hole anchors. Left is the source of truth, mirrored
-  # across the matrix axis to the right (mirror_screw_*). screw_left/screw_right
-  # tags drive per-PCB footprints; the /screw/ regex drives the outline cutouts. ---
+  # across the matrix axis to the right (mirror_screw_*). The screw_left/screw_right
+  # tags drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
+  # outlines. Shifts are tuned so the 3mm case boss clears the 14.5mm switch cutouts:
+  # center and right sit at that limit (~0.1mm), pinky has more room. Pinky and right
+  # (the top pair) share y so they mount level. ---
   zones.screw_left_left:
     mirror: *matrix_mirror
     key.tags.screw_left: true
@@ -267,21 +270,21 @@ points:
       screw_right: true
     anchor:
       ref: matrix_one_home
-      shift: [-9.5, 9.525]
+      shift: [-9.525, 9.525]
   zones.screw_left_center:
     mirror: *matrix_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_three_home
-      shift: [-10.15, -12.525]
+      shift: [-10.338, -12.525]
   zones.screw_left_right:
     mirror: *matrix_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_five_home
-      shift: [-8.85, 9.525]
+      shift: [-8.712, 9.525]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
@@ -358,10 +361,31 @@ outlines:
       where: right
       size: u
       bound: true
-  _screws:
+  # Screw holes: M3 clearance hole, 3.5mm dia (1.75mm radius), matching the
+  # mounting_hole_npth footprint that actually cuts the PCB. These outlines only
+  # draw it into the case-export DXF as a reference curve. Per-half scoped and
+  # stacked, like the bosses below.
+  _screwsleft:
     - what: circle
-      where: /screw/
+      where: screw_left
       radius: 1.75
+  _screwsright:
+    - what: circle
+      where: screw_right
+      radius: 1.75
+  # Screw bosses: the CNC case metal the M3 threads into, 6mm dia (3mm radius).
+  # Case-only reference curve in the export DXF, never cut into the PCB. May
+  # overlap the 16mm switch recesses (it is metal, not a hole), but the screw
+  # positions keep it clear of the 14.5mm cutouts. Per-half scoped: a stacked
+  # circle outside its own board would add a floating disc.
+  _screwbossesleft:
+    - what: circle
+      where: screw_left
+      radius: 3
+  _screwbossesright:
+    - what: circle
+      where: screw_right
+      radius: 3
   # fillet rounds the cutout corners inward for a CNC end mill (internal corners
   # can't be cut sharp). 1mm radius is JLCCNC's price-friendly floor (a sturdy
   # 2mm tool; 0.5mm needs a costlier micro mill). The hole is enlarged to c=14.5
@@ -403,7 +427,7 @@ outlines:
       size: s
   # fillet on the thumb-binding part rounds every corner of the accumulated
   # exterior outline (box + thumb binding). No internal cutouts exist at that
-  # stage (screws/switch holes are subtracted later in left/right), so only the
+  # stage (screws/switch holes are stacked later in left/right), so only the
   # exterior edge is rounded, easing the fit into a CNC-routed pocket whose
   # internal corners carry the end-mill radius. The USB-C notch is subtracted
   # AFTER the fillet so it keeps square corners (the box top edge is straight).
@@ -420,29 +444,31 @@ outlines:
     - name: _usbright
       operation: subtract
   # These outlines feed the DXF case export only (the PCB edge cut uses _walls*
-  # directly). Both switch profiles are stacked, not subtracted, so the export
-  # carries both curve sets for the 3D case model: the 16mm filleted switch
-  # outlines (recess pockets) AND the 14.5mm switch cutouts (through holes).
-  # The 14.5mm holes MUST be stacked, not subtracted: subtracting them while the
-  # 16mm outline is also stacked at the same spot cancels the coincident hole
-  # edges and the cutouts vanish from the export. Screws stay subtracted (they
-  # sit on solid wall, not inside a stacked square, so they survive as circles).
+  # directly). Everything is stacked as reference curves for the 3D case model:
+  # 16mm switch recesses, 14.5mm switch cutouts, 3mm bosses, 1.75mm holes. They
+  # must be stacked, not subtracted: subtracting a shape that sits coincident
+  # with or inside another stacked shape cancels it in the boolean simplify and
+  # it vanishes from the export.
   left:
     - name: _wallsleft
     - name: _switchoutlinesleft
       operation: stack
     - name: _switchholesleft
       operation: stack
-    - name: _screws
-      operation: subtract
+    - name: _screwbossesleft
+      operation: stack
+    - name: _screwsleft
+      operation: stack
   right:
     - name: _wallsright
     - name: _switchoutlinesright
       operation: stack
     - name: _switchholesright
       operation: stack
-    - name: _screws
-      operation: subtract
+    - name: _screwbossesright
+      operation: stack
+    - name: _screwsright
+      operation: stack
   full:
     - name: left
     - name: right
