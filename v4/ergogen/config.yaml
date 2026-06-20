@@ -259,8 +259,8 @@ points:
   # --- Screw zones: mounting-hole anchors. Left is the source of truth, mirrored
   # across the matrix axis to the right (mirror_screw_*). The screw_left/screw_right
   # tags drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
-  # outlines. Shifts are tuned so the 3mm case boss clears the 14.5mm switch cutouts:
-  # center and right sit at that limit (~0.1mm), pinky has more room. Pinky and right
+  # outlines. Shifts are tuned so the case boss clears the switch cutouts: center
+  # and right sit at that limit (~0.1mm), pinky has more room. Pinky and right
   # (the top pair) share y so they mount level. ---
   zones.screw_left_left:
     mirror: *matrix_mirror
@@ -285,6 +285,28 @@ points:
     anchor:
       ref: matrix_five_home
       shift: [-8.712, 9.525]
+  # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
+  # the bare PCB here (no hole, not screwed). Left is the source, mirrored to
+  # support_right; they drive the _supports* outlines only (case reference, never
+  # cut into the PCB), like the bosses. inner sits in the margin by the MCU column,
+  # level in y with the center screw; thumb sits in the pocket below column three,
+  # equidistant (center-to-center) from the three surrounding cutouts. ---
+  zones.support_left_inner:
+    mirror: *matrix_mirror
+    key.tags.support_left: true
+    key.mirror.tags: &support_mirror_tags
+      support_left: $unset
+      support_right: true
+    anchor:
+      ref: matrix_five_home
+      shift: [12.5, -6.525] # y aligned with the center screw hole
+  zones.support_left_thumb:
+    mirror: *matrix_mirror
+    key.tags.support_left: true
+    key.mirror.tags: *support_mirror_tags
+    anchor:
+      ref: matrix_two_mod
+      shift: [17.771, 3.901]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
@@ -361,10 +383,9 @@ outlines:
       where: right
       size: u
       bound: true
-  # Screw holes: M3 clearance hole, 3.5mm dia (1.75mm radius), matching the
-  # mounting_hole_npth footprint that actually cuts the PCB. These outlines only
-  # draw it into the case-export DXF as a reference curve. Per-half scoped and
-  # stacked, like the bosses below.
+  # Screw holes: the M3 clearance hole, matching the mounting_hole_npth footprint
+  # that actually cuts the PCB. These outlines only draw it into the case-export
+  # DXF as a reference curve. Per-half scoped and stacked, like the bosses below.
   _screwsleft:
     - what: circle
       where: screw_left
@@ -373,11 +394,11 @@ outlines:
     - what: circle
       where: screw_right
       radius: 1.75
-  # Screw bosses: the CNC case metal the M3 threads into, 6mm dia (3mm radius).
-  # Case-only reference curve in the export DXF, never cut into the PCB. May
-  # overlap the 16mm switch recesses (it is metal, not a hole), but the screw
-  # positions keep it clear of the 14.5mm cutouts. Per-half scoped: a stacked
-  # circle outside its own board would add a floating disc.
+  # Screw bosses: the CNC case metal the M3 threads into. Case-only reference
+  # curve in the export DXF, never cut into the PCB. May overlap the switch
+  # recesses (it is metal, not a hole), but the screw positions keep it clear of
+  # the switch cutouts. Per-half scoped: a stacked circle outside its own board
+  # would add a floating disc.
   _screwbossesleft:
     - what: circle
       where: screw_left
@@ -385,6 +406,16 @@ outlines:
   _screwbossesright:
     - what: circle
       where: screw_right
+      radius: 3
+  # Support posts: anti-flex PCB supports. Case-only reference curve in the export
+  # DXF, never cut into the PCB. Per-half scoped and stacked.
+  _supportsleft:
+    - what: circle
+      where: support_left
+      radius: 3
+  _supportsright:
+    - what: circle
+      where: support_right
       radius: 3
   # fillet rounds the cutout corners inward for a CNC end mill (internal corners
   # can't be cut sharp). 1mm radius is JLCCNC's price-friendly floor (a sturdy
@@ -445,10 +476,10 @@ outlines:
       operation: subtract
   # These outlines feed the DXF case export only (the PCB edge cut uses _walls*
   # directly). Everything is stacked as reference curves for the 3D case model:
-  # 16mm switch recesses, 14.5mm switch cutouts, 3mm bosses, 1.75mm holes. They
-  # must be stacked, not subtracted: subtracting a shape that sits coincident
-  # with or inside another stacked shape cancels it in the boolean simplify and
-  # it vanishes from the export.
+  # switch recesses, switch cutouts, screw bosses, screw holes, support posts. They
+  # must be stacked, not subtracted: subtracting a shape that sits coincident with
+  # or inside another stacked shape cancels it in the boolean simplify and it
+  # vanishes from the export.
   left:
     - name: _wallsleft
     - name: _switchoutlinesleft
@@ -459,6 +490,8 @@ outlines:
       operation: stack
     - name: _screwsleft
       operation: stack
+    - name: _supportsleft
+      operation: stack
   right:
     - name: _wallsright
     - name: _switchoutlinesright
@@ -468,6 +501,8 @@ outlines:
     - name: _screwbossesright
       operation: stack
     - name: _screwsright
+      operation: stack
+    - name: _supportsright
       operation: stack
   full:
     - name: left
@@ -486,6 +521,15 @@ pcbs:
       main.outline: _wallsleft
       keycaps:
         outline: _switchoutlinesleft
+        layer: Eco1.User
+      # Screw bosses drawn on a user layer (not copper, not edge cut) so they're
+      # visible in the PCB editor as a routing keep-clear reference.
+      screwbosses:
+        outline: _screwbossesleft
+        layer: Eco1.User
+      # Support posts on the same user layer, also a routing keep-clear reference.
+      supports:
+        outline: _supportsleft
         layer: Eco1.User
     footprints:
       # Matrix diodes inherit each key's rotation (axis-aligned on the matrix).
@@ -711,6 +755,14 @@ pcbs:
       main.outline: _wallsright
       keycaps:
         outline: _switchoutlinesright
+        layer: Eco1.User
+      # See left: screw bosses on a user layer as a routing keep-clear reference.
+      screwbosses:
+        outline: _screwbossesright
+        layer: Eco1.User
+      # See left: support posts on a user layer as a routing keep-clear reference.
+      supports:
+        outline: _supportsright
         layer: Eco1.User
     footprints:
       # See left for footprint details
