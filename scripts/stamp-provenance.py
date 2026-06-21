@@ -28,7 +28,7 @@ from provenance import build_stamp, silk_from_stamp, write_stamp
 
 SILK_SIZE_MM = 0.8  # glyph height/width, matching the component labels
 SILK_THICKNESS_MM = 0.15
-SILK_MARGIN_MM = 0.6  # inset from the top and pinky-side board edges
+SILK_MARGIN_MM = 1.6  # inset from the top and pinky-side board edges
 SILK_TAG = "built="  # leading text identifying a prior provenance silk stamp
 
 
