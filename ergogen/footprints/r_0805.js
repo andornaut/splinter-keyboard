@@ -53,6 +53,7 @@ module.exports = {
   },
   body: p => {
     const s = p.side  // 'F' or 'B'
+    const other = s === 'F' ? 'B' : 'F'  // opposite copper layer the routing via reaches
     const footprint = `
     (footprint "splinter:R_0805"
         (layer "${s}.Cu")
@@ -88,13 +89,13 @@ module.exports = {
     // via in the pad center (via_in_pad, no stub), or a via just outside each pad
     // joined by a short stub (the safe-for-reflow default).
     const traces_vias = !p.include_traces_vias ? '' : p.via_in_pad ? `
-    (via (at ${p.eaxy(0, 0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.from.index}))
-    (via (at ${p.eaxy(0, -0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.to.index}))
+    (via (at ${p.eaxy(0, 0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
+    (via (at ${p.eaxy(0, -0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
     ` : `
     (segment (start ${p.eaxy(0, 0.95)}) (end ${p.eaxy(0, 0.95 + p.trace_distance)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.from.index}))
-    (via (at ${p.eaxy(0, 0.95 + p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.from.index}))
+    (via (at ${p.eaxy(0, 0.95 + p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
     (segment (start ${p.eaxy(0, -0.95)}) (end ${p.eaxy(0, -0.95 - p.trace_distance)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.to.index}))
-    (via (at ${p.eaxy(0, -0.95 - p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.to.index}))
+    (via (at ${p.eaxy(0, -0.95 - p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
     `
     return footprint + traces_vias
   }

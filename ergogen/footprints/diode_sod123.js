@@ -1,5 +1,5 @@
 // diode_sod123: combined thru-hole and SMD diode footprint for the SOD-123
-// package (e.g. the Semtech 1N4148W matrix diode), single- or both-side. The
+// package (e.g. the 1N4148W matrix diode), single- or both-side. The
 // module and reference designator follow `side`, so a `side: B` placement is
 // reported on the back by `kicad-cli pcb export pos`.
 //
@@ -58,7 +58,7 @@ module.exports = {
     side: 'B',
     reversible: false,
     include_traces_vias: false,
-    trace_distance: { type: 'number', value: 1.2 },
+    trace_distance: 1.2,
     trace_width: 0.25,
     via_size: 0.6,
     via_drill: 0.3,

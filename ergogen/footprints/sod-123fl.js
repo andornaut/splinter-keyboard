@@ -50,6 +50,7 @@ module.exports = {
     },
     body: p => {
         const s = p.side  // 'F' or 'B'
+        const other = s === 'F' ? 'B' : 'F'  // opposite copper layer the routing via reaches
         const footprint = `
         (footprint "splinter:D_SOD-123FL"
             (layer "${s}.Cu")
@@ -87,13 +88,13 @@ module.exports = {
         // via in the pad center (via_in_pad, no stub), or a via just outside each
         // pad joined by a short stub (the safe-for-reflow default).
         const traces_vias = !p.include_traces_vias ? '' : p.via_in_pad ? `
-        (via (at ${p.eaxy(1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.from.index}))
-        (via (at ${p.eaxy(-1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.to.index}))
+        (via (at ${p.eaxy(1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
+        (via (at ${p.eaxy(-1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
         ` : `
         (segment (start ${p.eaxy(1.5, 0)}) (end ${p.eaxy(1.5 + p.trace_distance, 0)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.from.index}))
-        (via (at ${p.eaxy(1.5 + p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.from.index}))
+        (via (at ${p.eaxy(1.5 + p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
         (segment (start ${p.eaxy(-1.5, 0)}) (end ${p.eaxy(-1.5 - p.trace_distance, 0)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.to.index}))
-        (via (at ${p.eaxy(-1.5 - p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "F.Cu" "B.Cu") (net ${p.to.index}))
+        (via (at ${p.eaxy(-1.5 - p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
         `
         return footprint + traces_vias
     }

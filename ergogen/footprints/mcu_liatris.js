@@ -77,7 +77,6 @@ module.exports = {
     reverse_mount: false,
     include_traces: true,
     include_extra_pins: true,
-    invert_jumpers_position: false,
     only_required_jumpers: false,
     use_rectangular_jumpers: false,
     via_size: 0.8, // JLCPC min is 0.56 for 1-2 layer boards, KiCad defaults to 0.8
@@ -476,7 +475,7 @@ module.exports = {
     }
 
     const common_top = `
-  (footprint "ceoloide:mcu_liatris"
+  (footprint "splinter:mcu_liatris"
     (layer "${p.side}.Cu")
     ${p.at}
     (property "Reference" "${p.ref}"
