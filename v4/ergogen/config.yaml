@@ -20,7 +20,7 @@ units:
   # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
   mcu_reset_x: 17.75 # was 18; net -0.25 moves MCU+reset left (left half) / right (right half)
   mcu_y: -2
-  reset_y: 9.525 # level with the screw_*_right hole
+  reset_y: 9.525 # level with the screw_*_inner hole
   trrs_tvs_resistor_x: mcu_reset_x + 12.75 # offset absorbs mcu_reset_x's 0.25 bump so TRRS/TVS/resistor stay at 30.5
   trrs_y: 15.125
   tvs_y: trrs_y - 17
@@ -260,9 +260,9 @@ points:
   # across the matrix axis to the right (mirror_screw_*). The screw_left/screw_right
   # tags drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
   # outlines. Shifts are tuned so the case boss clears the switch cutouts; the
-  # pinky and right holes share y so they mount level. The former center screw
+  # pinky (outer) and inner holes share y so they mount level. The former center screw
   # (between matrix three's home/lower keys) is now support_left_center. ---
-  zones.screw_left_left:
+  zones.screw_left_outer:
     mirror: *matrix_mirror
     key.tags.screw_left: true
     key.mirror.tags: &screw_mirror_tags
@@ -271,13 +271,15 @@ points:
     anchor:
       ref: matrix_one_home
       shift: [-9.525, 9.525]
-  zones.screw_left_right:
+  zones.screw_left_inner:
     mirror: *matrix_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_five_home
-      shift: [-8.3, 9.525]
+      # x: the mirrored (right) instance's boss is tangent to the 16mm
+      # _switchoutlines of the switch directly to its right.
+      shift: [-8.55, 9.525]
   # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
   # the bare PCB (no hole, not screwed). Left is the source, mirrored to
   # support_right; they drive the _supports* outlines only (case reference, never
@@ -286,7 +288,7 @@ points:
   # center band, ~30mm from any edge/screw). Positions are optimized to minimize
   # the worst key-to-clamp span while staying clear of copper. The center column
   # is a vertical pair at x=206; the two lower posts each sit directly under a
-  # screw (x aligned with screw_left_left / screw_left_right), in the lower
+  # screw (x aligned with screw_left_outer / screw_left_inner), in the lower
   # margin below the routed traces. ---
   # center column, upper: shares x with center-lower (same anchor + shift_x).
   zones.support_left_center_middle:
@@ -297,30 +299,29 @@ points:
       support_right: true
     anchor:
       ref: matrix_three_home
-      shift: [-10.655, -12.525]
+      # x: the mirrored (right) instance is tangent to the 16mm _switchoutlines
+      # of the switch directly to its left.
+      shift: [-10.5, -12.525]
 
   # bottom-outer: x aligned under the pinky (outer) screw (same anchor + shift_x
-  # as screw_left_left), dropped into the lower margin clear of the routed traces.
+  # as screw_left_outer), dropped into the lower margin clear of the routed traces.
   zones.support_left_bottom_outer:
     mirror: *matrix_mirror
     key.tags.support_left: true
     key.mirror.tags: *support_mirror_tags
     anchor:
       ref: matrix_one_home
-      # Tight by necessity: this x (under the pinky screw) mirrors into the
-      # right-half thumb cluster, so y is the saddle that maximizes thumb
-      # clearance on both halves (~0.34mm). Clips routed traces (~1.5mm); the
-      # traces here are to be moved up to clear it.
-      shift: [-9.525, -27.2]
-  # bottom-inner: x aligned under the right (inner) screw (same anchor + shift_x
-  # as screw_left_right), dropped further down to clear the routed traces.
+      # y = 170.5: the mirrored (right) instance is tangent to the 16mm
+      # _switchoutlines of the thumb switch directly below it.
+      shift: [-9.525, -27.6]
+  # bottom-inner: y matches bottom-outer (170.5); x kept as set.
   zones.support_left_bottom_inner:
     mirror: *matrix_mirror
     key.tags.support_left: true
     key.mirror.tags: *support_mirror_tags
     anchor:
       ref: matrix_five_home
-      shift: [12, -27.2]
+      shift: [12, -27.6]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
@@ -734,17 +735,17 @@ pcbs:
       label_diode: &label_diode
         what: ceoloide/utility_text
         where:
-          ref: screw_left_left
+          ref: screw_left_outer
           shift: [label_diode_x, label_diode_y]
         params:
           <<: *label_params
           text: 'Socket\nKailh CPG151101S11\nMX hotswap\n\nDiode\n1N4148W\nSOD-123'
       # Screw labels: beside each hole (directly below is blocked by keys),
       # anchored per-hole so each goes to its open side.
-      label_screw_ll: &label_screw_ll
+      label_screw_lo: &label_screw_lo
         what: ceoloide/utility_text
         where:
-          ref: screw_left_left
+          ref: screw_left_outer
           shift: [-label_screw_dx, 0]
         params:
           reversible: true
@@ -753,10 +754,10 @@ pcbs:
           width: 0.8
           thickness: 0.15
           text: M3x0.5
-      label_screw_lr:
-        <<: *label_screw_ll
+      label_screw_li:
+        <<: *label_screw_lo
         where:
-          ref: screw_left_right
+          ref: screw_left_inner
           shift: [label_screw_dx, 0]
   right:
     template: kicad8 # ceoloide footprints need KiCad 8
@@ -880,15 +881,15 @@ pcbs:
       label_diode:
         <<: *label_diode
         where:
-          ref: mirror_screw_left_left
+          ref: mirror_screw_left_outer
           shift: [label_diode_x, label_diode_y]
-      label_screw_ll:
-        <<: *label_screw_ll
+      label_screw_lo:
+        <<: *label_screw_lo
         where:
-          ref: mirror_screw_left_left
+          ref: mirror_screw_left_outer
           shift: [-label_screw_dx, 0]
-      label_screw_lr:
-        <<: *label_screw_ll
+      label_screw_li:
+        <<: *label_screw_lo
         where:
-          ref: mirror_screw_left_right
+          ref: mirror_screw_left_inner
           shift: [label_screw_dx, 0]
