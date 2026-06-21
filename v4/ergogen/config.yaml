@@ -3,48 +3,45 @@ meta:
 
 # --- Units ---
 units:
-  c: 14.5 # MX cutout/hole length: 14mm nominal + 0.5mm to clear the 1mm CNC corner fillet
+  c: 14.5 # MX cutout/hole length, sized to clear the CNC corner fillet
   s: 16 # MX widest is 15.6mm
-  cnc_fillet: 1 # internal corner radius on the switch cutouts/recesses for a 2mm CNC end mill (c is sized to clear it)
-  u: U # key pitch (ergogen U = 19.05mm)
-  # Thumbcluster splay angle (deg). One source of truth: the thumb keys splay by
-  # this, and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
+  cnc_fillet: 1 # switch cutout/recess internal corner radius for the CNC end mill
+  u: U # key pitch
+  # Case-export outline radii (DXF reference curves, never cut into the PCB):
+  # the CNC boss the M3 threads into, and the anti-flex support post.
+  screw_boss_radius: 2.75
+  support_radius: 2.25
+  # Thumbcluster splay angle (deg), single source of truth: the thumb keys splay
+  # by this and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
   thumb_splay: -19.111732
-  # Thumb diode offset from its switch, in the splayed key frame. dy sets how far
-  # below the switch it sits; dx re-centers it laterally (the rotated dy would
-  # otherwise drift it sideways). Keep dx = dy * tan(thumb_splay) so it stays
-  # centered when dy changes; dx auto-flips x on the mirrored right half.
+  # Thumb diode offset from its switch in the splayed key frame. Keep
+  # dx = dy * tan(thumb_splay) so it stays centered when dy changes.
   thumb_diode_dy: -4.7
   thumb_diode_dx: 1.629
-  # --- MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves) ---
-  # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS+resistor on trrs_tvs_resistor_x.
-  mcu_reset_x: 17.75 # was 18; net -0.25 moves MCU+reset left (left half) / right (right half)
+  # MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves).
+  # x is shared per column: MCU+reset on mcu_reset_x, the rest on trrs_tvs_resistor_x.
+  mcu_reset_x: 17.75
   mcu_y: -2
   reset_y: 9.525 # level with the screw_*_inner hole
-  trrs_tvs_resistor_x: mcu_reset_x + 12.75 # offset absorbs mcu_reset_x's 0.25 bump so TRRS/TVS/resistor stay at 30.5
+  trrs_tvs_resistor_x: mcu_reset_x + 12.75
   trrs_y: 15.125
   tvs_y: trrs_y - 17
   resistor_y: tvs_y - 8
-  # --- Silkscreen credit text offsets ---
-  # y is the block center; x centers the wider URL line. Center-justified (see footprint).
+  # Silkscreen credit text offsets. Center-justified (see footprint).
   label_credit_y: 11
   label_credit_x_left: -u/2 -u +25 # left pinky
   label_credit_x_right: u/2 -25 # right pinky
-  # --- Component label y-offsets (silkscreen) ---
-  # Each label reuses its component's x var (same column); these set y only.
-  # Hugging labels are relative to the component's y, so they track the part;
-  # label_mcu_y is absolute.
+  # Component label y-offsets. Each label reuses its component's x var (same
+  # column); hugging labels track the part's y, label_mcu_y is absolute.
   label_mcu_y: -20
   label_trrs_y: trrs_y - 13.5
   label_tvs_y: tvs_y - 4
   label_resistor_y: resistor_y - 5
   label_reset_y: reset_y - 6
-  # Reset pad-net label offset. After the 270 rotation GND lands right of the pad
-  # column, RST left, so GND uses +dx and RST -dx; the right half's mirror_ ref flips x.
+  # Reset pad-net label offset: GND uses +dx (right of pad column), RST -dx.
   label_reset_pad_dx: 4.5
   # Diode/socket block: one shift off the pinky-side screw hole (a mirror pair),
-  # so both halves share it and ergogen auto-flips x for the right (like the
-  # screw labels). Lands the block in the bottom-pinky margin on each half.
+  # so ergogen auto-flips x for the right; lands in the bottom-pinky margin.
   label_diode_x: -30
   label_diode_y: -51
   label_screw_dx: 5
@@ -54,12 +51,12 @@ points:
   # --- Main key matrix ---
   zones.matrix:
     anchor:
-      # The only absolute coordinate, and cosmetic: npm run ergogen re-centers
-      # each PCB (recenter.py) afterward, so the value doesn't matter.
+      # The only absolute coordinate, and cosmetic: ergogen re-centers each PCB
+      # afterward, so the value doesn't matter.
       shift: [69, -192]
     # Left half is the source of truth, mirrored to build the right. Keys marked
     # `mirror.skip: true` are left-only; their right counterparts live in
-    # zones.extra and the thumbcluster, so must not be auto-mirrored.
+    # zones.extra and the thumbcluster.
     mirror: &matrix_mirror
       ref: matrix_five_num
       distance: 5u
@@ -100,12 +97,9 @@ points:
           home: # A
           upper: # Q
           num: # 1
-      # Columns two-five mirror to the right half. Mirror nets are constant per
-      # column/row, so they're declared once via key.mirror.* not per key.
-      # Comments show left key -> right (mirrored) key. Columns three-five also
-      # carry thumb keys, so their column nets are YAML anchors (&col_three_left
-      # etc.) aliased by the thumbcluster, keeping the thumbs in the same matrix
-      # columns automatically.
+      # Columns two-five mirror to the right half. Comments show left key -> right
+      # (mirrored) key. Columns three-five carry thumb keys, so their column nets
+      # are YAML anchors aliased by the thumbcluster to share the matrix columns.
       two:
         key.stagger: 3
         key.column_net: P6
@@ -152,11 +146,10 @@ points:
           upper: # T -> Y
           num: # 5 -> 6
     # Per-row nets: row_net is the left mapping; mirror.row_net the right half's.
-    # (The matrix mod row is never mirrored, so it needs no mirror.row_net.)
+    # The matrix mod row is never mirrored, so it needs no mirror.row_net.
     rows:
-      # &mod_row_left: left-half mod row, aliased by the thumbcluster's left keys so
-      # the left thumbs share the matrix mod row. The matrix mod row is never
-      # mirrored; the right half's mod row is &mod_row_right (in zones.extra).
+      # &mod_row_left: aliased by the thumbcluster's left keys so they share the
+      # matrix mod row. The right half's mod row is &mod_row_right (zones.extra).
       mod.row_net: &mod_row_left P9
       lower:
         row_net: P14
@@ -173,10 +166,8 @@ points:
   # --- Extra keys: the right half's inner columns ---
   # Right counterparts to the left's mirror.skip columns, defined explicitly
   # because they differ (backspace, punctuation, right mods). 9u right.
-  # Right matrix columns: five..two -> P19,P8,P7,P6, with P5,P4,P3 for the three
-  # extra inner columns. P2 (GP2) is left free for the TRRS serial pin, so one
-  # firmware split.serial.pin = GP2 fits both halves (see data_resistor); P0 (GP1),
-  # P18 (GP26), and P20 (GP28) are unused on the right.
+  # P2 (GP2) is left free for the TRRS serial pin so one firmware
+  # split.serial.pin = GP2 fits both halves (see data_resistor).
   zones.extra:
     key.tags.right: true
     anchor:
@@ -213,9 +204,7 @@ points:
           num: # =
     # Right-half row->net mapping (differs from the main matrix's left mapping).
     rows:
-      # &mod_row_right: right-half mod row, aliased by the thumbcluster's mirrored
-      # (right) keys. A YAML anchor, not a units/variables entry: ergogen units are
-      # math-evaluated, so a net-name string would not parse.
+      # &mod_row_right: aliased by the thumbcluster's mirrored (right) keys.
       mod.row_net: &mod_row_right P9
       lower.row_net: P14
       home.row_net: P16
@@ -223,11 +212,9 @@ points:
       num.row_net: P15
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
-    # The anchor shift and the column-three splay below are jointly solved (not
-    # hand-tuned): they pin the rightmost thumb key's top-right hull corner to the
-    # box's bottom-right corner (198.9, -201.525) and drop its bottom-right corner
-    # to y=-219.525, making the board exactly 158 x 119mm. Re-solve all three
-    # together if any changes; tweaking one alone breaks the corner fit.
+    # The anchor shift and the column-three splay below are jointly solved: they
+    # pin the rightmost thumb key's hull corner to the box corner for a 158 x
+    # 119mm board. Re-solve both together; tweaking one alone breaks the fit.
     anchor:
       ref: matrix_four_lower
       shift: [-3.418594, -1u -2.813439]
@@ -256,12 +243,10 @@ points:
         column_net: *col_five_left
         mirror:
           column_net: *col_five_right
-  # --- Screw zones: mounting-hole anchors. Left is the source of truth, mirrored
-  # across the matrix axis to the right (mirror_screw_*). The screw_left/screw_right
-  # tags drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
-  # outlines. Shifts are tuned so the case boss clears the switch cutouts; the
-  # pinky (outer) and inner holes share y so they mount level. The former center screw
-  # (between matrix three's home/lower keys) is now support_left_center. ---
+  # --- Screw zones: mounting-hole anchors. Left is the source, mirrored to the
+  # right (mirror_screw_*). The screw_left/screw_right tags drive the per-PCB
+  # mounting_hole_npth footprints and the per-half hole/boss outlines. Shifts are
+  # tuned so the boss clears the switch cutouts; outer and inner holes share y. ---
   zones.screw_left_outer:
     mirror: *matrix_mirror
     key.tags.screw_left: true
@@ -270,72 +255,49 @@ points:
       screw_right: true
     anchor:
       ref: matrix_one_home
-      shift: [-9.525, 9.525]
+      # Dropped into the diagonal gap, vertically centered between the home/lower
+      # switches beside it, so the boss clears the 14.5mm holes on both halves (the
+      # right pinky columns are 1u apart, too tight for the boss at the row level).
+      shift: [-10, -9.525]
   zones.screw_left_inner:
     mirror: *matrix_mirror
     key.tags.screw_left: true
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_five_home
-      # x: the mirrored (right) instance's boss is tangent to the 16mm
-      # _switchoutlines of the switch directly to its right.
-      shift: [-8.55, 9.525]
+      # y centered between the two switch holes beside it; x moved left so the boss
+      # is tangent to (never overlapping) the 14.5mm switch hole beside it.
+      shift: [-10, -6.525]
   # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
   # the bare PCB (no hole, not screwed). Left is the source, mirrored to
   # support_right; they drive the _supports* outlines only (case reference, never
-  # cut into the PCB), like the bosses. The PCB perimeter is already clamped by the
-  # case sandwich, so these four posts target only the deep-interior keys (the
-  # center band, ~30mm from any edge/screw). Positions are optimized to minimize
-  # the worst key-to-clamp span while staying clear of copper. The center column
-  # is a vertical pair at x=206; the two lower posts each sit directly under a
-  # screw (x aligned with screw_left_outer / screw_left_inner), in the lower
-  # margin below the routed traces. ---
-  # center column, upper: shares x with center-lower (same anchor + shift_x).
-  zones.support_left_center_middle:
+  # cut into the PCB), like the bosses. The posts target the deep-interior keys
+  # farthest from any edge or screw. ---
+  # center column, top post (sole anti-flex support).
+  zones.support_left_center_top:
     mirror: *matrix_mirror
     key.tags.support_left: true
-    key.mirror.tags: &support_mirror_tags
+    key.mirror.tags:
       support_left: $unset
       support_right: true
     anchor:
-      ref: matrix_three_home
-      # x: the mirrored (right) instance is tangent to the 16mm _switchoutlines
-      # of the switch directly to its left.
-      shift: [-10.5, -12.525]
-
-  # bottom-outer: x aligned under the pinky (outer) screw (same anchor + shift_x
-  # as screw_left_outer), dropped into the lower margin clear of the routed traces.
-  zones.support_left_bottom_outer:
-    mirror: *matrix_mirror
-    key.tags.support_left: true
-    key.mirror.tags: *support_mirror_tags
-    anchor:
-      ref: matrix_one_home
-      # y = 170.5: the mirrored (right) instance is tangent to the 16mm
-      # _switchoutlines of the thumb switch directly below it.
-      shift: [-9.525, -27.6]
-  # bottom-inner: y matches bottom-outer (170.5); x kept as set.
-  zones.support_left_bottom_inner:
-    mirror: *matrix_mirror
-    key.tags.support_left: true
-    key.mirror.tags: *support_mirror_tags
-    anchor:
-      ref: matrix_five_home
-      shift: [12, -27.6]
+      ref: matrix_three_num
+      # Right half: tangent to the switch outline on its left; raised so the post's
+      # bottom edge is coincident with the top of the lower switch outline on its
+      # right (pulls it off the hotswap socket pad below for clearance).
+      shift: [-10.25, -11.8]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
   _boxleft:
     - what: polygon
       points:
-        # Outer (pinky) edge: mirror of the right's outer edge (right sets the
-        # 158mm width). Left pinky ends up well clear of its keys.
+        # Outer (pinky) edge: mirror of the right's outer edge (right sets width).
         - ref: matrix_zero_num
           shift: [-u/2 -u +0.475, u/2 +5.75]
 
-        # Top edge runs straight across here; the USB-C notch is subtracted
-        # separately (_usbleft) after the exterior fillet so its corners stay
-        # square (the fillet rounds only the true outer corners of this box).
+        # Top edge straight across; the USB-C notch is subtracted separately
+        # (_usbleft) after the fillet so its corners stay square.
         - ref: matrix_five_num
           shift: [u + 15.6, u/2 +5.75]
         - ref: matrix_five_lower
@@ -348,24 +310,18 @@ outlines:
         - ref: mirror_matrix_five_num
           shift: [u + 15.6, u/2 +5.75]
 
-        # Top edge runs straight across here; the USB-C notch is subtracted
-        # separately (_usbright) after the exterior fillet so its corners stay
-        # square (mirror of the left).
-
         # Outer (pinky) edge: the right is wider (extra inner column), so it sets
-        # the board width. Pulled in 0.475 to round 158.475 -> 158mm; cuts into
-        # the key hull but stays ~1mm clear of the switch. Left mirrors this.
+        # the board width. Pulled in 0.475 to round to 158mm; stays clear of the
+        # switch. Left mirrors this.
         - ref: extra_equal_num
           shift: [u/2 -0.475, u/2 +5.75]
         - ref: extra_equal_lower
           shift: [u/2 -0.475, -u/2 -u]
         - ref: mirror_matrix_five_lower
           shift: [u + 15.6, -u -1/2u]
-  # USB-C cutouts, subtracted from the walls after the exterior fillet so the
-  # notch keeps square corners. Centered on the Liatris socket (0.127mm left of
-  # the MCU origin): the +-5 span is tied to mcu_reset_x so the notch tracks the
-  # MCU if it moves. The top edge (y u/2 +8) overshoots the board edge (u/2
-  # +5.75) so the subtraction cuts cleanly through it. Right is the mirror.
+  # USB-C cutouts, subtracted from the walls after the fillet so the notch keeps
+  # square corners. Centered on the Liatris socket and tied to mcu_reset_x so the
+  # notch tracks the MCU; the top edge overshoots so the subtraction cuts through.
   _usbleft:
     - what: polygon
       points:
@@ -399,8 +355,8 @@ outlines:
       size: u
       bound: true
   # Screw holes: the M3 clearance hole, matching the mounting_hole_npth footprint
-  # that actually cuts the PCB. These outlines only draw it into the case-export
-  # DXF as a reference curve. Per-half scoped and stacked, like the bosses below.
+  # that cuts the PCB. These outlines only draw it into the case-export DXF as a
+  # reference curve. Per-half scoped and stacked, like the bosses below.
   _screwsleft:
     - what: circle
       where: screw_left
@@ -410,34 +366,28 @@ outlines:
       where: screw_right
       radius: 1.75
   # Screw bosses: the CNC case metal the M3 threads into. Case-only reference
-  # curve in the export DXF, never cut into the PCB. May overlap the switch
-  # recesses (it is metal, not a hole), but the screw positions keep it clear of
-  # the switch cutouts. Per-half scoped: a stacked circle outside its own board
-  # would add a floating disc.
+  # curve in the export DXF, never cut into the PCB. Per-half scoped: a stacked
+  # circle outside its own board would add a floating disc.
   _screwbossesleft:
     - what: circle
       where: screw_left
-      radius: 2.5
+      radius: screw_boss_radius
   _screwbossesright:
     - what: circle
       where: screw_right
-      radius: 2.5
+      radius: screw_boss_radius
   # Support posts: anti-flex PCB supports. Case-only reference curve in the export
   # DXF, never cut into the PCB. Per-half scoped and stacked.
   _supportsleft:
     - what: circle
       where: support_left
-      radius: 2.5
+      radius: support_radius
   _supportsright:
     - what: circle
       where: support_right
-      radius: 2.5
+      radius: support_radius
   # fillet rounds the cutout corners inward for a CNC end mill (internal corners
-  # can't be cut sharp). 1mm radius is JLCCNC's price-friendly floor (a sturdy
-  # 2mm tool; 0.5mm needs a costlier micro mill). The hole is enlarged to c=14.5
-  # to clear that 1mm round: a Cherry MX housing fits a 14.0mm/0.3mm-corner cutout
-  # (datasheet), so the sharp-corner-equivalent boss is ~13.82mm, needing
-  # 13.82 + 0.586*1 = ~14.41mm min; 14.5 adds margin. Verified by test print.
+  # can't be cut sharp). The hole c is enlarged to clear that round (see units).
   _switchholesleft:
     - what: rectangle
       where: left
@@ -449,8 +399,7 @@ outlines:
       fillet: cnc_fillet
       size: c
   # Binding scoped to the thumb cluster only: the matrix is enclosed by the box,
-  # so binding it would poke 1u hulls above the top edge (needing a trim). The
-  # thumb cluster sits below the box, so it still needs its hull.
+  # but the thumb cluster sits below it and still needs its hull.
   _thumbbindingleft:
     - what: rectangle
       where: /^thumbcluster/
@@ -471,12 +420,9 @@ outlines:
       where: right
       fillet: cnc_fillet
       size: s
-  # fillet on the thumb-binding part rounds every corner of the accumulated
-  # exterior outline (box + thumb binding). No internal cutouts exist at that
-  # stage (screws/switch holes are stacked later in left/right), so only the
-  # exterior edge is rounded, easing the fit into a CNC-routed pocket whose
-  # internal corners carry the end-mill radius. The USB-C notch is subtracted
-  # AFTER the fillet so it keeps square corners (the box top edge is straight).
+  # fillet on the thumb-binding part rounds the exterior outline (box + thumb
+  # binding) to fit a CNC-routed pocket. The USB-C notch is subtracted AFTER the
+  # fillet so it keeps square corners.
   _wallsleft:
     - name: _boxleft
     - name: _thumbbindingleft
@@ -490,11 +436,9 @@ outlines:
     - name: _usbright
       operation: subtract
   # These outlines feed the DXF case export only (the PCB edge cut uses _walls*
-  # directly). Everything is stacked as reference curves for the 3D case model:
-  # switch recesses, switch cutouts, screw bosses, screw holes, support posts. They
-  # must be stacked, not subtracted: subtracting a shape that sits coincident with
-  # or inside another stacked shape cancels it in the boolean simplify and it
-  # vanishes from the export.
+  # directly). Everything is stacked as reference curves for the 3D case model.
+  # Must be stacked, not subtracted: a coincident/inner subtracted shape cancels
+  # in the boolean simplify and vanishes from the export.
   left:
     - name: _wallsleft
     - name: _switchoutlinesleft
@@ -556,8 +500,8 @@ pcbs:
         params:
           side: B
           include_tht: false
-          reversible: true # both-side pads so include_traces_vias can route on either layer
-          include_traces_vias: true # via per pad, net routes on either layer (single-side assembly unchanged)
+          reversible: true # both-side pads so the net can route on either layer
+          include_traces_vias: true # via per pad (single-side assembly unchanged)
           from: "{{colrow}}"
           to: "{{row_net}}"
       # Thumb diodes: counter-rotate by -thumb_splay to cancel the thumbcluster
@@ -593,7 +537,7 @@ pcbs:
           reversible: false
           reverse_mount: true
           include_extra_pins: false # GP12-GP16 unused
-          show_silk_labels_on_both_sides: true # MCU hides its mounting-side silk; mirror pin labels to the exposed side too
+          show_silk_labels_on_both_sides: true # mirror pin labels to the exposed side
       reset: &reset
         what: button
         where:
@@ -631,10 +575,9 @@ pcbs:
           side: B # single-side SMD, same side as the diodes (Economic PCBA)
           from: DATA_RAW
           to: GND
-      # In series from DATA_RAW to the MCU serial pin, limiting residual surge current
-      # after the TVS. Non-polar, so from/to is electrically arbitrary. Both halves
-      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both. Neither
-      # half's matrix uses P2, so it stays free for serial on both (see zones.extra).
+      # In series from DATA_RAW to the MCU serial pin, limiting residual surge
+      # current after the TVS. Non-polar, so from/to is arbitrary. Both halves
+      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both.
       data_resistor: &data_resistor
         what: r_0805
         where:
@@ -645,9 +588,9 @@ pcbs:
           designator: R # ref prefix R<n>
           side: B
           from: DATA_RAW
-          to: P2 # left half serial data -> GP2
+          to: P2 # serial data -> GP2
       # reversible -> copy on F+B silk. Center-justified so the back copy mirrors
-      # onto the same spot. Centered over the pinky top corner.
+      # onto the same spot, over the pinky top corner.
       label_credit: &label_credit
         what: ceoloide/utility_text
         where:
@@ -660,22 +603,24 @@ pcbs:
           width: 1.2
           thickness: 0.18
           text: '\"Splinter\" keyboard v4 by @andornaut\nhttps://github.com/andornaut/splinter-keyboard'
-      # Each label sits by its component on the same ref; the right half re-anchors to
-      # mirror_ refs (x auto-flips). Every label is side B + mirrored, so it reads
-      # correctly from the back.
+      # Each label sits by its component on the same ref; the right half re-anchors
+      # to mirror_ refs (x auto-flips). All side B + mirrored, to read from the back.
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
           shift: [mcu_reset_x, label_mcu_y]
         params: &label_params
+          # &text_style: shared silk text geometry, also used by the screw labels
+          # (which need reversible: true instead of this block's side B + mirrored).
+          <<: &text_style
+            layer: SilkS
+            height: 0.8
+            width: 0.8
+            thickness: 0.15
           reversible: false
           side: B
           mirrored: true
-          layer: SilkS
-          height: 0.8
-          width: 0.8
-          thickness: 0.15
           text: 'MCU\nsplitkb Liatris\nPro Micro (RP2040)'
       label_trrs: &label_trrs
         what: ceoloide/utility_text
@@ -685,8 +630,6 @@ pcbs:
         params:
           <<: *label_params
           text: 'TRRS\nPJ-320A'
-      # SMD and reset labels reuse label_params (side B, mirrored) with their own
-      # text. Credit and screw labels use their own reversible params instead.
       label_tvs: &label_tvs
         what: ceoloide/utility_text
         where:
@@ -728,10 +671,8 @@ pcbs:
         params:
           <<: *label_params
           text: RST
-      # Diode + hotswap-socket part reference. Side B (where both parts mount) via
-      # label_params, so it appears only on the pad side. Anchored to the
-      # pinky-side screw hole (a mirror pair) with a single shared shift, so the
-      # right half mirrors it automatically; lands in the bottom-pinky margin.
+      # Diode + hotswap-socket part reference. Anchored to the pinky-side screw
+      # hole (a mirror pair) so the right half mirrors it; in the bottom-pinky margin.
       label_diode: &label_diode
         what: ceoloide/utility_text
         where:
@@ -748,11 +689,8 @@ pcbs:
           ref: screw_left_outer
           shift: [-label_screw_dx, 0]
         params:
+          <<: *text_style
           reversible: true
-          layer: SilkS
-          height: 0.8
-          width: 0.8
-          thickness: 0.15
           text: M3x0.5
       label_screw_li:
         <<: *label_screw_lo
@@ -779,8 +717,8 @@ pcbs:
       diode:
         <<: *diode
         where: /^(mirror_matrix|extra)_/
-      # Thumb diodes: counter-rotate to horizontal. Same -1 * thumb_splay input as
-      # the left; ergogen's mirror negates it to cancel the mirrored +splay here.
+      # Thumb diodes: same input as the left; ergogen's mirror negates it to
+      # cancel the mirrored +splay here.
       diode_thumb:
         <<: *diode
         where: /^mirror_thumbcluster_/
@@ -824,25 +762,20 @@ pcbs:
         <<: *data_resistor
         where:
           ref: mirror_matrix_five_num
-          # Same value as the left, NOT 270: the mirror_ ref auto-negates the
-          # rotation (renders as -90), so this is already the left's mirror image
-          # and the output pad still faces the MCU. Setting 270 here would
-          # double-flip it.
+          # 90 (same as the left, not 270): the mirror_ ref auto-negates it, so
+          # this is the left's mirror image with the output pad facing the MCU.
           rotate: 90
           shift: [trrs_tvs_resistor_x, resistor_y]
         params:
           <<: *data_resistor_params
-          # to: P2 inherited (not overridden) so both halves use the same serial
-          # pin; see the left data_resistor for why P2.
-      # Right half: centered over the outer (pinky) top corner, mirroring the
-      # left half's placement.
+          # to: P2 inherited so both halves use the same serial pin.
+      # Right half credit: over the outer (pinky) top corner, mirroring the left.
       label_credit:
         <<: *label_credit
         where:
           ref: extra_equal_num
           shift: [label_credit_x_right, label_credit_y]
-      # Right half component labels: mirror_ refs auto-flip the x-shift. All component
-      # labels (MCU, TRRS, SMD parts) are side B on both halves.
+      # Right half component labels: mirror_ refs auto-flip the x-shift.
       label_mcu:
         <<: *label_mcu
         where:
