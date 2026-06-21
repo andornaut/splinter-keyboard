@@ -15,6 +15,8 @@ A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-t
 
 The reverse-mounted (facing the PCB) [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). Its USB VBUS line is wired to GP19, so QMK senses USB presence via `USB_VBUS_PIN` (GP19) instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
+The MCU is socketed, not soldered: it sits in two pairs of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused.
+
 The firmware config for this (the `USB_VBUS_PIN GP19` define and the matching `development_board`/split settings) lives in the [firmware repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).
 
 ### Pinout
@@ -37,9 +39,11 @@ The firmware config for this (the `USB_VBUS_PIN GP19` define and the matching `d
 | P8 (GP8) | | | P16 (GP23) |
 | P9 (GP9) | | | P10 (GP21) |
 
+GP19 (the `USB_VBUS_PIN`) is the Liatris's internal VBUS-sense pin, not a header net, so it does not appear in the table above. The `P19` row maps to GP27, a separate matrix pin.
+
 ## TRRS data-line protection
 
-v4 adds a TVS diode and series resistor on the TRRS data line to protect the MCU's serial GPIO when the cable is hot-unplugged. The TVS (bidirectional, 5V standoff) clamps the line to GND; the 100Ω resistor limits current into the MCU pin. Each half:
+v4 adds a TVS diode and series resistor on the TRRS data line to protect the MCU's serial GPIO when the cable is hot-unplugged. The TVS (bidirectional, 5V standoff) clamps the line to GND: its 5V turn-on voltage stays above the 3.3V data signal so it does not conduct in normal use, and it clamps to ~9V under surge. The 100Ω resistor limits current into the MCU pin. Each half:
 
 ```text
 TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P2)-- MCU GP2
