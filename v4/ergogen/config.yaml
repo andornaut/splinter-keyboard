@@ -277,7 +277,7 @@ points:
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_five_home
-      shift: [-8.712, 9.525]
+      shift: [-8.3, 9.525]
   # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
   # the bare PCB (no hole, not screwed). Left is the source, mirrored to
   # support_right; they drive the _supports* outlines only (case reference, never
