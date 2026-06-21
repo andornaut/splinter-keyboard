@@ -7,10 +7,9 @@ units:
   s: 16 # MX widest is 15.6mm
   cnc_fillet: 1 # switch cutout/recess internal corner radius for the CNC end mill
   u: U # key pitch
-  # Case-export outline radii (DXF reference curves, never cut into the PCB):
-  # the CNC boss the M3 threads into, and the anti-flex support post.
+  # Screw-boss radius: the CNC case metal each M3 threads into (DXF reference
+  # curve, never cut into the PCB).
   screw_boss_radius: 2.75
-  support_radius: 2.5
   # Thumbcluster splay angle (deg), single source of truth: the thumb keys splay
   # by this and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
   thumb_splay: -19.111732
@@ -28,22 +27,28 @@ units:
   tvs_y: trrs_y - 17
   resistor_y: tvs_y - 8
   # Silkscreen credit text offsets. Center-justified (see footprint).
-  label_credit_y: 11
-  label_credit_x_left: -u/2 -u +25 # left pinky
-  label_credit_x_right: u/2 -25 # right pinky
+  label_credit_y: 10
+  label_credit_x_left: -u/2 -u +26 # left pinky
+  label_credit_x_right: u/2 -26 # right pinky
   # Component label y-offsets. Each label reuses its component's x var (same
   # column); hugging labels track the part's y, label_mcu_y is absolute.
   label_mcu_y: -20
   label_trrs_y: trrs_y - 13.5
+  # TRRS pad-net labels: centered on the jack centerline (the gap between its two
+  # mirrored pad columns), each level with its net's pad row. Offsets are the
+  # footprint's local pad ys, which run downward, so subtract from trrs_y.
+  label_trrs_gnd_y: trrs_y - 3.2 # SL pad row
+  label_trrs_data_y: trrs_y - 6.2 # R2 pad row
+  label_trrs_vcc_y: trrs_y - 10.75 # TP pad row
   label_tvs_y: tvs_y - 4
   label_resistor_y: resistor_y - 5
   label_reset_y: reset_y - 6
   # Reset pad-net label offset: GND uses +dx (right of pad column), RST -dx.
   label_reset_pad_dx: 4.5
-  # Diode/socket block: one shift off the pinky-side screw hole (a mirror pair),
-  # so ergogen auto-flips x for the right; lands in the bottom-pinky margin.
-  label_diode_x: -30
-  label_diode_y: -51
+  # Diode/socket label offset, off matrix_two_lower; lands in the bottom-pinky
+  # margin (placement rationale at the footprint).
+  label_diode_x: -58.575
+  label_diode_y: -25.425
   label_screw_dx: 5
 
 # --- Points: key matrix, thumbcluster, mounting holes ---
@@ -165,7 +170,7 @@ points:
         mirror.row_net: P15
   # --- Extra keys: the right half's inner columns ---
   # Right counterparts to the left's mirror.skip columns, defined explicitly
-  # because they differ (backspace, punctuation, right mods). 9u right.
+  # because they differ (backspace, punctuation, right mods).
   # P2 (GP2) is left free for the TRRS serial pin so one firmware
   # split.serial.pin = GP2 fits both halves (see data_resistor).
   zones.extra:
@@ -213,8 +218,9 @@ points:
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
     # The anchor shift and the column-three splay below are jointly solved: they
-    # pin the rightmost thumb key's hull corner to the box corner for a 158 x
-    # 119mm board. Re-solve both together; tweaking one alone breaks the fit.
+    # pin the rightmost thumb key's hull corner to the box corner for the target
+    # board size (see AGENTS.md). Re-solve both together; tweaking one alone breaks
+    # the fit.
     anchor:
       ref: matrix_four_lower
       shift: [-3.418594, -1u -2.813439]
@@ -243,10 +249,14 @@ points:
         column_net: *col_five_left
         mirror:
           column_net: *col_five_right
-  # --- Screw zones: mounting-hole anchors. Left is the source, mirrored to the
-  # right (mirror_screw_*). The screw_left/screw_right tags drive the per-PCB
-  # mounting_hole_npth footprints and the per-half hole/boss outlines. Shifts are
-  # tuned so the boss clears the switch cutouts; outer and inner holes share y. ---
+  # --- Screw zones: mounting-hole anchors (outer, inner, center). Left is the
+  # source, mirrored to the right (mirror_screw_*). The screw_left/screw_right tags
+  # drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
+  # outlines. Placement obeys two hard rules (see AGENTS.md): the boss never
+  # overlaps a switch hole and stays clear of every copper pad. Each sits in a
+  # diagonal gap between four switches; the asymmetric pinky columns make the
+  # mirrored pair land differently per half, so outer/inner cannot share a y. The
+  # center screw also serves as a centering peg. ---
   zones.screw_left_outer:
     mirror: *matrix_mirror
     key.tags.screw_left: true
@@ -255,9 +265,9 @@ points:
       screw_right: true
     anchor:
       ref: matrix_one_home
-      # Dropped into the diagonal gap, vertically centered between the home/lower
-      # switches beside it, so the boss clears the 14.5mm holes on both halves (the
-      # right pinky columns are 1u apart, too tight for the boss at the row level).
+      # Diagonal gap, vertically centered between the home/lower switches beside
+      # it, so the boss clears the switch holes on both halves (the right pinky
+      # columns are too tight for it at the row level).
       shift: [-10, -9.525]
   zones.screw_left_inner:
     mirror: *matrix_mirror
@@ -265,26 +275,19 @@ points:
     key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_five_home
-      # y centered between the two switch holes beside it; x moved left so the boss
-      # is tangent to (never overlapping) the 14.5mm switch hole beside it.
+      # x makes the boss tangent to the switch hole beside it; y raised just
+      # enough to clear the nearby hotswap-socket pad.
       shift: [-10, -5.825]
-  # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
-  # the bare PCB (no hole, not screwed). Left is the source, mirrored to
-  # support_right; they drive the _supports* outlines only (case reference, never
-  # cut into the PCB), like the bosses. The posts target the deep-interior keys
-  # farthest from any edge or screw. ---
-  # center column, top post (sole anti-flex support).
-  zones.support_left_center_top:
+  # Center screw: a third mounting hole mid-board that doubles as a centering peg
+  # and anti-flex clamp. Like the others it sits in a diagonal gap between four
+  # switches, clearing the holes and pads.
+  zones.screw_left_center:
     mirror: *matrix_mirror
-    key.tags.support_left: true
-    key.mirror.tags:
-      support_left: $unset
-      support_right: true
+    key.tags.screw_left: true
+    key.mirror.tags: *screw_mirror_tags
     anchor:
       ref: matrix_three_num
-      # Mid-board in the diagonal gap (clears the 14.5mm holes), nudged to keep the
-      # post well off the nearby pads at this radius.
-      shift: [-9.15, -27.4]
+      shift: [-9.05, -27.8]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
@@ -310,8 +313,8 @@ outlines:
           shift: [u + 15.6, u/2 +5.75]
 
         # Outer (pinky) edge: the right is wider (extra inner column), so it sets
-        # the board width. Pulled in 0.475 to round to 158mm; stays clear of the
-        # switch. Left mirrors this.
+        # the board width. Pulled in slightly to round the width to spec; stays
+        # clear of the switch. Left mirrors this.
         - ref: extra_equal_num
           shift: [u/2 -0.475, u/2 +5.75]
         - ref: extra_equal_lower
@@ -375,16 +378,6 @@ outlines:
     - what: circle
       where: screw_right
       radius: screw_boss_radius
-  # Support posts: anti-flex PCB supports. Case-only reference curve in the export
-  # DXF, never cut into the PCB. Per-half scoped and stacked.
-  _supportsleft:
-    - what: circle
-      where: support_left
-      radius: support_radius
-  _supportsright:
-    - what: circle
-      where: support_right
-      radius: support_radius
   # fillet rounds the cutout corners inward for a CNC end mill (internal corners
   # can't be cut sharp). The hole c is enlarged to clear that round (see units).
   _switchholesleft:
@@ -448,8 +441,6 @@ outlines:
       operation: stack
     - name: _screwsleft
       operation: stack
-    - name: _supportsleft
-      operation: stack
   right:
     - name: _wallsright
     - name: _switchoutlinesright
@@ -459,8 +450,6 @@ outlines:
     - name: _screwbossesright
       operation: stack
     - name: _screwsright
-      operation: stack
-    - name: _supportsright
       operation: stack
   full:
     - name: left
@@ -485,10 +474,6 @@ pcbs:
       screwbosses:
         outline: _screwbossesleft
         layer: Eco1.User
-      # Support posts on the same user layer, also a routing keep-clear reference.
-      supports:
-        outline: _supportsleft
-        layer: Eco1.User
     footprints:
       # Matrix diodes inherit each key's rotation (axis-aligned on the matrix).
       diode: &diode
@@ -499,8 +484,8 @@ pcbs:
         params:
           side: B
           include_tht: false
-          reversible: true # both-side pads so the net can route on either layer
-          include_traces_vias: true # via per pad (single-side assembly unchanged)
+          reversible: false # B-only pads; matrix routes on F.Cu via the include_traces_vias via
+          include_traces_vias: true # via per pad exposes the net on F.Cu for the matrix
           from: "{{colrow}}"
           to: "{{row_net}}"
       # Thumb diodes: counter-rotate by -thumb_splay to cancel the thumbcluster
@@ -670,19 +655,51 @@ pcbs:
         params:
           <<: *label_params
           text: RST
-      # Diode + hotswap-socket part reference. Anchored to the pinky-side screw
-      # hole (a mirror pair) so the right half mirrors it; in the bottom-pinky margin.
+      # TRRS pad-net labels: GND/DATA/VCC down the jack centerline, each level
+      # with its pad row. The jack is symmetric, so each net has a pad either side
+      # of the centerline; the label sits in the gap between the pair.
+      label_trrs_gnd: &label_trrs_gnd
+        what: ceoloide/utility_text
+        where:
+          ref: matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_gnd_y]
+        params:
+          <<: *label_params
+          text: GND
+      label_trrs_data:
+        <<: *label_trrs_gnd
+        where:
+          ref: matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_data_y]
+        params:
+          <<: *label_params
+          text: DATA
+      label_trrs_vcc:
+        <<: *label_trrs_gnd
+        where:
+          ref: matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
+        params:
+          <<: *label_params
+          text: VCC
+      # Diode + hotswap-socket part reference. Anchored to matrix_two_lower (the
+      # pinky-closest key mirrored on both halves) so one shift serves both; the
+      # right re-anchors to mirror_matrix_two_lower and x auto-flips. Bottom-pinky
+      # margin. Never anchor to a screw zone: screw positions get retuned and would
+      # drag the label off-board.
       label_diode: &label_diode
         what: ceoloide/utility_text
         where:
-          ref: screw_left_outer
+          ref: matrix_two_lower
           shift: [label_diode_x, label_diode_y]
         params:
           <<: *label_params
           text: 'Socket\nKailh CPG151101S11\nMX hotswap\n\nDiode\n1N4148W\nSOD-123'
-      # Screw labels: beside each hole (directly below is blocked by keys),
-      # anchored per-hole so each goes to its open side.
-      label_screw_lo: &label_screw_lo
+      # Screw labels (M3x0.5), one per hole, all on the left side for a consistent
+      # look. Switch cutouts are case/plate geometry (User.Eco1/DXF), never cut into
+      # the PCB, so they do not constrain silk; only the board edge and real copper
+      # pads do (and all three clear both on the left).
+      label_screw_left_outer: &label_screw_left_outer
         what: ceoloide/utility_text
         where:
           ref: screw_left_outer
@@ -691,11 +708,16 @@ pcbs:
           <<: *text_style
           reversible: true
           text: M3x0.5
-      label_screw_li:
-        <<: *label_screw_lo
+      label_screw_left_inner:
+        <<: *label_screw_left_outer
         where:
           ref: screw_left_inner
-          shift: [label_screw_dx, 0]
+          shift: [-label_screw_dx, 0]
+      label_screw_left_center:
+        <<: *label_screw_left_outer
+        where:
+          ref: screw_left_center
+          shift: [-label_screw_dx, 0]
   right:
     template: kicad8 # ceoloide footprints need KiCad 8
     outlines:
@@ -706,10 +728,6 @@ pcbs:
       # See left: screw bosses on a user layer as a routing keep-clear reference.
       screwbosses:
         outline: _screwbossesright
-        layer: Eco1.User
-      # See left: support posts on a user layer as a routing keep-clear reference.
-      supports:
-        outline: _supportsright
         layer: Eco1.User
     footprints:
       # See left for footprint details
@@ -810,18 +828,44 @@ pcbs:
         where:
           ref: mirror_matrix_five_home
           shift: [mcu_reset_x - label_reset_pad_dx, reset_y]
+      label_trrs_gnd:
+        <<: *label_trrs_gnd
+        where:
+          ref: mirror_matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_gnd_y]
+      label_trrs_data:
+        <<: *label_trrs_gnd
+        where:
+          ref: mirror_matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_data_y]
+        params:
+          <<: *label_params
+          text: DATA
+      label_trrs_vcc:
+        <<: *label_trrs_gnd
+        where:
+          ref: mirror_matrix_five_num
+          shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
+        params:
+          <<: *label_params
+          text: VCC
       label_diode:
         <<: *label_diode
         where:
-          ref: mirror_screw_left_outer
+          ref: mirror_matrix_two_lower
           shift: [label_diode_x, label_diode_y]
-      label_screw_lo:
-        <<: *label_screw_lo
+      label_screw_left_outer:
+        <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_outer
           shift: [-label_screw_dx, 0]
-      label_screw_li:
-        <<: *label_screw_lo
+      label_screw_left_inner:
+        <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_inner
-          shift: [label_screw_dx, 0]
+          shift: [-label_screw_dx, 0]
+      label_screw_left_center:
+        <<: *label_screw_left_outer
+        where:
+          ref: mirror_screw_left_center
+          shift: [-label_screw_dx, 0]
