@@ -10,7 +10,7 @@ units:
   # Case-export outline radii (DXF reference curves, never cut into the PCB):
   # the CNC boss the M3 threads into, and the anti-flex support post.
   screw_boss_radius: 2.75
-  support_radius: 2.25
+  support_radius: 2.5
   # Thumbcluster splay angle (deg), single source of truth: the thumb keys splay
   # by this and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
   thumb_splay: -19.111732
@@ -267,7 +267,7 @@ points:
       ref: matrix_five_home
       # y centered between the two switch holes beside it; x moved left so the boss
       # is tangent to (never overlapping) the 14.5mm switch hole beside it.
-      shift: [-10, -6.525]
+      shift: [-10, -5.825]
   # --- Support-post zones: anti-flex PCB supports. Case base + lid posts sandwich
   # the bare PCB (no hole, not screwed). Left is the source, mirrored to
   # support_right; they drive the _supports* outlines only (case reference, never
@@ -282,10 +282,9 @@ points:
       support_right: true
     anchor:
       ref: matrix_three_num
-      # Right half: tangent to the switch outline on its left; raised so the post's
-      # bottom edge is coincident with the top of the lower switch outline on its
-      # right (pulls it off the hotswap socket pad below for clearance).
-      shift: [-10.25, -11.8]
+      # Mid-board in the diagonal gap (clears the 14.5mm holes), nudged to keep the
+      # post well off the nearby pads at this radius.
+      shift: [-9.15, -27.4]
 
 # --- Outlines: board shape and cutouts ---
 outlines:
