@@ -7,23 +7,37 @@ units:
   s: 16 # MX widest is 15.6mm
   cnc_fillet: 1 # switch cutout/recess internal corner radius for the CNC end mill
   u: U # key pitch
-  # Screw-boss radius: the CNC case metal each M3 threads into (DXF reference
-  # curve, never cut into the PCB).
+  # Screw-boss radius: the CNC/printed case metal each M2.5 threads into (DXF
+  # reference curve, never cut into the PCB).
   screw_boss_radius: 2.75
   # Thumbcluster splay angle (deg), single source of truth: the thumb keys splay
   # by this and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
-  thumb_splay: -19.111732
+  thumb_splay: -19.52
   # Thumb diode offset from its switch in the splayed key frame. Keep
   # dx = dy * tan(thumb_splay) so it stays centered when dy changes.
   thumb_diode_dy: -4.7
-  thumb_diode_dx: 1.629
+  thumb_diode_dx: 1.67
+  # Thumbcluster edge pad-out, separate per axis: _h is the uniform expand on the
+  # _thumbbinding hull, _v trims the bottom back (see _thumbbinding).
+  thumb_pad_h: 0.5
+  thumb_pad_v: -0.218
+  # Extra padding on the thumb cluster's inner edge ONLY (splayed-horizontal, via a
+  # polygon on the inner thumb key in _thumbbinding). Pushes the inner board edge off
+  # the inner mod-key pad (2mm keepout) and out to the box inner edge (closes the
+  # inner-corner notch), without growing the vertical pads (which thumb_pad_h would).
+  thumb_inner_pad: 0.95
   # MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves).
   # x is shared per column: MCU+reset on mcu_reset_x, the rest on trrs_tvs_resistor_x.
-  mcu_reset_x: 17.75
-  mcu_y: -2
+  mcu_reset_x: 17.965
+  # Seats the Liatris PCB edge flush with the board top edge, leaving the USB-C
+  # connector mouth (which the footprint draws protruding past the body outline)
+  # to overhang the edge so a cable can plug in from outside the case wall. Biased
+  # down ~0.4mm past footprint-flush because the real board runs that much longer
+  # than the footprint body outline at the USB end.
+  mcu_y: -1.40
   reset_y: 9.525 # level with the screw_*_inner hole
-  trrs_tvs_resistor_x: mcu_reset_x + 12.75
-  trrs_y: 15.125
+  trrs_tvs_resistor_x: mcu_reset_x + 12.860
+  trrs_y: 15.525
   tvs_y: trrs_y - 17
   resistor_y: tvs_y - 8
   # Silkscreen credit text offsets. Center-justified (see footprint).
@@ -49,7 +63,11 @@ units:
   # margin (placement rationale at the footprint).
   label_diode_x: -58.575
   label_diode_y: -25.425
-  label_screw_dx: 5
+  # Pushes the M2.5 label clear of the screw-boss copper keepout disk beside it.
+  label_screw_dx: 7.0
+  # The center screw has a diode to its left, so its label goes above the screw
+  # (clear of the same keepout) instead of beside it.
+  label_screw_center_dy: 4.5
 
 # --- Points: key matrix, thumbcluster, mounting holes ---
 points:
@@ -218,12 +236,12 @@ points:
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
     # The anchor shift and the column-three splay below are jointly solved: they
-    # pin the rightmost thumb key's hull corner to the box corner for the target
-    # board size (see AGENTS.md). Re-solve both together; tweaking one alone breaks
-    # the fit.
+    # pin the rightmost thumb key's hull corner to the box corner (see AGENTS.md).
+    # _thumbbinding then grows the hull outward (thumb_pad_h) so the keys stay here
+    # while the board edge moves out for keycap/copper clearance.
     anchor:
       ref: matrix_four_lower
-      shift: [-3.418594, -1u -2.813439]
+      shift: [-2.8503, -1u -2.0893]
     key.tags.left: true
     key.row_net: *mod_row_left # left thumb keys on the left mod row
     key.mirror.tags: *lr_mirror_tags
@@ -294,33 +312,37 @@ outlines:
   _boxleft:
     - what: polygon
       points:
-        # Outer (pinky) edge: mirror of the right's outer edge (right sets width).
+        # Outer (pinky) edge: the left's 1.5u pinky, tuned separately from the
+        # right (the halves' pinky columns differ, so the gaps are not mirrored).
         - ref: matrix_zero_num
-          shift: [-u/2 -u +0.475, u/2 +5.75]
+          shift: [-u/2 -u, u/2 +6.0]
 
         # Top edge straight across; the USB-C notch is subtracted separately
         # (_usbleft) after the fillet so its corners stay square.
         - ref: matrix_five_num
-          shift: [u + 15.6, u/2 +5.75]
+          shift: [u + 17.125, u/2 +6.0]
+        # Inner edge (MCU/TRRS column, no keycap): offset out far enough that the
+        # expanded thumb hull meets it flush, leaving no step at the thumb-inner
+        # corner. The inner gap floats; retune it with the TRRS position.
         - ref: matrix_five_lower
-          shift: [u + 15.6, -1u -1/2u]
+          shift: [u + 17.125, -1u -1/2u]
         - ref: matrix_zero_mod
-          shift: [-u/4 -u +0.475, -u/2]
+          shift: [-u/4 -u +0.25, -u/2]
   _boxright:
     - what: polygon
       points:
         - ref: mirror_matrix_five_num
-          shift: [u + 15.6, u/2 +5.75]
+          shift: [u + 17.125, u/2 +6.0]
 
-        # Outer (pinky) edge: the right is wider (extra inner column), so it sets
-        # the board width. Pulled in slightly to round the width to spec; stays
-        # clear of the switch. Left mirrors this.
+        # Outer (pinky) edge: 0.5mm keycap gap. The right pinky is 1u and the extra
+        # inner column makes this half set the board width; the left pinky is 1.5u
+        # and tuned separately, so the two outer edges are not mirrored.
         - ref: extra_equal_num
-          shift: [u/2 -0.475, u/2 +5.75]
+          shift: [u/2, u/2 +6.0]
         - ref: extra_equal_lower
-          shift: [u/2 -0.475, -u/2 -u]
+          shift: [u/2, -u/2 -u]
         - ref: mirror_matrix_five_lower
-          shift: [u + 15.6, -u -1/2u]
+          shift: [u + 17.125, -u -1/2u]
   # USB-C cutouts, subtracted from the walls after the fillet so the notch keeps
   # square corners. Centered on the Liatris socket and tied to mcu_reset_x so the
   # notch tracks the MCU; the top edge overshoots so the subtraction cuts through.
@@ -356,18 +378,18 @@ outlines:
       where: right
       size: u
       bound: true
-  # Screw holes: the M3 clearance hole, matching the mounting_hole_npth footprint
+  # Screw holes: the M2.5 clearance hole, matching the mounting_hole_npth footprint
   # that cuts the PCB. These outlines only draw it into the case-export DXF as a
   # reference curve. Per-half scoped and stacked, like the bosses below.
   _screwsleft:
     - what: circle
       where: screw_left
-      radius: 1.75
+      radius: 1.5
   _screwsright:
     - what: circle
       where: screw_right
-      radius: 1.75
-  # Screw bosses: the CNC case metal the M3 threads into. Case-only reference
+      radius: 1.5
+  # Screw bosses: the CNC/printed case metal the M2.5 threads into. Case-only reference
   # curve in the export DXF, never cut into the PCB. Per-half scoped: a stacked
   # circle outside its own board would add a floating disc.
   _screwbossesleft:
@@ -397,11 +419,51 @@ outlines:
       where: /^thumbcluster/
       size: u
       bound: true
+      expand: thumb_pad_h
+    # Splayed inner-edge padding: a key-height polygon on the inner thumb key's inner
+    # side, rotating with the splay. Extends the inner board edge by thumb_inner_pad
+    # without adding vertical padding (see thumb_inner_pad).
+    - what: polygon
+      points:
+        - ref: thumbcluster_five_mod
+          shift: [u/2, u/2]
+        - ref: thumbcluster_five_mod
+          shift: [u/2 +thumb_inner_pad, u/2]
+        - ref: thumbcluster_five_mod
+          shift: [u/2 +thumb_inner_pad, -u/2]
+        - ref: thumbcluster_five_mod
+          shift: [u/2, -u/2]
+    # Trim the bottom back to thumb_pad_v: subtract a wide rectangle anchored to the
+    # middle thumb key (so it rotates with the splayed row), its top edge sitting
+    # (0.5 + thumb_pad_v)mm below the thumb keycaps. The expand keeps inner/outer at thumb_pad_h.
+    - what: rectangle
+      where: /^thumbcluster_four/
+      size: [70, 40]
+      adjust:
+        shift: [0, -29.525 -thumb_pad_v]
+      operation: subtract
   _thumbbindingright:
     - what: rectangle
       where: /^mirror_thumbcluster/
       size: u
       bound: true
+      expand: thumb_pad_h
+    - what: polygon
+      points:
+        - ref: mirror_thumbcluster_five_mod
+          shift: [u/2, u/2]
+        - ref: mirror_thumbcluster_five_mod
+          shift: [u/2 +thumb_inner_pad, u/2]
+        - ref: mirror_thumbcluster_five_mod
+          shift: [u/2 +thumb_inner_pad, -u/2]
+        - ref: mirror_thumbcluster_five_mod
+          shift: [u/2, -u/2]
+    - what: rectangle
+      where: /^mirror_thumbcluster_four/
+      size: [70, 40]
+      adjust:
+        shift: [0, -29.525 -thumb_pad_v]
+      operation: subtract
   _switchoutlinesleft:
     - what: rectangle
       where: left
@@ -500,8 +562,8 @@ pcbs:
         what: ceoloide/mounting_hole_npth
         where: screw_left
         params:
-          hole_drill: 3.5 # M3 is 3.4mm
-          hole_size: 3.5
+          hole_drill: 3.0 # M2.5 is 2.9mm
+          hole_size: 3.0
       mx: &mx
         what: ceoloide/switch_mx
         where: left
@@ -695,7 +757,7 @@ pcbs:
         params:
           <<: *label_params
           text: 'Socket\nKailh CPG151101S11\nMX hotswap\n\nDiode\n1N4148W\nSOD-123'
-      # Screw labels (M3x0.5), one per hole, all on the left side for a consistent
+      # Screw labels (M2.5x0.45), one per hole, all on the left side for a consistent
       # look. Switch cutouts are case/plate geometry (User.Eco1/DXF), never cut into
       # the PCB, so they do not constrain silk; only the board edge and real copper
       # pads do (and all three clear both on the left).
@@ -707,7 +769,7 @@ pcbs:
         params:
           <<: *text_style
           reversible: true
-          text: M3x0.5
+          text: M2.5x0.45
       label_screw_left_inner:
         <<: *label_screw_left_outer
         where:
@@ -717,7 +779,7 @@ pcbs:
         <<: *label_screw_left_outer
         where:
           ref: screw_left_center
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_center_dy]
   right:
     template: kicad8 # ceoloide footprints need KiCad 8
     outlines:
@@ -868,4 +930,4 @@ pcbs:
         <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_center
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_center_dy]
