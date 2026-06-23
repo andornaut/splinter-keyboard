@@ -55,6 +55,7 @@ BOSS_FPID_KEY = "mounting_hole"       # footprint-id substring marking a screw b
 CENTER_TOL = pcbnew.FromMM(0.05)      # boss-circle/mounting-hole coincidence tolerance
 ARC_ERROR = pcbnew.FromMM(0.01)       # inflate max error
 CIRCLE_SEGMENTS = 64                  # polygon approximation of each boss disk
+DEGENERATE_EDGE_MAX = pcbnew.FromMM(0.001)  # drop Edge.Cuts shapes shorter than this
 
 # The route-ring carve opens the top edge above the TRRS connector (the case's
 # top wall has the port opening there; the inner vertical edge ring stays whole).
@@ -234,6 +235,28 @@ def _boss_centers(board):
     return [fp.GetPosition() for fp in _footprints(board, BOSS_FPID_KEY)]
 
 
+def _strip_degenerate_edges(board):
+    """Take near-zero-length Edge.Cuts shapes off the Edge.Cuts layer. Ergogen
+    emits a zero-length shape where two outline vertices coincide (e.g. the thumb
+    hull corner closing exactly onto the box corner), which makes
+    GetBoardPolygonOutlines() fail to chain the outline ("could not read board
+    outline"). The shape is geometric noise. We test GetLength() so a degenerate
+    arc (a fillet collapsing at a coincident corner) is caught as well as a
+    segment; real edges are mm-scale, far above the threshold. We move it to
+    Cmts.User rather than board.Remove() it: Remove() corrupts pcbnew's SWIG type
+    table (later zone.Outline() then returns an untyped SwigPyObject with no
+    NewOutline); re-layering mutates nothing the outline reader sees and leaves
+    SWIG intact. Returns the count moved."""
+    moved = 0
+    for d in board.GetDrawings():
+        if (d.GetClass() == "PCB_SHAPE" and d.GetLayer() == pcbnew.Edge_Cuts
+                and d.GetShape() in (pcbnew.SHAPE_T_SEGMENT, pcbnew.SHAPE_T_ARC)
+                and d.GetLength() < DEGENERATE_EDGE_MAX):
+            d.SetLayer(pcbnew.Cmts_User)
+            moved += 1
+    return moved
+
+
 def add_keepout_zones(path):
     board = pcbnew.LoadBoard(path)
 
@@ -243,6 +266,10 @@ def add_keepout_zones(path):
     if existing:
         print(f"  UNCHANGED: keepouts already present ({', '.join(sorted(existing))}): {path}")
         return
+
+    moved = _strip_degenerate_edges(board)
+    if moved:
+        print(f"  moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User")
 
     ring = _perimeter_ring(board)
     _add_keepout(board, PERIMETER_POUR_NAME, ring, pour=True, tracks_vias=False)

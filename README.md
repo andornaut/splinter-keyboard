@@ -92,6 +92,7 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 ![KiCad preview](./v4/kicad/kicad.png)
 
 1. Copy Ergogen's generated boards into [`kicad/unrouted/`](./v4/kicad/unrouted/) with `npm run copy:dist-to-unrouted` (existing boards are first backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb`), then open one in KiCad, e.g. [`left.kicad_pcb`](./v4/kicad/unrouted/left.kicad_pcb).
+   * Board keepout/DRC features that constrain routing are version-specific; v4 carries copper keepout zones (added by `npm run ergogen`) that flag stray copper near the board edge or screw bosses, see [Copper keepout zones](./v4/README.md#copper-keepout-zones).
 1. Route the boards in [`kicad/unrouted/`](./v4/kicad/unrouted/). Once routing is done, clean each board up before saving:
    * **Cleanup Tracks & Vias** (Tools > Cleanup Tracks & Vias): enable all options to merge collinear segments, delete redundant/dangling tracks and vias, and remove tracks inside pads.
    * **Add Teardrops** (Edit > Edit Teardrops, with nothing selected to apply board-wide): smooths track-to-pad/via junctions for stronger joints and better DFM. Re-run after any reroute.
@@ -155,6 +156,7 @@ LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.js
 1. Open or create an OrcaSlicer project.
 1. Import the `*.step` files from [`onshape/`](./v4/onshape/).
 1. Slice and print the case.
+1. Install an [M2.5 heat-set insert](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (CNC Kitchen) into each mounting boss with a soldering iron, then clamp the PCB with the [M2.5 screws](./v4/README.md#bill-of-materials-bom) (this is the recommended approach; the machined-aluminium alternative below taps the holes directly instead).
 
 #### Alternative: machined aluminium case (JLCCNC)
 
@@ -164,15 +166,15 @@ Instead of 3D printing, the case can be CNC-machined in aluminium via [JLCCNC](h
 * **Surface finish:** Bead blasting + Anodizing (matte) is the recommended premium-keyboard finish: smooth, uniform, fingerprint resistant. For a glossier sheen, choose Anodizing without bead blasting. Pick a color (black is the safe default).
 * **Tolerance:** the default (ISO 2768 medium) is fine for a case.
 * **Quantity:** left and right are two separate mirrored parts, so set quantity per file.
-* **Threaded holes:** tap the M3 mounting holes directly (the heat-set inserts in the [BOM](./v4/README.md#bill-of-materials-bom) are only for the printed case). A STEP can't carry threads, so model each hole at the ~2.5mm tap-drill diameter and also upload a 2D drawing (PDF) with an `M3x0.5` thread callout (depth, through/blind) for JLCCNC to tap to.
+* **Threaded holes:** tap the M2.5 mounting holes directly (the heat-set inserts in the [BOM](./v4/README.md#bill-of-materials-bom) are only for the printed case). A STEP can't carry threads, so model each hole at the ~2.05mm tap-drill diameter and also upload a 2D drawing (PDF) with an `M2.5x0.45` thread callout (depth, through/blind) for JLCCNC to tap to.
 
 To make the thread drawing in Onshape:
 
 1. From the case Part Studio, create a **Drawing** and place a top (or section) view of the half.
-1. Add a **Hole/thread callout** (right-click the hole edge > Callout) on a mounting hole; it reads the hole and emits `M3x0.5`. Add the thread depth and through/blind.
+1. Add a **Hole/thread callout** (right-click the hole edge > Callout) on a mounting hole; it reads the hole and emits `M2.5x0.45`. Add the thread depth and through/blind.
 1. Export the drawing to PDF and upload it with the `.step`.
 
-Since every mounting hole shares one spec, a full dimensioned drawing is optional: a single PDF or screenshot noting "All mounting holes: M3x0.5 tapped, N mm deep" is accepted, and JLCCNC's order interface can also tag threaded holes in its 3D viewer. The STEP still needs the holes at ~2.5mm tap-drill either way.
+Since every mounting hole shares one spec, a full dimensioned drawing is optional: a single PDF or screenshot noting "All mounting holes: M2.5x0.45 tapped, N mm deep" is accepted, and JLCCNC's order interface can also tag threaded holes in its 3D viewer. The STEP still needs the holes at ~2.05mm tap-drill either way.
 
 ### Step 8. [QMK Firmware](https://qmk.fm/)
 

@@ -12,20 +12,20 @@ units:
   screw_boss_radius: 2.75
   # Thumbcluster splay angle (deg), single source of truth: the thumb keys splay
   # by this and the thumb diodes counter-rotate by -thumb_splay to sit horizontal.
-  thumb_splay: -19.52
+  thumb_splay: -19.20
   # Thumb diode offset from its switch in the splayed key frame. Keep
   # dx = dy * tan(thumb_splay) so it stays centered when dy changes.
   thumb_diode_dy: -4.7
-  thumb_diode_dx: 1.67
+  thumb_diode_dx: 1.64
   # Thumbcluster edge pad-out, separate per axis: _h is the uniform expand on the
   # _thumbbinding hull, _v trims the bottom back (see _thumbbinding).
   thumb_pad_h: 0.5
-  thumb_pad_v: -0.218
+  thumb_pad_v: -0.255
   # Extra padding on the thumb cluster's inner edge ONLY (splayed-horizontal, via a
   # polygon on the inner thumb key in _thumbbinding). Pushes the inner board edge off
   # the inner mod-key pad (2mm keepout) and out to the box inner edge (closes the
   # inner-corner notch), without growing the vertical pads (which thumb_pad_h would).
-  thumb_inner_pad: 0.95
+  thumb_inner_pad: 0.9
   # MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves).
   # x is shared per column: MCU+reset on mcu_reset_x, the rest on trrs_tvs_resistor_x.
   mcu_reset_x: 17.965
@@ -235,13 +235,14 @@ points:
       num.row_net: P15
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
-    # The anchor shift and the column-three splay below are jointly solved: they
-    # pin the rightmost thumb key's hull corner to the box corner (see AGENTS.md).
-    # _thumbbinding then grows the hull outward (thumb_pad_h) so the keys stay here
-    # while the board edge moves out for keycap/copper clearance.
+    # The anchor shift and the splay are jointly solved against the thumb
+    # constraint set (see AGENTS.md): anchor x sets the backspace-to-M column
+    # offset, anchor y the backspace-to-M vertical gap (which also seats the hull
+    # corner on the box bottom edge), and the splay the un-filleted board height.
+    # thumb_inner_pad then pads the hull's inner edge out to meet the box inner edge.
     anchor:
       ref: matrix_four_lower
-      shift: [-2.8503, -1u -2.0893]
+      shift: [-2.7280, -1u -2.4295]
     key.tags.left: true
     key.row_net: *mod_row_left # left thumb keys on the left mod row
     key.mirror.tags: *lr_mirror_tags
@@ -321,9 +322,9 @@ outlines:
         # (_usbleft) after the fillet so its corners stay square.
         - ref: matrix_five_num
           shift: [u + 17.125, u/2 +6.0]
-        # Inner edge (MCU/TRRS column, no keycap): offset out far enough that the
-        # expanded thumb hull meets it flush, leaving no step at the thumb-inner
-        # corner. The inner gap floats; retune it with the TRRS position.
+        # Inner edge (MCU/TRRS column, no keycap): offset out for TRRS/MCU clearance.
+        # The thumb hull's inner edge is padded out to meet it (thumb_inner_pad), so
+        # the thumb-inner junction is flush with no step. Retune with the TRRS position.
         - ref: matrix_five_lower
           shift: [u + 17.125, -1u -1/2u]
         - ref: matrix_zero_mod
@@ -433,9 +434,10 @@ outlines:
           shift: [u/2 +thumb_inner_pad, -u/2]
         - ref: thumbcluster_five_mod
           shift: [u/2, -u/2]
-    # Trim the bottom back to thumb_pad_v: subtract a wide rectangle anchored to the
-    # middle thumb key (so it rotates with the splayed row), its top edge sitting
-    # (0.5 + thumb_pad_v)mm below the thumb keycaps. The expand keeps inner/outer at thumb_pad_h.
+    # Trim the thumb hull's bottom edge via thumb_pad_v: subtract a wide rectangle
+    # anchored to the middle thumb key (so it rotates with the splayed row); a more
+    # negative thumb_pad_v cuts more, shrinking the thumb-bottom keycap gap. The
+    # expand sets the outer keycap gap (thumb_pad_h); the inner edge is thumb_inner_pad.
     - what: rectangle
       where: /^thumbcluster_four/
       size: [70, 40]
