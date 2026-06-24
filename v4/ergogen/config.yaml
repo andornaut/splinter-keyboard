@@ -35,39 +35,50 @@ units:
   # down ~0.4mm past footprint-flush because the real board runs that much longer
   # than the footprint body outline at the USB end.
   mcu_y: -1.40
-  reset_y: 9.525 # level with the screw_*_inner hole
+  reset_y: 8.065 # set for an 8mm body-edge gap below the MCU
   trrs_tvs_resistor_x: mcu_reset_x + 12.860
   trrs_y: 15.525
-  tvs_y: trrs_y - 17
-  resistor_y: tvs_y - 8
-  # Silkscreen credit text offsets. Center-justified (see footprint).
-  label_credit_y: 10
-  label_credit_x_left: -u/2 -u +26 # left pinky
-  label_credit_x_right: u/2 -26 # right pinky
+  # Drop the TVS so its body-edge gap up to the TRRS equals the gap down to the
+  # resistor: the TVS sits symmetrically between its two neighbours (mirrors the
+  # bottom gap up). Carries the resistor (defined off tvs_y) down with it.
+  tvs_y: trrs_y - 21.57
+  # Sets the body-edge gap below the TVS, with room for the TVS's multi-line silk
+  # label plus clearance to the resistor; tvs_y mirrors this same gap above the TVS.
+  resistor_y: tvs_y - 10.145
+  # Silkscreen credit text offsets. Center-justified (see footprint). Pushed down to
+  # sit clear below the provenance stamp, both just inside the perimeter keepout; the
+  # credit then overlaps the keyswitch outlines (User.Eco1 only, never on the PCB).
+  label_credit_y: 9.4
+  # Pushed out to abut the perimeter keepout at the outer (pinky) edge: as far out
+  # as it goes while staying clear of the keepout. Left/right tuned separately
+  # (pinky differs); no vertical room (the top edge is just above).
+  label_credit_x_left: -u/2 -u +24.9 # left pinky
+  label_credit_x_right: u/2 -24.9 # right pinky
   # Component label y-offsets. Each label reuses its component's x var (same
   # column); hugging labels track the part's y, label_mcu_y is absolute.
-  label_mcu_y: -20
-  label_trrs_y: trrs_y - 13.5
+  label_mcu_y: -20.55
+  label_trrs_y: trrs_y - 14.27
   # TRRS pad-net labels: centered on the jack centerline (the gap between its two
   # mirrored pad columns), each level with its net's pad row. Offsets are the
   # footprint's local pad ys, which run downward, so subtract from trrs_y.
   label_trrs_gnd_y: trrs_y - 3.2 # SL pad row
   label_trrs_data_y: trrs_y - 6.2 # R2 pad row
   label_trrs_vcc_y: trrs_y - 10.75 # TP pad row
-  label_tvs_y: tvs_y - 4
-  label_resistor_y: resistor_y - 5
-  label_reset_y: reset_y - 6
+  label_tvs_y: tvs_y - 4.34
+  label_resistor_y: resistor_y - 5.42
+  label_reset_y: reset_y - 6.52
   # Reset pad-net label offset: GND uses +dx (right of pad column), RST -dx.
   label_reset_pad_dx: 4.5
-  # Diode/socket label offset, off matrix_two_lower; lands in the bottom-pinky
-  # margin (placement rationale at the footprint).
-  label_diode_x: -58.575
-  label_diode_y: -25.425
-  # Pushes the M2.5 label clear of the screw-boss copper keepout disk beside it.
-  label_screw_dx: 7.0
-  # The center screw has a diode to its left, so its label goes above the screw
-  # (clear of the same keepout) instead of beside it.
-  label_screw_center_dy: 4.5
+  # Diode/socket label offset, off matrix_two_lower; tucked into the bottom-pinky
+  # margin to abut the perimeter keepout at the outer and bottom edges (placement
+  # rationale at the footprint).
+  label_diode_x: -57.795
+  label_diode_y: -24.955
+  # M2.5 label offset: every screw label sits above its hole, ~2mm from the drilled-hole
+  # edge (radius ~1.5mm, the actual hole on the PCB; the boss circle is case-only on
+  # Eco1.User and not fabricated). Above is the one direction clear of pads and diodes for
+  # all six bosses (inner/outer/center on both halves); beside or below collides on at least one.
+  label_screw_dy: 4.23
 
 # --- Points: key matrix, thumbcluster, mounting holes ---
 points:
@@ -658,17 +669,17 @@ pcbs:
         where:
           ref: matrix_five_num
           shift: [mcu_reset_x, label_mcu_y]
-        params: &label_params
-          # &text_style: shared silk text geometry, also used by the screw labels
-          # (which need reversible: true instead of this block's side B + mirrored).
+        params: &label_tht_params
+          # Through-hole parts (MCU, TRRS jack, MX switch) get silk on BOTH sides
+          # (reversible) so the part and its pads read from the front and the back.
+          # SMD-only parts (TVS, resistor, reset) stay back-only via &label_params.
+          # &text_style: shared silk text geometry (also used by the screw labels).
           <<: &text_style
             layer: SilkS
             height: 0.8
             width: 0.8
             thickness: 0.15
-          reversible: false
-          side: B
-          mirrored: true
+          reversible: true
           text: 'MCU\nsplitkb Liatris\nPro Micro (RP2040)'
       label_trrs: &label_trrs
         what: ceoloide/utility_text
@@ -676,15 +687,19 @@ pcbs:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_y]
         params:
-          <<: *label_params
+          <<: *label_tht_params
           text: 'TRRS\nPJ-320A'
       label_tvs: &label_tvs
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_tvs_y]
-        params:
-          <<: *label_params
+        params: &label_params
+          # Back-only silk (side B, mirrored) for SMD parts, which live on the back.
+          <<: *text_style
+          reversible: false
+          side: B
+          mirrored: true
           text: 'TVS\nLittelfuse\nSMF5.0CA\nSOD-123FL'
       label_resistor: &label_resistor
         what: ceoloide/utility_text
@@ -728,7 +743,7 @@ pcbs:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_gnd_y]
         params:
-          <<: *label_params
+          <<: *label_tht_params
           text: GND
       label_trrs_data:
         <<: *label_trrs_gnd
@@ -736,15 +751,18 @@ pcbs:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_data_y]
         params:
-          <<: *label_params
-          text: DATA
+          <<: *label_tht_params
+          # MCU GPIO the data ring reaches (through the TVS+resistor): the data_resistor
+          # `to: P2` net, which mcu_liatris.js maps to pad GP2, and which the firmware
+          # uses as split.serial.pin. Update all three together if the serial pin changes.
+          text: &trrs_data_pin GP2
       label_trrs_vcc:
         <<: *label_trrs_gnd
         where:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
         params:
-          <<: *label_params
+          <<: *label_tht_params
           text: VCC
       # Diode + hotswap-socket part reference. Anchored to matrix_two_lower (the
       # pinky-closest key mirrored on both halves) so one shift serves both; the
@@ -757,7 +775,7 @@ pcbs:
           ref: matrix_two_lower
           shift: [label_diode_x, label_diode_y]
         params:
-          <<: *label_params
+          <<: *label_tht_params
           text: 'Socket\nKailh CPG151101S11\nMX hotswap\n\nDiode\n1N4148W\nSOD-123'
       # Screw labels (M2.5x0.45), one per hole, all on the left side for a consistent
       # look. Switch cutouts are case/plate geometry (User.Eco1/DXF), never cut into
@@ -767,7 +785,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: screw_left_outer
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_dy]
         params:
           <<: *text_style
           reversible: true
@@ -776,12 +794,12 @@ pcbs:
         <<: *label_screw_left_outer
         where:
           ref: screw_left_inner
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_dy]
       label_screw_left_center:
         <<: *label_screw_left_outer
         where:
           ref: screw_left_center
-          shift: [0, label_screw_center_dy]
+          shift: [0, label_screw_dy]
   right:
     template: kicad8 # ceoloide footprints need KiCad 8
     outlines:
@@ -903,15 +921,15 @@ pcbs:
           ref: mirror_matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_data_y]
         params:
-          <<: *label_params
-          text: DATA
+          <<: *label_tht_params
+          text: *trrs_data_pin # mirrors the left half's GP2 (see left label_trrs_data)
       label_trrs_vcc:
         <<: *label_trrs_gnd
         where:
           ref: mirror_matrix_five_num
           shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
         params:
-          <<: *label_params
+          <<: *label_tht_params
           text: VCC
       label_diode:
         <<: *label_diode
@@ -922,14 +940,14 @@ pcbs:
         <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_outer
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_dy]
       label_screw_left_inner:
         <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_inner
-          shift: [-label_screw_dx, 0]
+          shift: [0, label_screw_dy]
       label_screw_left_center:
         <<: *label_screw_left_outer
         where:
           ref: mirror_screw_left_center
-          shift: [0, label_screw_center_dy]
+          shift: [0, label_screw_dy]
