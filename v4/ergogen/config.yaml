@@ -663,7 +663,9 @@ pcbs:
           thickness: 0.18
           text: '\"Splinter\" keyboard v4 by @andornaut\nhttps://github.com/andornaut/splinter-keyboard'
       # Each label sits by its component on the same ref; the right half re-anchors
-      # to mirror_ refs (x auto-flips). All side B + mirrored, to read from the back.
+      # to mirror_ refs (x auto-flips). Silk side follows the part: through-hole
+      # parts use label_tht_params (reversible, both sides); SMD-only parts use
+      # label_params (side B, mirrored). See AGENTS.md "v4: Silkscreen text".
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:

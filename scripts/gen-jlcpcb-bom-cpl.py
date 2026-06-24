@@ -11,7 +11,7 @@ and writes the two files JLCPCB's assembly service expects:
   CPL.csv  Designator, Mid X, Mid Y, Rotation, Layer     (one line per placement)
 
 Placement rules (see jlcpcb-parts.json `_comment`):
-  - footprint absent from the JSON  -> Do-Not-Place (skipped silently)
+  - footprint absent from the JSON  -> Do-Not-Place (listed, grouped by package)
   - footprint present, empty `lcsc` -> error; nothing is written until you fill it in
   - footprint present, `lcsc` set    -> placed; `rotation` is added to KiCad's
                                         angle to correct pick-and-place orientation

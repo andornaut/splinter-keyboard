@@ -5,8 +5,9 @@
 # KiCad project files. The GND pour is added later, at copy:unrouted-to-routed,
 # so routing happens on a clean board. Run via: npm run ergogen
 #
-# Footprint submodules are used at their pinned (checked-out) revision; this
-# script does not advance them. See README "Updating footprint submodules".
+# The footprint and kb_ergogen_helper submodules are used at their pinned
+# (checked-out) revision; this script ensures they are present (so a non-recursive
+# clone still works) but does not advance them. See README "Updating footprint submodules".
 set -euo pipefail
 shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -15,7 +16,7 @@ VERSION="${npm_package_config_VERSION:?set via npm (npm run ergogen)}"
 helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"
 out_dir="dist/${VERSION}/ergogen"
 
-git submodule update --init ergogen/footprints/ceoloide ergogen/footprints/infused-kim
+git submodule update --init ergogen/footprints/ceoloide ergogen/footprints/infused-kim ergogen/kb_ergogen_helper
 npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
 require_pcbs "${out_dir}/pcbs" "ergogen produced no PCBs in ${out_dir}/pcbs/ -- check the config."
 for f in "${files[@]}"; do
