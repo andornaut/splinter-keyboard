@@ -27,8 +27,8 @@ Install the following tools:
 * [Node.js](https://nodejs.org)
 * [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
 * [Python 3](https://www.python.org)
-* [Freerouting](https://github.com/freerouting/freerouting) (optional)
-* [KiKit](https://github.com/yaqwsx/KiKit) (optional, for `npm run panelize`; needs the git-master build, see [Panelization](#panelization-optional-for-pcba-cost) below)
+* [Freerouting](https://github.com/freerouting/freerouting) (Optional, for `npm run route`. See [Autorouting](#autorouting-optional).)
+* [KiKit](https://github.com/yaqwsx/KiKit) (Optional, for `npm run panelize`; needs the git-master build. See [Panelization](#panelization-optional-for-pcba-cost).)
 
 ```bash
 # Include submodules when cloning
@@ -100,18 +100,20 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
    * **Check copper/silk** visually: confirm the GND zone has no isolated islands or stranded pads, and that silkscreen text and reference designators clear pads and the board edge.
 
    Then `npm run copy:unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
-   * KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) boards in place via [Freerouting](https://github.com/freerouting/freerouting), leaving `kicad/routed/` untouched. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. The defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
-
-     | Env var | Default |
-     | --- | --- |
-     | `FREEROUTING_PASSES` | 100 |
-     | `FREEROUTING_STRATEGY` | greedy |
-     | `FREEROUTING_SELECTION` | prioritized |
-     | `FREEROUTING_VIA_COST` | 50 |
-     | `FREEROUTING_UNDESIRED_DIR_COST` | unset |
-     | `FREEROUTING_LOG_LEVEL` | WARN |
-
    * After regenerating boards with Ergogen, `npm run copy:traces-to-unrouted` copies the traces and teardrops from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
+
+#### Autorouting (optional)
+
+KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) boards in place via [Freerouting](https://github.com/freerouting/freerouting), leaving `kicad/routed/` untouched. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. The defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
+
+| Env var | Default |
+| --- | --- |
+| `FREEROUTING_PASSES` | 100 |
+| `FREEROUTING_STRATEGY` | greedy |
+| `FREEROUTING_SELECTION` | prioritized |
+| `FREEROUTING_VIA_COST` | 50 |
+| `FREEROUTING_UNDESIRED_DIR_COST` | unset |
+| `FREEROUTING_LOG_LEVEL` | WARN |
 
 ### One-command pipeline
 
