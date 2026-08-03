@@ -21,7 +21,7 @@ import argparse
 import os
 import sys
 
-import pcbnew
+from pcbnew_quiet import pcbnew
 from kikit.panelize import Panel, Origin
 from kikit.units import mm
 

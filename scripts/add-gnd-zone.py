@@ -34,7 +34,7 @@ Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 import sys
 from collections import namedtuple
 
-import pcbnew
+from pcbnew_quiet import pcbnew
 
 CLEARANCE = pcbnew.FromMM(0.25)
 MIN_THICKNESS = pcbnew.FromMM(0.25)

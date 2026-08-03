@@ -11,7 +11,7 @@ Usage: recenter.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
 import re
 import sys
-import pcbnew
+from pcbnew_quiet import pcbnew
 
 # Standard KiCad page sizes in landscape orientation (width, height) mm.
 PAGE_SIZES = {

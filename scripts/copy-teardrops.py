@@ -11,7 +11,7 @@ Invoked per board from copy-traces-to-unrouted.sh right after the trace
 copy. Usage: copy-teardrops.py <src.kicad_pcb> <dst.kicad_pcb>
 """
 import sys
-import pcbnew
+from pcbnew_quiet import pcbnew
 
 
 def teardrop_zones(board):
@@ -32,10 +32,12 @@ def copy_teardrops(src_path, dst_path):
 
     # Add a Duplicate of each source teardrop so dst owns its own copy and src
     # frees its originals; adding the src object directly would leave both boards
-    # claiming ownership (the same swig "leaked ZONE *" warning).
+    # claiming ownership (the same swig "leaked ZONE *" warning). Duplicate's
+    # addToParentGroup must be False: the copy is a standalone zone on dst, and
+    # joining the source item's group would reach across boards.
     fresh = teardrop_zones(src)
     for z in fresh:
-        dst.Add(z.Duplicate())
+        dst.Add(z.Duplicate(False))
 
     dst.Save(dst_path)
     print(f'Copied {len(fresh)} teardrop zone(s) (removed {len(stale)} stale) into {dst_path}')

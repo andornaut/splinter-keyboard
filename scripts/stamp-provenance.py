@@ -23,7 +23,7 @@ Usage: stamp-provenance.py --version <vN> --config <config.yaml> <board.kicad_pc
 
 import argparse
 
-import pcbnew
+from pcbnew_quiet import pcbnew
 from provenance import build_stamp, silk_from_stamp, write_stamp
 
 SILK_SIZE_MM = 0.8  # glyph height/width, matching the component labels
