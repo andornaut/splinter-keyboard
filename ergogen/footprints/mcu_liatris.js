@@ -12,15 +12,21 @@
 //
 // Params:
 //    side: default is F for Front
-//      the side on which to place the single-side footprint and designator, either F or B
+//      the side on which to place the single-side footprint and designator, either F or B.
+//      Cosmetic only: it sets the module layer and the designator's silk layer. It does
+//      NOT affect which net reaches which MCU pin (see raw_pin_column).
 //    reversible: default is false
 //      if true, the footprint will be placed on both sides so that the PCB can be
 //      reversible
-//    reverse_mount: default is false (MCU facing away from the PCB)
-//      if true, the sockets will be oriented so that the MCU faces the PCB (RAW / B+ is the
-//      top left pin). This is the most common mounting option for the Liatris.
-//      When set to false, the pads will match the datasheet and assume the MCU faces away
-//      from the PCB (RAW / B+ is the top right pin).
+//    raw_pin_column: default is 'front_right', either 'front_left' or 'front_right'
+//      which socket column carries RAW / B+, named from the PCB front (local x -7.62
+//      is 'front_left', +7.62 is 'front_right'). From the back it is the other column.
+//      'front_right' is the datasheet pinout.
+//      This decides which MCU pin every net reaches, so it must match how the MCU
+//      seats. Wrong value: every matrix net lands on the opposite pin, and no DRC or
+//      netlist check catches it. Verify by seating the module and confirming its RAW
+//      pin lands on the pad silkscreened RAW.
+//      Both halves of a split must use the same value: the MCU cannot be mirrored.
 //    include_traces: default is true
 //      if true it will include traces that connect the jumper pads to the vias
 //      and the through-holes for the MCU
@@ -74,7 +80,7 @@ module.exports = {
     designator: 'MCU',
     side: 'F',
     reversible: false,
-    reverse_mount: false,
+    raw_pin_column: 'front_right',
     include_traces: true,
     include_extra_pins: true,
     only_required_jumpers: false,
@@ -217,13 +223,17 @@ module.exports = {
       return traces
     }
 
-    // The pin matrix in gen_socket_rows is authored for the canonical view:
-    // front side, MCU facing away from the PCB (reverse_mount = false). The
-    // left/right pad columns must be swapped whenever the physical view is
-    // mirrored relative to that canonical case: mounted on the back without
-    // reverse_mount, reverse-mounted on the front (MCU faces the PCB), or a
-    // reversible board mounted MCU-facing-away.
-    const invert_pins = (p.side == 'B' && !p.reverse_mount && !p.reversible) || (p.side == 'F' && p.reverse_mount && !p.reversible) || (!p.reverse_mount && p.reversible)
+    // The pin matrix in gen_socket_rows is authored with RAW in the front-right
+    // column (the datasheet pinout). raw_pin_column is the only input that swaps the
+    // two columns, and it is deliberately not derived from side or reversible: those
+    // describe where the footprint is drawn, which is independent of how the MCU
+    // seats in the socket.
+    if (p.raw_pin_column !== 'front_left' && p.raw_pin_column !== 'front_right') {
+      throw new Error(
+        `mcu_liatris: raw_pin_column must be 'front_left' or 'front_right' ` +
+        `(named from the PCB front), got '${p.raw_pin_column}'`)
+    }
+    const invert_pins = p.raw_pin_column === 'front_left'
 
     const gen_socket_row = (row_num, pin_name_left, pin_name_right, show_via_labels, show_silk_labels) => {
       const row_offset_y = 2.54 * row_num
@@ -411,10 +421,9 @@ module.exports = {
     }
     const gen_socket_rows = (show_via_labels, show_silk_labels) => {
       const pin_names = [
-        // The pin matrix below assumes PCB is mounted with the MCU
-        // facing away from the PCB (reverse_mount = false) on the
-        // Front side. It should be inverted for reverse_mount = true
-        // or when mounted on teh Back
+        // [front-left column, front-right column], with RAW in the front-right
+        // column (the datasheet pinout). raw_pin_column: 'front_left' swaps
+        // every row.
         ['P1', 'RAW'],
         ['P0', 'GND'],
         ['GND', 'RST'],
@@ -500,10 +509,10 @@ module.exports = {
     `;
 
     const instructions = `
-    (fp_text user "R hand back side (M${!p.reverse_mount ? '↑' : '↓'})" (at 0 -15.245 ${p.r}) (layer "F.SilkS")
+    (fp_text user "R hand back side (M${!invert_pins ? '↑' : '↓'})" (at 0 -15.245 ${p.r}) (layer "F.SilkS")
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text user "L hand back side (M${!p.reverse_mount ? '↑' : '↓'})" (at 0 -15.245 ${p.r}) (layer "B.SilkS")
+    (fp_text user "L hand back side (M${!invert_pins ? '↑' : '↓'})" (at 0 -15.245 ${p.r}) (layer "B.SilkS")
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
     )
     `

@@ -29,12 +29,10 @@ units:
   # MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves).
   # x is shared per column: MCU+reset on mcu_reset_x, the rest on trrs_tvs_resistor_x.
   mcu_reset_x: 17.965
-  # Seats the Liatris PCB edge flush with the board top edge, leaving the USB-C
+  # Seats the Liatris body outline flush with the board top edge, leaving the USB-C
   # connector mouth (which the footprint draws protruding past the body outline)
-  # to overhang the edge so a cable can plug in from outside the case wall. Biased
-  # down ~0.4mm past footprint-flush because the real board runs that much longer
-  # than the footprint body outline at the USB end.
-  mcu_y: -1.40
+  # to overhang the edge so a cable can plug in from outside the case wall.
+  mcu_y: -0.985
   reset_y: 8.065 # set for an 8mm body-edge gap below the MCU
   trrs_tvs_resistor_x: mcu_reset_x + 12.860
   trrs_y: 15.525
@@ -98,9 +96,13 @@ points:
     key.mirror.tags: &lr_mirror_tags
       left: $unset
       right: true
+    # Left-half MCU nets are mirrored across the socket header: each one sits on
+    # the pin opposite it in the other socket column (the pin-matrix rows in
+    # mcu_liatris.js pair them). P2 (TRRS serial) is not mirrored: QMK has a
+    # single split.serial.pin, so both halves keep it (see data_resistor).
     columns:
       zero:
-        key.column_net: P4
+        key.column_net: P19
         key.mirror.skip: true
         rows:
           mod: # LCTRL
@@ -123,7 +125,7 @@ points:
           num: # `
             shift: [u/4, 0]
       one:
-        key.column_net: P5
+        key.column_net: P18
         key.mirror.skip: true
         rows:
           mod: # SUPER
@@ -136,7 +138,7 @@ points:
       # are YAML anchors aliased by the thumbcluster to share the matrix columns.
       two:
         key.stagger: 3
-        key.column_net: P6
+        key.column_net: P15
         key.mirror.column_net: P6
         rows:
           mod: # LALT
@@ -148,7 +150,7 @@ points:
           num: # 2 -> 9
       three:
         key.stagger: 3
-        key.column_net: &col_three_left P7
+        key.column_net: &col_three_left P14
         key.mirror.column_net: &col_three_right P7
         rows:
           mod.skip: true # no mod-row key here
@@ -159,7 +161,7 @@ points:
           num: # 3 -> 8
       four:
         key.stagger: -3
-        key.column_net: &col_four_left P8
+        key.column_net: &col_four_left P16
         key.mirror.column_net: &col_four_right P8
         rows:
           mod.skip: true
@@ -170,7 +172,7 @@ points:
           num: # 4 -> 7
       five:
         key.stagger: -3
-        key.column_net: &col_five_left P15
+        key.column_net: &col_five_left P6
         key.mirror.column_net: &col_five_right P19
         rows:
           mod.skip: true
@@ -184,18 +186,18 @@ points:
     rows:
       # &mod_row_left: aliased by the thumbcluster's left keys so they share the
       # matrix mod row. The right half's mod row is &mod_row_right (zones.extra).
-      mod.row_net: &mod_row_left P9
+      mod.row_net: &mod_row_left P10
       lower:
-        row_net: P14
+        row_net: P7
         mirror.row_net: P14
       home:
-        row_net: P16
+        row_net: P8
         mirror.row_net: P16
       upper:
-        row_net: P10
+        row_net: P9
         mirror.row_net: P10
       num:
-        row_net: P18
+        row_net: P5
         mirror.row_net: P15
   # --- Extra keys: the right half's inner columns ---
   # Right counterparts to the left's mirror.skip columns, defined explicitly
@@ -592,9 +594,16 @@ pcbs:
           ref: matrix_five_num
           shift: [mcu_reset_x, mcu_y]
         params: &mcu_params
-          side: F
+          # Bottom side, same as every other component (the SMDs are all on B.Cu).
+          # Cosmetic: it sets the module and designator layer, not the pin mapping.
+          side: B
           reversible: false
-          reverse_mount: true
+          # Which socket column carries RAW, and so which MCU pin every matrix net
+          # reaches. Named from the PCB FRONT; from the BACK, where the MCU mounts,
+          # it is the other column. Verify by seating the module and confirming its
+          # RAW pin lands on the pad silkscreened RAW.
+          # Both halves must use this same value: the MCU cannot be mirrored.
+          raw_pin_column: front_right
           include_extra_pins: false # GP12-GP16 unused
           show_silk_labels_on_both_sides: true # mirror pin labels to the exposed side
       reset: &reset
@@ -696,8 +705,8 @@ pcbs:
         where:
           ref: matrix_five_num
           shift: [trrs_tvs_resistor_x, label_tvs_y]
-        params: &label_params
-          # Back-only silk (side B, mirrored) for SMD parts, which live on the back.
+        params:
+          &label_params # Back-only silk (side B, mirrored) for SMD parts, which live on the back.
           <<: *text_style
           reversible: false
           side: B
@@ -837,11 +846,9 @@ pcbs:
         where:
           ref: mirror_matrix_five_num
           shift: [mcu_reset_x, mcu_y]
-        # Side B (not the left's F): mcu_liatris can't mirror in-plane, so the
-        # side flip reflects its pads while keeping the USB at the top.
-        params:
-          <<: *mcu_params
-          side: B
+        # No params override: the MCU is a physical part that cannot be mirrored,
+        # so both halves seat it identically and share raw_pin_column.
+        params: *mcu_params
       reset:
         <<: *reset
         where:

@@ -8,14 +8,14 @@ A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-t
 
 | Change | Details |
 | --- | --- |
-| The reverse-mounted [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) MCU | [Microcontroller](#microcontroller) |
+| The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) MCU | [Microcontroller](#microcontroller) |
 | A TVS diode and series resistor protect the TRRS serial line from hot-unplug transients | [TRRS data-line protection](#trrs-data-line-protection) |
 
 ## Microcontroller
 
-The reverse-mounted (facing the PCB) [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). Its USB VBUS line is wired to GP19, so QMK senses USB presence via `USB_VBUS_PIN` (GP19) instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
+The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040). Its USB VBUS line is wired to GP19, so QMK senses USB presence via `USB_VBUS_PIN` (GP19) instead of the `SPLIT_USB_DETECT` polling loop. This removes the ~2-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
-The MCU is socketed, not soldered: it sits in two pairs of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused.
+The MCU is socketed, not soldered: it sits in two pairs of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused. It mounts on the bottom of the board, the same side as the diodes, hotswap sockets and the rest of the SMD parts, with its own components facing away from the board so the reset and boot buttons stay reachable. That seating determines which header column each matrix net lands on, so it is not interchangeable with the opposite orientation.
 
 The firmware config for this (the `USB_VBUS_PIN GP19` define and the matching `development_board`/split settings) lives in the [firmware repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).
 
@@ -40,6 +40,19 @@ The firmware config for this (the `USB_VBUS_PIN GP19` define and the matching `d
 | P9 (GP9) | | | P10 (GP21) |
 
 GP19 (the `USB_VBUS_PIN`) is the Liatris's internal VBUS-sense pin, not a header net, so it does not appear in the table above. The `P19` row maps to GP27, a separate matrix pin.
+
+Which column is which is set by one parameter, `raw_pin_column` on the `mcu` footprint in [ergogen/config.yaml](./ergogen/config.yaml): `front_left` or `front_right`, named from the PCB front. From the back, where the MCU mounts, the columns read the other way round. The table above is `front_right`, the datasheet arrangement. Both halves must share the value: the Liatris cannot be mirrored.
+
+To check it on a physical board, seat the module and confirm its RAW pin lands on the pad silkscreened RAW. The board silk and the config net names cannot tell you: they move together when the parameter flips.
+
+### Verifying the pin mapping
+
+A board whose matrix nets reach the wrong MCU column is fully routed, shorts nothing, and passes DRC and every other check here. It fails only once an MCU is plugged in, which is after the boards are paid for. `npm run validate:firmware` is the gate for that, and both of its checks are required:
+
+* **Half symmetry** - both halves must wire the MCU header identically. Halves that disagree mean one of them is backwards.
+* **Firmware agreement** - the matrix pins implied by the boards must equal the QMK [keyboard.json](https://github.com/andornaut/qmk_firmware/blob/splinter/keyboards/splinter/keyboard.json), both halves plus the serial pin. The source is `config.FIRMWARE` in [package.json](../package.json), a URL or a path, overridable with `--firmware` or `$SPLINTER_FIRMWARE_JSON`.
+
+Neither check can prove the mapping matches physical reality: both mirrorings of the header produce electrically valid boards, and the footprint's silk pin labels are generated from the same table as the pad nets, so they move together under a flip. The firmware check compares net names through that same table, so it is invariant under `raw_pin_column` too. What the checks guarantee is that the two halves agree and that the config's net assignments never silently drift from the firmware's pin arrays. Which physical pin those nets reach is set by `raw_pin_column`, and only a flash test settles it.
 
 ## TRRS data-line protection
 

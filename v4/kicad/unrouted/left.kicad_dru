@@ -1,0 +1,4 @@
+(version 1)
+(rule "keepout_conductive_pads"
+	(constraint disallow pad)
+	(condition "A.Pad_Type != 'NPTH, mechanical' && (A.insideArea('keepout_perimeter_route') || A.insideArea('keepout_screw_bosses'))"))
