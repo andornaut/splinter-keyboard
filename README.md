@@ -119,7 +119,9 @@ KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`]
 
 `npm run pipeline` re-syncs already-routed boards after a config change. **It requires existing routed masters in [`kicad/routed/`](./v4/kicad/routed/)**: the `copy:traces-to-unrouted` step copies their traces back onto the freshly generated boards, and it aborts if a master has no human routing. It does not route for you, so use it only for updates where the existing routing still applies; for a first route (or when geometry changes enough that the old traces no longer fit), route by hand in KiCad (Step 4) instead.
 
-It runs the whole hardware path in order: `ergogen`, `copy:dist-to-unrouted`, `copy:traces-to-unrouted`, `copy:unrouted-to-routed`, `validate:provenance`, `fab`, `validate:fab`, then `panelize`. It prints a per-step banner and a closing summary of the artifacts produced. Each step is a hard gate except the final `panelize`, which is skipped with a note when [KiKit](#panelization-optional-for-pcba-cost) is not installed (the per-half fab from `fab` is complete on its own).
+It runs the whole hardware path in order: `ergogen`, `copy:dist-to-unrouted`, `copy:traces-to-unrouted`, `copy:unrouted-to-routed`, `validate:provenance`, `validate:firmware`, `fab`, `validate:fab`, then `panelize`. It prints a per-step banner and a closing summary of the artifacts produced. Each step is a hard gate except the final `panelize`, which is skipped with a note when [KiKit](#panelization-optional-for-pcba-cost) is not installed (the per-half fab from `fab` is complete on its own).
+
+`validate:firmware` (step 6) reads the QMK `keyboard.json` named by `config.FIRMWARE` in [package.json](./package.json), which ships as a path to a sibling `qmk_firmware` checkout. The firmware is developed alongside the boards, so a local path checks what you are about to flash rather than what is pushed. The consequence is that the pipeline needs that checkout: without it this step fails and no gerbers are produced. On a machine that lacks it, point the step at the published file with `npm run validate:firmware -- --firmware <raw.githubusercontent.com URL>`, or set `$SPLINTER_FIRMWARE_JSON`.
 
 ### Provenance stamp (keeping routed/ in sync with config.yaml)
 
@@ -135,7 +137,7 @@ With the boards saved to `routed/` (Step 4), `npm run fab` exports from [`kicad/
 * **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): JLCPCB PCBA assembly files, generated only when [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
 * **DRC report** (`<name>-drc.json`): a headless DRC gate runs first and aborts the whole fab (no gerbers written) on any error-level violation or unrouted net.
 
-After `npm run fab`, run `npm run validate:fab` to audit the outputs against design intent the DRC and provenance gates miss: that the routed master and the exported gerbers both carry a board-spanning GND ground plane, that the gerber zip has every expected layer plus drill, and that every assembled part made it into the BOM/CPL. It is step 7 of `npm run pipeline`. (This guards the failure where a board with no ground plane passed every other gate and still shipped.)
+After `npm run fab`, run `npm run validate:fab` to audit the outputs against design intent the DRC and provenance gates miss: that the routed master and the exported gerbers both carry a board-spanning GND ground plane, that the gerber zip has every expected layer plus drill, and that every assembled part made it into the BOM/CPL. It is step 8 of `npm run pipeline`. (This guards the failure where a board with no ground plane passed every other gate and still shipped.)
 
 LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), kept out of the `.kicad_pcb` so they survive Ergogen regen. Which parts JLCPCB places vs. which you hand-solder is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
 

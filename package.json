@@ -6,7 +6,8 @@
     "node": ">=24"
   },
   "config": {
-    "VERSION": "v4"
+    "VERSION": "v4",
+    "FIRMWARE": "../qmk_firmware/keyboards/splinter/keyboard.json"
   },
   "dependencies": {
     "ergogen": "^4.2.1"
@@ -25,6 +26,7 @@
     "pipeline": "./scripts/pipeline.sh",
     "route": "python3 ./scripts/route.py",
     "validate:fab": "python3 ./scripts/validate-fab.py",
+    "validate:firmware": "python3 ./scripts/validate-firmware.py",
     "validate:provenance": "python3 ./scripts/validate-provenance.py",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen\"",
     "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\""

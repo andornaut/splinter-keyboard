@@ -10,19 +10,29 @@
 #   3 copy:traces-to-unrouted routed/ traces+teardrops -> unrouted/
 #   4 copy:unrouted-to-routed unrouted/ -> routed/ (adds GND pour)
 #   5 validate:provenance   unrouted/ + routed/ match current config
-#   6 fab                   per-half gerbers/drill (+ assembly BOM/CPL)
-#   7 validate:fab          audit the fab outputs (GND plane, gerber set, BOM/CPL)
-#   8 panelize              combined left+right PCBA panel (optional)
+#   6 validate:firmware     halves agree on MCU pins; boards match QMK matrix_pins
+#   7 fab                   per-half gerbers/drill (+ assembly BOM/CPL)
+#   8 validate:fab          audit the fab outputs (GND plane, gerber set, BOM/CPL)
+#   9 panelize              combined left+right PCBA panel (optional)
+#
+# validate:firmware runs before fab so a board whose matrix nets disagree with the
+# firmware aborts before any gerber is written; that error passes DRC and is
+# invisible until an MCU is plugged in. It lives here rather than inside fab.sh
+# because it needs an external firmware source, and a fetch failure should not
+# block a legitimate gerber export. All of its checks are required: a board
+# is not fab-ready until firmware is proven to match it, so an unset or unreachable
+# firmware source stops the pipeline rather than silently dropping a check. Set the
+# source in package.json config.FIRMWARE (a URL or path).
 #
 # panelize needs the KiKit venv (see panelize.sh). When it is absent the pipeline
 # skips that step with a note instead of failing -- the per-half fab output from
-# steps 6-7 is complete on its own. Every other step is a hard gate.
+# steps 7-8 is complete on its own. Every other step is a hard gate.
 set -Eeuo pipefail
 shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run pipeline)}"
-total_steps=8
+total_steps=9
 
 # Bold the banners only when stdout is a terminal (plain text when piped/logged).
 if [ -t 1 ]; then B=$'\033[1m'; R=$'\033[0m'; else B=''; R=''; fi
@@ -53,12 +63,13 @@ run_step 2 "copy:dist-to-unrouted"   ./scripts/copy-dist-to-unrouted.sh
 run_step 3 "copy:traces-to-unrouted" ./scripts/copy-traces-to-unrouted.sh
 run_step 4 "copy:unrouted-to-routed" ./scripts/copy-unrouted-to-routed.sh
 run_step 5 "validate:provenance"     python3 ./scripts/validate-provenance.py
-run_step 6 "fab"                     ./scripts/fab.sh
-run_step 7 "validate:fab"            python3 ./scripts/validate-fab.py
+run_step 6 "validate:firmware"       python3 ./scripts/validate-firmware.py
+run_step 7 "fab"                     ./scripts/fab.sh
+run_step 8 "validate:fab"            python3 ./scripts/validate-fab.py
 
-# Step 8 (panelize) is optional: run it only when the KiKit venv is present and
+# Step 9 (panelize) is optional: run it only when the KiKit venv is present and
 # importable (the same probe panelize.sh does), otherwise skip with a note so a
-# machine without KiKit still gets a complete per-half fab from steps 6-7.
+# machine without KiKit still gets a complete per-half fab from steps 7-8.
 current_step="panelize"
 printf '\n%s==> [%d/%d] %s%s\n' "$B" "$total_steps" "$total_steps" "panelize (optional)" "$R"
 kikit_py="$(kikit_python)"
@@ -68,7 +79,7 @@ if kikit_importable "$kikit_py"; then
   summary+=("ok|panelize|$(( SECONDS - t0 ))s")
 else
   echo "  KiKit not available at ${kikit_py}; skipping the panel."
-  echo "  Per-half fab from step 6 is complete. Install KiKit (ansible-ctrl hobbies"
+  echo "  Per-half fab from steps 7-8 is complete. Install KiKit (ansible-ctrl hobbies"
   echo "  role, kicad tag) or set KIKIT_PYTHON to enable panelization."
   summary+=("skip|panelize|KiKit unavailable")
 fi
