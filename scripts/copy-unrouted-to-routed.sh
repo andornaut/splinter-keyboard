@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Copy the working kicad/unrouted/ PCBs onto the routed/ masters (the fab source), then
-# add a filled B.Cu GND pour to each master. The pour is applied here, after
-# manual routing, rather than at build time so routing happens on a clean board;
-# the cp overwrites each master with the pour-free working copy first, so the
-# pour is always freshly flowed around the current traces. Run via:
+# add a filled GND pour to each master and clean up the copper no route uses.
+# The pour is applied here, after manual routing, rather than at build time so
+# routing happens on a clean board; the cp overwrites each master with the
+# pour-free working copy first, so the pour is always freshly flowed around the
+# current traces. The cleanup runs after the pour, never before: it treats a
+# filled pour as copper, which is what keeps a GND stitching via. Run via:
 # npm run copy:unrouted-to-routed
 set -euo pipefail
 shopt -s nullglob
@@ -20,6 +22,7 @@ for f in "${files[@]}"; do
   dst="${dst_dir}/$(basename "$f")"
   cp "$f" "$dst"
   mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
+  mute_pcbnew_noise python3 ./scripts/cleanup-tracks.py "$dst"
 done
 
 # Apply project settings to the routed/ projects (this copy step owns the routed
@@ -27,4 +30,4 @@ done
 # apply_project_settings in lib.sh.
 apply_project_settings "$dst_dir"
 
-ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour"
+ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, unused copper cleaned up"

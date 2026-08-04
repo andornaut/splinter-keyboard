@@ -84,27 +84,26 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
 
 **Notes:**
 
-* The GUI prototypes key placement, layout, and outlines but does not render PCBs. It runs client-side only (no filesystem access, no sync), so edit there and copy back to `config.yaml`, the source of truth. Use `npm run ergogen` for full builds and PCB generation.
-* Custom footprints are baked into the GUI image via the [`Dockerfile`](./Dockerfile) since the browser can't load them from disk. It registers this repo's [custom footprints](./ergogen/footprints/) on top of the upstream `ceoloide` and `infused-kim` libraries; any unregistered `what:` shows up as unknown. After adding one, rebuild with `docker compose build --no-cache`.
+* The GUI prototypes placement and outlines but renders no PCBs, and is client-side only: edit there, copy back to `config.yaml` (the source of truth), and build with `npm run ergogen`.
+* The browser can't load footprints from disk, so the [`Dockerfile`](./Dockerfile) bakes this repo's [custom footprints](./ergogen/footprints/) into the GUI image on top of `ceoloide` and `infused-kim`; an unregistered `what:` shows up as unknown. After adding one, `docker compose build --no-cache`.
 
 ### Step 4. [KiCad](https://www.kicad.org/)
 
 ![KiCad preview](./v4/kicad/kicad.png)
 
-1. Copy Ergogen's generated boards into [`kicad/unrouted/`](./v4/kicad/unrouted/) with `npm run copy:dist-to-unrouted` (existing boards are first backed up to gitignored `kicad/backups/<name>-<timestamp>.kicad_pcb`), then open one in KiCad, e.g. [`left.kicad_pcb`](./v4/kicad/unrouted/left.kicad_pcb).
-   * Board keepout/DRC features that constrain routing are version-specific; v4 carries copper keepout zones (added by `npm run ergogen`) that flag stray copper near the board edge or screw bosses, see [Copper keepout zones](./v4/README.md#copper-keepout-zones).
-1. Route the boards in [`kicad/unrouted/`](./v4/kicad/unrouted/). Once routing is done, clean each board up before saving:
-   * **Cleanup Tracks & Vias** (Tools > Cleanup Tracks & Vias): enable all options to merge collinear segments, delete redundant/dangling tracks and vias, and remove tracks inside pads.
-   * **Add Teardrops** (Edit > Edit Teardrops, with nothing selected to apply board-wide): smooths track-to-pad/via junctions for stronger joints and better DFM. Re-run after any reroute.
-   * **Run DRC** (Inspect > Design Rules Checker) with "Refill all zones before performing DRC" checked: resolve every violation and confirm there are no unrouted nets. `npm run fab` re-runs this same check headlessly and refuses to emit gerbers if it fails (see [Step 5](#step-5-fabrication-jlcpcb)), but fixing violations interactively in KiCad is far easier than reading the JSON report.
-   * **Check copper/silk** visually: confirm the GND zone has no isolated islands or stranded pads, and that silkscreen text and reference designators clear pads and the board edge.
+1. `npm run copy:dist-to-unrouted` copies Ergogen's boards into [`kicad/unrouted/`](./v4/kicad/unrouted/) (backing up the old ones to gitignored `kicad/backups/`); open one in KiCad, e.g. [`left.kicad_pcb`](./v4/kicad/unrouted/left.kicad_pcb).
+   * v4 carries [copper keepout zones](./v4/README.md#copper-keepout-zones) that flag stray copper near the board edge or screw bosses.
+1. Route the boards in [`kicad/unrouted/`](./v4/kicad/unrouted/), then before saving:
+   * **Add Teardrops** (Edit > Edit Teardrops, nothing selected for board-wide): stronger pad/via joints. Re-run after any reroute.
+   * **Run DRC** (Inspect > Design Rules Checker, "Refill all zones" checked): clear every violation and unrouted net. `npm run fab` re-runs it headlessly and refuses to emit gerbers if it fails, but fixing it here beats reading the JSON.
+   * **Check copper/silk** visually: no isolated GND islands or stranded pads; silk and reference designators clear of pads and the board edge.
 
-   Then `npm run copy:unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/).
-   * After regenerating boards with Ergogen, `npm run copy:traces-to-unrouted` copies the traces and teardrops from [`kicad/routed/`](./v4/kicad/routed/) back into the same-named boards in [`kicad/unrouted/`](./v4/kicad/unrouted/) (then File > Revert in KiCad).
+   Then `npm run copy:unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/), which adds the GND pour and strips the copper no route uses (dangling tracks and the vias they strand, tracks buried in pads, redundant vias, split segments). The working boards keep that copper, mainly the footprints' unused `include_traces_vias` stubs, since a later reroute may pick it up.
+   * After regenerating with Ergogen, `npm run copy:traces-to-unrouted` copies the traces and teardrops from `routed/` back into `unrouted/` (then File > Revert in KiCad).
 
 #### Autorouting (optional)
 
-KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) boards in place via [Freerouting](https://github.com/freerouting/freerouting), leaving `kicad/routed/` untouched. Expect to hand-clean the result (the matrix routes nicer by hand), then File > Revert to load it. The defaults below aim for a fully-connected, DRC-clean board; raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
+KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`](./v4/kicad/unrouted/) boards in place via [Freerouting](https://github.com/freerouting/freerouting), leaving `routed/` untouched; expect to hand-clean the result, then File > Revert to load it. Raising via cost trades vias for *unrouted nets*, so it can't beat hand-routing on via count.
 
 | Env var | Default |
 | --- | --- |
@@ -117,17 +116,17 @@ KiCad has no built-in autorouter. `npm run route` routes the [`kicad/unrouted/`]
 
 ### One-command pipeline
 
-`npm run pipeline` re-syncs already-routed boards after a config change. **It requires existing routed masters in [`kicad/routed/`](./v4/kicad/routed/)**: the `copy:traces-to-unrouted` step copies their traces back onto the freshly generated boards, and it aborts if a master has no human routing. It does not route for you, so use it only for updates where the existing routing still applies; for a first route (or when geometry changes enough that the old traces no longer fit), route by hand in KiCad (Step 4) instead.
+`npm run pipeline` re-syncs already-routed boards after a config change, running `ergogen`, `copy:dist-to-unrouted`, `copy:traces-to-unrouted`, `copy:unrouted-to-routed`, `validate:provenance`, `validate:firmware`, `fab`, `validate:fab`, then `panelize`. Every step is a hard gate except `panelize`, which is skipped when [KiKit](#panelization-optional-for-pcba-cost) is absent.
 
-It runs the whole hardware path in order: `ergogen`, `copy:dist-to-unrouted`, `copy:traces-to-unrouted`, `copy:unrouted-to-routed`, `validate:provenance`, `validate:firmware`, `fab`, `validate:fab`, then `panelize`. It prints a per-step banner and a closing summary of the artifacts produced. Each step is a hard gate except the final `panelize`, which is skipped with a note when [KiKit](#panelization-optional-for-pcba-cost) is not installed (the per-half fab from `fab` is complete on its own).
+**It requires existing routed masters in [`kicad/routed/`](./v4/kicad/routed/)** (it copies their traces onto the freshly generated boards, and aborts if a master has no human routing) and it does not route for you: for a first route, or when geometry moves enough that the old traces no longer fit, route by hand in KiCad (Step 4).
 
-`validate:firmware` (step 6) reads the QMK `keyboard.json` named by `config.FIRMWARE` in [package.json](./package.json), which ships as a path to a sibling `qmk_firmware` checkout. The firmware is developed alongside the boards, so a local path checks what you are about to flash rather than what is pushed. The consequence is that the pipeline needs that checkout: without it this step fails and no gerbers are produced. On a machine that lacks it, point the step at the published file with `npm run validate:firmware -- --firmware <raw.githubusercontent.com URL>`, or set `$SPLINTER_FIRMWARE_JSON`.
+`validate:firmware` (step 6) reads the QMK `keyboard.json` named by `config.FIRMWARE` in [package.json](./package.json), a path to a sibling `qmk_firmware` checkout, so it checks what you are about to flash rather than what is pushed. Without that checkout the step fails and no gerbers are produced; use `npm run validate:firmware -- --firmware <raw.githubusercontent.com URL>` or `$SPLINTER_FIRMWARE_JSON` instead.
 
 ### Provenance stamp (keeping routed/ in sync with config.yaml)
 
-The `cp` steps and manual routing let `routed/` silently drift from `config.yaml`, so you could fab a stale board. To guard against this, `npm run ergogen` stamps each board with a hash of `config.yaml`, and `npm run fab` checks that stamp (scoped to `routed/`) before it fabs, refusing a drifted or unstamped master. Run `npm run validate:provenance` any time to check without fabbing.
+The `cp` steps and manual routing let `routed/` drift from `config.yaml`, so you could fab a stale board. `npm run ergogen` stamps each board with a hash of `config.yaml`; `npm run fab` refuses a drifted or unstamped master, and `npm run validate:provenance` checks without fabbing. Clear a mismatch by re-running the pipeline (re-routing if needed).
 
-Clear a mismatch by re-running the pipeline (`ergogen`, `copy:dist-to-unrouted`, re-route, `copy:unrouted-to-routed`); when the existing routing still applies, `npm run pipeline` does that whole chain in one step. Caveat: only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
+Only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
 
 ### Step 5. Fabrication (JLCPCB)
 
@@ -137,15 +136,15 @@ With the boards saved to `routed/` (Step 4), `npm run fab` exports from [`kicad/
 * **BOM + CPL** (`<name>-BOM.csv`, `<name>-CPL.csv`): JLCPCB PCBA assembly files, generated only when [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json) is present.
 * **DRC report** (`<name>-drc.json`): a headless DRC gate runs first and aborts the whole fab (no gerbers written) on any error-level violation or unrouted net.
 
-After `npm run fab`, run `npm run validate:fab` to audit the outputs against design intent the DRC and provenance gates miss: that the routed master and the exported gerbers both carry a board-spanning GND ground plane, that the gerber zip has every expected layer plus drill, and that every assembled part made it into the BOM/CPL. It is step 8 of `npm run pipeline`. (This guards the failure where a board with no ground plane passed every other gate and still shipped.)
+Then `npm run validate:fab` (step 8 of the pipeline) audits those outputs for what DRC and provenance miss: a board-spanning GND plane on both the master and the gerbers, a complete gerber set, and every assembled part present in the BOM/CPL.
 
 LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.json), kept out of the `.kicad_pcb` so they survive Ergogen regen. Which parts JLCPCB places vs. which you hand-solder is version-specific; see the [version README](./v4/README.md#fabrication-jlcpcb).
 
-**Ordering** from [JLCPCB](https://jlcpcb.com/): upload each `<name>-gerber.zip` for bare boards, plus the matching `<name>-BOM.csv` / `<name>-CPL.csv` for assembly. Check placement in JLCPCB's [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree); fix a mis-oriented part via its `rotation` in the JSON and re-run.
+**Ordering** from [JLCPCB](https://jlcpcb.com/): upload each `<name>-gerber.zip`, plus the matching `<name>-BOM.csv` / `<name>-CPL.csv` for assembly. Check placement in the [DFM viewer](https://cart.jlcpcb.com/quote/gerberviewThree); fix a mis-oriented part via its `rotation` in the JSON and re-run.
 
 #### Panelization (optional, for PCBA cost)
 
-`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice. Worthwhile only for PCBA orders; skip it for bare boards. It exports gerbers + BOM/CPL into `dist/v4/kicad/jlcpcb/panel/`, with the per-half `fab` staying the strict DRC gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) (git-master build for KiCad 10 support); point `panelize.sh` at its interpreter with `KIKIT_PYTHON`.
+`npm run panelize` combines `left` + `right` into one panel so JLCPCB's per-order assembly setup and stencil fees are paid once instead of twice: worth it for PCBA orders, skip it for bare boards. Outputs gerbers + BOM/CPL to `dist/v4/kicad/jlcpcb/panel/`; the per-half `fab` remains the strict DRC gate. Requires [KiKit](https://github.com/yaqwsx/KiKit) (git-master build for KiCad 10); point `panelize.sh` at its interpreter with `KIKIT_PYTHON`.
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 
@@ -160,25 +159,16 @@ LCSC part numbers live in [`kicad/jlcpcb-parts.json`](./v4/kicad/jlcpcb-parts.js
 1. Open or create an OrcaSlicer project.
 1. Import the `*.step` files from [`onshape/`](./v4/onshape/).
 1. Slice and print the case.
-1. Install an [M2.5 heat-set insert](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (CNC Kitchen) into each mounting boss with a soldering iron, then clamp the PCB with the [M2.5 screws](./v4/README.md#bill-of-materials-bom) (this is the recommended approach; the machined-aluminium alternative below taps the holes directly instead).
+1. Install an [M2.5 heat-set insert](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (CNC Kitchen) into each mounting boss with a soldering iron, then clamp the PCB with the [M2.5 screws](./v4/README.md#bill-of-materials-bom).
 
 #### Alternative: machined aluminium case (JLCCNC)
 
-Instead of 3D printing, the case can be CNC-machined in aluminium via [JLCCNC](https://jlccnc.com). Upload each half's `*.step` and set:
+Instead of 3D printing, the case can be CNC-machined in aluminium via [JLCCNC](https://jlccnc.com). Upload each half's `*.step` (left and right are separate mirrored parts, so set quantity per file) and set:
 
-* **Material:** 6061 aluminium (JLCCNC's standard alloy; 6063 is the equivalent keyboard-typical option, marginally more even anodize color).
-* **Surface finish:** Bead blasting + Anodizing (matte) is the recommended premium-keyboard finish: smooth, uniform, fingerprint resistant. For a glossier sheen, choose Anodizing without bead blasting. Pick a color (black is the safe default).
-* **Tolerance:** the default (ISO 2768 medium) is fine for a case.
-* **Quantity:** left and right are two separate mirrored parts, so set quantity per file.
-* **Threaded holes:** tap the M2.5 mounting holes directly (the heat-set inserts in the [BOM](./v4/README.md#bill-of-materials-bom) are only for the printed case). A STEP can't carry threads, so model each hole at the ~2.05mm tap-drill diameter and also upload a 2D drawing (PDF) with an `M2.5x0.45` thread callout (depth, through/blind) for JLCCNC to tap to.
-
-To make the thread drawing in Onshape:
-
-1. From the case Part Studio, create a **Drawing** and place a top (or section) view of the half.
-1. Add a **Hole/thread callout** (right-click the hole edge > Callout) on a mounting hole; it reads the hole and emits `M2.5x0.45`. Add the thread depth and through/blind.
-1. Export the drawing to PDF and upload it with the `.step`.
-
-Since every mounting hole shares one spec, a full dimensioned drawing is optional: a single PDF or screenshot noting "All mounting holes: M2.5x0.45 tapped, N mm deep" is accepted, and JLCCNC's order interface can also tag threaded holes in its 3D viewer. The STEP still needs the holes at ~2.05mm tap-drill either way.
+* **Material:** 6061 aluminium (JLCCNC's standard alloy).
+* **Surface finish:** bead blasting + matte anodizing; drop the bead blasting for a glossier sheen. Black is the safe color.
+* **Tolerance:** the default (ISO 2768 medium).
+* **Threaded holes:** tap the M2.5 holes directly (the heat-set inserts in the [BOM](./v4/README.md#bill-of-materials-bom) are for the printed case only). A STEP can't carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Since every hole shares one spec, a note reading "All mounting holes: M2.5x0.45 tapped, N mm deep" is enough; in Onshape, a Drawing of the half with a hole/thread callout (right-click the hole edge > Callout) emits it.
 
 ### Step 8. [QMK Firmware](https://qmk.fm/)
 

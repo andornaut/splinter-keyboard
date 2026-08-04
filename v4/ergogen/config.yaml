@@ -249,7 +249,7 @@ points:
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
     # The anchor shift and the splay are jointly solved against the thumb
-    # constraint set (see AGENTS.md): anchor x sets the backspace-to-M column
+    # constraint set: anchor x sets the backspace-to-M column
     # offset, anchor y the backspace-to-M vertical gap (which also seats the hull
     # corner on the box bottom edge), and the splay the un-filleted board height.
     # thumb_inner_pad then pads the hull's inner edge out to meet the box inner edge.
@@ -284,7 +284,7 @@ points:
   # --- Screw zones: mounting-hole anchors (outer, inner, center). Left is the
   # source, mirrored to the right (mirror_screw_*). The screw_left/screw_right tags
   # drive the per-PCB mounting_hole_npth footprints and the per-half hole/boss
-  # outlines. Placement obeys two hard rules (see AGENTS.md): the boss never
+  # outlines. Placement obeys two hard rules: the boss never
   # overlaps a switch hole and stays clear of every copper pad. Each sits in a
   # diagonal gap between four switches; the asymmetric pinky columns make the
   # mirrored pair land differently per half, so outer/inner cannot share a y. The
@@ -674,7 +674,7 @@ pcbs:
       # Each label sits by its component on the same ref; the right half re-anchors
       # to mirror_ refs (x auto-flips). Silk side follows the part: through-hole
       # parts use label_tht_params (reversible, both sides); SMD-only parts use
-      # label_params (side B, mirrored). See AGENTS.md "v4: Silkscreen text".
+      # label_params (side B, mirrored).
       label_mcu: &label_mcu
         what: ceoloide/utility_text
         where:

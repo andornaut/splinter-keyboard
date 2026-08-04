@@ -11,12 +11,13 @@ The layer is chosen per board, not hardcoded. The script scores F.Cu and B.Cu
 and pours on the lower-cost one (see `choose_gnd_layer`), so it follows whatever
 routing strategy a board actually has instead of assuming the back is clear:
 
-  cost(layer) = non-GND track length on the layer
+  cost(layer) = non-GND track length on the layer, dangling copper excluded
               + UNREACHABLE_GND_PAD_COST_MM * (GND pads not reachable on it)
 
 Lower is better. The first term measures how much the plane would be fragmented
-by signal copper (GND tracks merge into the pour, so they do not count); the
-second penalizes each GND pad that would need a stitching via to reach the plane.
+by signal copper (GND tracks merge into the pour, so they do not count, and so
+does copper cleanup-tracks.py is about to strip); the second penalizes each GND
+pad that would need a stitching via to reach the plane.
 Neither side is inherently preferred: the pour lands on whichever gives the more
 continuous plane with fewer stitching vias. On a tie (e.g. an un-routed board
 with no signal copper yet) B.Cu wins, the historical default. The selected layer
@@ -34,6 +35,7 @@ Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 import sys
 from collections import namedtuple
 
+from pcb_copper import copper_pads, dangling_tracks, ids, is_via
 from pcbnew_quiet import pcbnew
 
 CLEARANCE = pcbnew.FromMM(0.25)
@@ -59,12 +61,13 @@ def _try_set(obj, name, *args):
         fn(*args)
 
 
-def _signal_track_len_mm(board, layer):
+def _signal_track_len_mm(tracks, doomed_ids, layer):
     """Total length of non-GND tracks/arcs on `layer` (GND copper merges into the
-    pour, so it does not fragment the plane and is excluded)."""
+    pour, so it does not fragment the plane and is excluded), skipping the copper
+    cleanup-tracks.py is about to delete."""
     total = 0.0
-    for t in board.GetTracks():
-        if t.GetClass() == "PCB_VIA":
+    for t in tracks:
+        if is_via(t) or id(t) in doomed_ids:
             continue
         if t.GetLayer() != layer:
             continue
@@ -84,9 +87,17 @@ def choose_gnd_layer(board):
     best is the winning LayerScore and rows is every candidate's LayerScore."""
     gnd_pads = _gnd_pads(board)
     total_gnd = len(gnd_pads)
+    # Copper that copy-unrouted-to-routed.sh is about to strip must not sway the
+    # choice: the unused include_traces_vias stubs are tens of mm of front-side
+    # track on v4, all of it gone by the time the plane is poured. The pour this
+    # script is about to add does not exist yet, so nothing counts as a filled zone;
+    # only a track of the pour's own net could read differently for its absence, and
+    # GND tracks are excluded from the score anyway.
+    tracks = list(board.GetTracks())
+    doomed_ids = ids(dangling_tracks(tracks, copper_pads(board), []))
     rows = []
     for layer in CANDIDATE_LAYERS:
-        signal_mm = _signal_track_len_mm(board, layer)
+        signal_mm = _signal_track_len_mm(tracks, doomed_ids, layer)
         reach = sum(1 for p in gnd_pads if p.IsOnLayer(layer))
         cost = signal_mm + UNREACHABLE_GND_PAD_COST_MM * (total_gnd - reach)
         rows.append(LayerScore(layer, board.GetLayerName(layer), signal_mm, reach, cost))

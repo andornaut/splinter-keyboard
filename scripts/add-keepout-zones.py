@@ -56,6 +56,13 @@ CENTER_TOL = pcbnew.FromMM(0.05)      # boss-circle/mounting-hole coincidence to
 ARC_ERROR = pcbnew.FromMM(0.01)       # inflate max error
 CIRCLE_SEGMENTS = 64                  # polygon approximation of each boss disk
 DEGENERATE_EDGE_MAX = pcbnew.FromMM(0.001)  # drop Edge.Cuts shapes shorter than this
+# How far an endpoint may move to close the gap a stripped shape leaves, past which
+# it is real geometry and the build stops. It has to exceed DEGENERATE_EDGE_MAX: the
+# far end of a stripped shape sits that far from the near end, so a shorter reach
+# would put the neighbour there out of range and turn every strip into a hard error.
+WELD_MAX = pcbnew.FromMM(0.01)
+if WELD_MAX <= DEGENERATE_EDGE_MAX:
+    raise SystemExit("add-keepout-zones.py: WELD_MAX must exceed DEGENERATE_EDGE_MAX")
 
 # The route-ring carve opens the top edge above the TRRS connector (the case's
 # top wall has the port opening there; the inner vertical edge ring stays whole).
@@ -235,26 +242,79 @@ def _boss_centers(board):
     return [fp.GetPosition() for fp in _footprints(board, BOSS_FPID_KEY)]
 
 
-def _strip_degenerate_edges(board):
-    """Take near-zero-length Edge.Cuts shapes off the Edge.Cuts layer. Ergogen
-    emits a zero-length shape where two outline vertices coincide (e.g. the thumb
-    hull corner closing exactly onto the box corner), which makes
-    GetBoardPolygonOutlines() fail to chain the outline ("could not read board
-    outline"). The shape is geometric noise. We test GetLength() so a degenerate
-    arc (a fillet collapsing at a coincident corner) is caught as well as a
-    segment; real edges are mm-scale, far above the threshold. We move it to
-    Cmts.User rather than board.Remove() it: Remove() corrupts pcbnew's SWIG type
-    table (later zone.Outline() then returns an untyped SwigPyObject with no
-    NewOutline); re-layering mutates nothing the outline reader sees and leaves
-    SWIG intact. Returns the count moved."""
-    moved = 0
-    for d in board.GetDrawings():
-        if (d.GetClass() == "PCB_SHAPE" and d.GetLayer() == pcbnew.Edge_Cuts
-                and d.GetShape() in (pcbnew.SHAPE_T_SEGMENT, pcbnew.SHAPE_T_ARC)
-                and d.GetLength() < DEGENERATE_EDGE_MAX):
-            d.SetLayer(pcbnew.Cmts_User)
-            moved += 1
-    return moved
+def _edge_shapes(board):
+    """Every segment/arc currently on Edge.Cuts."""
+    return [d for d in board.GetDrawings()
+            if (d.GetClass() == "PCB_SHAPE" and d.GetLayer() == pcbnew.Edge_Cuts
+                and d.GetShape() in (pcbnew.SHAPE_T_SEGMENT, pcbnew.SHAPE_T_ARC))]
+
+
+def _weld_edge_gap(board, path, a, b):
+    """Close the gap a stripped shape leaves by collapsing its two ends into one.
+
+    The neighbours that met the stripped shape keep their now-free endpoints at a
+    and b, which are up to DEGENERATE_EDGE_MAX apart. KiCad's outline reader closes
+    a gap that small silently, but KiKit's ring extraction (npm run panelize)
+    matches endpoints exactly and aborts on it, so the loop must actually close.
+    Every remaining Edge.Cuts endpoint within WELD_MAX of either end snaps to a.
+    Reaching an endpoint parked at b therefore moves it by up to WELD_MAX plus the
+    a-to-b gap, which is what the hard error allows for: measuring that move against
+    WELD_MAX alone would abort the build on the far side of a legitimate weld.
+    Returns (welded count, largest move).
+
+    Arc endpoints are set the same way as segment ones: the move is sub-micron, so
+    the implied change in radius is far below fab resolution."""
+    welded, max_move = 0, 0
+    for d in _edge_shapes(board):
+        for get, set_ in ((d.GetStart, d.SetStart), (d.GetEnd, d.SetEnd)):
+            p = get()
+            if (p.x, p.y) == (a.x, a.y):
+                continue
+            move = math.dist((p.x, p.y), (a.x, a.y))
+            if min(move, math.dist((p.x, p.y), (b.x, b.y))) > WELD_MAX:
+                continue
+            if move > WELD_MAX + DEGENERATE_EDGE_MAX:
+                raise SystemExit(
+                    f"{path}: welding the Edge.Cuts gap at "
+                    f"({pcbnew.ToMM(a.x)}, {pcbnew.ToMM(a.y)}) would move an endpoint "
+                    f"{pcbnew.ToMM(move):.4f}mm, over the "
+                    f"{pcbnew.ToMM(WELD_MAX + DEGENERATE_EDGE_MAX)}mm limit. "
+                    f"That is real geometry, not outline noise: fix the board outline.")
+            set_(a)
+            welded += 1
+            max_move = max(max_move, move)
+    return welded, max_move
+
+
+def _strip_degenerate_edges(board, path):
+    """Take near-zero-length Edge.Cuts shapes off the Edge.Cuts layer, then weld
+    the gap each one leaves. Ergogen emits a near-zero-length shape where two
+    outline vertices all but coincide (e.g. the thumb hull corner closing onto the
+    box corner), which makes GetBoardPolygonOutlines() fail to chain the outline
+    ("could not read board outline"). The shape is geometric noise. We test
+    GetLength() so a degenerate arc (a fillet collapsing at a coincident corner) is
+    caught as well as a segment; real edges are mm-scale, far above the threshold.
+    We move it to Cmts.User rather than board.Remove() it: Remove() corrupts
+    pcbnew's SWIG type table (later zone.Outline() then returns an untyped
+    SwigPyObject with no NewOutline); re-layering mutates nothing the outline reader
+    sees and leaves SWIG intact. Returns (count moved, welded count, largest move).
+
+    One shape is stripped per pass, re-reading the layer each time, because a weld
+    moves the endpoints of shapes still to be tested: it can lengthen a second
+    degenerate shape past the threshold (a stale snapshot would then skip it and
+    leave the outline broken) or shorten a real one below it. Each pass takes one
+    shape off Edge.Cuts, so this terminates."""
+    moved, welded, max_move = 0, 0, 0
+    while True:
+        d = next((s for s in _edge_shapes(board) if s.GetLength() < DEGENERATE_EDGE_MAX), None)
+        if d is None:
+            return moved, welded, max_move
+        a, b = d.GetStart(), d.GetEnd()
+        d.SetLayer(pcbnew.Cmts_User)
+        moved += 1
+        n, move = _weld_edge_gap(board, path, a, b)
+        welded += n
+        max_move = max(max_move, move)
 
 
 def add_keepout_zones(path):
@@ -267,9 +327,10 @@ def add_keepout_zones(path):
         print(f"  UNCHANGED: keepouts already present ({', '.join(sorted(existing))}): {path}")
         return
 
-    moved = _strip_degenerate_edges(board)
+    moved, welded, max_move = _strip_degenerate_edges(board, path)
     if moved:
-        print(f"  moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User")
+        print(f"  moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User; "
+              f"welded {welded} endpoint(s), largest move {pcbnew.ToMM(max_move):.6f}mm")
 
     ring = _perimeter_ring(board)
     _add_keepout(board, PERIMETER_POUR_NAME, ring, pour=True, tracks_vias=False)

@@ -34,7 +34,7 @@ mute_pcbnew_noise python3 ./scripts/stamp-provenance.py \
 # Add copper keepout rule areas (2mm perimeter ring + a disk around each screw
 # boss). Like the stamp, they ride the cp steps into unrouted/ (so routing and
 # DRC see them) and routed/ (where add-gnd-zone pours around them). See
-# add-keepout-zones.py and AGENTS.md "v4: Copper keepout zones".
+# add-keepout-zones.py.
 mute_pcbnew_noise python3 ./scripts/add-keepout-zones.py "${files[@]}"
 
 # Apply project settings to the generated dist/ projects (ergogen owns this tier;
