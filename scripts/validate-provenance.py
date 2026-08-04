@@ -33,6 +33,7 @@ import os
 import re
 import sys
 
+from pipeline_log import note
 from provenance import config_hash, parse_config_field
 
 STAGES = ("unrouted", "routed")
@@ -55,7 +56,11 @@ def main():
     # too when nargs="*", and would reject the list as a single invalid choice.
     ap.add_argument("stages", nargs="*", choices=STAGES, default=None,
                     help="stage(s) to validate (default: both)")
-    stages = ap.parse_args().stages or list(STAGES)
+    ap.add_argument("--quiet", action="store_true",
+                    help="say nothing when every board passes (for use as a gate inside\n"
+                         "another step, which reports its own result)")
+    args = ap.parse_args()
+    stages = args.stages or list(STAGES)
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
@@ -77,7 +82,7 @@ def main():
     for pcb in boards:
         stored = parse_config_field(stamps[pcb])
         if stored == expected:
-            print(f"  ok {pcb}: config={stored}")
+            note(f"  ok {pcb}: config={stored}")
         elif stored is None:
             sys.stdout.flush()  # this line is stderr; keep it in step with the ok lines
             print(f"  MISSING {pcb}: no provenance stamp, rebuild to stamp", file=sys.stderr)
@@ -117,7 +122,9 @@ def main():
               file=sys.stderr)
         sys.exit(1)
 
-    print(f"OK: validate:provenance: {len(boards)} board(s) match {config} (config={expected})")
+    if not args.quiet:
+        print(f"OK: validate:provenance: {len(boards)} board(s) match {config} "
+              f"(config={expected})")
 
 
 if __name__ == "__main__":

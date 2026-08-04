@@ -52,10 +52,6 @@ for f in "${files[@]}"; do
 
   for ((pass = 1; pass <= TIDY_PASSES; pass++)); do
     before="$(sha256sum <"$dst")"
-    # Name the pass. The last one repeats every line of the one before it, since a
-    # pass that changes nothing is how the loop ends, and without this header a
-    # re-reported LEFT ALONE reads as a second finding rather than a second look.
-    echo "  tidy pass ${pass}/${TIDY_PASSES} ${dst}:"
     mute_pcbnew_noise python3 ./scripts/cleanup-tracks.py "$dst"
     # After the cleanup, which merges the collinear fragments an edit leaves behind:
     # a fragmented run does not read as the shape it is, so a stray would be missed.
@@ -64,10 +60,14 @@ for f in "${files[@]}"; do
     # been snapped to the pattern.
     mute_pcbnew_noise python3 ./scripts/tidy-slivers.py "$dst"
     # Each step leaves the board untouched when it has nothing to do, so an
-    # unchanged file is the fixpoint.
+    # unchanged file is the fixpoint. Close every pass with its outcome: the last
+    # pass repeats the lines of the one before it, and this is what tells a reader
+    # that a re-reported LEFT ALONE is a second look rather than a second finding.
     if [ "$(sha256sum <"$dst")" = "$before" ]; then
+      echo "  tidy ${dst}: settled, pass ${pass}/${TIDY_PASSES} changed nothing"
       break
     fi
+    echo "  tidy ${dst}: pass ${pass}/${TIDY_PASSES} changed it, going again"
     if [ "$pass" -eq "$TIDY_PASSES" ]; then
       echo "ERROR ${dst}: still changing after ${TIDY_PASSES} tidy passes" >&2
       echo "    The cleanup and tidy steps are trading changes rather than settling, so" >&2

@@ -60,6 +60,7 @@ import argparse
 from pcb_copper import (TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via,
                         keepout_blocker)
 from pcbnew_quiet import pcbnew
+from pipeline_log import note
 
 MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
 
@@ -225,7 +226,7 @@ def tidy_slivers(path):
         raise SystemExit("\n".join(lines))
 
     if not collapsed:
-        print(f"  unchanged {path}: no slivers to tidy")
+        note(f"  unchanged {path}: no slivers to tidy")
         return
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper

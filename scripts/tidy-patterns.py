@@ -58,6 +58,7 @@ import sys
 
 from pcb_copper import clearance_blocker, describe, ids, keepout_blocker
 from pcbnew_quiet import pcbnew
+from pipeline_log import note
 
 MAX_MOVE = pcbnew.FromMM(1.0)  # furthest a snap may drag copper, per endpoint
 
@@ -408,7 +409,7 @@ def tidy_patterns(path):
         print(f"  LEFT ALONE {net}: {why}")
 
     if not legs and not motifs:
-        print(f"  unchanged {path}: already on the pattern")
+        note(f"  unchanged {path}: already on the pattern")
         return
 
     for net, _, _, was, now, travel in legs:

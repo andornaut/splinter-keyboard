@@ -37,6 +37,8 @@ import json
 import os
 import sys
 
+from pipeline_log import note
+
 # Spacing between routes. Raised from KiCad's 0.20mm default to give the
 # hand-routed matrix more yield margin at JLCPCB. Track width stays 0.20mm (the
 # matrix nets carry ~no current, and a fatter track would eat the new spacing in
@@ -174,7 +176,7 @@ def apply(path):
             f.write("\n")
         print(f"  updated {path}: project settings")
     else:
-        print(f"  ok {path}: already up to date")
+        note(f"  ok {path}: already up to date")
     dru = ensure_drc_rules(path)
     if dru:
         print(f"  wrote {dru}: custom DRC rules")

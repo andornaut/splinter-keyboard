@@ -37,6 +37,7 @@ from collections import namedtuple
 
 from pcb_copper import copper_pads, dangling_tracks, ids, is_via
 from pcbnew_quiet import pcbnew
+from pipeline_log import note
 
 CLEARANCE = pcbnew.FromMM(0.25)
 MIN_THICKNESS = pcbnew.FromMM(0.25)
@@ -108,12 +109,12 @@ def choose_gnd_layer(board):
 
 
 def _print_analysis(path, best, rows, total_gnd):
-    print(f"  analysis {path}: GND pour layer")
+    note(f"  analysis {path}: GND pour layer")
     for r in rows:
         mark = "  <- selected" if r.layer == best.layer else ""
-        print(f"    {r.name}: signal={r.signal_mm:7.1f}mm  "
-              f"GND-pads-reachable={r.reach}/{total_gnd}  cost={r.cost:7.1f}{mark}")
-    print(f"    selected {best.name}")
+        note(f"    {r.name}: signal={r.signal_mm:7.1f}mm  "
+             f"GND-pads-reachable={r.reach}/{total_gnd}  cost={r.cost:7.1f}{mark}")
+    note(f"    selected {best.name}")
 
 
 def add_gnd_zone(path):
@@ -142,7 +143,7 @@ def add_gnd_zone(path):
         msg = f"GND pour already present on {', '.join(existing)}, leaving as-is"
         if layer_name not in existing:
             msg += f"; analysis preferred {layer_name}, not re-pouring an already-poured board"
-        print(f"  unchanged {path}: {msg}")
+        note(f"  unchanged {path}: {msg}")
         return
 
     bb = board.GetBoardEdgesBoundingBox()

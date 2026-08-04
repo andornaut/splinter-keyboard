@@ -52,6 +52,8 @@ import sys
 import urllib.error
 import urllib.request
 
+from pipeline_log import note
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pcbnew_quiet import pcbnew  # noqa: E402
 
@@ -185,7 +187,7 @@ def check_symmetry(boards):
             print('    The MCU cannot be mirrored, so one half is wired backwards, and\n'
                   '    both halves must share one raw_pin_column value', file=sys.stderr)
         else:
-            print(f'  ok {stage}: all {len(mapped)} board(s) agree on MCU pad wiring')
+            note(f'  ok {stage}: all {len(mapped)} board(s) agree on MCU pad wiring')
     return failures
 
 
@@ -258,7 +260,7 @@ def check_firmware(boards, fw, labels):
             print(f'  FAIL {key}: serial pin, board {got_serial}, '
                   f'firmware {fw["split"]["serial"]["pin"]}', file=sys.stderr)
         if key not in failures:
-            print(f'  ok {key}: matrix pins and serial pin match the firmware')
+            note(f'  ok {key}: matrix pins and serial pin match the firmware')
     return failures
 
 
@@ -286,13 +288,13 @@ def main():
 
     source = resolve_firmware_source(args.firmware)
 
-    print(f'validate:firmware: {len(boards)} board(s) for {version}')
+    note(f'validate:firmware: {len(boards)} board(s) for {version}')
     failures = check_symmetry(boards)
 
     fw, reason = load_firmware(source)
     if fw is None:
         raise SystemExit(f'validate:firmware: {reason}')
-    print(f'  firmware source: {source}')
+    note(f'  firmware source: {source}')
     failures += check_firmware(boards, fw, labels)
 
     if failures:
@@ -300,7 +302,9 @@ def main():
         print(f'validate:firmware: {len(failures)} check(s) failed for {version}',
               file=sys.stderr)
         raise SystemExit(1)
-    print('OK: validate:firmware')
+    # The firmware source names an external input that varies by machine, so the
+    # summary carries it rather than a line of its own.
+    print(f'OK: validate:firmware: {len(boards)} board(s) match {source}')
 
 
 if __name__ == '__main__':

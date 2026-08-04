@@ -43,6 +43,7 @@ import math
 import sys
 
 from pcbnew_quiet import pcbnew
+from pipeline_log import note
 
 # Ring width: keep copper clear of the case support-wall lip (which sits on the
 # PCB face), with margin for the board's shift in its pocket and case build
@@ -324,8 +325,8 @@ def add_keepout_zones(path):
     existing = {z.GetZoneName() for z in board.Zones()
                 if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
     if existing:
-        print(f"  unchanged {path}: keepouts already present "
-              f"({', '.join(sorted(existing))})")
+        note(f"  unchanged {path}: keepouts already present "
+             f"({', '.join(sorted(existing))})")
         return
 
     moved, welded, max_move = _strip_degenerate_edges(board, path)

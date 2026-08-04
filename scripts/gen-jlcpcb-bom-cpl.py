@@ -26,6 +26,8 @@ import re
 import sys
 from collections import defaultdict
 
+from pipeline_log import note
+
 
 def ref_key(ref):
     """Natural sort key for a reference designator (D2 before D10). Allows a
@@ -101,8 +103,12 @@ def main():
     n_dnp = sum(len(refs) for _, refs in dnp_items)
     print(f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), "
           f"{n_dnp} do-not-place")
+    # Which packages they are is verbose-only: validate:fab is the gate that a
+    # part meant for assembly did not fall through to here (it requires every
+    # footprint with an lcsc to appear in the CPL exactly once), so this listing
+    # is for reading, not for catching.
     for pkg, refs in dnp_items:
-        print(f"    do-not-place {pkg} ({len(refs)})")
+        note(f"    do-not-place {pkg} ({len(refs)})")
 
 
 if __name__ == "__main__":

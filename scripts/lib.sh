@@ -40,6 +40,12 @@ require_pcbs() {
 # the script's success signal. Goes to stdout (errors already go to stderr).
 ok() { echo "OK: $*"; }
 
+# Print a line that only confirms nothing needed doing, under PIPELINE_VERBOSE.
+# The bash half of scripts/pipeline_log.py; see there for why the switch is an
+# environment variable. `return 0` because a bare test is the last command under
+# `set -e` and a quiet run would otherwise abort the caller.
+note() { [ -n "${PIPELINE_VERBOSE:-}" ] && echo "$@"; return 0; }
+
 # Fail early with a clear message if any named runtime dependency is missing from
 # PATH. Shared by the wrappers that shell out to external tools (fab,
 # panelize). Call as `require_cmds kicad-cli zip python3`.
@@ -75,7 +81,9 @@ mute_pcbnew_noise() {
 # routed board drifted from the current config.yaml (or is unstamped). Scoped to
 # routed/ (the fab source) so unrouted/ drift never blocks a legitimate fab/panel
 # of a current routed master. Under `set -e` a nonzero exit aborts the caller.
-provenance_gate_routed() { python3 ./scripts/validate-provenance.py routed; }
+# --quiet because this is a gate, not a report: a passing gate says nothing and
+# leaves the OK: line to validate:provenance, the step that reports provenance.
+provenance_gate_routed() { python3 ./scripts/validate-provenance.py routed --quiet; }
 
 # Apply the custom KiCad project settings (VCC net class + DRC floors) to the
 # [!_]*.kicad_pro files under $1. Called by each step that writes a board tier so

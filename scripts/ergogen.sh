@@ -17,7 +17,16 @@ helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"
 out_dir="dist/${VERSION}/ergogen"
 
 git submodule update --init ergogen/footprints/ceoloide ergogen/footprints/infused-kim ergogen/kb_ergogen_helper
-npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
+
+# Ergogen narrates its twelve phases on the way to "Done."; none of it says
+# anything the step banner does not. Hold the output and print it only if the run
+# fails, where it is the whole diagnosis, or under PIPELINE_VERBOSE.
+if [ -n "${PIPELINE_VERBOSE:-}" ]; then
+  npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
+else
+  ergogen_log="$(npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/" 2>&1)" \
+    || { echo "$ergogen_log" >&2; exit 1; }
+fi
 require_pcbs "${out_dir}/pcbs" "No boards generated in ${out_dir}/pcbs/ -- check the config"
 for f in "${files[@]}"; do
   mute_pcbnew_noise python3 "$helper" --no-backup update-pcb "$f"

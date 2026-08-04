@@ -57,6 +57,7 @@ import sys
 from pcb_copper import (TOUCH_TOL, connected, copper_pads, covers, dangling_tracks,
                         dist, fill_zones, ids, is_via, point_to_segment)
 from pcbnew_quiet import pcbnew
+from pipeline_log import note
 
 ARC_ERROR = pcbnew.FromMM(0.01)  # polygon approximation of a pad/via outline
 MAX_PASSES = 3  # passes allowed to change the board before it is called an error
@@ -284,7 +285,7 @@ def _cleanup_pass(board):
 def cleanup_tracks(path):
     board = pcbnew.LoadBoard(path)
     if any(not z.IsFilled() for z in board.Zones() if not z.GetIsRuleArea()):
-        print(f"  filling {path}: unfilled zone(s), flowed before analysis")
+        note(f"  filling {path}: unfilled zone(s), flowed before analysis")
         _fill_zones(board)
 
     totals = [0, 0, 0, 0]
@@ -300,7 +301,7 @@ def cleanup_tracks(path):
             f"{counts[3]} teardrop(s), and merged {counts[2]} segment(s)")
 
     if not any(totals):
-        print(f"  unchanged {path}: nothing to clean up")
+        note(f"  unchanged {path}: nothing to clean up")
         return
 
     board.Save(path)
