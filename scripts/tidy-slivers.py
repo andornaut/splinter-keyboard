@@ -10,13 +10,16 @@ outright and deleting a sliver would strand the run on the far side of it.
 
 A sliver is collapsed by pulling what meets it onto a single point and deleting
 it, which is the one operation in this pipeline that MOVES copper rather than
-only removing it. That is capped hard at MAX_MOVE: the cap is what makes the
-collapse a tidy rather than a re-route, since copper that moves less than a
-hundredth of a millimetre cannot change what the board does. Where a collapse
-would need more than that, the sliver is left exactly as it is and reported as an
-error, because deciding to move real copper is a routing decision and belongs to
-whoever is routing. Nothing is saved in that case: the step either tidies
-everything it found or changes nothing.
+only removing it. What keeps that a tidy rather than a re-route is where the
+copper goes: an endpoint only ever travels along the sliver, over ground the
+sliver's own copper already occupied at the same width, so the board keeps the
+shape it had. MAX_MOVE caps that travel anyway, as a backstop against a sliver
+whose definition and geometry disagree. It binds only on traces wider than the
+cap, since a sliver is by definition shorter than it is wide. Where a collapse
+would need more, the sliver is left exactly as it is and reported as an error,
+because moving copper that far is a routing decision and belongs to whoever is
+routing. Nothing is saved in that case: the step either tidies everything it
+found or changes nothing.
 
   - a sliver whose ends both hang on other segments collapses to its midpoint, so
     each side moves by half its length
@@ -33,10 +36,8 @@ meeting end to end, which the next build's cleanup merges into one segment.
 
 Idempotent: a board with no slivers is not modified or even re-saved.
 
-`--max-move` raises the cap for one deliberate run, for the case the cap exists to
-prevent: a board carrying slivers a person is willing to have closed for them.
-The pipeline never passes it, so the default cap is what every build enforces.
-Re-run DRC after using it.
+`--max-move` changes the cap for one deliberate run. The pipeline never passes it,
+so the default is what every build enforces. Re-run DRC after raising it.
 
 Usage: tidy-slivers.py <board.kicad_pcb> [more.kicad_pcb ...] [--max-move <mm>]
 """
@@ -45,7 +46,7 @@ import argparse
 from pcb_copper import TOUCH_TOL, copper_pads, dist, is_via
 from pcbnew_quiet import pcbnew
 
-MAX_MOVE = pcbnew.FromMM(0.01)  # furthest a tidy may drag copper, per endpoint
+MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
 
 SEGMENT_CLASS = "PCB_TRACK"  # a straight segment; an arc endpoint cannot be moved freely
 
