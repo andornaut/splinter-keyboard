@@ -246,4 +246,6 @@ Every step is a hard gate. `panelize` runs last and is the only optional one, sk
 
 The copy steps and manual routing let `routed/` drift from `config.yaml`, so you could fab a stale board. `npm run ergogen` stamps each board with a hash of `config.yaml`; `fab` refuses a drifted or unstamped master, and `validate:provenance` checks without fabbing. Clear a mismatch by re-running the pipeline, re-routing if needed.
 
+A panel inherits its masters' stamp rather than getting one of its own, so its `commit=` names the commit the panelled copper came from. Masters whose stamps disagree stop `panelize`, since a panel merged from two generations of board has no single provenance to report.
+
 Only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".

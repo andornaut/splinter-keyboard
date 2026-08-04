@@ -5,8 +5,8 @@ Lays the input boards out in a single left-to-right row inside a frame, joins
 each board to the frame with mouse-bite tabs, and adds corner fiducials and
 tooling holes for assembly. Each board's references and nets are prefixed with
 the board's file stem (e.g. left_D1, right_D1) so the two mirrored halves stay
-unique in the position file / CPL. The panel is re-stamped with the provenance
-string (see provenance.py) when --version and --config are given.
+unique in the position file / CPL. The panel inherits its boards' provenance stamp
+(see provenance.py and `stamp` below).
 
 Unlike the other scripts/*.py helpers this one is NOT stdlib-only: it needs KiKit
 (kikit.panelize) plus the KiCad pcbnew bindings. KiCad 10 support is only in
@@ -14,8 +14,7 @@ KiKit/pcbnewTransition git master (no PyPI release yet), so panelize.sh runs thi
 under a dedicated venv. inheritDrc=False is required: KiKit cannot merge the two
 boards' net-class/DRC rules and aborts on save otherwise.
 
-Usage: panelize.py <board.kicad_pcb> [more ...] --output panel.kicad_pcb \
-         [--version v4 --config v4/ergogen/config.yaml] [tuning flags]
+Usage: panelize.py <board.kicad_pcb> [more ...] --output panel.kicad_pcb [tuning flags]
 """
 import argparse
 import os
@@ -25,7 +24,7 @@ from pcbnew_quiet import pcbnew
 from kikit.panelize import Panel, Origin
 from kikit.units import mm
 
-from provenance import build_stamp, write_stamp
+from provenance import read_stamp, write_stamp
 
 
 def stem(path):
@@ -66,9 +65,32 @@ def build(boards, output, rail, gap, frame_space, tabs, tab_width,
     panel.save()
 
 
-def stamp(output, version, config):
+def stamp(boards, output):
+    """Carry the source boards' provenance stamp onto the panel.
+
+    Inherited, never rebuilt. A panel is its boards merged and nothing else, so the
+    stamp that describes it is the one they already carry. Building a fresh one here
+    would re-read the working tree at panel time, which is always later than the
+    boards were stamped and, in a pipeline run, always after the steps that rewrite
+    the boards have dirtied it: the panel would report clean=no beside the very
+    commit its copper came from, and the commit field would read as meaningless.
+
+    Boards that disagree is a hard error. A panel merged from two generations of
+    board has no single provenance, and reporting either one of them would be a
+    claim about copper that is not all there.
+    """
+    stamps = [(stem(f), read_stamp(pcbnew.LoadBoard(f))) for f in boards]
+    missing = [name for name, text in stamps if not text]
+    if missing:
+        sys.exit(f"panelize.py: no provenance stamp on {', '.join(missing)}. "
+                 "Re-run the pipeline to stamp the boards, then panel them.")
+    if len({text for _, text in stamps}) > 1:
+        listing = "\n".join(f"  {name}: {text}" for name, text in stamps)
+        sys.exit("panelize.py: the boards carry different provenance stamps, so the panel "
+                 f"has no single provenance to report:\n{listing}\n"
+                 "  Re-run the pipeline so every half is built from the same config.")
+    text = stamps[0][1]
     board = pcbnew.LoadBoard(output)
-    text = build_stamp(config, version)
     write_stamp(board, text)
     board.Save(output)
     print(f"{output}: {text}")
@@ -78,8 +100,6 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("board", nargs="+", help="routed .kicad_pcb file(s), laid out left-to-right")
     ap.add_argument("--output", required=True, help="output panel .kicad_pcb path")
-    ap.add_argument("--version", help="active version (for the provenance stamp)")
-    ap.add_argument("--config", help="config.yaml path (for the provenance stamp)")
     ap.add_argument("--rail", type=float, default=5.0, help="frame rail width, mm (default 5)")
     ap.add_argument("--gap", type=float, default=3.0, help="gap between boards, mm (default 3)")
     ap.add_argument("--frame-space", type=float, default=3.0, help="board-to-frame gap, mm (default 3)")
@@ -108,8 +128,7 @@ def main():
           mb_diameter=nm(args.mousebite_diameter), mb_spacing=nm(args.mousebite_spacing),
           tab_min_distance=nm(args.tab_min_distance))
 
-    if args.version and args.config:
-        stamp(args.output, args.version, args.config)
+    stamp(args.board, args.output)
     print(f"panel written to {args.output}")
 
 

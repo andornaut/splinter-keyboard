@@ -35,6 +35,13 @@ def write_stamp(board, text):
     board.GetTitleBlock().SetComment(STAMP_COMMENT_INDEX, text)
 
 
+def read_stamp(board):
+    """Return the stamp string in an already-loaded board's title_block comment 1,
+    or "" if it carries none. The counterpart to write_stamp, so every reader and
+    writer shares the one comment index."""
+    return board.GetTitleBlock().GetComment(STAMP_COMMENT_INDEX).strip()
+
+
 def config_hash(config_path):
     """Return sha256 of the config file's bytes, truncated to 12 hex chars."""
     with open(config_path, "rb") as f:
@@ -55,7 +62,12 @@ def _git(*args):
 
 
 def build_stamp(config_path, version):
-    """Assemble the provenance stamp string for a freshly generated board."""
+    """Assemble the provenance stamp string for a freshly generated board.
+
+    Only for a board built from config.yaml. Anything assembled out of boards that
+    are already stamped inherits their stamp (read_stamp) instead: the git fields
+    describe the tree at the moment they are read, so rebuilding a stamp later in a
+    run would report on that moment rather than on the copper it is stamping."""
     commit = _git("rev-parse", "--short", "HEAD")
     status = _git("status", "--porcelain")
     if commit is None or status is None:

@@ -18,7 +18,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run panelize)}"
 parts="./${VERSION}/kicad/jlcpcb-parts.json"
-config="./${VERSION}/ergogen/config.yaml"
 out="dist/${VERSION}/kicad/jlcpcb/panel"
 panel="dist/${VERSION}/kicad/panelize/panel.kicad_pcb"
 
@@ -42,10 +41,11 @@ require_pcbs "./${VERSION}/kicad/routed"
 
 # Build the panel (KiKit prints wx image-handler + pcbnew PROPERTY_ENUM noise to
 # stderr; mute_kikit_noise drops just those, keeping real errors and the exit
-# code). panelize.py creates the output directory itself.
+# code). panelize.py creates the output directory itself, and stamps the panel with
+# the provenance the masters already carry, so it needs no version or config here.
 echo "panel <- ${files[*]}"
 mute_kikit_noise env PYTHONNOUSERSITE=1 "$kikit_py" ./scripts/panelize.py "${files[@]}" \
-  --output "$panel" --version "$VERSION" --config "$config"
+  --output "$panel"
 
 # DRC is advisory on the panel: write the report but do NOT abort on violations
 # (board-to-board and tab clearances are expected). The per-half fab run
