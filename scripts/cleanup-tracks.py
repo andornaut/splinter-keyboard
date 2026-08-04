@@ -36,8 +36,16 @@ flare on the very copper under test, so counting it would let a dangling stub
 hold itself up. Teardrops left with nothing to decorate are deleted with the
 copper they decorated, so a deleted via cannot leave an island behind.
 
-Zones are re-filled before saving, for the same reason KiCad offers to re-pour
-after its own cleanup: removing copper changes what the pour can flow into.
+Zones are re-filled at the end of every pass, for the same reason KiCad offers to
+re-pour after its own cleanup: removing copper changes what the pour can flow
+into. That re-pour is also why the whole pass repeats until one of them changes
+nothing: a track the old pour propped up only reads as dangling once the pour has
+been re-flowed without it, and the merge and the teardrop scan both run after the
+deletion fixpoint, so nothing tests what they leave behind. Every rule only ever
+removes copper, so a changing pass strictly shrinks the board and the loop always
+ends; MAX_PASSES is a canary for rules interacting in a way this file does not
+predict, not a termination guard, and a board still changing that deep is a hard
+error rather than a truncated cleanup.
 
 Idempotent: a board with nothing to clean is not modified or even re-saved, so
 running it on every build is safe.
@@ -51,6 +59,7 @@ from pcb_copper import (TOUCH_TOL, connected, copper_pads, covers, dangling_trac
 from pcbnew_quiet import pcbnew
 
 ARC_ERROR = pcbnew.FromMM(0.01)  # polygon approximation of a pad/via outline
+MAX_PASSES = 3  # passes allowed to change the board before it is called an error
 
 
 def _fill_zones(board):
@@ -245,12 +254,10 @@ def _orphan_teardrops(board):
     return orphans
 
 
-def cleanup_tracks(path):
-    board = pcbnew.LoadBoard(path)
-    if any(not z.IsFilled() for z in board.Zones() if not z.GetIsRuleArea()):
-        print(f"  filling unfilled zone(s) before analysis: {path}")
-        _fill_zones(board)
-
+def _cleanup_pass(board):
+    """Every rule once: the deletions to a fixpoint, then the merge, then the
+    teardrops the deletions stranded, then a re-pour if any of it went. Returns the
+    four counts, all zero on a board this pass found nothing to do to."""
     removed_tracks = removed_vias = 0
     while True:
         doomed_tracks, doomed_vias = _doomed(board)
@@ -269,15 +276,37 @@ def cleanup_tracks(path):
     for z in orphans:
         board.RemoveNative(z)
 
-    if not (removed_tracks or removed_vias or merged or orphans):
+    if removed_tracks or removed_vias or merged or orphans:
+        _fill_zones(board)  # re-pour around the freed copper, before the next pass reads it
+    return removed_tracks, removed_vias, merged, len(orphans)
+
+
+def cleanup_tracks(path):
+    board = pcbnew.LoadBoard(path)
+    if any(not z.IsFilled() for z in board.Zones() if not z.GetIsRuleArea()):
+        print(f"  filling unfilled zone(s) before analysis: {path}")
+        _fill_zones(board)
+
+    totals = [0, 0, 0, 0]
+    for run in range(1, MAX_PASSES + 1):
+        counts = _cleanup_pass(board)
+        if not any(counts):
+            break
+        totals = [total + count for total, count in zip(totals, counts)]
+    else:
+        raise SystemExit(
+            f"ERROR: still cleaning up after {MAX_PASSES} passes: {path}\n"
+            f"  the last pass removed {counts[0]} track(s), {counts[1]} via(s) and "
+            f"{counts[3]} teardrop(s), and merged {counts[2]} segment(s)")
+
+    if not any(totals):
         print(f"  UNCHANGED: nothing to clean up: {path}")
         return
 
-    _fill_zones(board)  # re-pour around the freed copper
     board.Save(path)
-    print(f"  CLEANED: removed {removed_tracks} dangling/buried/duplicate track(s), {removed_vias} "
-          f"unconnected/redundant via(s) and {len(orphans)} stranded teardrop(s), "
-          f"merged {merged} split segment(s), zones re-filled: {path}")
+    print(f"  CLEANED: removed {totals[0]} dangling/buried/duplicate track(s), {totals[1]} "
+          f"unconnected/redundant via(s) and {totals[3]} stranded teardrop(s), "
+          f"merged {totals[2]} split segment(s) over {run - 1} pass(es), zones re-filled: {path}")
 
 
 if __name__ == "__main__":
