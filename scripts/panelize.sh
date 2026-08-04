@@ -10,7 +10,7 @@
 # and PYTHONNOUSERSITE=1 (so a stale ~/.local pcbnewTransition can't shadow it).
 # Set KIKIT_PYTHON to override the interpreter. The per-half fab is the
 # strict-DRC gate and source of truth; the panel's DRC here is advisory only,
-# because KiKit panels routinely trip board-to-board / tab clearance rules.
+# because the frame KiKit adds trips DRC rules that no board of ours does.
 # Run via: npm run panelize
 set -euo pipefail
 shopt -s nullglob
@@ -47,9 +47,11 @@ echo "  build $panel: from ${files[*]}"
 mute_pcbnew_noise env PYTHONNOUSERSITE=1 "$kikit_py" ./scripts/panelize.py "${files[@]}" \
   --output "$panel"
 
-# DRC is advisory on the panel: write the report but do NOT abort on violations
-# (board-to-board and tab clearances are expected). The per-half fab run
-# is the hard DRC gate. Refill zones in-memory so the report is meaningful.
+# DRC is advisory on the panel: write the report but do NOT abort on violations.
+# They come from the rails, where the corner fiducials and tooling holes sit close
+# enough to trip mask-bridge, edge-clearance, courtyard and hole-clearance rules
+# against each other; the rails are snapped off and carry no circuit. The per-half
+# fab run is the hard DRC gate. Refill zones in-memory so the report is meaningful.
 mkdir -p "$out"
 echo "  export $panel: $out/"
 if mute_pcbnew_noise kicad-cli pcb drc --refill-zones --severity-error \
