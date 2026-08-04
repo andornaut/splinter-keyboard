@@ -234,7 +234,7 @@ Every step is a hard gate. `panelize` runs last and is the only optional one, sk
 
 | Gate | Checks |
 | --- | --- |
-| `validate:provenance` | Every board's stamp still matches `config.yaml`, so a stale master cannot reach fab |
+| `validate:provenance` | Every board's stamp still matches `config.yaml`, and the boards in a stage were all built in the same run, so neither a stale master nor a half restored on its own can reach fab |
 | `validate:firmware` | Both halves wire the MCU header identically, and the matrix they imply equals the QMK `keyboard.json` |
 | `validate:fab` | The exported artifacts: a board-spanning GND plane on both master and gerbers, a complete gerber set, a non-empty BOM and CPL with every assembled footprint appearing in the CPL exactly once, outputs no older than their sources, comparable teardrop counts across the halves |
 
@@ -245,6 +245,8 @@ Every step is a hard gate. `panelize` runs last and is the only optional one, sk
 ### Provenance stamp
 
 The copy steps and manual routing let `routed/` drift from `config.yaml`, so you could fab a stale board. `npm run ergogen` stamps each board with a hash of `config.yaml`; `fab` refuses a drifted or unstamped master, and `validate:provenance` checks without fabbing. Clear a mismatch by re-running the pipeline, re-routing if needed.
+
+Restoring or rebuilding one half on its own is invisible to the hash, since identical config bytes hash the same across builds, so `validate:provenance` also requires every board in a stage to carry the same stamp. The two stages are compared separately: `unrouted/` is expected to be newer than `routed/` between an `ergogen` run and the save back to the masters.
 
 A panel inherits its masters' stamp rather than getting one of its own, so its `commit=` names the commit the panelled copper came from. Masters whose stamps disagree stop `panelize`, since a panel merged from two generations of board has no single provenance to report.
 
