@@ -10,10 +10,11 @@
 #   3 copy:traces-to-unrouted routed/ traces+teardrops -> unrouted/
 #   4 copy:unrouted-to-routed unrouted/ -> routed/ (adds GND pour)
 #   5 validate:provenance   unrouted/ + routed/ match current config
-#   6 validate:firmware     halves agree on MCU pins; boards match QMK matrix_pins
-#   7 fab                   per-half gerbers/drill (+ assembly BOM/CPL)
-#   8 validate:fab          audit the fab outputs (GND plane, gerber set, BOM/CPL)
-#   9 panelize              combined left+right PCBA panel (optional)
+#   6 validate:symmetry     the halves mirror: outline, parts, pads, zones, silk
+#   7 validate:firmware     halves agree on MCU pins; boards match QMK matrix_pins
+#   8 fab                   per-half gerbers/drill (+ assembly BOM/CPL)
+#   9 validate:fab          audit the fab outputs (GND plane, gerber set, BOM/CPL)
+#  10 panelize              combined left+right PCBA panel (optional)
 #
 # validate:firmware runs before fab so a board whose matrix nets disagree with the
 # firmware aborts before any gerber is written; that error passes DRC and is
@@ -26,13 +27,31 @@
 #
 # panelize needs the KiKit venv (see panelize.sh). When it is absent the pipeline
 # skips that step with a note instead of failing -- the per-half fab output from
-# steps 7-8 is complete on its own. Every other step is a hard gate.
+# steps 8-9 is complete on its own. Every other step is a hard gate.
+#
+# A step reports what it changed and what wants reading; the lines that only
+# confirm nothing needed doing are held back, since each step's OK: summary
+# already carries the count they would have added up to. `npm run pipeline -- -v`
+# shows them all, plus Ergogen's own narration and the full artifact listing. It
+# is one env var (PIPELINE_VERBOSE) because a run is a dozen processes deep and
+# every one of them has to agree on how loud it is; see scripts/pipeline_log.py.
 set -Eeuo pipefail
 shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
+# Every argument is checked, not just the first: this run rewrites the masters and
+# writes gerbers, so an unrecognised argument has to stop it rather than be dropped
+# on the floor behind a flag that did parse.
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -v|--verbose) export PIPELINE_VERBOSE=1 ;;
+    *) echo "usage: npm run pipeline [-- -v]" >&2; exit 2 ;;
+  esac
+  shift
+done
+
 VERSION="${npm_package_config_VERSION:?set via npm (npm run pipeline)}"
-total_steps=9
+total_steps=10
 
 # Bold the banners only when stdout is a terminal (plain text when piped/logged).
 if [ -t 1 ]; then B=$'\033[1m'; R=$'\033[0m'; else B=''; R=''; fi
@@ -63,13 +82,14 @@ run_step 2 "copy:dist-to-unrouted"   ./scripts/copy-dist-to-unrouted.sh
 run_step 3 "copy:traces-to-unrouted" ./scripts/copy-traces-to-unrouted.sh
 run_step 4 "copy:unrouted-to-routed" ./scripts/copy-unrouted-to-routed.sh
 run_step 5 "validate:provenance"     python3 ./scripts/validate-provenance.py
-run_step 6 "validate:firmware"       python3 ./scripts/validate-firmware.py
-run_step 7 "fab"                     ./scripts/fab.sh
-run_step 8 "validate:fab"            python3 ./scripts/validate-fab.py
+run_step 6 "validate:symmetry"       python3 ./scripts/validate-symmetry.py
+run_step 7 "validate:firmware"       python3 ./scripts/validate-firmware.py
+run_step 8 "fab"                     ./scripts/fab.sh
+run_step 9 "validate:fab"            python3 ./scripts/validate-fab.py
 
-# Step 9 (panelize) is optional: run it only when the KiKit venv is present and
+# Step 10 (panelize) is optional: run it only when the KiKit venv is present and
 # importable (the same probe panelize.sh does), otherwise skip with a note so a
-# machine without KiKit still gets a complete per-half fab from steps 7-8.
+# machine without KiKit still gets a complete per-half fab from steps 8-9.
 current_step="panelize"
 printf '\n%s==> [%d/%d] %s%s\n' "$B" "$total_steps" "$total_steps" "panelize (optional)" "$R"
 kikit_py="$(kikit_python)"
@@ -78,9 +98,9 @@ if kikit_importable "$kikit_py"; then
   ./scripts/panelize.sh
   summary+=("ok|panelize|$(( SECONDS - t0 ))s")
 else
-  echo "  KiKit not available at ${kikit_py}; skipping the panel."
-  echo "  Per-half fab from steps 7-8 is complete. Install KiKit (ansible-ctrl hobbies"
-  echo "  role, kicad tag) or set KIKIT_PYTHON to enable panelization."
+  echo "  skip panelize: KiKit not importable at ${kikit_py}"
+  echo "    The per-half fab from steps 8-9 is complete on its own. Install KiKit"
+  echo "    (ansible-ctrl hobbies role, kicad tag) or set KIKIT_PYTHON to enable it"
   summary+=("skip|panelize|KiKit unavailable")
 fi
 
@@ -100,10 +120,16 @@ if [ -d "$base" ]; then
   echo "Fab outputs (${base}/):"
   for d in "$base"/*/; do
     [ -d "$d" ] || continue
-    echo "  ${d#"${base}/"}"
-    for f in "$d"*; do
-      [ -f "$f" ] || continue   # skip the gerber/ subdir; the zipped set is the artifact
-      printf '    %-22s %s\n' "$(basename "$f")" "$(du -h "$f" | cut -f1)"
+    # A count and a size per output directory; the file-by-file listing is what
+    # PIPELINE_VERBOSE is for. The names are derivable from the directory name.
+    files=("$d"*)                # the gerber/ subdir is skipped: the zip is the artifact
+    n=0
+    for f in "${files[@]}"; do [ -f "$f" ] && n=$((n + 1)); done
+    printf '  %-8s %d files, %s\n' "${d#"${base}/"}" "$n" \
+      "$(du -sh --exclude=gerber "$d" | cut -f1)"
+    for f in "${files[@]}"; do
+      [ -f "$f" ] || continue
+      note "$(printf '    %-22s %s' "$(basename "$f")" "$(du -h "$f" | cut -f1)")"
     done
   done
 fi

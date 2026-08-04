@@ -246,6 +246,25 @@ points:
       home.row_net: P16
       upper.row_net: P10 # matches the matrix's upper mirror row
       num.row_net: P15
+  # --- Outer (pinky) board edge ---
+  # The two corners of the outer board edge, defined once here and mirrored, so
+  # both halves' outer edges are exact mirror images by construction. Anchoring
+  # each half's edge to its own pinky column instead lets the two drift apart by
+  # a fraction of a millimetre with nothing to catch it.
+  # The base points sit on the RIGHT half (the reverse of the usual left-is-source
+  # convention) because that is where the edge is constrained: its 1u pinky sets
+  # the 0.5mm keycap gap at u/2 from the key center. The left half's 1.5u pinky
+  # has ~10mm of margin, so it follows the mirror (mirror_edge_outer_*).
+  zones.edge_outer_top:
+    mirror: *matrix_mirror
+    anchor:
+      ref: extra_equal_num
+      shift: [u/2, u/2 +6.0]
+  zones.edge_outer_bottom:
+    mirror: *matrix_mirror
+    anchor:
+      ref: extra_equal_lower
+      shift: [u/2, -u/2 -u]
   # --- Thumbcluster (mirrored to both halves) ---
   zones.thumbcluster:
     # The anchor shift and the splay are jointly solved against the thumb
@@ -326,10 +345,11 @@ outlines:
   _boxleft:
     - what: polygon
       points:
-        # Outer (pinky) edge: the left's 1.5u pinky, tuned separately from the
-        # right (the halves' pinky columns differ, so the gaps are not mirrored).
-        - ref: matrix_zero_num
-          shift: [-u/2 -u, u/2 +6.0]
+        # Outer (pinky) edge: the mirrored edge_outer_* anchors, so this edge is
+        # the exact mirror of the right half's. Do not re-anchor it to this half's
+        # own pinky column: the halves' pinky columns differ, so that is what let
+        # the two edges drift apart.
+        - ref: mirror_edge_outer_top
 
         # Top edge straight across; the USB-C notch is subtracted separately
         # (_usbleft) after the fillet so its corners stay square.
@@ -340,21 +360,17 @@ outlines:
         # the thumb-inner junction is flush with no step. Retune with the TRRS position.
         - ref: matrix_five_lower
           shift: [u + 17.125, -1u -1/2u]
-        - ref: matrix_zero_mod
-          shift: [-u/4 -u +0.25, -u/2]
+        - ref: mirror_edge_outer_bottom
   _boxright:
     - what: polygon
       points:
         - ref: mirror_matrix_five_num
           shift: [u + 17.125, u/2 +6.0]
 
-        # Outer (pinky) edge: 0.5mm keycap gap. The right pinky is 1u and the extra
-        # inner column makes this half set the board width; the left pinky is 1.5u
-        # and tuned separately, so the two outer edges are not mirrored.
-        - ref: extra_equal_num
-          shift: [u/2, u/2 +6.0]
-        - ref: extra_equal_lower
-          shift: [u/2, -u/2 -u]
+        # Outer (pinky) edge: the edge_outer_* anchors, which carry the 0.5mm
+        # keycap gap this half's 1u pinky sets and drive the left half's edge too.
+        - ref: edge_outer_top
+        - ref: edge_outer_bottom
         - ref: mirror_matrix_five_lower
           shift: [u + 17.125, -u -1/2u]
   # USB-C cutouts, subtracted from the walls after the fillet so the notch keeps

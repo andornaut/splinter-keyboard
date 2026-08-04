@@ -76,7 +76,7 @@ Run everything through `npm run` from the repo root: the scripts read the active
 
 | Command | Does |
 | --- | --- |
-| `pipeline` | The full build, all eight steps. The normal entry point. |
+| `pipeline` | The full build, every gate in order. The normal entry point. Add `-- -v` for the full log. |
 | `ergogen` | Generate outlines and PCBs into `dist/${VERSION}/ergogen/` |
 | `watch` / `watch:sync-unrouted` | Re-run `ergogen` on every `config.yaml` change, the second also copying into `unrouted/` |
 | `copy:dist-to-unrouted` | `dist/` -> `unrouted/` (backs up the old boards first) |
@@ -85,7 +85,7 @@ Run everything through `npm run` from the repo root: the scripts read the active
 | `fab` | Gerbers, drill, and assembly BOM/CPL via `kicad-cli` |
 | `panelize` | Combine both halves into one JLCPCB panel (optional) |
 | `route` | Autoroute `unrouted/` via Freerouting (optional) |
-| `validate:provenance` / `validate:firmware` / `validate:fab` | The three gates (see [Validation](#validation)) |
+| `validate:provenance` / `validate:symmetry` / `validate:firmware` / `validate:fab` | The four gates (see [Validation](#validation)) |
 | `clean` | Remove `dist/` |
 
 ## Developing
@@ -222,11 +222,14 @@ Install the [custom QMK firmware](https://github.com/andornaut/qmk_firmware/tree
 | 3 | `copy:traces-to-unrouted` | Replay the masters' routing onto them |
 | 4 | `copy:unrouted-to-routed` | Save back to `routed/` ([details](#saving-to-routed)) |
 | 5 | `validate:provenance` | Stamps match `config.yaml` |
-| 6 | `validate:firmware` | Boards match the QMK matrix |
-| 7 | `fab` | Export gerbers and assembly files |
-| 8 | `validate:fab` | Audit those outputs |
+| 6 | `validate:symmetry` | The halves are exact mirror images |
+| 7 | `validate:firmware` | Boards match the QMK matrix |
+| 8 | `fab` | Export gerbers and assembly files |
+| 9 | `validate:fab` | Audit those outputs |
 
 Every step is a hard gate. `panelize` runs last and is the only optional one, skipped with a note when KiKit is absent.
+
+A step reports what it changed and what wants reading; lines that only confirm nothing needed doing are held back, since each step's closing `OK:` line already carries the count they would have added up to. `npm run pipeline -- -v` shows them all, plus Ergogen's own narration and the artifact listing file by file.
 
 **It requires existing routed masters** and does not route for you: step 3 replays their traces onto the fresh boards and aborts if a master carries no human routing. For a first route, or when geometry moves enough that the old traces no longer fit, route by hand in KiCad (Step 4).
 
@@ -235,10 +238,15 @@ Every step is a hard gate. `panelize` runs last and is the only optional one, sk
 | Gate | Checks |
 | --- | --- |
 | `validate:provenance` | Every board's stamp still matches `config.yaml`, and the boards in a stage were all built in the same run, so neither a stale master nor a half restored on its own can reach fab |
+| `validate:symmetry` | The two halves are exact mirror images: outline, parts, pads, rule areas and silk, compared in each board's own frame so the per-board recentering is not read as asymmetry |
 | `validate:firmware` | Both halves wire the MCU header identically, and the matrix they imply equals the QMK `keyboard.json` |
 | `validate:fab` | The exported artifacts: a board-spanning GND plane on both master and gerbers, a complete gerber set, a non-empty BOM and CPL with every assembled footprint appearing in the CPL exactly once, outputs no older than their sources, comparable teardrop counts across the halves |
 
 `validate:fab` also warns, without failing, when a master was built from an uncommitted tree: the board is fine, but its recorded commit means nothing, so the warning is expected during ordinary in-progress work.
+
+`validate:symmetry` holds the halves to being exact mirrors of each other. The licensed exception is the keys of the outer pinky columns, which differ by design (the left pinky is 1.5u; the right is 1u plus an extra inner column). Drift here is otherwise invisible: both halves still route, pass DRC, fab and assemble, and it surfaces only as a case that fits one half and rocks on the other, or a clearance that is comfortable on one half and marginal on the other. Both halves are generated from one set of mirrored anchors in `config.yaml`, so a failure is a config change to undo rather than a board to edit.
+
+Three kinds of part are placed in the same orientation on both halves rather than mirrored, because the parts themselves cannot be: an MX switch and its Kailh socket have an asymmetric pin pattern, the matrix diode wires straight to a switch pin and follows it, and the MCU is a module that plugs in one way up. Their pads therefore land at mirrored positions carrying the opposite pin at each. Key *placements* still mirror exactly, and so does every clearance measured from key geometry; only pad-to-edge distances within a key differ between the halves. Hand routing is not compared at all.
 
 `validate:firmware` reads the `keyboard.json` at `config.FIRMWARE` in [`package.json`](./package.json), which ships as a path to a sibling `qmk_firmware` checkout so the check covers what you are about to flash rather than what is pushed. Without that checkout the step fails and no gerbers are produced; pass `--firmware <URL>` or set `$SPLINTER_FIRMWARE_JSON` instead.
 

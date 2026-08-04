@@ -28,6 +28,7 @@
     "validate:fab": "python3 ./scripts/validate-fab.py",
     "validate:firmware": "python3 ./scripts/validate-firmware.py",
     "validate:provenance": "python3 ./scripts/validate-provenance.py",
+    "validate:symmetry": "python3 ./scripts/validate-symmetry.py",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen\"",
     "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\""
   }
