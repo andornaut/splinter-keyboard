@@ -6,9 +6,11 @@ Ergogen outline (`dist/v4/ergogen/outlines/full.dxf`), then printed
 the import/order workflow; this file is design guidance.
 
 Each half is 160 x 119mm un-filleted (the nominal hull); the actual Edge.Cuts
-outline is ~160.0 x 118.5mm after the 1.5mm wall fillet rounds the corners (the
-straight side edges set the 160mm width, so only the height drops ~0.5mm). Model
-the case to the filleted outline. The case's support-wall lip rests on the
+outline is 160 x 118.59mm after the 1.5mm wall fillet rounds the corners, so the
+height drops ~0.41mm while the width holds at the straight side edges. Model the
+case to the filleted outline. Measure the cut line itself (KiCad's board outline
+polygon), not the board bounding box: the box is inflated by the 0.15mm Edge.Cuts
+stroke on every side, which is 0.3mm of case pocket that is not there. The case's support-wall lip rests on the
 board's outer ~2mm margin (the perimeter copper keepout keeps that margin clear,
 so the lip presses on bare substrate, not copper). Left and right are mirrored, so
 model one and mirror, and export each as its own `*.step` (JLCCNC quantity is set

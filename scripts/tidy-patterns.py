@@ -12,13 +12,22 @@ of where the pattern puts it. A deviation larger than that is a routing decision
 (the detours around the screw-boss keepouts are all of them), so it is reported
 and left exactly as it is rather than being flattened into the pattern.
 
+The cap is measured on the travel, not on the deviation, and for a row leg the two
+differ: both corners move diagonally to hold their 45 degrees, so a leg one GRID
+line off the pattern travels sqrt(2) times as far as the leg itself moves. At
+MAX_MOVE the rule admits a leg two grid lines off and refuses one three lines off,
+which is the line between a hand-drag that missed and a leg drawn where it is on
+purpose.
+
 MAX_MOVE bounds how far a vertex travels, which is not the same as bounding where
 the copper ends up: moving one end of a run pivots the whole run about its other
 end, so copper swings along its entire length, millimetres from the vertex that
 moved. A run already close to another net can break clearance on a move of
-microns. So every snap is measured against the copper of every other net before it
-is applied (pcb_copper.clearance_blocker) and reported rather than applied if it
-would land inside the clearance either net asks for.
+microns, and a run drawn wide of a screw boss can come back inside the keepout the
+detour exists to clear. So every snap is measured before it is applied, against the
+copper of every other net (pcb_copper.clearance_blocker) and against the rule areas
+that keep copper out (pcb_copper.keepout_blocker). A snap that would land inside
+either is reported and left alone, like one over the cap.
 
   ROW LEG    a row trunk crosses from one column's via to the next as a
              three-segment staircase: 45 degree riser, horizontal leg, 45 degree
@@ -47,10 +56,10 @@ import collections
 import math
 import sys
 
-from pcb_copper import clearance_blocker, describe, ids
+from pcb_copper import clearance_blocker, describe, ids, keepout_blocker
 from pcbnew_quiet import pcbnew
 
-MAX_MOVE = pcbnew.FromMM(0.5)  # furthest a snap may drag copper, per endpoint
+MAX_MOVE = pcbnew.FromMM(1.0)  # furthest a snap may drag copper, per endpoint
 
 GRID = pcbnew.FromMM(0.25)  # the grid the row legs are drawn on
 LEG_DROP = pcbnew.FromMM(1.65)  # nominal gap from the lower via down to the leg
@@ -127,7 +136,22 @@ def _paths(tracks, pads):
     return out
 
 
-def _row_legs(tracks, pads):
+def _blocked(tracks, pads, zones, proposals, replaced):
+    """Why this copper may not go where the pattern wants it, as a phrase completing
+    "snapping it would ...", or None if it may. Two questions, asked of the same
+    proposals: does the copper crowd another net, and is it allowed there at all."""
+    crowded = clearance_blocker(tracks, pads, proposals, replaced)
+    if crowded is not None:
+        other, gap = crowded
+        return (f"put copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
+                f"{describe(other)}")
+    area = keepout_blocker(zones, proposals)
+    if area is not None:
+        return f"put copper inside the {area.GetZoneName()} rule area"
+    return None
+
+
+def _row_legs(tracks, pads, zones):
     """(chain, [(old, new)]) per staircase whose leg is off the pattern's grid line,
     plus the hops left alone and why."""
     snaps, skipped = [], []
@@ -160,12 +184,9 @@ def _row_legs(tracks, pads):
                             f"leg is {pcbnew.ToMM(abs(want - corner_a[1])):.3f}mm off the "
                             f"pattern, which would move copper {pcbnew.ToMM(travel):.3f}mm"))
             continue
-        blocked = clearance_blocker(tracks, pads, _leg_shapes(chain, moves), ids(chain))
-        if blocked is not None:
-            other, gap = blocked
-            skipped.append((net, points,
-                            f"snapping the leg would swing copper inside the "
-                            f"{pcbnew.ToMM(gap):.2f}mm clearance of {describe(other)}"))
+        why = _blocked(tracks, pads, zones, _leg_shapes(chain, moves), ids(chain))
+        if why is not None:
+            skipped.append((net, points, f"snapping the leg would {why}"))
             continue
         snaps.append((net, chain, moves, corner_a[1], want, travel))
     return snaps, skipped
@@ -263,14 +284,27 @@ def _reshape_cost(have, want):
 
 
 def _profile(shape):
-    """The layers and widths a shape is drawn with. _reshape_cost measures vertex
-    positions only, so it scores an identical run on the wrong layer, or at the
-    wrong width, at 0.000mm and MAX_MOVE cannot veto it. Two runs are the same
-    motif only if they agree here first."""
+    """The layers and widths a shape is drawn with, one entry per segment.
+    _reshape_cost measures vertex positions only, so it scores an identical run on
+    the wrong layer, or at the wrong width, at 0.000mm and MAX_MOVE cannot veto it.
+    Two runs are the same motif only if they agree here first.
+
+    Being one entry per segment, this tests segment count as much as layer and
+    width, and count is the commoner difference: a run carrying one fragment more
+    than the pattern does not match either. Anything reporting a mismatch has to say
+    which it was, or it sends the reader looking for the wrong difference."""
     return sorted((layer, width) for layer, width, *_ in shape)
 
 
-def _key_motifs(board, tracks, pads):
+def _profile_desc(board, shape):
+    """A shape's profile, named so a report can put two of them side by side."""
+    counts = collections.Counter(
+        (board.GetLayerName(layer), pcbnew.ToMM(width)) for layer, width, *_ in shape)
+    return ", ".join(f"{n} x {layer} {width:.2f}mm"
+                     for (layer, width), n in sorted(counts.items()))
+
+
+def _key_motifs(board, tracks, pads, zones):
     """(net, tracks, canonical segments) per key off its family's dominant shape,
     plus the keys left alone and why."""
     families, switch, runs = _key_families(board, tracks)
@@ -296,8 +330,9 @@ def _key_motifs(board, tracks, pads):
             cost = _reshape_cost(shape, canon)
             for net in nets:
                 if _profile(shape) != _profile(canon):
-                    skipped.append((net, f"its run is drawn on different layers or widths "
-                                         f"from the other {best}, so it is not the same motif"))
+                    skipped.append((net, f"its run is {_profile_desc(board, shape)} where the "
+                                         f"other {best} are {_profile_desc(board, canon)}, so it "
+                                         f"is not the same motif"))
                     continue
                 if cost > MAX_MOVE:
                     skipped.append((net, f"its run is a different shape, not a stray: "
@@ -308,12 +343,10 @@ def _key_motifs(board, tracks, pads):
                 want = [(layer, width,
                          (ax + origin.x, ay + origin.y), (bx + origin.x, by + origin.y))
                         for layer, width, ax, ay, bx, by in canon]
-                blocked = clearance_blocker(tracks, pads, _motif_shapes(runs[net][0], want),
-                                            ids(runs[net]))
-                if blocked is not None:
-                    other, gap = blocked
-                    skipped.append((net, f"re-laying it would put copper inside the "
-                                         f"{pcbnew.ToMM(gap):.2f}mm clearance of {describe(other)}"))
+                why = _blocked(tracks, pads, zones, _motif_shapes(runs[net][0], want),
+                               ids(runs[net]))
+                if why is not None:
+                    skipped.append((net, f"re-laying it would {why}"))
                     continue
                 rewrites.append((net, runs[net], want, cost))
     return rewrites, skipped
@@ -357,8 +390,9 @@ def tidy_patterns(path):
     # One snapshot for the whole run: the identity of these proxies is what the
     # chain walk and the rewrite both work from.
     tracks, pads = list(board.GetTracks()), list(board.GetPads())
-    legs, leg_skips = _row_legs(tracks, pads)
-    motifs, motif_skips = _key_motifs(board, tracks, pads)
+    zones = list(board.Zones())
+    legs, leg_skips = _row_legs(tracks, pads, zones)
+    motifs, motif_skips = _key_motifs(board, tracks, pads, zones)
 
     for _, chain, moves, _, _, _ in legs:
         _apply_row_leg(chain, moves)

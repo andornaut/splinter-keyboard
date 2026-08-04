@@ -9,24 +9,30 @@ net. cleanup-tracks.py cannot remove it, since every rule there deletes copper
 outright and deleting a sliver would strand the run on the far side of it.
 
 A sliver is collapsed by pulling what meets it onto a single point and deleting
-it, which is the one operation in this pipeline that MOVES copper rather than
-only removing it. Two things bound that move, and both are needed:
+it, which is one of the two operations in this pipeline that MOVE copper rather
+than only removing it (tidy-patterns.py is the other). A cap and two geometry
+tests bound the move, and all three are needed:
 
 MAX_MOVE caps how far any endpoint travels. It binds only on traces wider than
 the cap, since a sliver is by definition shorter than it is wide. Where a
 collapse would need more, the sliver is left exactly as it is, because moving
 copper that far is a routing decision and belongs to whoever is routing.
 
-A clearance test catches what the cap cannot. Moving one endpoint of a segment
-pivots the WHOLE segment about its far end, so copper swings along its entire
-length, metres from the sliver, by up to the same distance. On a run already
-close to another net that is enough to break clearance: the move is small, but so
-is the margin it eats. So every collapse is applied, measured against the copper
-of every other net, and undone if any moved segment would land inside the
-clearance either net asks for. The GND pour is not measured, since it re-flows
-around whatever the copper ends up being.
+Two geometry tests catch what the cap cannot, both asked of the moved copper
+before the board is changed. Moving one endpoint of a segment pivots the WHOLE
+segment about its far end, so copper swings along its entire length, metres from
+the sliver, by up to the same distance:
 
-Either refusal is a hard error naming the sliver. Nothing is saved in that case:
+  - clearance (pcb_copper.clearance_blocker), against the copper of every other
+    net. On a run already close to one, that swing is enough to break clearance:
+    the move is small, but so is the margin it eats. The GND pour is not
+    measured, since it re-flows around whatever the copper ends up being.
+  - rule areas (pcb_copper.keepout_blocker), against the keepout_* zones that
+    keep copper out. A rule area is not copper, so the clearance test cannot see
+    one, and a run drawn wide of a screw boss can swing back inside the keepout
+    the detour exists to clear.
+
+Any refusal is a hard error naming the sliver. Nothing is saved in that case:
 the step tidies everything it found or changes nothing.
 
   - a sliver whose ends both hang on other segments collapses to its midpoint, so
@@ -51,7 +57,8 @@ Usage: tidy-slivers.py <board.kicad_pcb> [more.kicad_pcb ...] [--max-move <mm>]
 """
 import argparse
 
-from pcb_copper import TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via
+from pcb_copper import (TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via,
+                        keepout_blocker)
 from pcbnew_quiet import pcbnew
 
 MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
@@ -127,13 +134,23 @@ def _moved(ends, target, mover):
     return pcbnew.SHAPE_SEGMENT(points[0], points[1], mover.GetWidth())
 
 
-def _blocker(tracks, pads, sliver, target, movers):
-    """The first item of another net a moved segment would sit too close to, with the
-    clearance it wanted, or None."""
+def _blocked(tracks, pads, zones, sliver, target, movers):
+    """Why the copper this collapse would lay down may not go there, as a phrase
+    completing "collapsing it would ...", or None if it may. Two questions asked of
+    the same proposals: does the copper crowd another net, and is it allowed there at
+    all."""
     ends = _ends(sliver)
     proposals = [(m.GetLayer(), m.GetNetCode(), m.GetOwnClearance(m.GetLayer()),
                   _moved(ends, target, m)) for m in movers]
-    return clearance_blocker(tracks, pads, proposals, replaced={id(sliver)})
+    crowded = clearance_blocker(tracks, pads, proposals, replaced={id(sliver)})
+    if crowded is not None:
+        other, gap = crowded
+        return (f"swing copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
+                f"{describe(other)}")
+    area = keepout_blocker(zones, proposals)
+    if area is not None:
+        return f"swing copper inside the {area.GetZoneName()} rule area"
+    return None
 
 
 def _collapse(board, sliver, target, movers):
@@ -150,7 +167,7 @@ def _collapse(board, sliver, target, movers):
             board.RemoveNative(mover)  # a mover the collapse shortened to nothing
 
 
-def _refusal(tracks, pads, sliver):
+def _refusal(tracks, pads, zones, sliver):
     """Why this sliver cannot be collapsed, or None if it can."""
     target, movers, detail = _plan(tracks, pads, sliver)
     if target is None:
@@ -158,11 +175,9 @@ def _refusal(tracks, pads, sliver):
     if detail > MAX_MOVE:
         return (f"collapsing it would move copper {pcbnew.ToMM(detail):.4f}mm, "
                 f"over the {pcbnew.ToMM(MAX_MOVE):.2f}mm cap")
-    blocked = _blocker(tracks, pads, sliver, target, movers)
-    if blocked is not None:
-        other, gap = blocked
-        return (f"collapsing it would swing copper inside the {pcbnew.ToMM(gap):.2f}mm "
-                f"clearance of {describe(other)}")
+    why = _blocked(tracks, pads, zones, sliver, target, movers)
+    if why is not None:
+        return f"collapsing it would {why}"
     return None
 
 
@@ -172,8 +187,9 @@ def _collapse_one(board):
     the same Python objects and a sliver cannot be its own neighbour."""
     tracks = list(board.GetTracks())
     pads = copper_pads(board)
+    zones = list(board.Zones())
     for sliver in _slivers(tracks):
-        if _refusal(tracks, pads, sliver) is None:
+        if _refusal(tracks, pads, zones, sliver) is None:
             target, movers, _ = _plan(tracks, pads, sliver)
             _collapse(board, sliver, target, movers)
             return True
@@ -191,7 +207,8 @@ def tidy_slivers(path):
     # Whatever is left is, by definition, something the loop could not collapse.
     tracks = list(board.GetTracks())
     pads = copper_pads(board)
-    refused = [(s, _refusal(tracks, pads, s)) for s in _slivers(tracks)]
+    zones = list(board.Zones())
+    refused = [(s, _refusal(tracks, pads, zones, s)) for s in _slivers(tracks)]
     if refused:
         lines = [f"ERROR: {len(refused)} sliver(s) cannot be tidied within "
                  f"{pcbnew.ToMM(MAX_MOVE):.2f}mm: {path}"]
@@ -202,8 +219,10 @@ def tidy_slivers(path):
                          f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f}): {detail}")
         lines.append("  Close these in KiCad by dragging the two runs together, then re-run the "
                      "pipeline. Where the reason is clearance, give the run room from the item "
-                     "named first, or closing it by hand will fail DRC where this refused. The "
-                     "board was NOT modified.")
+                     "named first, or closing it by hand will fail DRC where this refused. Where "
+                     "it is a rule area, the copper may not be there at all, so re-route the run "
+                     "clear of the area rather than closing it where it lies. The board was NOT "
+                     "modified.")
         raise SystemExit("\n".join(lines))
 
     if not collapsed:

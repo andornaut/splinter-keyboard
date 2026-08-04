@@ -1,5 +1,5 @@
 {
-  "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column from `kicad-cli pcb export pos`). scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. See v4/README.md 'How parts are assigned' for the full rules.",
+  "_comment": "LCSC part assignments for JLCPCB PCBA, keyed by KiCad footprint name (the 'Package' column from `kicad-cli pcb export pos`). scripts/gen-jlcpcb-bom-cpl.py joins this against the position file to emit BOM/CPL. See v4/README.md 'Fabrication (JLCPCB)' for which parts are placed and which are hand-soldered.",
   "parts": {
     "diode_sod123": {
       "lcsc": "C81598",

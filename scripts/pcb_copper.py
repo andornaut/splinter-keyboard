@@ -5,9 +5,11 @@ cleanup-tracks.py deletes the copper nothing connects to, and add-gnd-zone.py
 must not score a pour layer on copper cleanup is about to delete. Both ask the
 same question, so both ask it here and get the same answer.
 
-tidy-slivers.py and tidy-patterns.py are the two steps that MOVE copper, and both
-have to ask whether the copper they are about to lay down would crowd another net,
-so `clearance_blocker` lives here for the same reason.
+tidy-slivers.py and tidy-patterns.py are the two steps that MOVE copper, and each
+has to ask both halves of "may this copper go here" before it changes the board:
+`clearance_blocker` for whether the copper would crowd another net, and
+`keepout_blocker` for whether it may be there at all. Both take the same
+proposals, so a caller builds them once and asks both.
 
 Not an entry point: import it, do not run it.
 """
@@ -131,6 +133,32 @@ def clearance_blocker(tracks, pads, proposals, replaced=()):
                 continue
             if shape.Collide(other.GetEffectiveShape(layer), gap):
                 return other, gap
+    return None
+
+
+def keepout_blocker(zones, proposals):
+    """The first rule area that a piece of copper about to be laid down would enter,
+    or None. Proposals are the `(layer, net_code, clearance, shape)` the clearance
+    test takes, so a caller builds them once and asks both questions of them.
+
+    A rule area is not copper, so clearance_blocker cannot see one. This is the
+    check that binds hardest on the largest moves: the deviations a move must not
+    flatten are mostly detours drawn around these zones, and pulling one back puts
+    copper inside the zone the detour was drawn to avoid.
+
+    Intrusion, not clearance: KiCad reports items_not_allowed for copper that enters
+    the area and passes copper that merely runs alongside it, so the test asks for a
+    gap of zero and refuses exactly what DRC would.
+
+    Only the areas that disallow tracks are consulted, since a move lays nothing
+    else. The perimeter pour ring excludes the fill alone and must not veto a track:
+    routing inside it is the intent.
+    """
+    areas = [z for z in zones if z.GetIsRuleArea() and z.GetDoNotAllowTracks()]
+    for layer, _net, _clearance, shape in proposals:
+        for area in areas:
+            if area.IsOnLayer(layer) and shape.Collide(area.Outline(), 0):
+                return area
     return None
 
 
