@@ -52,7 +52,9 @@ A board whose matrix nets reach the wrong MCU column is fully routed, shorts not
 * **Half symmetry** - both halves must wire the MCU header identically. Halves that disagree mean one of them is backwards.
 * **Firmware agreement** - the matrix pins implied by the boards must equal the QMK [keyboard.json](https://github.com/andornaut/qmk_firmware/blob/splinter/keyboards/splinter/keyboard.json), both halves plus the serial pin. The source is `config.FIRMWARE` in [package.json](../package.json), a URL or a path, overridable with `--firmware` or `$SPLINTER_FIRMWARE_JSON`.
 
-Neither check can prove the mapping matches physical reality: both mirrorings of the header produce electrically valid boards, and the footprint's silk pin labels are generated from the same table as the pad nets, so they move together under a flip. The firmware check compares net names through that same table, so it is invariant under `raw_pin_column` too. What the checks guarantee is that the two halves agree and that the config's net assignments never silently drift from the firmware's pin arrays. Which physical pin those nets reach is set by `raw_pin_column`, and only a flash test settles it.
+Neither check can prove the mapping matches physical reality: both mirrorings of the header produce electrically valid boards, and the footprint's silk pin labels are generated from the same table as the pad nets, so they move together under a flip. The firmware check compares net names through that same table, so it is invariant under `raw_pin_column` too. What the checks guarantee is that the two halves agree and that the config's net assignments never silently drift from the firmware's pin arrays.
+
+Which physical pin those nets reach is set by `raw_pin_column`, and only hardware settles that. It is settled: the current value, `front_right`, is confirmed on an assembled and working board. Treat it as fixed. Changing it, or changing how the MCU seats, invalidates that confirmation and needs a fresh check on hardware.
 
 ## TRRS data-line protection
 

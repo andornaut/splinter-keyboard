@@ -23,7 +23,9 @@ fails only when a human plugs an MCU in, which is after the boards are paid for.
 Neither check can prove the boards match physical reality. Both mirrorings of
 the header are electrically valid and nothing on the board distinguishes them,
 so which physical pin each net reaches rests on raw_pin_column matching how the
-MCU is seated, and only a flash test settles that.
+MCU is seated, which only hardware settles. It is settled: the current value,
+front_right, is confirmed on an assembled and working board, so treat it as
+fixed and re-confirm on hardware if it or the MCU seating ever changes.
 
 Usage: validate-firmware.py [unrouted|routed] [--firmware <source>]
 

@@ -600,8 +600,11 @@ pcbs:
           reversible: false
           # Which socket column carries RAW, and so which MCU pin every matrix net
           # reaches. Named from the PCB FRONT; from the BACK, where the MCU mounts,
-          # it is the other column. Verify by seating the module and confirming its
-          # RAW pin lands on the pad silkscreened RAW.
+          # it is the other column. This value is confirmed on an assembled and
+          # working board, and no check here can re-prove it: both mirrorings are
+          # electrically valid. Change it only alongside a hardware re-check, by
+          # seating the module and confirming its RAW pin lands on the pad
+          # silkscreened RAW.
           # Both halves must use this same value: the MCU cannot be mirrored.
           raw_pin_column: front_right
           include_extra_pins: false # GP12-GP16 unused
