@@ -401,27 +401,28 @@ def tidy_patterns(path):
 
     for net, points, why in leg_skips:
         a, b = points[0], points[-1]
-        print(f"  LEFT ALONE: {net} hop ({pcbnew.ToMM(a[0]):.3f}, {pcbnew.ToMM(a[1]):.3f}) -> "
-              f"({pcbnew.ToMM(b[0]):.3f}, {pcbnew.ToMM(b[1]):.3f}): {why}")
+        print(f"  LEFT ALONE {net}: {why}, hop "
+              f"({pcbnew.ToMM(a[0]):.3f}, {pcbnew.ToMM(a[1]):.3f}) -> "
+              f"({pcbnew.ToMM(b[0]):.3f}, {pcbnew.ToMM(b[1]):.3f})")
     for net, why in motif_skips:
-        print(f"  LEFT ALONE: {net}: {why}")
+        print(f"  LEFT ALONE {net}: {why}")
 
     if not legs and not motifs:
-        print(f"  UNCHANGED: already on the pattern: {path}")
+        print(f"  unchanged {path}: already on the pattern")
         return
 
     for net, _, _, was, now, travel in legs:
-        print(f"  SNAPPED: {net} row leg y {pcbnew.ToMM(was):.3f} -> {pcbnew.ToMM(now):.3f}, "
-              f"copper moved {pcbnew.ToMM(travel):.3f}mm")
+        print(f"  SNAPPED {net}: row leg y {pcbnew.ToMM(was):.3f} -> "
+              f"{pcbnew.ToMM(now):.3f}, copper moved {pcbnew.ToMM(travel):.3f}mm")
     for net, _, _, cost in motifs:
-        print(f"  RELAID: {net} onto its family's shape, copper moved "
+        print(f"  RELAID {net}: onto its family's shape, copper moved "
               f"{pcbnew.ToMM(cost):.3f}mm")
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper
     board.Save(path)
     worst = max([t for *_, t in legs] + [c for *_, c in motifs])
-    print(f"  TIDIED: {len(legs)} row leg(s) and {len(motifs)} key run(s) snapped to the "
-          f"pattern within {pcbnew.ToMM(worst):.3f}mm, zones re-filled: {path}")
+    print(f"  TIDIED {path}: {len(legs)} row leg(s) and {len(motifs)} key run(s) snapped "
+          f"to the pattern within {pcbnew.ToMM(worst):.3f}mm, zones re-filled")
 
 
 if __name__ == "__main__":

@@ -174,16 +174,18 @@ def check_symmetry(boards):
         distinct = {tuple(tuple(sorted(r.items())) for r in v) for v in mapped.values()}
         if len(distinct) > 1:
             failures.append(stage)
-            print(f'  FAIL {stage}: halves disagree on MCU pad wiring')
-            print('         Columns named from the PCB front; from the back, swap them.')
+            sys.stdout.flush()  # keep the ok lines above this under a pipe
+            print(f'  FAIL {stage}: halves disagree on MCU pad wiring', file=sys.stderr)
+            print('    Columns named from the PCB front; from the back, swap them',
+                  file=sys.stderr)
             for key, pads in sorted(mapped.items()):
                 top = pads[0]
-                print(f'         {key}: row 0 is {top.get("L")} (front-left) | '
-                      f'{top.get("R")} (front-right)')
-            print('         The MCU cannot be mirrored, so one half is wired backwards.')
-            print('         Both halves must share one raw_pin_column value.')
+                print(f'    {key}: row 0 is {top.get("L")} (front-left) | '
+                      f'{top.get("R")} (front-right)', file=sys.stderr)
+            print('    The MCU cannot be mirrored, so one half is wired backwards, and\n'
+                  '    both halves must share one raw_pin_column value', file=sys.stderr)
         else:
-            print(f'  ok   {stage}: all {len(mapped)} board(s) agree on MCU pad wiring')
+            print(f'  ok {stage}: all {len(mapped)} board(s) agree on MCU pad wiring')
     return failures
 
 
@@ -244,17 +246,19 @@ def check_firmware(boards, fw, labels):
         for what, got, expected in (('cols', got_cols, fw_cols), ('rows', got_rows, fw_rows)):
             if got != expected:
                 failures.append(key)
-                print(f'  FAIL {key} {what}:')
-                print(f'         board    {got}')
-                print(f'         firmware {expected}')
+                sys.stdout.flush()  # keep the ok lines above this under a pipe
+                print(f'  FAIL {key}: {what} disagree', file=sys.stderr)
+                print(f'    board    {got}', file=sys.stderr)
+                print(f'    firmware {expected}', file=sys.stderr)
         net = serial_net(board)
         got_serial = labels.get(net, net)
         if got_serial != fw['split']['serial']['pin']:
             failures.append(key)
-            print(f'  FAIL {key} serial pin: board {got_serial}, '
-                  f'firmware {fw["split"]["serial"]["pin"]}')
+            sys.stdout.flush()  # keep the ok lines above this under a pipe
+            print(f'  FAIL {key}: serial pin, board {got_serial}, '
+                  f'firmware {fw["split"]["serial"]["pin"]}', file=sys.stderr)
         if key not in failures:
-            print(f'  ok   {key}: matrix pins and serial pin match the firmware')
+            print(f'  ok {key}: matrix pins and serial pin match the firmware')
     return failures
 
 
@@ -292,6 +296,9 @@ def main():
     failures += check_firmware(boards, fw, labels)
 
     if failures:
+        sys.stdout.flush()
+        print(f'validate:firmware: {len(failures)} check(s) failed for {version}',
+              file=sys.stderr)
         raise SystemExit(1)
     print('OK: validate:firmware')
 

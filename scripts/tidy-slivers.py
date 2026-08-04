@@ -210,29 +210,28 @@ def tidy_slivers(path):
     zones = list(board.Zones())
     refused = [(s, _refusal(tracks, pads, zones, s)) for s in _slivers(tracks)]
     if refused:
-        lines = [f"ERROR: {len(refused)} sliver(s) cannot be tidied within "
-                 f"{pcbnew.ToMM(MAX_MOVE):.2f}mm: {path}"]
+        lines = [f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within "
+                 f"{pcbnew.ToMM(MAX_MOVE):.2f}mm"]
         for sliver, detail in refused:
             p = sliver.GetStart()
-            lines.append(f"  {board.GetLayerName(sliver.GetLayer())} {sliver.GetNetname()} "
+            lines.append(f"    {board.GetLayerName(sliver.GetLayer())} {sliver.GetNetname()} "
                          f"{pcbnew.ToMM(sliver.GetLength()):.4f}mm at "
                          f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f}): {detail}")
-        lines.append("  Close these in KiCad by dragging the two runs together, then re-run the "
-                     "pipeline. Where the reason is clearance, give the run room from the item "
-                     "named first, or closing it by hand will fail DRC where this refused. Where "
-                     "it is a rule area, the copper may not be there at all, so re-route the run "
-                     "clear of the area rather than closing it where it lies. The board was NOT "
-                     "modified.")
+        lines.append("    Close these in KiCad by dragging the two runs together, then re-run\n"
+                     "    the pipeline. Where the reason is clearance, give the run room from\n"
+                     "    the item named first, or closing it by hand will fail DRC where this\n"
+                     "    refused. Where it is a rule area, the copper may not be there at all,\n"
+                     "    so re-route the run clear of it. The board was NOT modified")
         raise SystemExit("\n".join(lines))
 
     if not collapsed:
-        print(f"  UNCHANGED: no slivers to tidy: {path}")
+        print(f"  unchanged {path}: no slivers to tidy")
         return
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper
     board.Save(path)
-    print(f"  TIDIED: collapsed {collapsed} sliver(s) within {pcbnew.ToMM(MAX_MOVE):.2f}mm, "
-          f"zones re-filled: {path}")
+    print(f"  TIDIED {path}: collapsed {collapsed} sliver(s) within "
+          f"{pcbnew.ToMM(MAX_MOVE):.2f}mm, zones re-filled")
 
 
 if __name__ == "__main__":

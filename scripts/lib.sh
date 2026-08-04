@@ -4,6 +4,22 @@
 #   source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 # Each wrapper still owns its source dir and per-file command (mapping 1:1 to an
 # npm script); this only factors out the require-inputs-or-fail pattern they share.
+#
+# Output convention, followed by every step in this directory, wrapper and python
+# helper alike. A pipeline run is one log, so the steps have to read as one voice:
+#
+#   OK: <step>: <summary>       final success line, one per step, stdout (see ok)
+#   ..<tag> <subject>: <detail> per-item line, indented 2. The subject is a
+#                               repo-relative board path, or the thing acted on
+#                               (a net, a stage) where the line is not about a board
+#   ....<detail>                continuation of the line above, indented 4
+#
+# Tags are lowercase for the routine (ok, skip, wrote) and UPPERCASE for anything
+# asking to be read (ADDED, CLEANED, TIDIED, LEFT ALONE, WARN, FAIL, ERROR). Every
+# failure and warning goes to stderr, everything else to stdout, and a script that
+# mixes the two flushes stdout before writing the summary so a pipe keeps the order.
+# A board is a "board", never a "PCB"; paths carry no leading ./; no line ends in a
+# full stop.
 
 # Populate the caller's `files` array with the non-underscore .kicad_pcb files in
 # $1, or print $2 (default message) to stderr and exit 1. Named "require" because
@@ -11,7 +27,7 @@
 # surface, not a benign skip. Requires `shopt -s nullglob` in the caller.
 require_pcbs() {
   local dir="$1"
-  local msg="${2:-No PCBs found in ${dir}/.}"
+  local msg="${2:-No boards found in ${dir}/}"
   files=("$dir"/[!_]*.kicad_pcb)
   if [ ${#files[@]} -eq 0 ]; then
     echo "$msg" >&2
@@ -34,24 +50,25 @@ require_cmds() {
   done
 }
 
-# The distinctive tail of the harmless PROPERTY_ENUM wxASSERT KiCad's pcbnew module
-# prints to stderr every time it is imported (directly, or via kb_ergogen_helper).
-# Matched as a fixed string (not the bare "No enum choices defined") so a real
-# error happening to contain that phrase is not swallowed. Defined once so both
-# mute helpers below share the one pattern.
-PCBNEW_NOISE='PROPERTY_ENUM(): No enum choices defined'
+# The two harmless wx lines KiCad's pcbnew module prints to stderr on import: the
+# PROPERTY_ENUM wxASSERT, and the image-handler debug line. Every tool that loads
+# pcbnew emits them (kicad-cli, KiKit, kb_ergogen_helper, our own scripts), so one
+# filter covers them all; a per-tool filter only means one caller keeps the noise.
+# Matched as fixed strings (not the bare "No enum choices defined") so a real error
+# happening to contain the phrase is not swallowed.
+PCBNEW_NOISE=(
+  'PROPERTY_ENUM(): No enum choices defined'
+  'Debug: Adding duplicate image handler'
+)
 
-# Drop just the pcbnew import noise from a command's stderr, preserving all other
-# output and its exit code (the grep runs in a process substitution, so the
-# wrapped command's status is what propagates).
-mute_pcbnew_noise() { "$@" 2> >(grep -vF -e "$PCBNEW_NOISE" >&2); }
-
-# Like mute_pcbnew_noise, but also drops the "Adding duplicate image handler" wx
-# debug line KiKit emits on top of the pcbnew noise. Wrap KiKit invocations with
-# this; prefix any env-var assignment with `env` so it stays a command word
-# (e.g. `mute_kikit_noise env PYTHONNOUSERSITE=1 "$kikit_py" ...`).
-mute_kikit_noise() {
-  "$@" 2> >(grep -vF -e "$PCBNEW_NOISE" -e 'Debug: Adding duplicate image handler' >&2)
+# Drop just that noise from a command's stderr, preserving all other output and its
+# exit code (the grep runs in a process substitution, so the wrapped command's
+# status is what propagates). Prefix any env-var assignment with `env` so it stays
+# a command word (e.g. `mute_pcbnew_noise env PYTHONNOUSERSITE=1 "$py" ...`).
+mute_pcbnew_noise() {
+  local patterns=() line
+  for line in "${PCBNEW_NOISE[@]}"; do patterns+=(-e "$line"); done
+  "$@" 2> >(grep -vF "${patterns[@]}" >&2)
 }
 
 # Provenance gate shared by fab.sh and panelize.sh: refuse to proceed if any
@@ -115,6 +132,6 @@ export_jlcpcb_fab() {
       --pos "$pos" --parts "$parts" \
       --bom "${out}/${name}-BOM.csv" --cpl "${out}/${name}-CPL.csv"
   else
-    echo "  no ${parts} -- gerbers only (no assembly BOM/CPL)"
+    echo "  skip ${parts}: not found, exporting gerbers only (no assembly BOM/CPL)"
   fi
 }

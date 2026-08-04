@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copy manual traces (and teardrops) from the routed/ masters back onto the working
-# kicad/unrouted/ PCBs. kb_ergogen_helper copy-traces handles the tracks (segments,
+# kicad/unrouted/ boards. kb_ergogen_helper copy-traces handles the tracks (segments,
 # arcs, vias); copy-teardrops.py handles the teardrop zones it leaves behind.
 # Run via: npm run copy:traces-to-unrouted
 set -euo pipefail
@@ -29,14 +29,14 @@ has_human_routes() {
   [ "$n" -gt 0 ]
 }
 
-require_pcbs "./${VERSION}/kicad/routed"
+require_pcbs "${VERSION}/kicad/routed"
 for f in "${files[@]}"; do
-  echo "$f"
   if ! has_human_routes "$f"; then
-    echo "ERROR: $f has no human routing (only footprint stubs); refusing to copy. Restore the routed master (e.g. git checkout HEAD -- $f)." >&2
+    echo "ERROR $f: no human routing on it (only footprint stubs), refusing to copy" >&2
+    echo "    Restore the routed master: git checkout HEAD -- $f" >&2
     exit 1
   fi
-  dst="./${VERSION}/kicad/unrouted/$(basename "$f")"
+  dst="${VERSION}/kicad/unrouted/$(basename "$f")"
   # The copy MERGES: copy-traces adds every routed track the destination does not
   # already hold verbatim. That is only safe onto a freshly generated board. Since
   # routed/ now differs from unrouted/ by MOVED copper (tidy-patterns.py and
@@ -47,13 +47,13 @@ for f in "${files[@]}"; do
   # is fully connected and neither is an exact duplicate of the other), so the
   # stale copy rides into the fab source and another accumulates every run.
   if has_human_routes "$dst"; then
-    echo "ERROR: $dst already carries routing; refusing to copy onto it. This step" >&2
-    echo "  merges rather than replaces, so run it on a freshly generated board:" >&2
-    echo "  npm run ergogen && npm run copy:dist-to-unrouted first, or npm run pipeline." >&2
+    echo "ERROR $dst: already carries routing, refusing to copy onto it" >&2
+    echo "    This step merges rather than replaces, so it needs a freshly generated" >&2
+    echo "    board: npm run ergogen && npm run copy:dist-to-unrouted, or npm run pipeline" >&2
     exit 1
   fi
   mute_pcbnew_noise python3 "$helper" --no-backup copy-traces "$f" "$dst"
   mute_pcbnew_noise python3 ./scripts/copy-teardrops.py "$f" "$dst"
 done
 
-ok "copy:traces-to-unrouted: traces + teardrops copied for ${#files[@]} PCB(s) into ${VERSION}/kicad/unrouted/"
+ok "copy:traces-to-unrouted: traces + teardrops copied for ${#files[@]} board(s) into ${VERSION}/kicad/unrouted/"

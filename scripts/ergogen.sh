@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate outlines/PCBs from the active version's ergogen config, then
+# Generate outlines/boards from the active version's ergogen config, then
 # post-process each PCB (update footprints via kb_ergogen_helper, recenter on
 # the sheet) and ensure custom project settings (net class + DRC floors) in the
 # KiCad project files. The GND pour is added later, at copy:unrouted-to-routed,
@@ -18,9 +18,8 @@ out_dir="dist/${VERSION}/ergogen"
 
 git submodule update --init ergogen/footprints/ceoloide ergogen/footprints/infused-kim ergogen/kb_ergogen_helper
 npx ergogen "./${VERSION}/ergogen/" --output "${out_dir}/"
-require_pcbs "${out_dir}/pcbs" "ergogen produced no PCBs in ${out_dir}/pcbs/ -- check the config."
+require_pcbs "${out_dir}/pcbs" "No boards generated in ${out_dir}/pcbs/ -- check the config"
 for f in "${files[@]}"; do
-  echo "$f"
   mute_pcbnew_noise python3 "$helper" --no-backup update-pcb "$f"
   mute_pcbnew_noise python3 ./scripts/recenter.py "$f"
 done
@@ -42,4 +41,4 @@ mute_pcbnew_noise python3 ./scripts/add-keepout-zones.py "${files[@]}"
 # in lib.sh.
 apply_project_settings "${out_dir}/pcbs"
 
-ok "ergogen: ${#files[@]} PCB(s) generated and post-processed in ${out_dir}/pcbs/"
+ok "ergogen: ${#files[@]} board(s) generated and post-processed in ${out_dir}/pcbs/"

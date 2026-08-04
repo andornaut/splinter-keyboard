@@ -97,7 +97,7 @@ def stamp(text, path):
     _remove_prior_silk(board)
     _add_silk(board, silk_from_stamp(text))
     board.Save(path)
-    print(f"{path}: {text}")
+    print(f"  stamped {path}: {text}")
 
 
 def main():

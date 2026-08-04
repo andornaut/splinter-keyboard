@@ -231,7 +231,7 @@ def main():
     config = f"{version}/ergogen/config.yaml"
     routed = sorted(glob.glob(f"{version}/kicad/routed/[!_]*.kicad_pcb"))
     if not routed:
-        sys.exit(f"No routed boards under {version}/kicad/routed/ to validate.")
+        sys.exit(f"No routed boards under {version}/kicad/routed/ to validate")
 
     parts_path = f"{version}/kicad/jlcpcb-parts.json"
     assembled_pkgs = {}
@@ -248,7 +248,7 @@ def main():
         name = os.path.splitext(os.path.basename(pcb))[0]
         out = f"dist/{version}/kicad/jlcpcb/{name}"
         zip_path = f"{out}/{name}-gerber.zip"
-        print(f"  {pcb} -> {out}/")
+        print(f"  audit {pcb}: {out}/")
 
         if not os.path.isdir(out):
             failures.append(f"{name}: no fab output at {out}/ -- run `npm run fab` first")
@@ -269,13 +269,13 @@ def main():
                             f"board (< {ZONE_AREA_FRAC:.0%}); looks like islands, not a plane")
         else:
             shown = f"{area:.0f}mm^2" if area is not None else "filled"
-            print(f"    GND zone (master): ok ({shown})")
+            print(f"    ok GND zone (master): {shown}")
 
         if not os.path.isfile(zip_path):
             failures.append(f"{name}: missing gerber zip {zip_path}")
         else:
             if gnd_flood_in_gerber(zip_path, board_w, board_h):
-                print(f"    GND flood (gerber): ok")
+                print("    ok GND flood (gerber)")
             else:
                 failures.append(f"{name}: no copper flood spanning the board in {name}-gerber.zip "
                                 f"-- the shipped gerbers have no ground plane")
@@ -285,7 +285,7 @@ def main():
             if missing:
                 failures.append(f"{name}: gerber zip missing {', '.join(missing)}")
             else:
-                print(f"    gerber set: ok ({len(LAYER_FRAGMENTS)} layers + drill)")
+                print(f"    ok gerber set: {len(LAYER_FRAGMENTS)} layers + drill")
 
         # 3. assembly placement sanity.
         if assembled_pkgs:
@@ -305,11 +305,11 @@ def main():
                     failures.append(f"{name}: {len(dropped)} assembled part(s) absent from the CPL: "
                                     f"{', '.join(dropped)}")
                 else:
-                    print(f"    assembly: ok ({len(expected)} placements in CPL)")
+                    print(f"    ok assembly: {len(expected)} placement(s) in CPL")
 
         # 5. teardrop count: collect per board; the consistency gate runs after the loop.
         teardrop_counts[name] = teardrop_count(board)
-        print(f"    teardrops: {teardrop_counts[name]}")
+        print(f"    ok teardrops: {teardrop_counts[name]}")
 
         # 6. provenance clean flag (warning).
         # Read the stamp off the already-loaded board (title_block comment 1 = index 0,
@@ -337,13 +337,14 @@ def main():
                     f"{name}: only {count} teardrops vs {max_count} on the best-teardropped "
                     f"board (< {TEARDROP_MIN_FRAC:.0%}); teardrops were lost -- restore the master")
 
+    if warnings or failures:
+        sys.stdout.flush()  # keep the per-board lines above these under a pipe
     for w in warnings:
-        print(f"  WARN: {w}")
+        print(f"  WARN {w}", file=sys.stderr)
     if failures:
-        print(file=sys.stderr)
         for fmsg in failures:
-            print(f"  FAIL: {fmsg}", file=sys.stderr)
-        print(f"validate:fab: {len(failures)} check(s) failed for {version}.", file=sys.stderr)
+            print(f"  FAIL {fmsg}", file=sys.stderr)
+        print(f"validate:fab: {len(failures)} check(s) failed for {version}", file=sys.stderr)
         sys.exit(1)
     print(f"OK: validate:fab: {len(routed)} board(s) passed all gates for {version}"
           f"{f' ({len(warnings)} warning(s))' if warnings else ''}")

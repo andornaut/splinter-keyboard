@@ -40,7 +40,7 @@ def copy_teardrops(src_path, dst_path):
         dst.Add(z.Duplicate(False))
 
     dst.Save(dst_path)
-    print(f'Copied {len(fresh)} teardrop zone(s) (removed {len(stale)} stale) into {dst_path}')
+    print(f'  copied {dst_path}: {len(fresh)} teardrop zone(s) in, {len(stale)} stale removed')
 
 
 if __name__ == '__main__':

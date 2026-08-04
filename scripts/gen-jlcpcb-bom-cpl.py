@@ -64,8 +64,8 @@ def main():
     # output rather than silently dropping the part from the assembly.
     if no_lcsc:
         for pkg, refs in sorted(no_lcsc.items()):
-            print(f"  ERROR: no lcsc for '{pkg}' ({len(refs)} part(s)); "
-                  f"set it in {args.parts}", file=sys.stderr)
+            print(f"  ERROR {pkg}: no lcsc for its {len(refs)} part(s), "
+                  f"set one in {args.parts}", file=sys.stderr)
         sys.exit(1)
 
     # CPL: one row per placed footprint, rotation corrected.
@@ -99,10 +99,10 @@ def main():
     # sockets.
     dnp_items = sorted(dnp.items())
     n_dnp = sum(len(refs) for _, refs in dnp_items)
-    print(f"  placed {len(placed)} parts in {len(refs_by_lcsc)} BOM lines; "
+    print(f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), "
           f"{n_dnp} do-not-place")
     for pkg, refs in dnp_items:
-        print(f"    DNP: {pkg} ({len(refs)})")
+        print(f"    do-not-place {pkg} ({len(refs)})")
 
 
 if __name__ == "__main__":

@@ -109,7 +109,7 @@ def autoroute(pcb_path, work_dir, passes):
 
     board = pcbnew.LoadBoard(pcb_path)
     if not pcbnew.ExportSpecctraDSN(board, dsn_path):
-        sys.exit(f"Failed to export Specctra DSN for {pcb_path}")
+        sys.exit(f"ERROR {pcb_path}: failed to export its Specctra DSN")
 
     write_freerouting_config(config_dir, passes, scoring)
 
@@ -128,27 +128,27 @@ def autoroute(pcb_path, work_dir, passes):
              "FREEROUTING__LOGGING__FILE__LEVEL": LOG_LEVEL},
     )
     if not os.path.exists(ses_path):
-        sys.exit(f"Freerouting did not produce {ses_path}")
+        sys.exit(f"ERROR {pcb_path}: Freerouting produced no {ses_path}")
 
     # Import onto the board already in memory: ExportSpecctraDSN only serialized
     # it (no mutation) and pcb_path is untouched until the Save below, so this is
     # the same unrouted board a reload would give. Then save over the working file.
     if not pcbnew.ImportSpecctraSES(board, ses_path):
-        sys.exit(f"Failed to import Specctra SES into {pcb_path}")
+        sys.exit(f"ERROR {pcb_path}: failed to import the Specctra SES into it")
     board.Save(pcb_path)
-    print(f"Routed {pcb_path}")
+    print(f"  routed {pcb_path}: Freerouting session imported")
 
 
 if __name__ == "__main__":
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION unset -- run via npm (npm run route).")
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run route)")
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
     pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb"))
     if not pcbs:
-        sys.exit(f"No PCBs in {version}/kicad/unrouted/ -- nothing to do.")
+        sys.exit(f"No boards in {version}/kicad/unrouted/ -- nothing to do")
     for pcb in pcbs:
         autoroute(pcb, work_dir, passes)
-    print(f"OK: route: {len(pcbs)} PCB(s) routed in place.")
+    print(f"OK: route: {len(pcbs)} board(s) routed in place")

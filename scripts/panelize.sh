@@ -27,9 +27,9 @@ require_cmds kicad-cli zip python3
 # and probe it, failing with a pointer to the installer (the ansible hobbies role,
 # kicad tag). See kikit_python / kikit_importable in lib.sh.
 kikit_py="$(kikit_python)"
-[ -x "$kikit_py" ] || { echo "KiKit venv python not found at ${kikit_py}. Install it (ansible-ctrl hobbies role, kicad tag) or set KIKIT_PYTHON." >&2; exit 1; }
+[ -x "$kikit_py" ] || { echo "ERROR ${kikit_py}: KiKit venv python not found, install it (ansible-ctrl hobbies role, kicad tag) or set KIKIT_PYTHON" >&2; exit 1; }
 kikit_importable "$kikit_py" \
-  || { echo "KiKit not importable under ${kikit_py} (needs KiCad 10 git-master KiKit + pcbnewTransition). Reinstall via the ansible hobbies role." >&2; exit 1; }
+  || { echo "ERROR ${kikit_py}: KiKit not importable (needs KiCad 10 git-master KiKit + pcbnewTransition), reinstall via the ansible hobbies role" >&2; exit 1; }
 
 # Provenance gate: same as fab, refuse to panel if routed/ drifted from
 # config. Scoped to routed/ (the only stage the panel consumes), so unrouted/
@@ -37,27 +37,27 @@ kikit_importable "$kikit_py" \
 # provenance_gate_routed in lib.sh.
 provenance_gate_routed
 
-require_pcbs "./${VERSION}/kicad/routed"
+require_pcbs "${VERSION}/kicad/routed"
 
 # Build the panel (KiKit prints wx image-handler + pcbnew PROPERTY_ENUM noise to
-# stderr; mute_kikit_noise drops just those, keeping real errors and the exit
+# stderr; mute_pcbnew_noise drops just those, keeping real errors and the exit
 # code). panelize.py creates the output directory itself, and stamps the panel with
 # the provenance the masters already carry, so it needs no version or config here.
-echo "panel <- ${files[*]}"
-mute_kikit_noise env PYTHONNOUSERSITE=1 "$kikit_py" ./scripts/panelize.py "${files[@]}" \
+echo "  build $panel: from ${files[*]}"
+mute_pcbnew_noise env PYTHONNOUSERSITE=1 "$kikit_py" ./scripts/panelize.py "${files[@]}" \
   --output "$panel"
 
 # DRC is advisory on the panel: write the report but do NOT abort on violations
 # (board-to-board and tab clearances are expected). The per-half fab run
 # is the hard DRC gate. Refill zones in-memory so the report is meaningful.
 mkdir -p "$out"
-echo "panel -> $out"
+echo "  export $panel: $out/"
 if mute_pcbnew_noise kicad-cli pcb drc --refill-zones --severity-error \
     --exit-code-violations --format json \
     --output "${out}/panel-drc.json" "$panel" >/dev/null; then
-  echo "  panel DRC: clean"
+  echo "  ok $panel: DRC clean"
 else
-  echo "  panel DRC: violations present (advisory only) -- review ${out}/panel-drc.json" >&2
+  echo "  WARN $panel: DRC violations (advisory only), review ${out}/panel-drc.json" >&2
 fi
 
 # Export gerbers/drill/pos + BOM/CPL from the panel. Shared with fab.sh;

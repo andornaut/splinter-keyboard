@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copy the working kicad/unrouted/ PCBs onto the routed/ masters (the fab source), then
+# Copy the working kicad/unrouted/ boards onto the routed/ masters (the fab source), then
 # add a filled GND pour to each master, clean up the copper no route uses, and
 # tidy away the strays and the segments an edit left shorter than they are wide.
 # The pour is applied here, after manual routing, rather than at build time so
@@ -52,6 +52,10 @@ for f in "${files[@]}"; do
 
   for ((pass = 1; pass <= TIDY_PASSES; pass++)); do
     before="$(sha256sum <"$dst")"
+    # Name the pass. The last one repeats every line of the one before it, since a
+    # pass that changes nothing is how the loop ends, and without this header a
+    # re-reported LEFT ALONE reads as a second finding rather than a second look.
+    echo "  tidy pass ${pass}/${TIDY_PASSES} ${dst}:"
     mute_pcbnew_noise python3 ./scripts/cleanup-tracks.py "$dst"
     # After the cleanup, which merges the collinear fragments an edit leaves behind:
     # a fragmented run does not read as the shape it is, so a stray would be missed.
@@ -65,13 +69,13 @@ for f in "${files[@]}"; do
       break
     fi
     if [ "$pass" -eq "$TIDY_PASSES" ]; then
-      echo "ERROR: ${dst} was still changing after ${TIDY_PASSES} tidy passes." >&2
-      echo "  The cleanup and tidy steps are trading changes rather than settling, so this" >&2
-      echo "  build and the next would ship different copper from the same routing. Read the" >&2
-      echo "  pass output above for what kept moving, settle it in KiCad, then re-run." >&2
+      echo "ERROR ${dst}: still changing after ${TIDY_PASSES} tidy passes" >&2
+      echo "    The cleanup and tidy steps are trading changes rather than settling, so" >&2
+      echo "    this build and the next would ship different copper from the same routing." >&2
+      echo "    Read the pass output above for what kept moving, settle it in KiCad, re-run" >&2
       exit 1
     fi
   done
 done
 
-ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, then cleaned, snapped to the pattern and tidied of slivers until settled (max ${TIDY_PASSES} passes)"
+ok "copy:unrouted-to-routed: ${#files[@]} board(s) copied to ${dst_dir}/ with GND pour, then cleaned, snapped to the pattern and tidied of slivers until settled (max ${TIDY_PASSES} passes)"

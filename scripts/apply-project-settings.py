@@ -100,7 +100,7 @@ def ensure_vcc(net_settings):
     if not any(c.get("name") == "VCC" for c in classes):
         default = next((c for c in classes if c.get("name") == "Default"), None)
         if default is None:
-            print("  skip: no Default net class to derive VCC from", file=sys.stderr)
+            print("  WARN: no Default net class to derive VCC from", file=sys.stderr)
         else:
             vcc = dict(default)
             vcc["name"] = "VCC"
@@ -172,12 +172,12 @@ def apply(path):
         with open(path, "w") as f:
             json.dump(project, f, indent=2)
             f.write("\n")
-        print(f"  updated project settings: {path}")
+        print(f"  updated {path}: project settings")
     else:
-        print(f"  ok (already up to date): {path}")
+        print(f"  ok {path}: already up to date")
     dru = ensure_drc_rules(path)
     if dru:
-        print(f"  wrote custom DRC rules: {dru}")
+        print(f"  wrote {dru}: custom DRC rules")
 
 
 def main(paths):

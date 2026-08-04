@@ -68,7 +68,7 @@ def recenter(path):
         item.Move(offset)
 
     board.Save(path)
-    print(f"{path}: center ({cx:.3f},{cy:.3f}) -> ({cx+dx:.3f},{cy+dy:.3f}) "
+    print(f"  centered {path}: ({cx:.3f},{cy:.3f}) -> ({cx+dx:.3f},{cy+dy:.3f}), "
           f"offset ({dx},{dy})mm, page center ({px:.1f},{py:.1f})")
 
 

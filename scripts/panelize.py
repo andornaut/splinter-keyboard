@@ -82,18 +82,18 @@ def stamp(boards, output):
     stamps = [(stem(f), read_stamp(pcbnew.LoadBoard(f))) for f in boards]
     missing = [name for name, text in stamps if not text]
     if missing:
-        sys.exit(f"panelize.py: no provenance stamp on {', '.join(missing)}. "
-                 "Re-run the pipeline to stamp the boards, then panel them.")
+        sys.exit(f"ERROR {', '.join(missing)}: no provenance stamp, re-run the "
+                 "pipeline to stamp the boards, then panel them")
     if len({text for _, text in stamps}) > 1:
-        listing = "\n".join(f"  {name}: {text}" for name, text in stamps)
-        sys.exit("panelize.py: the boards carry different provenance stamps, so the panel "
-                 f"has no single provenance to report:\n{listing}\n"
-                 "  Re-run the pipeline so every half is built from the same config.")
+        listing = "\n".join(f"    {name}: {text}" for name, text in stamps)
+        sys.exit("ERROR: the boards carry different provenance stamps, so the panel has "
+                 f"no single provenance to report:\n{listing}\n"
+                 "    Re-run the pipeline so every half is built in one run")
     text = stamps[0][1]
     board = pcbnew.LoadBoard(output)
     write_stamp(board, text)
     board.Save(output)
-    print(f"{output}: {text}")
+    print(f"  stamped {output}: {text}")
 
 
 def main():
@@ -111,10 +111,10 @@ def main():
     args = ap.parse_args()
 
     if len(args.board) < 2:
-        sys.exit("panelize.py needs at least 2 boards (left + right)")
+        sys.exit("ERROR: panelize needs at least 2 boards (left + right)")
     for f in args.board:
         if not os.path.isfile(f):
-            sys.exit(f"no such board: {f}")
+            sys.exit(f"ERROR {f}: no such board")
 
     # KiCad internal units are integer nanometres; mm scales up, so round to int
     # (argparse gives floats) before these reach pcbnew/KiKit geometry calls.
@@ -129,7 +129,6 @@ def main():
           tab_min_distance=nm(args.tab_min_distance))
 
     stamp(args.board, args.output)
-    print(f"panel written to {args.output}")
 
 
 if __name__ == "__main__":

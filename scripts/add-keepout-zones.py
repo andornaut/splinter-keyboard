@@ -324,12 +324,13 @@ def add_keepout_zones(path):
     existing = {z.GetZoneName() for z in board.Zones()
                 if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
     if existing:
-        print(f"  UNCHANGED: keepouts already present ({', '.join(sorted(existing))}): {path}")
+        print(f"  unchanged {path}: keepouts already present "
+              f"({', '.join(sorted(existing))})")
         return
 
     moved, welded, max_move = _strip_degenerate_edges(board, path)
     if moved:
-        print(f"  moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User; "
+        print(f"  welded {path}: moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User, "
               f"welded {welded} endpoint(s), largest move {pcbnew.ToMM(max_move):.6f}mm")
 
     ring = _perimeter_ring(board)
@@ -349,9 +350,9 @@ def add_keepout_zones(path):
                      pour=True, tracks_vias=True)
 
     board.Save(path)
-    print(f"  ADDED keepouts: {pcbnew.ToMM(PERIMETER_INSET):.1f}mm perimeter pour ring + "
-          f"route ring (TRRS corner carved) + {len(centers)} screw-boss disks "
-          f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm): {path}")
+    print(f"  ADDED {path}: {pcbnew.ToMM(PERIMETER_INSET):.1f}mm perimeter pour ring + "
+          f"route ring (TRRS corner carved) + {len(centers)} screw-boss disk(s) "
+          f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm)")
 
 
 if __name__ == "__main__":

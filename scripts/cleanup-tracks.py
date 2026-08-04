@@ -284,7 +284,7 @@ def _cleanup_pass(board):
 def cleanup_tracks(path):
     board = pcbnew.LoadBoard(path)
     if any(not z.IsFilled() for z in board.Zones() if not z.GetIsRuleArea()):
-        print(f"  filling unfilled zone(s) before analysis: {path}")
+        print(f"  filling {path}: unfilled zone(s), flowed before analysis")
         _fill_zones(board)
 
     totals = [0, 0, 0, 0]
@@ -295,18 +295,18 @@ def cleanup_tracks(path):
         totals = [total + count for total, count in zip(totals, counts)]
     else:
         raise SystemExit(
-            f"ERROR: still cleaning up after {MAX_PASSES} passes: {path}\n"
-            f"  the last pass removed {counts[0]} track(s), {counts[1]} via(s) and "
+            f"ERROR {path}: still cleaning up after {MAX_PASSES} passes\n"
+            f"    the last pass removed {counts[0]} track(s), {counts[1]} via(s) and "
             f"{counts[3]} teardrop(s), and merged {counts[2]} segment(s)")
 
     if not any(totals):
-        print(f"  UNCHANGED: nothing to clean up: {path}")
+        print(f"  unchanged {path}: nothing to clean up")
         return
 
     board.Save(path)
-    print(f"  CLEANED: removed {totals[0]} dangling/buried/duplicate track(s), {totals[1]} "
-          f"unconnected/redundant via(s) and {totals[3]} stranded teardrop(s), "
-          f"merged {totals[2]} split segment(s) over {run - 1} pass(es), zones re-filled: {path}")
+    print(f"  CLEANED {path}: removed {totals[0]} dangling/buried/duplicate track(s), "
+          f"{totals[1]} unconnected/redundant via(s) and {totals[3]} stranded teardrop(s), "
+          f"merged {totals[2]} split segment(s) over {run - 1} pass(es), zones re-filled")
 
 
 if __name__ == "__main__":

@@ -108,12 +108,12 @@ def choose_gnd_layer(board):
 
 
 def _print_analysis(path, best, rows, total_gnd):
-    print(f"  GND-layer analysis ({path}):")
+    print(f"  analysis {path}: GND pour layer")
     for r in rows:
         mark = "  <- selected" if r.layer == best.layer else ""
         print(f"    {r.name}: signal={r.signal_mm:7.1f}mm  "
               f"GND-pads-reachable={r.reach}/{total_gnd}  cost={r.cost:7.1f}{mark}")
-    print(f"  selected GND layer: {best.name}")
+    print(f"    selected {best.name}")
 
 
 def add_gnd_zone(path):
@@ -142,7 +142,7 @@ def add_gnd_zone(path):
         msg = f"GND pour already present on {', '.join(existing)}, leaving as-is"
         if layer_name not in existing:
             msg += f"; analysis preferred {layer_name}, not re-pouring an already-poured board"
-        print(f"  UNCHANGED: {msg}: {path}")
+        print(f"  unchanged {path}: {msg}")
         return
 
     bb = board.GetBoardEdgesBoundingBox()
@@ -167,8 +167,8 @@ def add_gnd_zone(path):
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # sets the zone's filled state
 
     board.Save(path)
-    print(f"  ADDED new {layer_name} GND pour ({pcbnew.ToMM(x1 - x0):.1f} x "
-          f"{pcbnew.ToMM(y1 - y0):.1f}mm outline): {path}")
+    print(f"  ADDED {path}: {layer_name} GND pour, {pcbnew.ToMM(x1 - x0):.1f} x "
+          f"{pcbnew.ToMM(y1 - y0):.1f}mm pour extent (larger than the board outline)")
 
 
 if __name__ == "__main__":

@@ -23,12 +23,12 @@ require_cmds kicad-cli zip python3
 # fab before any gerber is written. See provenance_gate_routed in lib.sh.
 provenance_gate_routed
 
-require_pcbs "./${VERSION}/kicad/routed"
+require_pcbs "${VERSION}/kicad/routed"
 for f in "${files[@]}"; do
   name="$(basename "${f%.kicad_pcb}")"
   out="dist/${VERSION}/kicad/jlcpcb/${name}"
   mkdir -p "$out"
-  echo "$f -> $out"
+  echo "  export $f: $out/"
 
   # DRC gate: refill the GND pour, then fail the fab on any error-level violation
   # or unrouted net BEFORE export_jlcpcb_fab clears this board's prior output, so a
@@ -39,7 +39,7 @@ for f in "${files[@]}"; do
   mute_pcbnew_noise kicad-cli pcb drc --refill-zones --severity-error \
     --exit-code-violations --format json \
     --output "${out}/${name}-drc.json" "$f" >/dev/null \
-    || { echo "DRC failed for ${name}: see ${out}/${name}-drc.json" >&2; exit 1; }
+    || { echo "ERROR $f: DRC failed, see ${out}/${name}-drc.json" >&2; exit 1; }
 
   export_jlcpcb_fab "$f" "$out" "$name" "$parts"
 done
