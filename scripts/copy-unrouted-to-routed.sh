@@ -24,7 +24,11 @@ for f in "${files[@]}"; do
   cp "$f" "$dst"
   mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
   mute_pcbnew_noise python3 ./scripts/cleanup-tracks.py "$dst"
-  # After the cleanup, so every sliver it sees sits in copper the route uses.
+  # After the cleanup, which merges the collinear fragments an edit leaves behind:
+  # a fragmented run does not read as the shape it is, so a stray would be missed.
+  mute_pcbnew_noise python3 ./scripts/tidy-patterns.py "$dst"
+  # Last, so every sliver it sees sits in copper the route uses and has already
+  # been snapped to the pattern.
   mute_pcbnew_noise python3 ./scripts/tidy-slivers.py "$dst"
 done
 
@@ -33,4 +37,4 @@ done
 # apply_project_settings in lib.sh.
 apply_project_settings "$dst_dir"
 
-ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, unused copper cleaned up, slivers tidied"
+ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, unused copper cleaned up, strays snapped to the pattern, slivers tidied"

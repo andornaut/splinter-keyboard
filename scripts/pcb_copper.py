@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Shared copper-connectivity helpers: does anything touch this point?
+"""Shared copper geometry: does anything touch this point, and may copper go here?
 
 cleanup-tracks.py deletes the copper nothing connects to, and add-gnd-zone.py
 must not score a pour layer on copper cleanup is about to delete. Both ask the
 same question, so both ask it here and get the same answer.
+
+tidy-slivers.py and tidy-patterns.py are the two steps that MOVE copper, and both
+have to ask whether the copper they are about to lay down would crowd another net,
+so `clearance_blocker` lives here for the same reason.
 
 Not an entry point: import it, do not run it.
 """
@@ -99,3 +103,39 @@ def dangling_tracks(tracks, pads, zones):
                for p in (t.GetStart(), t.GetEnd())):
             doomed.append(t)
     return doomed
+
+
+def clearance_blocker(tracks, pads, proposals, replaced=()):
+    """The first item of another net that a piece of copper about to be laid down
+    would sit too close to, as (item, clearance it wanted), or None.
+
+    A proposal is `(layer, net_code, clearance, shape)`: where the copper will be,
+    not where it is. The caller has to ask before changing the board, because a
+    refused move must leave no trace. `replaced` holds the ids of the items the
+    proposals stand in for, which are not measured against themselves.
+
+    This is the check MAX_MOVE-style caps cannot do. Moving one endpoint of a
+    segment pivots the whole segment about its far end, so copper swings along its
+    entire length, millimetres away from the edit; on a run already close to
+    another net a move of microns is enough to break clearance.
+
+    Zones are not measured: the pour re-flows around whatever the copper becomes.
+    """
+    others = [t for t in tracks if id(t) not in replaced] + list(pads)
+    for layer, net, clearance, shape in proposals:
+        for other in others:
+            if other.GetNetCode() == net or not other.IsOnLayer(layer):
+                continue
+            gap = max(clearance, other.GetOwnClearance(layer))
+            if not shape.BBox(gap).Intersects(other.GetBoundingBox()):
+                continue
+            if shape.Collide(other.GetEffectiveShape(layer), gap):
+                return other, gap
+    return None
+
+
+def describe(item):
+    """An item named the way its DRC violation would name it."""
+    p = item.GetPosition()
+    return (f"{item.GetClass()} [{item.GetNetname()}] at "
+            f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f})")

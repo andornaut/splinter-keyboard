@@ -51,7 +51,7 @@ Usage: tidy-slivers.py <board.kicad_pcb> [more.kicad_pcb ...] [--max-move <mm>]
 """
 import argparse
 
-from pcb_copper import TOUCH_TOL, copper_pads, dist, is_via
+from pcb_copper import TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via
 from pcbnew_quiet import pcbnew
 
 MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
@@ -129,22 +129,11 @@ def _moved(ends, target, mover):
 
 def _blocker(tracks, pads, sliver, target, movers):
     """The first item of another net a moved segment would sit too close to, with the
-    clearance it wanted, or None. Zones are left out: the pour re-flows around
-    whatever the copper ends up being."""
+    clearance it wanted, or None."""
     ends = _ends(sliver)
-    others = [t for t in tracks if id(t) != id(sliver)] + list(pads)
-    for mover in movers:
-        layer, net = mover.GetLayer(), mover.GetNetCode()
-        shape = _moved(ends, target, mover)
-        for other in others:
-            if other.GetNetCode() == net or not other.IsOnLayer(layer):
-                continue
-            gap = max(mover.GetOwnClearance(layer), other.GetOwnClearance(layer))
-            if not shape.BBox(gap).Intersects(other.GetBoundingBox()):
-                continue
-            if shape.Collide(other.GetEffectiveShape(layer), gap):
-                return other, gap
-    return None
+    proposals = [(m.GetLayer(), m.GetNetCode(), m.GetOwnClearance(m.GetLayer()),
+                  _moved(ends, target, m)) for m in movers]
+    return clearance_blocker(tracks, pads, proposals, replaced={id(sliver)})
 
 
 def _collapse(board, sliver, target, movers):
@@ -172,10 +161,8 @@ def _refusal(tracks, pads, sliver):
     blocked = _blocker(tracks, pads, sliver, target, movers)
     if blocked is not None:
         other, gap = blocked
-        p = other.GetPosition()
         return (f"collapsing it would swing copper inside the {pcbnew.ToMM(gap):.2f}mm "
-                f"clearance of {other.GetClass()} [{other.GetNetname()}] at "
-                f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f})")
+                f"clearance of {describe(other)}")
     return None
 
 
