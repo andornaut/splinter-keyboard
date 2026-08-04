@@ -99,6 +99,8 @@ Set the active version in [`package.json`](./package.json) under `config.VERSION
    * **Check copper/silk** visually: no isolated GND islands or stranded pads; silk and reference designators clear of pads and the board edge.
 
    Then `npm run copy:unrouted-to-routed` to save them to [`kicad/routed/`](./v4/kicad/routed/), which adds the GND pour and strips the copper no route uses (dangling tracks and the vias they strand, tracks buried in pads, redundant vias, split segments). The working boards keep that copper, mainly the footprints' unused `include_traces_vias` stubs, since a later reroute may pick it up.
+
+   It then tidies away any segment left shorter than it is wide: the few-micron jog or via stub a drag leaves behind. Collapsing one moves copper, so it is capped at 0.01mm; anything needing more is reported as an error naming its net, layer and position, and the step stops rather than shipping copper nobody chose. Close those by dragging the two runs together in KiCad, or run `python3 ./scripts/tidy-slivers.py v4/kicad/routed/*.kicad_pcb --max-move <mm>` once to have them closed for you (then re-run DRC). Builds always use the 0.01mm cap.
    * After regenerating with Ergogen, `npm run copy:traces-to-unrouted` copies the traces and teardrops from `routed/` back into `unrouted/` (then File > Revert in KiCad).
 
 #### Autorouting (optional)

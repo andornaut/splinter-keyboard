@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Copy the working kicad/unrouted/ PCBs onto the routed/ masters (the fab source), then
-# add a filled GND pour to each master and clean up the copper no route uses.
+# add a filled GND pour to each master, clean up the copper no route uses, and
+# tidy away the segments an edit left shorter than they are wide.
 # The pour is applied here, after manual routing, rather than at build time so
 # routing happens on a clean board; the cp overwrites each master with the
 # pour-free working copy first, so the pour is always freshly flowed around the
@@ -23,6 +24,8 @@ for f in "${files[@]}"; do
   cp "$f" "$dst"
   mute_pcbnew_noise python3 ./scripts/add-gnd-zone.py "$dst"
   mute_pcbnew_noise python3 ./scripts/cleanup-tracks.py "$dst"
+  # After the cleanup, so every sliver it sees sits in copper the route uses.
+  mute_pcbnew_noise python3 ./scripts/tidy-slivers.py "$dst"
 done
 
 # Apply project settings to the routed/ projects (this copy step owns the routed
@@ -30,4 +33,4 @@ done
 # apply_project_settings in lib.sh.
 apply_project_settings "$dst_dir"
 
-ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, unused copper cleaned up"
+ok "copy:unrouted-to-routed: ${#files[@]} PCB(s) copied to ${dst_dir}/ with GND pour, unused copper cleaned up, slivers tidied"
