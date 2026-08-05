@@ -26,8 +26,13 @@ width holds at the straight side edges.
 - **The support-wall lip rests on the board's outer ~2mm margin.** The perimeter
   copper keepout keeps that margin clear, so the lip presses on bare substrate,
   not copper.
-- **Left and right are mirrored**, so model one and mirror it, and export each as
-  its own `*.step` (JLCCNC quantity is set per file).
+- **The outline mirrors; the switch cutouts do not.** Both halves' outer edges come
+  from the same mirrored anchors, so the tray can be modelled once and mirrored.
+  The key field cannot be: the left pinky is 1.5u where the right is 1u plus an
+  extra inner column, so the halves carry 30 and 32 switch cutouts with 14
+  positions having no mirrored counterpart. **Cut each switch plate from its own
+  half of the DXF**, which is why the export carries both halves. Export every
+  part as its own `*.step` (JLCCNC quantity is set per file).
 
 ## Topology: two-piece sandwich
 
