@@ -520,6 +520,20 @@ outlines:
       fillet: 1.5
     - name: _usbright
       operation: subtract
+  # The same walls without the exterior fillet: the nominal hull, and what the case
+  # is modelled to. The fillet only removes material, so this is a strict superset
+  # of the PCB edge cut and a case pocket built to it can never come out undersized.
+  # Not used by any pcb; it exists to be exported as a DXF for CAD.
+  _wallsleft_unfilleted:
+    - name: _boxleft
+    - name: _thumbbindingleft
+    - name: _usbleft
+      operation: subtract
+  _wallsright_unfilleted:
+    - name: _boxright
+    - name: _thumbbindingright
+    - name: _usbright
+      operation: subtract
   # These outlines feed the DXF case export only (the PCB edge cut uses _walls*
   # directly). Everything is stacked as reference curves for the 3D case model.
   # Must be stacked, not subtracted: a coincident/inner subtracted shape cancels
@@ -547,6 +561,31 @@ outlines:
   full:
     - name: left
     - name: right
+  # Case-export twin of `full`, on the un-filleted hull. Same reference curves
+  # stacked, so it imports into CAD exactly like `full` does.
+  _left_unfilleted:
+    - name: _wallsleft_unfilleted
+    - name: _switchoutlinesleft
+      operation: stack
+    - name: _switchholesleft
+      operation: stack
+    - name: _screwbossesleft
+      operation: stack
+    - name: _screwsleft
+      operation: stack
+  _right_unfilleted:
+    - name: _wallsright_unfilleted
+    - name: _switchoutlinesright
+      operation: stack
+    - name: _switchholesright
+      operation: stack
+    - name: _screwbossesright
+      operation: stack
+    - name: _screwsright
+      operation: stack
+  full_unfilleted:
+    - name: _left_unfilleted
+    - name: _right_unfilleted
   bounds:
     - name: full
     - name: _boundsleft

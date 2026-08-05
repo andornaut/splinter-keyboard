@@ -191,7 +191,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 ![Onshape preview](./v4/onshape/onshape.png)
 
 1. Create a document and start a sketch.
-1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full.dxf`.
+1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
 1. Design the case, then export `*.step` files to [`onshape/`](./v4/onshape/).
 
 ### Step 7. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)

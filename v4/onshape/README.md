@@ -1,7 +1,7 @@
 # v4 case design (Onshape)
 
 3D case models (`*.step`) live here. The case is designed in Onshape from the
-Ergogen outline (`dist/v4/ergogen/outlines/full.dxf`), then printed
+Ergogen outline (`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed
 (OrcaSlicer) or CNC-machined (JLCCNC). See the root `README.md` steps 6-7 for
 the import/order workflow; this file is design guidance.
 
@@ -15,7 +15,11 @@ Each half:
 The 1.5mm wall fillet rounds the corners, so the height drops 0.41mm while the
 width holds at the straight side edges.
 
-- **Model the case to the filleted outline**, not the nominal hull.
+- **Model the case to the un-filleted hull**, which is what `full_unfilleted.dxf`
+  carries. The fillet only removes material, so the hull is a strict superset of
+  the board and a pocket cut to it can never come out undersized. The board then
+  sits with up to ~0.62mm of corner gap, which is clearance, not slop: the lip
+  still bears on the flat margin along every straight edge.
 - **Measure the cut line itself** (KiCad's board outline polygon), not the board
   bounding box: the box is inflated by the 0.15mm `Edge.Cuts` stroke on every
   side, which is 0.3mm of case pocket that is not there.
