@@ -3,7 +3,8 @@
 3D case models (`*.step`) live here. The case is designed in Onshape from the
 Ergogen outline (`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed
 (OrcaSlicer) or CNC-machined (JLCCNC). See the root `README.md` steps 6-7 for
-the import/order workflow; this file is design guidance.
+the import/order workflow; this file is design guidance and [BUILD.md](./BUILD.md)
+is the feature-by-feature recipe with the numbers.
 
 Each half:
 
