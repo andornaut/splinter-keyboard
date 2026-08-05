@@ -323,6 +323,18 @@ Plate thickness then drives the case, because the plate is inset and eats cavity
 | 2.80 | pan head | 17.49 | +1.63 |
 | **2.00** | **countersunk** | **16.69** | **+0.83** |
 
+**M3 is not an option here**, despite being the safer default generally:
+
+| | M2.5 | M3 |
+| --- | --- | --- |
+| Fits the fabricated 3.00mm board hole | 0.50mm clearance | **0.00mm, interference** |
+| Countersunk head height | 1.50 | 1.65, so a thicker plate |
+| Heat-set insert melt diameter | 3.60 | 4.20, leaving 0.65mm of boss wall against 0.95 |
+
+The hole alone settles it: M3 needs 3.2 to 3.4mm, which is a config change and new boards.
+The boss cannot grow to carry a larger insert either, since 5.5mm already does not fit
+between 1u-spaced switch columns, which is why the screws sit in the diagonal gaps.
+
 **Countersunk M2.5 in a 2.00mm plate is the recommendation.** It is the only head that
 keeps the plate near the thickness the cavity wants, and it lands the case at a 16.69mm
 thick end, under a millimetre more than today. It also suits both processes: a countersink
