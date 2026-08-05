@@ -120,8 +120,8 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -15.10 | usable cavity ends here |
-| Shell bottom rim / plate underside | -17.10 | plate is **inset**, flush with the rim |
+| Bottom plate top face | -14.76 | usable cavity ends here |
+| Shell bottom rim / plate underside | -16.36 | plate is **inset**, flush with the rim |
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -136,7 +136,7 @@ switches, and the whole height question is below the board.
 | Mill-Max 315-43-112-41-003000 socket, above board | 2.00 - 2.41 | measured ~2.0; datasheet `.095"` reads 2.41 |
 | Liatris PCB | 1.00 | splitkb states a 1mm PCB |
 | Liatris down-facing, pin stubs tallest | 2.00 | measured; the USB-C and buttons are shorter |
-| MCU stack | 5.00 - 5.41 | measured, conservative |
+| MCU stack | 5.40 | measured (7.00 overall less the 1.60 main PCB) |
 | **TRRS jack body (PJ-320A)** | **5.20** | **binds**; measured |
 | Hotswap socket | 1.85 | Kailh CPG151101S11 |
 
@@ -147,7 +147,7 @@ board and its socketed stack comes in under the jack.
 | --- | --- |
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
-| Below-PCB, set by the TRRS jack | 5.20 |
+| Below-PCB, set by the MCU | 5.40 |
 | Bottom plate | 2.00 |
 | **Minimum total** | **15.1 - 16.1** |
 | Current design | 17.60 |
@@ -172,7 +172,7 @@ the inset plate leaves very little:
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
 | TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.20 | **+0.35** |
-| Liatris | 52.78 .. 70.80 | 5.07 mm | 5.00 - 5.41 | **+0.07 .. -0.34** |
+| Liatris | 52.78 .. 70.80 | 5.07 mm | 5.40 | **-0.33 fouls** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -185,23 +185,22 @@ cheapest first:
 | Grow the thick end 15.86 -> 17.31mm | +1.45mm, for a 1.0mm margin on a 6mm jack |
 | Hang the plate below the rim instead of insetting | +2.00mm, but loses the flush look |
 
-**The MCU is the tightest item, not the jack, and it does not reliably clear.** Measured
-conservatively, the assembly hangs 5.00 to 5.41mm below the main PCB (socket 2.0 to 2.41,
-MCU PCB 1.0, pin stubs 2.0) against 5.07mm available. That is +0.07mm at best and -0.34mm
-at worst.
+**The MCU is the tightest item, not the jack, and at the current geometry it fouls.**
+It hangs **5.40mm** below the main PCB (7.00mm overall less the 1.60mm board: socket ~2,
+MCU PCB ~1, pin stubs ~2) against 5.07mm available. That is **-0.33mm**.
 
-**Recovering it is cheap.** Thinning the inset plate is the least invasive fix:
+| Plate | Thick end | MCU margin | Jack margin | |
+| --- | --- | --- | --- | --- |
+| 2.00 | 15.86 | -0.33 | +0.35 | fouls |
+| 1.60 | 15.86 | +0.07 | +0.75 | marginal |
+| 1.20 | 15.86 | +0.47 | +1.15 | clears, thin plate |
+| 2.00 | 16.86 | +0.67 | +1.35 | clears, +1mm case |
+| **1.60** | **16.36** | **+0.57** | **+1.25** | **recommended** |
 
-| Plate | Thick end | MCU margin | Jack margin |
-| --- | --- | --- | --- |
-| 2.00 | 15.86 | -0.34 .. +0.07 | +0.35 |
-| **1.60** | **15.86** | **+0.06 .. +0.47** | **+0.75** |
-| 1.20 | 15.86 | +0.46 .. +0.87 | +1.15 |
-| 2.00 | 16.86 | +0.66 .. +1.07 | +1.35 |
-
-A 1.60mm plate clears both parts without touching the external height. A 1.20mm plate, or
-1.60mm with 1mm more case, buys real margin. **1.60mm plate is the recommendation**: it
-is still four layers at 0.4mm and stiff enough for a part held by three screws.
+Thinning the plate alone is tempting but it is inset and screw-retained at three points
+with no supporting ledge, so below about 1.6mm a clearance problem becomes a stiffness
+one on a 160mm span. **Take 1.60mm of plate and 0.50mm more case**: that clears the MCU
+by 0.57mm and the jack by 1.25mm for half a millimetre of external height.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
@@ -219,7 +218,7 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 1.60 mm | decision; **inset**, so it consumes cavity; 2.00 leaves the MCU without margin |
+| Bottom plate thickness | 1.60 mm | **inset**, so it consumes cavity |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
