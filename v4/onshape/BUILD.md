@@ -272,7 +272,29 @@ print and 0.2-0.3mm machined.
    **3.25mm** so it matches the shell footprint, blind **2.00mm**.
 2. **Screw holes**, 2.90 dia at the three boss positions, counterbored for the M2.5 head
    so it sits flush.
-3. **Bumper recesses**, four shallow pads on the outer face, clear of the screw heads.
+3. **Access holes** for the two things that face the bottom plate, see below.
+4. **Bumper recesses**, four shallow pads on the outer face, clear of the screw heads
+   and the access holes.
+
+### Access holes
+
+The MCU is mounted with its component side facing down, which is what keeps its reset
+and boot buttons usable, and the board's own reset switch is an SMD tactile on side B.
+**Both therefore face the bottom plate, and a solid plate defeats the reason for that
+orientation.**
+
+| Needs access | Centre | Note |
+| --- | --- | --- |
+| Board reset switch | (61.79, 13.94) | Exact; shares the `mcu_reset_x` column with the MCU by design |
+| Liatris boot button | within x 52.78 .. 70.80, y 26.36 .. 57.08 | Position on the module not published; measure one |
+
+Size them for a tool rather than a finger. The switch sits about 1.5mm below the PCB and
+the plate is 7.50mm below it, so the actuator is recessed roughly 6mm: a 3mm hole passes
+a paperclip. Keep the holes clear of the screw counterbores and bumper pads.
+
+QMK can enter the bootloader from a keycode or a double-tap reset, so the Liatris boot
+button is the less critical of the two if you would rather not put a second hole in the
+plate.
 
 ## Right half
 
