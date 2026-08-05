@@ -171,8 +171,8 @@ the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.20 | **+0.35** |
-| Liatris | 52.78 .. 70.80 | 5.07 mm | 5.40 | **-0.33 fouls** |
+| TRRS jack | 71.55 .. 77.75 | 6.35 mm | 5.20 | **+1.15** |
+| Liatris | 52.78 .. 70.80 | 5.87 mm | 5.40 | **+0.47** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -185,22 +185,16 @@ cheapest first:
 | Grow the thick end 15.86 -> 17.31mm | +1.45mm, for a 1.0mm margin on a 6mm jack |
 | Hang the plate below the rim instead of insetting | +2.00mm, but loses the flush look |
 
-**The MCU is the tightest item, not the jack, and at the current geometry it fouls.**
-It hangs **5.40mm** below the main PCB (7.00mm overall less the 1.60mm board: socket ~2,
-MCU PCB ~1, pin stubs ~2) against 5.07mm available. That is **-0.33mm**.
+**Thicken the plate only where the screws are.** The MCU hangs 5.40mm below the board
+and the jack 5.20mm, and a uniform 2.00mm plate leaves -0.33mm and +0.35mm. But the plate
+only needs to be thick where a screw head is buried, and none of the three screws is
+anywhere near the MCU or the jack. A **1.20mm plate with local bosses** gives +0.47mm and
++1.15mm at the **current** case height, so no growth is needed.
 
-| Plate | Thick end | MCU margin | Jack margin | |
-| --- | --- | --- | --- | --- |
-| 2.00 | 15.86 | -0.33 | +0.35 | fouls |
-| 1.60 | 15.86 | +0.07 | +0.75 | marginal |
-| 1.20 | 15.86 | +0.47 | +1.15 | clears, thin plate |
-| 2.00 | 16.86 | +0.67 | +1.35 | clears, +1mm case |
-| **1.60** | **16.36** | **+0.57** | **+1.25** | **recommended** |
-
-Thinning the plate alone is tempting but it is inset and screw-retained at three points
-with no supporting ledge, so below about 1.6mm a clearance problem becomes a stiffness
-one on a 160mm span. **Take 1.60mm of plate and 0.50mm more case**: that clears the MCU
-by 0.57mm and the jack by 1.25mm for half a millimetre of external height.
+| Plate | MCU | Jack |
+| --- | --- | --- |
+| Uniform 2.00mm | -0.33 | +0.35 |
+| **1.20mm + local bosses** | **+0.47** | **+1.15** |
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
@@ -218,7 +212,8 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 2.00 mm | set by the countersunk head, see below; **inset**, so it consumes cavity |
+| Bottom plate thickness | 1.20 mm general | **inset**, so it consumes cavity |
+| Plate at the screw bosses | 2.00 mm local | enough to bury a countersunk M2.5 head |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
@@ -355,19 +350,16 @@ Top face down on the bed. The first layer is the top face with its 16mm openings
 1.50mm the opening steps in to 14.5mm, a 0.75mm inward overhang per side that bridges
 without support. Walls and bosses rise from there, so nothing else overhangs.
 
-## Screw stack: OPEN
+## Screw stack
 
-The PCB and the plate are 7.00mm apart, so one screw cannot simply join plate to boss:
-it would span 2.00 + 7.00 + 1.60 = 10.60mm before engaging, needing roughly an M2.5x16
-and standing in bare air in bending for most of that. Pick one:
+**The plate carries standoffs up to the PCB underside**, so one screw runs plate,
+standoff, PCB, shell boss, and everything is in compression with nothing spanning bare
+air. The local thickening that buries the countersunk head is the base of the same
+feature.
 
-| Option | How | Cost |
-| --- | --- | --- |
-| **Separate fastenings** | M2.5x6 holds the PCB up against the shell bosses, heads inside the cavity. The plate gets its own retention | Two fastener systems; PCB screws only reachable with the plate off, which is acceptable here |
-| **Plate standoffs** | The plate carries three pillars 7.00mm tall to the PCB underside; one M2.5x16 runs plate, pillar, PCB, boss | One screw per position, everything in compression, but the pillars must dodge components |
-
-Either way the boss has 5.00mm of material above the PCB to engage, fixed by the MX
-plate-to-PCB spacing.
+The standoffs must dodge components on the underside of the board, which the three screw
+positions already do: none is near the MCU or the jack. The boss has 5.00mm of material
+above the PCB to engage, fixed by the MX plate-to-PCB spacing.
 
 ## Verify
 
