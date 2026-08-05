@@ -120,8 +120,8 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Cavity floor / shell bottom rim | -15.60 | carried from v3; 1.5-2.5mm over the computed floor, so there is room to shrink |
-| Bottom plate underside | -17.60 | + 2.00mm plate |
+| Bottom plate top face | -15.10 | usable cavity ends here |
+| Shell bottom rim / plate underside | -17.10 | plate is **inset**, flush with the rim |
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -208,7 +208,8 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 2.00 mm | decision |
+| Bottom plate thickness | 2.00 mm | decision; **inset**, so it consumes cavity |
+| Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
 | Boss radius | 2.75 mm | DXF boss circles |
@@ -272,29 +273,20 @@ print and 0.2-0.3mm machined.
    **3.25mm** so it matches the shell footprint, blind **2.00mm**.
 2. **Screw holes**, 2.90 dia at the three boss positions, counterbored for the M2.5 head
    so it sits flush.
-3. **Access holes** for the two things that face the bottom plate, see below.
-4. **Bumper recesses**, four shallow pads on the outer face, clear of the screw heads
-   and the access holes.
+3. **Bumper recesses**, four shallow pads on the outer face, clear of the screw heads.
 
-### Access holes
+### The plate is inset
 
-The MCU is mounted with its component side facing down, which is what keeps its reset
-and boot buttons usable, and the board's own reset switch is an SMD tactile on side B.
-**Both therefore face the bottom plate, and a solid plate defeats the reason for that
-orientation.**
+The plate drops into the bottom of the cavity and finishes flush with the shell rim,
+rather than covering the shell's whole footprint. Its outline is therefore the cavity
+outline less a fit clearance, not the shell outer profile.
 
-| Needs access | Centre | Note |
-| --- | --- | --- |
-| Board reset switch | (61.79, 13.94) | Exact; shares the `mcu_reset_x` column with the MCU by design |
-| Liatris boot button | within x 52.78 .. 70.80, y 26.36 .. 57.08 | Position on the module not published; measure one |
+**This costs 2.00mm of cavity depth**, which is why the shell is 17.10mm rather than
+15.60mm. It needs no rebate: the cavity is a straight extrusion, so the plate slides up
+into it and the screws locate it, which also keeps the cavity machinable from below.
 
-Size them for a tool rather than a finger. The switch sits about 1.5mm below the PCB and
-the plate is 7.50mm below it, so the actuator is recessed roughly 6mm: a 3mm hole passes
-a paperclip. Keep the holes clear of the screw counterbores and bumper pads.
-
-QMK can enter the bootloader from a keycode or a double-tap reset, so the Liatris boot
-button is the less critical of the two if you would rather not put a second hole in the
-plate.
+The MCU's reset and boot buttons and the board's own reset switch all face the plate.
+Access is by removing the plate, so no holes are needed.
 
 ## Right half
 
@@ -311,11 +303,19 @@ Top face down on the bed. The first layer is the top face with its 16mm openings
 1.50mm the opening steps in to 14.5mm, a 0.75mm inward overhang per side that bridges
 without support. Walls and bosses rise from there, so nothing else overhangs.
 
-## Screw stack
+## Screw stack: OPEN
 
-Bottom plate (2.00) + PCB (1.60) = 3.60mm consumed before the fastener enters the boss.
-An M2.5x8 leaves 4.40mm to engage a 5.00mm insert or tapped hole. A counterbore in the
-bottom plate recovers whatever depth it removes.
+The PCB and the plate are 7.00mm apart, so one screw cannot simply join plate to boss:
+it would span 2.00 + 7.00 + 1.60 = 10.60mm before engaging, needing roughly an M2.5x16
+and standing in bare air in bending for most of that. Pick one:
+
+| Option | How | Cost |
+| --- | --- | --- |
+| **Separate fastenings** | M2.5x6 holds the PCB up against the shell bosses, heads inside the cavity. The plate gets its own retention | Two fastener systems; PCB screws only reachable with the plate off, which is acceptable here |
+| **Plate standoffs** | The plate carries three pillars 7.00mm tall to the PCB underside; one M2.5x16 runs plate, pillar, PCB, boss | One screw per position, everything in compression, but the pillars must dodge components |
+
+Either way the boss has 5.00mm of material above the PCB to engage, fixed by the MX
+plate-to-PCB spacing.
 
 ## Verify
 
