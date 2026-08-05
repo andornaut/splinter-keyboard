@@ -137,7 +137,7 @@ switches, and the whole height question is below the board.
 | Liatris PCB | 1.00 | splitkb states a 1mm PCB |
 | Liatris down-facing components | 1.00 | measured: the mid-mount USB-C and the pin stubs at the edges are both ~1mm proud; the buttons are shorter |
 | MCU stack | 4.41 | measured |
-| **TRRS jack body (PJ-320A)** | **5.0 - 6.0** | **binds**; sources give 5 to 6mm, no datasheet retrieved |
+| **TRRS jack body (PJ-320A)** | **5.20** | **binds**; measured |
 | Hotswap socket | 1.85 | Kailh CPG151101S11 |
 
 **The TRRS jack sets the depth, not the MCU.** The Liatris is a deliberately low-profile
@@ -147,7 +147,7 @@ board and its socketed stack comes in under the jack.
 | --- | --- |
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
-| Below-PCB, set by the TRRS jack | 5.0 - 6.0 |
+| Below-PCB, set by the TRRS jack | 5.20 |
 | Bottom plate | 2.00 |
 | **Minimum total** | **15.1 - 16.1** |
 | Current design | 17.60 |
@@ -171,7 +171,7 @@ the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.0 - 6.0 | -0.45 .. +0.55 |
+| TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.20 | **+0.35** |
 | Liatris | 52.78 .. 70.80 | 5.07 mm | 4.41 | **+0.66** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
@@ -190,8 +190,18 @@ the Mill-Max pin stubs along the edges, both about 1mm proud, with the buttons s
 That is consistent with a ~3.26mm mid-mount connector splitting across a 1.00mm PCB. So
 the stack is 2.41 + 1.00 + 1.00 = 4.41mm and the MCU has 0.66mm.
 
-**The TRRS jack is the only open dimension left.** It has 5.55mm and needs 5.0 to 6.0mm,
-so it clears or fouls depending on a number nobody has measured.
+**The TRRS jack measures 5.20mm and clears by 0.35mm.** It is the tightest point in the
+design.
+
+**One thing still to confirm on the MCU.** The module measures 6.75mm from its component
+face to the pin tips, which decomposes as 1.00 components + 1.00 PCB + 4.75 pin tail. The
+tail is meant to be swallowed by the socket, giving 4.41mm below the main PCB and a
+0.66mm margin. But the bore is only 2.41mm of socket plus 1.60mm of main PCB, 4.01mm
+against a 4.75mm tail. Either 0.74mm of pin stands proud above the main PCB, which is
+harmless since there is 3.50mm of room there, or **the MCU seats 0.74mm low and the
+margin becomes -0.08mm**. Measure the installed assembly, main PCB underside to the
+lowest point of the MCU: 4.41mm means it seated, anything approaching 5.15mm means it
+did not.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
