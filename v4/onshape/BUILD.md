@@ -191,10 +191,20 @@ only needs to be thick where a screw head is buried, and none of the three screw
 anywhere near the MCU or the jack. A **1.20mm plate with local bosses** gives +0.47mm and
 +1.15mm at the **current** case height, so no growth is needed.
 
-| Plate | MCU | Jack |
-| --- | --- | --- |
-| Uniform 2.00mm | -0.33 | +0.35 |
-| **1.20mm + local bosses** | **+0.47** | **+1.15** |
+| General plate | Thick end | MCU | Jack |
+| --- | --- | --- | --- |
+| Uniform 2.00mm | 15.86 | -0.33 | +0.35 |
+| 1.50mm + local bosses | 15.86 | +0.17 | +0.85 |
+| **1.50mm + local bosses** | **16.16** | **+0.47** | **+1.15** |
+
+**A 1.50mm plate cannot bury the head by itself.** A countersunk M2.5 head is 1.50mm
+tall, so flush mounting needs a countersink exactly that deep, which consumes the whole
+plate and leaves the head bearing on a knife edge. The local pad takes it to 2.00mm at
+the hole, leaving 0.50mm under the cone. That pad is the base of the standoff, so it
+costs nothing extra.
+
+Taking 1.50mm rather than 1.20mm for general stiffness costs 0.30mm of MCU margin, which
+0.30mm of case height buys back.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
@@ -212,8 +222,8 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 1.20 mm general | **inset**, so it consumes cavity |
-| Plate at the screw bosses | 2.00 mm local | enough to bury a countersunk M2.5 head |
+| Bottom plate thickness | 1.50 mm general | **inset**, so it consumes cavity |
+| Plate at the screw bosses | 2.00 mm local | a 1.50mm plate is consumed exactly by the countersink |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
