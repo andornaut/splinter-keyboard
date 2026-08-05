@@ -30,7 +30,15 @@ Every version directory (`v1/` .. `v4/`) follows the same shape, though not ever
 | `onshape/` | Case STEP exports. |
 | `orcaslicer/` | Slicer projects. v2 and v3 only. |
 
-Shared: `ergogen/` (footprints and helpers), `scripts/` (build steps), `dist/` (generated, not committed). A `_` prefix on a PCB filename excludes it from every step.
+Shared across versions:
+
+| Path | Contents |
+| --- | --- |
+| `ergogen/` | Footprints and helpers. |
+| `scripts/` | Build steps. |
+| `dist/` | Build output. Generated, not committed. |
+
+A `_` prefix on a PCB filename excludes it from every step.
 
 ## Installation
 
@@ -259,3 +267,14 @@ Restoring or rebuilding one half on its own is invisible to the hash, since iden
 A panel inherits its masters' stamp rather than getting one of its own, so its `commit=` names the commit the panelled copper came from. Masters whose stamps disagree stop `panelize`, since a panel merged from two generations of board has no single provenance to report.
 
 Only `config.yaml` is hashed, so a footprint `.js` or Ergogen-version change can move geometry without tripping the check, while a comment-only config edit trips a false "stale".
+
+### Reproducing a previous build
+
+A stamp names the commit the build's *inputs* came from, never the commit that contains the stamped board: the stamp is written into the board, so it can only name its own parent. To get the boards a stamp describes, check that commit out and rebuild.
+
+```bash
+git checkout <the commit= from the stamp>
+npm run pipeline
+```
+
+Taking `kicad/routed/*.kicad_pcb` straight from that commit instead gives you the *previous* build's masters. Rebuilding reproduces copper, drill, mask, paste, outline and the assembly files identically; only the `built=` timestamp drawn on the silk and a few microns of teardrop fill tessellation differ.

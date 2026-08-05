@@ -5,7 +5,14 @@ A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-t
 * [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
 * Build and fabrication workflow: [root README](../README.md#developing)
 
-Each PCB half is 160 x 119 mm before the corner fillet, and 160 x 118.59 mm as fabricated: the fillet rounds the corners off the height, while the straight side edges hold the width. See the [case design notes](./onshape/README.md).
+Each PCB half:
+
+| Outline | Width | Height |
+| --- | --- | --- |
+| Un-filleted hull | 160.00 mm | 119.00 mm |
+| As fabricated, after the 1.5mm corner fillet | 160.00 mm | 118.59 mm |
+
+The fillet rounds the corners off the height; the straight side edges hold the width. See the [case design notes](./onshape/README.md).
 
 ## Changes from v3
 

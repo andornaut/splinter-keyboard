@@ -14,6 +14,8 @@ produces a cleaned board:
 
   - a track laid over another of the same net, layer and path is doubled copper,
     and the narrower of the pair is deleted
+  - a segment lying along a no-narrower one of its own net and layer is buried
+    inside it, and is deleted
   - a track whose start or end touches no other copper (a track, a via, a pad, or
     a filled pour of its own net) is dangling, and is deleted
   - a track that lies entirely inside a pad of its own net adds nothing, and is
@@ -143,6 +145,47 @@ def _duplicate_tracks(tracks):
     return doomed
 
 
+def _covered_tracks(tracks, doomed_ids):
+    """Segments buried inside another segment of their own net: same layer, both
+    ends on the other's centreline, and no wider than it. Those three together mean
+    every point of this segment's copper is already inside the other's, so deleting
+    it moves no copper and can strand nothing: whatever touched it still touches
+    what covered it.
+
+    The path rule above cannot see these, since a buried segment and its cover
+    share neither endpoint and so never collide in its key. They arrive as the
+    footprints' `include_traces_vias` stubs, when a route happens to run along a
+    stub instead of picking it up: the stub is not dangling (both ends sit on the
+    route's copper) and not buried in a pad, so every other rule here passes it
+    too, and doubled copper of exactly the kind this file exists to remove reaches
+    the master, invisible to DRC because it carries its own net.
+
+    Straight segments only, as cover and as covered. An arc is buried only if it
+    shares the other's circle as well as its extent, which is a different test, and
+    a chord is never inside its own arc.
+    """
+    segments = [t for t in tracks
+                if t.GetClass() == "PCB_TRACK" and id(t) not in doomed_ids]
+    doomed = []
+    dead = set(doomed_ids)
+    for a in segments:
+        for b in segments:
+            # A pair that buries each other is identical, so the path rule has
+            # already taken one of them; skipping the dead as covers is what keeps
+            # this from taking the survivor too.
+            if a is b or id(b) in dead:
+                continue
+            if (a.GetNetCode() != b.GetNetCode() or a.GetLayer() != b.GetLayer()
+                    or a.GetWidth() > b.GetWidth()):
+                continue
+            if all(point_to_segment(p, b.GetStart(), b.GetEnd()) <= TOUCH_TOL
+                   for p in (a.GetStart(), a.GetEnd())):
+                doomed.append(a)
+                dead.add(id(a))
+                break
+    return doomed
+
+
 def _doomed(board):
     """One pass of every deletion rule, as (tracks, vias)."""
     tracks = list(board.GetTracks())
@@ -151,6 +194,9 @@ def _doomed(board):
 
     doomed_tracks = _duplicate_tracks(tracks)
     doomed_ids = ids(doomed_tracks)
+    for t in _covered_tracks(tracks, doomed_ids):
+        doomed_tracks.append(t)
+        doomed_ids.add(id(t))
     # Judge the rest against a board the duplicates have already left, so a track
     # only its own twin held up is seen as dangling in this same pass.
     survivors = [t for t in tracks if id(t) not in doomed_ids]

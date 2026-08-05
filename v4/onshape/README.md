@@ -5,16 +5,25 @@ Ergogen outline (`dist/v4/ergogen/outlines/full.dxf`), then printed
 (OrcaSlicer) or CNC-machined (JLCCNC). See the root `README.md` steps 6-7 for
 the import/order workflow; this file is design guidance.
 
-Each half is 160 x 119mm un-filleted (the nominal hull); the actual Edge.Cuts
-outline is 160 x 118.59mm after the 1.5mm wall fillet rounds the corners, so the
-height drops ~0.41mm while the width holds at the straight side edges. Model the
-case to the filleted outline. Measure the cut line itself (KiCad's board outline
-polygon), not the board bounding box: the box is inflated by the 0.15mm Edge.Cuts
-stroke on every side, which is 0.3mm of case pocket that is not there. The case's support-wall lip rests on the
-board's outer ~2mm margin (the perimeter copper keepout keeps that margin clear,
-so the lip presses on bare substrate, not copper). Left and right are mirrored, so
-model one and mirror, and export each as its own `*.step` (JLCCNC quantity is set
-per file).
+Each half:
+
+| Outline | Width | Height |
+| --- | --- | --- |
+| Un-filleted hull (the nominal shape) | 160.00 mm | 119.00 mm |
+| `Edge.Cuts`, as fabricated | 160.00 mm | 118.59 mm |
+
+The 1.5mm wall fillet rounds the corners, so the height drops 0.41mm while the
+width holds at the straight side edges.
+
+- **Model the case to the filleted outline**, not the nominal hull.
+- **Measure the cut line itself** (KiCad's board outline polygon), not the board
+  bounding box: the box is inflated by the 0.15mm `Edge.Cuts` stroke on every
+  side, which is 0.3mm of case pocket that is not there.
+- **The support-wall lip rests on the board's outer ~2mm margin.** The perimeter
+  copper keepout keeps that margin clear, so the lip presses on bare substrate,
+  not copper.
+- **Left and right are mirrored**, so model one and mirror it, and export each as
+  its own `*.step` (JLCCNC quantity is set per file).
 
 ## Topology: two-piece sandwich
 
