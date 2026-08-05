@@ -95,9 +95,9 @@ Neither change affects firmware: the data line still terminates at the MCU seria
 
 | Zone | Excludes | Purpose |
 | --- | --- | --- |
-| Perimeter pour ring | The GND pour | Keeps the plane off the whole board edge. A 2mm ring just inside the edge, sized to clear the case support-wall lip, bridged straight across the USB cutout. |
+| Perimeter pour ring | The GND pour | Keeps the plane off the whole board edge. A ring just inside the edge, sized to clear the case support-wall lip, bridged straight across the USB cutout. |
 | Perimeter route ring | Tracks, vias, conductive pads | Same ring, minus a carved-out band above the TRRS: the case's top wall has the port opening there, so the TRRS top through-holes may reach the edge. The inner vertical edge stays full height, so copper under the side wall is still flagged. |
-| Screw-boss disks | Pour, tracks, vias | One disk per mounting hole, 1mm past the boss edge. |
+| Screw-boss disks | Pour, tracks, vias | One disk per mounting hole, extending past the boss edge by the margin the script sets. |
 
 Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating hole, carry no copper and are always allowed. The conductive-pad check is a custom DRC rule in each board's `<name>.kicad_dru`; it keys on pad type, so SMD lands like the hotswap sockets are caught too.
 

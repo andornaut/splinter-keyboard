@@ -139,19 +139,19 @@ After regenerating with Ergogen, `npm run copy:traces-to-unrouted` brings the tr
 | --- | --- |
 | GND pour | Floods a ground plane on whichever side costs less (scored per board, F.Cu vs B.Cu) |
 | Cleanup | Strips copper no route uses: dangling tracks and the vias they strand, tracks buried in pads, redundant vias, split segments |
-| Pattern snap | Pulls strays onto the repeated shape they belong to, within 1mm per endpoint |
-| Sliver tidy | Collapses any segment left shorter than it is wide, within 0.2mm per endpoint |
+| Pattern snap | Pulls strays onto the repeated shape they belong to, within a per-endpoint cap |
+| Sliver tidy | Collapses any segment left shorter than it is wide, within a per-endpoint cap |
 
 One master at a time, copy included, because any stage can stop the build: a master this run has not reached yet is still the routed board it was, rather than an un-poured working copy that nothing downstream would catch.
 
-The last three stages feed each other: a collapsed sliver can leave a run the next snap recognises, and a snap leaves fragments for the next cleanup to merge and can leave a sliver of its own. So they repeat until a pass changes nothing, three passes at most, and a board still changing on the last one stops the build instead of shipping a master its own tooling has not finished with.
+The last three stages feed each other: a collapsed sliver can leave a run the next snap recognises, and a snap leaves fragments for the next cleanup to merge and can leave a sliver of its own. So they repeat until a pass changes nothing, and a board still changing on the last allowed pass stops the build instead of shipping a master its own tooling has not finished with.
 
 The working boards keep the stripped copper, mainly the footprints' unused `include_traces_vias` stubs, since a later reroute may pick it up.
 
 Pattern snap and sliver tidy move copper rather than only removing it, so both are capped and both stop the build rather than guess:
 
-* **Pattern snap.** The matrix is a grid, so most of the routing is one motif repeated. Hand-drawing every copy lands them a fraction of a millimetre apart, which DRC never sees because each copy is individually legal. Anything further off than the cap is a routing decision, not a stray, so it is reported and left alone. A snap inside the cap is refused too, and named, where the copper would land inside another net's clearance or inside a keepout: a detour drawn around a screw boss is the shape it is on purpose, and snapping one flat would put copper back in the zone it clears.
-* **Sliver tidy.** Closing a jog pulls what meets it onto a single point. Moving one end of a run pivots the whole run, so it is refused if the move exceeds the cap, would swing copper inside another net's clearance, or would swing it into a keepout. The refusal names the sliver's net, layer and position: close it in KiCad by dragging the two runs together, giving the run room from the named item first where clearance was the reason, or re-routing clear of the area where a keepout was.
+* **Pattern snap.** The matrix is a grid, so most of the routing is one motif repeated, and hand-drawn copies land a fraction of a millimetre apart. DRC never sees it, because each copy is individually legal. Anything beyond the cap is a routing decision rather than a stray, so it is reported and left alone.
+* **Sliver tidy.** Moving one end of a run pivots the whole run, so a collapse is refused if it exceeds the cap or would swing copper into another net's clearance or a keepout. The refusal names the sliver and the reason; close it in KiCad by dragging the two runs together, or by re-routing clear of the named area.
 
 #### Autorouting (optional)
 
