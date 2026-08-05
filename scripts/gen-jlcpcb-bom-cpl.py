@@ -26,7 +26,7 @@ import re
 import sys
 from collections import defaultdict
 
-from pipeline_log import note
+from lib.pipeline_log import note
 
 
 def ref_key(ref):

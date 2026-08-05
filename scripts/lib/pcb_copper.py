@@ -13,10 +13,35 @@ proposals, so a caller builds them once and asks both.
 
 Not an entry point: import it, do not run it.
 """
-from pcbnew_quiet import pcbnew
+from .pcbnew_quiet import pcbnew
 
 TOUCH_TOL = pcbnew.FromMM(0.001)  # coincidence slack on top of the copper's own width
 VIA_CLASS = "PCB_VIA"
+
+
+def net_class(board, name):
+    """The named net class, read from the board's own project.
+
+    apply-project-settings.py is what writes the net classes into the `.kicad_pro`,
+    so a step needing one of their values must ask the board rather than restate
+    the number: a second copy goes stale the moment the project is retuned, and
+    nothing reports it. A step comparing against a stale width simply stops
+    matching anything and does nothing, silently.
+
+    Missing is a hard error, not a default, for the same reason: falling back
+    would let the step run on against a value the board does not use.
+
+    The keys are normalized because GetAllNetClasses() mixes types: the built-in
+    class comes back as a str and every added one as a wxString, which neither
+    compares nor hashes equal to the same text as a str. Looking a name up
+    directly therefore finds "Default" and misses every custom class."""
+    classes = {str(key): value for key, value in board.GetAllNetClasses().items()}
+    if name not in classes:
+        raise SystemExit(
+            f"ERROR {board.GetFileName()}: no '{name}' net class in this board's project\n"
+            f"    found {sorted(classes)}; apply-project-settings.py writes them, and"
+            f" must run on a stage before any step that reads them")
+    return classes[name]
 
 
 def is_via(item):

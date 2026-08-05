@@ -20,11 +20,11 @@ import argparse
 import os
 import sys
 
-from pcbnew_quiet import pcbnew
+from lib.pcbnew_quiet import pcbnew
 from kikit.panelize import Panel, Origin
 from kikit.units import mm
 
-from provenance import read_stamp, write_stamp
+from lib.provenance import read_stamp, write_stamp
 
 
 def stem(path):

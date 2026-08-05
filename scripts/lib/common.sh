@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Shared helpers for the per-stage pipeline wrappers in scripts/. Source near the
 # top of a wrapper, after `set -euo pipefail` and `shopt -s nullglob`:
-#   source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+#   source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 # Each wrapper still owns its source dir and per-file command (mapping 1:1 to an
 # npm script); this only factors out the require-inputs-or-fail pattern they share.
 #
@@ -41,7 +41,7 @@ require_pcbs() {
 ok() { echo "OK: $*"; }
 
 # Print a line that only confirms nothing needed doing, under PIPELINE_VERBOSE.
-# The bash half of scripts/pipeline_log.py; see there for why the switch is an
+# The bash half of scripts/lib/pipeline_log.py; see there for why the switch is an
 # environment variable. `return 0` because a bare test is the last command under
 # `set -e` and a quiet run would otherwise abort the caller.
 note() { [ -n "${PIPELINE_VERBOSE:-}" ] && echo "$@"; return 0; }

@@ -11,7 +11,7 @@
 # npm run copy:unrouted-to-routed
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run copy:unrouted-to-routed)}"
 kicad_dir="${VERSION}/kicad"
@@ -34,7 +34,7 @@ mkdir -p "$dst_dir"
 
 # Apply project settings to the routed/ projects (this copy step owns the routed
 # tier, the fab source whose DRC floors fab's DRC gate reads). See
-# apply_project_settings in lib.sh. Before the boards, not after: the two steps that
+# apply_project_settings in lib/common.sh. Before the boards, not after: the two steps that
 # move copper read this project's net classes to test what they lay down against
 # the clearance every other net asks for, so a settings change has to land first or
 # the run that introduces it measures against the clearances it replaced. It reads

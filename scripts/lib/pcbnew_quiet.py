@@ -5,7 +5,7 @@ Two separate sources, so two separate guards:
 
   1. At import, pcbnew prints a "PROPERTY_ENUM(): No enum choices defined"
      wxASSERT to stderr, before wx logging can be configured. The shell wrappers
-     drop it from a subprocess's stderr via lib.sh's mute_pcbnew_noise, but the
+     drop it from a subprocess's stderr via common.sh's mute_pcbnew_noise, but the
      in-process importers cannot -- the noise is emitted inside this very
      process. So swap fd 2 to /dev/null across just the import (nothing else
      useful is emitted there); a real import failure still surfaces via the
@@ -17,7 +17,7 @@ Two separate sources, so two separate guards:
      print, so a real wx complaint is not hidden.
 
 Use it in place of `import pcbnew`:
-    from pcbnew_quiet import pcbnew
+    from lib.pcbnew_quiet import pcbnew
 """
 import os
 

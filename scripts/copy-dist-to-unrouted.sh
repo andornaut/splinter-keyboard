@@ -4,7 +4,7 @@
 # work is recoverable. Run via: npm run copy:dist-to-unrouted
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run copy:dist-to-unrouted)}"
 src_dir="dist/${VERSION}/ergogen/pcbs"
@@ -25,7 +25,7 @@ for f in "${files[@]}"; do
 done
 
 # Apply project settings to the unrouted/ projects (this copy step owns the
-# unrouted tier). See apply_project_settings in lib.sh.
+# unrouted tier). See apply_project_settings in lib/common.sh.
 apply_project_settings "$dst_dir"
 
 ok "copy:dist-to-unrouted: ${#files[@]} board(s) copied to ${dst_dir}/ (backups in ${backup_dir}/)"

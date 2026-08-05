@@ -34,10 +34,10 @@
 # already carries the count they would have added up to. `npm run pipeline -- -v`
 # shows them all, plus Ergogen's own narration and the full artifact listing. It
 # is one env var (PIPELINE_VERBOSE) because a run is a dozen processes deep and
-# every one of them has to agree on how loud it is; see scripts/pipeline_log.py.
+# every one of them has to agree on how loud it is; see scripts/lib/pipeline_log.py.
 set -Eeuo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 # Every argument is checked, not just the first: this run rewrites the masters and
 # writes gerbers, so an unrecognised argument has to stop it rather than be dropped

@@ -33,10 +33,10 @@ import os
 import re
 import sys
 
-from pipeline_log import note
-from provenance import config_hash, parse_config_field
+from lib.pipeline_log import note
+from lib.stages import add_stage_argument, selected
+from lib.provenance import config_hash, parse_config_field
 
-STAGES = ("unrouted", "routed")
 COMMENT1_RE = re.compile(r'\(comment\s+1\s+"([^"]*)"\)')
 
 
@@ -52,15 +52,12 @@ def stamped_text(pcb_path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    # default=None (not list(STAGES)): argparse runs `choices` over the default
-    # too when nargs="*", and would reject the list as a single invalid choice.
-    ap.add_argument("stages", nargs="*", choices=STAGES, default=None,
-                    help="stage(s) to validate (default: both)")
+    add_stage_argument(ap, "stage(s) to validate (default: both)")
     ap.add_argument("--quiet", action="store_true",
                     help="say nothing when every board passes (for use as a gate inside\n"
                          "another step, which reports its own result)")
     args = ap.parse_args()
-    stages = args.stages or list(STAGES)
+    stages = selected(args)
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:

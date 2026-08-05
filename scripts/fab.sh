@@ -9,7 +9,7 @@
 # they survive Ergogen regeneration. Run via: npm run fab
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run fab)}"
 parts="./${VERSION}/kicad/jlcpcb-parts.json"
@@ -20,7 +20,7 @@ require_cmds kicad-cli zip python3
 # config.yaml (or is unstamped). Only routed/ is checked -- it is the fab source;
 # unrouted/ drift is irrelevant to fab (the full sync check is the bare
 # `npm run validate:provenance`). Under set -e a nonzero exit aborts the whole
-# fab before any gerber is written. See provenance_gate_routed in lib.sh.
+# fab before any gerber is written. See provenance_gate_routed in lib/common.sh.
 provenance_gate_routed
 
 require_pcbs "${VERSION}/kicad/routed"

@@ -42,8 +42,8 @@ Usage: add-keepout-zones.py <board.kicad_pcb> [more.kicad_pcb ...]
 import math
 import sys
 
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
 
 # Ring width: keep copper clear of the case support-wall lip (which sits on the
 # PCB face), with margin for the board's shift in its pocket and case build

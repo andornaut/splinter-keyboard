@@ -52,13 +52,12 @@ import sys
 import urllib.error
 import urllib.request
 
-from pipeline_log import note
+from lib.pipeline_log import note
+from lib.stages import add_stage_argument, selected
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pcbnew_quiet import pcbnew  # noqa: E402
+from lib.pcbnew_quiet import pcbnew
 
 FOOTPRINT_JS = 'ergogen/footprints/mcu_liatris.js'
-STAGES = ('unrouted', 'routed')
 FETCH_TIMEOUT_S = 15
 # Nets on the MCU header that are power/programming rather than matrix lines.
 NON_MATRIX = {'GND', 'VCC', 'RAW', 'RST', ''}
@@ -267,16 +266,13 @@ def check_firmware(boards, fw, labels):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    # default=None (not list(STAGES)): argparse runs `choices` over the default
-    # too when nargs="*", and would reject the list as a single invalid choice.
-    ap.add_argument('stages', nargs='*', choices=STAGES, default=None,
-                    help='stage(s) to check (default: both)')
+    add_stage_argument(ap, 'stage(s) to check (default: both)')
     ap.add_argument('--firmware', metavar='SOURCE',
                     help='keyboard.json URL or path (default: $SPLINTER_FIRMWARE_JSON, '
                          "else package.json's config.FIRMWARE)")
     args = ap.parse_args()
 
-    stages = args.stages or list(STAGES)
+    stages = selected(args)
     version = os.environ.get('npm_package_config_VERSION')
     if not version:
         raise SystemExit('set npm_package_config_VERSION via npm (npm run validate:firmware)')

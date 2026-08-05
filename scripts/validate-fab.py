@@ -24,7 +24,7 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      most of the board (catches the same thing in what actually shipped, immune to
      any export-stage drop). This is the direct inverse of the add-gnd-zone guard bug.
   2. Gerber-set completeness -- <name>-gerber.zip exists and contains every expected
-     layer gerber (the lib.sh JLCPCB_LAYERS set) plus a drill file.
+     layer gerber (the lib/common.sh JLCPCB_LAYERS set) plus a drill file.
   3. Assembly placement sanity (only when jlcpcb-parts.json exists) -- BOM + CPL exist
      and are non-empty, and every assembled footprint on the board appears in the CPL
      exactly once (catches a part silently dropping out of the pos/CPL join, which
@@ -51,19 +51,36 @@ import re
 import sys
 import zipfile
 
-from pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
+from lib.pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
 
 # Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
 # emits to stderr each time it re-inits image handlers on a board load.
 import wx
 wx.Log.SetLogLevel(wx.LOG_Warning)
 
-# Gerber filename fragments for the lib.sh JLCPCB_LAYERS set (layer name dots ->
-# underscores, as kicad-cli writes them). Keep in sync with JLCPCB_LAYERS in lib.sh.
-LAYER_FRAGMENTS = (
-    "F_Cu", "B_Cu", "F_Paste", "B_Paste",
-    "F_Silkscreen", "B_Silkscreen", "F_Mask", "B_Mask", "Edge_Cuts",
-)
+COMMON_SH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "common.sh")
+JLCPCB_LAYERS_RE = re.compile(r'^JLCPCB_LAYERS="([^"]*)"', re.M)
+
+
+def _layer_fragments():
+    """The gerber filename fragment for every layer fab exports.
+
+    Read from lib/common.sh's JLCPCB_LAYERS, which is the list actually handed to
+    kicad-cli, so the completeness check cannot drift from the export it checks.
+    A second copy here would drift silently in the dangerous direction: a layer
+    added to the export but not to the copy is simply never checked for.
+
+    The only transformation is the spelling. kicad-cli takes a layer as F.Cu on
+    the command line and writes it into a filename as F_Cu."""
+    with open(COMMON_SH) as f:
+        match = JLCPCB_LAYERS_RE.search(f.read())
+    if not match:
+        raise SystemExit(f"ERROR {COMMON_SH}: no JLCPCB_LAYERS= assignment; it is the "
+                         "list of layers fab exports and this check reads it from there")
+    return tuple(name.replace(".", "_") for name in match.group(1).split(","))
+
+
+LAYER_FRAGMENTS = _layer_fragments()
 COPPER_FRAGMENTS = ("F_Cu", "B_Cu")
 COPPER_LAYERS = (pcbnew.B_Cu, pcbnew.F_Cu)
 

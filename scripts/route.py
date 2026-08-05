@@ -35,7 +35,7 @@ import subprocess
 import sys
 import uuid
 
-from pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
+from lib.pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
 import wx
 
 # Single tuneable log level (env FREEROUTING_LOG_LEVEL, default WARN) applied to

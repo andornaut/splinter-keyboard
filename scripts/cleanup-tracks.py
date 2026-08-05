@@ -56,10 +56,10 @@ Usage: cleanup-tracks.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
 import sys
 
-from pcb_copper import (TOUCH_TOL, connected, copper_pads, covers, dangling_tracks,
-                        dist, fill_zones, ids, is_via, point_to_segment)
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcb_copper import (TOUCH_TOL, connected, copper_pads, covers, dangling_tracks,
+                            dist, fill_zones, ids, is_via, point_to_segment)
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
 
 ARC_ERROR = pcbnew.FromMM(0.01)  # polygon approximation of a pad/via outline
 MAX_PASSES = 3  # passes allowed to change the board before it is called an error

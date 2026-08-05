@@ -56,9 +56,10 @@ import collections
 import math
 import sys
 
-from pcb_copper import clearance_blocker, describe, ids, keepout_blocker
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcb_copper import (VIA_CLASS, clearance_blocker, describe, ids, keepout_blocker,
+                            net_class)
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
 
 MAX_MOVE = pcbnew.FromMM(1.0)  # furthest a snap may drag copper, per endpoint
 
@@ -66,12 +67,11 @@ GRID = pcbnew.FromMM(0.25)  # the grid the row legs are drawn on
 LEG_DROP = pcbnew.FromMM(1.65)  # nominal gap from the lower via down to the leg
 COLUMN_STAGGER = pcbnew.FromMM(3.0)  # vertical offset between adjacent columns
 MIN_LEG = pcbnew.FromMM(3.0)  # shorter than this is a jog, not a trunk leg
-TRUNK_WIDTH = pcbnew.FromMM(0.25)  # row trunks are VCC-class width
+TRUNK_NET_CLASS = "VCC"  # row trunks are drawn at this class's track width
 ANGLE_TOL = pcbnew.FromMM(0.0005)  # slack when testing a segment for 45 degrees
 FAMILY_GRID = pcbnew.FromMM(0.01)  # pad-offset rounding when grouping keys
 
 SEGMENT_CLASS = "PCB_TRACK"  # a straight segment; an arc cannot be re-cornered
-VIA_CLASS = "PCB_VIA"
 MATRIX_NETS = ("GND", "VCC", "RST", "DATA_RAW")  # never a key-local net
 
 
@@ -152,14 +152,14 @@ def _blocked(tracks, pads, zones, proposals, replaced):
     return None
 
 
-def _row_legs(tracks, pads, zones):
+def _row_legs(trunk_width, tracks, pads, zones):
     """(chain, [(old, new)]) per staircase whose leg is off the pattern's grid line,
     plus the hops left alone and why."""
     snaps, skipped = [], []
     for points, chain, via_ends in _paths(tracks, pads):
         if not via_ends or len(chain) != 3:
             continue
-        if any(s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != TRUNK_WIDTH for s in chain):
+        if any(s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != trunk_width for s in chain):
             continue
         start, corner_a, corner_b, end = points
         if corner_a[1] != corner_b[1] or abs(corner_a[0] - corner_b[0]) < MIN_LEG:
@@ -392,7 +392,8 @@ def tidy_patterns(path):
     # chain walk and the rewrite both work from.
     tracks, pads = list(board.GetTracks()), list(board.GetPads())
     zones = list(board.Zones())
-    legs, leg_skips = _row_legs(tracks, pads, zones)
+    trunk_width = net_class(board, TRUNK_NET_CLASS).GetTrackWidth()
+    legs, leg_skips = _row_legs(trunk_width, tracks, pads, zones)
     motifs, motif_skips = _key_motifs(board, tracks, pads, zones)
 
     for _, chain, moves, _, _, _ in legs:

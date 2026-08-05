@@ -10,7 +10,7 @@
 # clone still works) but does not advance them. See README "Updating footprint submodules".
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run ergogen)}"
 helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"
@@ -47,7 +47,7 @@ mute_pcbnew_noise python3 ./scripts/add-keepout-zones.py "${files[@]}"
 
 # Apply project settings to the generated dist/ projects (ergogen owns this tier;
 # unrouted/ and routed/ are owned by the copy steps). See apply_project_settings
-# in lib.sh.
+# in lib/common.sh.
 apply_project_settings "${out_dir}/pcbs"
 
 ok "ergogen: ${#files[@]} board(s) generated and post-processed in ${out_dir}/pcbs/"

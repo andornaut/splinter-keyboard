@@ -37,7 +37,7 @@ import json
 import os
 import sys
 
-from pipeline_log import note
+from lib.pipeline_log import note
 
 # Spacing between routes. Raised from KiCad's 0.20mm default to give the
 # hand-routed matrix more yield margin at JLCPCB. Track width stays 0.20mm (the
@@ -50,6 +50,10 @@ DEFAULT_CLEARANCE = 0.25
 VCC_CLEARANCE = 0.25
 VCC_TRACK_WIDTH = 0.25
 VCC_PATTERN = {"netclass": "VCC", "pattern": "VCC"}
+# Default ships with priority 2147483647 (KiCad's lowest-priority sentinel), which
+# a copy of it carries in. Lower number = higher priority, so 0 makes the VCC
+# pattern win over Default for the VCC net.
+VCC_PRIORITY = 0
 
 # JLCPCB's recommended 2-layer minimum; below the intentional 0.20mm features, so
 # it acts purely as a guardrail against accidental hair-thin tracks/gaps.
@@ -99,21 +103,27 @@ def ensure_vcc(net_settings):
 
     classes = net_settings.get("classes") or []  # handles absent and null
     net_settings["classes"] = classes
-    if not any(c.get("name") == "VCC" for c in classes):
+    vcc = next((c for c in classes if c.get("name") == "VCC"), None)
+    if vcc is None:
         default = next((c for c in classes if c.get("name") == "Default"), None)
         if default is None:
             print("  WARN: no Default net class to derive VCC from", file=sys.stderr)
         else:
-            vcc = dict(default)
-            vcc["name"] = "VCC"
-            vcc["clearance"] = VCC_CLEARANCE
-            vcc["track_width"] = VCC_TRACK_WIDTH
-            # Default ships with priority 2147483647 (KiCad's lowest-priority
-            # sentinel), which dict(default) copies in. Lower number = higher
-            # priority, so 0 makes the VCC pattern win over Default for the VCC net.
-            vcc["priority"] = 0
+            vcc = dict(default, name="VCC")
             classes.append(vcc)
             changed = True
+    if vcc is not None:
+        # Enforced on every run, not merely seeded when the class is created, the
+        # same way ensure_default_clearance enforces. tidy-patterns.py reads the
+        # trunk width back out of this class rather than restating it, so a value
+        # hand-edited in KiCad and left alone here would make that step match no
+        # trunk at all and report "already on the pattern" having snapped nothing.
+        for key, want in (("clearance", VCC_CLEARANCE),
+                          ("track_width", VCC_TRACK_WIDTH),
+                          ("priority", VCC_PRIORITY)):
+            if vcc.get(key) != want:
+                vcc[key] = want
+                changed = True
 
     patterns = net_settings.get("netclass_patterns") or []  # handles absent and null
     net_settings["netclass_patterns"] = patterns

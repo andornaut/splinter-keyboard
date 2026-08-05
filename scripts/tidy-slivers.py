@@ -57,10 +57,10 @@ Usage: tidy-slivers.py <board.kicad_pcb> [more.kicad_pcb ...] [--max-move <mm>]
 """
 import argparse
 
-from pcb_copper import (TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via,
-                        keepout_blocker)
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcb_copper import (TOUCH_TOL, clearance_blocker, copper_pads, describe, dist, is_via,
+                            keepout_blocker)
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
 
 MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
 

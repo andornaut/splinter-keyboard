@@ -35,11 +35,11 @@ Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 import sys
 from collections import namedtuple
 
-from pcb_copper import copper_pads, dangling_tracks, ids, is_via
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcb_copper import copper_pads, dangling_tracks, ids, is_via, net_class
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
 
-CLEARANCE = pcbnew.FromMM(0.25)
+POUR_NET_CLASS = "Default"  # the pour takes this class's clearance
 MIN_THICKNESS = pcbnew.FromMM(0.25)
 THERMAL_GAP = pcbnew.FromMM(0.30)
 THERMAL_SPOKE = pcbnew.FromMM(0.30)
@@ -154,7 +154,7 @@ def add_gnd_zone(path):
     zone.SetLayer(layer)
     zone.SetNet(gnd)
     zone.SetMinThickness(MIN_THICKNESS)
-    _try_set(zone, "SetLocalClearance", CLEARANCE)
+    _try_set(zone, "SetLocalClearance", net_class(board, POUR_NET_CLASS).GetClearance())
     _try_set(zone, "SetPadConnection", pcbnew.ZONE_CONNECTION_THERMAL)
     _try_set(zone, "SetThermalReliefGap", THERMAL_GAP)
     _try_set(zone, "SetThermalReliefSpokeWidth", THERMAL_SPOKE)

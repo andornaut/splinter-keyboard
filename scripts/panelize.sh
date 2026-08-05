@@ -3,7 +3,7 @@
 #
 # Pays JLC's per-order assembly setup + stencil fee once instead of once per half.
 # The panel is built with KiKit (scripts/panelize.py), then gerbers/drill/pos +
-# assembly BOM/CPL are exported via lib.sh's export_jlcpcb_fab (shared with fab.sh).
+# assembly BOM/CPL are exported via lib/common.sh's export_jlcpcb_fab (shared with fab.sh).
 #
 # KiCad 10 support is only in KiKit git master (no PyPI release yet), so KiKit
 # lives in a dedicated venv. panelize.sh runs panelize.py with that venv's python
@@ -14,7 +14,7 @@
 # Run via: npm run panelize
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run panelize)}"
 parts="./${VERSION}/kicad/jlcpcb-parts.json"
@@ -25,7 +25,7 @@ require_cmds kicad-cli zip python3
 
 # Resolve the KiKit interpreter (KIKIT_PYTHON override, else the dedicated venv)
 # and probe it, failing with a pointer to the installer (the ansible hobbies role,
-# kicad tag). See kikit_python / kikit_importable in lib.sh.
+# kicad tag). See kikit_python / kikit_importable in lib/common.sh.
 kikit_py="$(kikit_python)"
 [ -x "$kikit_py" ] || { echo "ERROR ${kikit_py}: KiKit venv python not found, install it (ansible-ctrl hobbies role, kicad tag) or set KIKIT_PYTHON" >&2; exit 1; }
 kikit_importable "$kikit_py" \
@@ -34,7 +34,7 @@ kikit_importable "$kikit_py" \
 # Provenance gate: same as fab, refuse to panel if routed/ drifted from
 # config. Scoped to routed/ (the only stage the panel consumes), so unrouted/
 # drift never blocks a legitimate panel of a current routed master. See
-# provenance_gate_routed in lib.sh.
+# provenance_gate_routed in lib/common.sh.
 provenance_gate_routed
 
 require_pcbs "${VERSION}/kicad/routed"

@@ -11,7 +11,7 @@ Invoked per board from copy-traces-to-unrouted.sh right after the trace
 copy. Usage: copy-teardrops.py <src.kicad_pcb> <dst.kicad_pcb>
 """
 import sys
-from pcbnew_quiet import pcbnew
+from lib.pcbnew_quiet import pcbnew
 
 
 def teardrop_zones(board):

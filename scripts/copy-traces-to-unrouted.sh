@@ -5,7 +5,7 @@
 # Run via: npm run copy:traces-to-unrouted
 set -euo pipefail
 shopt -s nullglob
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run copy:traces-to-unrouted)}"
 helper="${VERSION}/ergogen/kb_ergogen_helper/ergogen_helper.py"

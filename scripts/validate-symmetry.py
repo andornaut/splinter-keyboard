@@ -49,10 +49,10 @@ import os
 import re
 import sys
 
-from pcbnew_quiet import pcbnew
-from pipeline_log import note
+from lib.pcbnew_quiet import pcbnew
+from lib.pipeline_log import note
+from lib.stages import add_stage_argument, selected
 
-STAGES = ("unrouted", "routed")
 
 MM = 1e6  # pcbnew internal units (nm) per mm
 
@@ -456,14 +456,11 @@ def check_components(a_path, b_path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    # default=None (not list(STAGES)): argparse runs `choices` over the default
-    # too when nargs="*", and would reject the list as a single invalid choice.
-    ap.add_argument("stages", nargs="*", choices=STAGES, default=None,
-                    help="stage(s) to validate (default: both)")
+    add_stage_argument(ap, "stage(s) to validate (default: both)")
     ap.add_argument("--tolerance", type=float, default=TOLERANCE,
                     help=f"worst accepted mirrored gap in mm (default {TOLERANCE})")
     args = ap.parse_args()
-    stages = args.stages or list(STAGES)
+    stages = selected(args)
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
