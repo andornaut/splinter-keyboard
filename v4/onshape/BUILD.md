@@ -7,6 +7,33 @@ Every position is a **dimension, not a reference**. That is deliberate: a re-imp
 replaces the imported entities, so anything projected off them loses its reference,
 while a typed value does not.
 
+## Terms
+
+| Term | Means |
+| --- | --- |
+| **Boss** | A cylindrical pillar that takes a fastener. Three per half, hanging from the top underside down to the PCB |
+| **Hull** | The un-filleted board outline, 160.00 x 119.00mm. The case is modelled to this, not to the fabricated edge |
+| **Nesting / recess** | The 16mm opening at the top face that each switch drops into, so the surrounding wall covers its lower body |
+| **Setup** | One fixturing of the part in the mill. Every flip is another setup and another fixed fee |
+
+## How it goes together
+
+```text
+   top face   ------------------------------   z   0.00
+                    | |            <- boss, r 2.75, 3.50mm long
+   recess floor ----| |------------------      z  -1.50   switch flange bears here
+   top underside ---+-+------------------      z  -3.00
+                    | |
+   PCB top    ------+-+------------------      z  -6.50   boss ends here
+   PCB        #######o#######################  <- 2.9mm clearance hole
+                     |
+   bottom     -------|------------------       z -15.60
+   plate      -------#------------------       M2.5x8 up from below, head counterbored
+```
+
+The PCB is clamped between the boss ends and the bottom plate. Nothing rests on a
+perimeter lip, because this topology cannot have one.
+
 ## Topology
 
 | Part | Contents |
@@ -38,6 +65,24 @@ The 14.5mm holes are through-features and can be cut in either setup.
 There is no geometry that nests the switch and still machines in one setup. Flattening
 the top to a single 14.5mm hole would do it, at the cost of the switch sitting proud on
 a flat face.
+
+### What the second setup costs
+
+**Quote both variants before deciding.** Model the nested version and a flat-top version
+with a single 14.5mm through-hole, upload each to JLCCNC, and compare. That delta is the
+answer; everything below is only for judging whether the number looks sane.
+
+| Factor | Assessment |
+| --- | --- |
+| Cutting time | Small. The recesses remove ~2cm^3 per half if the hole is cut first, ~12cm^3 if cut full-face. Roughly 10-25 min of spindle time |
+| Fixed cost | Dominates. Re-fixturing, a second work offset, probing, and usually a soft jaw or vacuum plate. The same fee whether the op is 10 minutes or an hour |
+| Whether it is truly additive | Possibly not. Without the recess one setup is *possible* (hold by the flat top face, hollow and profile from below). A shop may plan two ops regardless, in which case the recess costs only its cutting time |
+| Quantity | Works against you. Setup amortises over parts and you need two. Spares are disproportionately cheap once the fee is paid |
+| Context | Hollowing a ~19mm block to a 3mm shell likely dominates the whole part cost, so the recess op may be a modest percentage rather than a doubling |
+
+**Fallback if the delta is large:** flatten the top for the aluminium variant only and
+keep the nested look on the printed one. The nesting is a finish detail, and anodised
+aluminium is the variant where surface finish already does the most work.
 
 ## Decisions this sheet assumes
 
