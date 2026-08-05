@@ -120,8 +120,8 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -14.76 | usable cavity ends here |
-| Shell bottom rim / plate underside | -16.36 | plate is **inset**, flush with the rim |
+| Bottom plate top face | -14.69 | usable cavity ends here |
+| Shell bottom rim / plate underside | -16.69 | plate is **inset**, flush with the rim |
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -218,7 +218,7 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 1.60 mm | **inset**, so it consumes cavity |
+| Bottom plate thickness | 2.00 mm | set by the countersunk head, see below; **inset**, so it consumes cavity |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
@@ -226,7 +226,7 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Boss height (top underside to PCB) | 3.50 mm | z stack |
 | Insert hole (print) | 3.60 dia x 5.00 deep | M2.5 melt diameter; leaves 1.50mm of top face |
 | Tapped hole (machined) | 2.05 dia tap drill, M2.5x0.45 | README CNC note |
-| Screw clearance (bottom plate) | 2.90 dia, counterbored | M2.5 |
+| Screw clearance (bottom plate) | 2.90 dia, 90 deg countersink | M2.5 countersunk head, ISO 7046 |
 
 ### Screw bosses
 
@@ -297,6 +297,36 @@ into it and the screws locate it, which also keeps the cavity machinable from be
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate.
 Access is by removing the plate, so no holes are needed.
+
+### Plate thickness is set by the screw head
+
+The heads must sit inside the plate, and enough material has to remain under them to
+carry the load. M2.5 head heights, measured against the standards:
+
+| Head type | dk | Head height | Seat | Min plate |
+| --- | --- | --- | --- | --- |
+| Socket head cap, ISO 4762 | 4.50 | 2.50 | counterbore | 3.30 |
+| Pan head, ISO 7045 | 5.00 | 2.00 | counterbore | 2.80 |
+| **Countersunk, ISO 7046** | **4.70** | **1.50** | **conical seat** | **2.00** |
+
+Counterbore allowance is head height plus 0.80mm of material beneath. A countersink needs
+less because the cone spreads load into the plate rather than bearing on a thin shoulder.
+
+**ISO 7380 button heads do not exist in M2.5**; that standard starts at M3. So the
+realistic choice is countersunk or pan head.
+
+Plate thickness then drives the case, because the plate is inset and eats cavity:
+
+| Plate | Suits | Thick end for a 0.50mm MCU margin | vs current 15.86 |
+| --- | --- | --- | --- |
+| 3.30 | socket head cap | 17.99 | +2.13 |
+| 2.80 | pan head | 17.49 | +1.63 |
+| **2.00** | **countersunk** | **16.69** | **+0.83** |
+
+**Countersunk M2.5 in a 2.00mm plate is the recommendation.** It is the only head that
+keeps the plate near the thickness the cavity wants, and it lands the case at a 16.69mm
+thick end, under a millimetre more than today. It also suits both processes: a countersink
+machines in one pass and prints acceptably face-down, which is how this plate prints.
 
 ## Right half
 
