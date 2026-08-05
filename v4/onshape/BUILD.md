@@ -135,8 +135,8 @@ switches, and the whole height question is below the board.
 | --- | --- | --- |
 | Mill-Max 315-43-112-41-003000 socket, above board | 2.41 | datasheet, `.095"`, ultra low profile |
 | Liatris PCB | 1.00 | splitkb states a 1mm PCB |
-| Liatris bottom-side components | 1.00 - 1.75 | **mid-mounted** USB-C measures ~1.00mm proud; the reset and boot buttons may be taller and are the thing to measure |
-| MCU stack | 4.41 - 5.16 | set by whichever down-facing item is tallest |
+| Liatris down-facing components | 1.00 | measured: the mid-mount USB-C and the pin stubs at the edges are both ~1mm proud; the buttons are shorter |
+| MCU stack | 4.41 | measured |
 | **TRRS jack body (PJ-320A)** | **5.0 - 6.0** | **binds**; sources give 5 to 6mm, no datasheet retrieved |
 | Hotswap socket | 1.85 | Kailh CPG151101S11 |
 
@@ -172,7 +172,7 @@ the inset plate leaves very little:
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
 | TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.0 - 6.0 | -0.45 .. +0.55 |
-| Liatris | 52.78 .. 70.80 | 5.07 mm | 4.41 - 5.16 | +0.66 .. **-0.09** |
+| Liatris | 52.78 .. 70.80 | 5.07 mm | 4.41 | **+0.66** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -185,12 +185,13 @@ cheapest first:
 | Grow the thick end 15.86 -> 17.31mm | +1.45mm, for a 1.0mm margin on a 6mm jack |
 | Hang the plate below the rim instead of insetting | +2.00mm, but loses the flush look |
 
-**The MCU's tallest down-facing part is not necessarily the USB.** A mid-mount USB-C is
-~3.26mm overall, so on a 1.00mm PCB it splits roughly 1.00mm one face and 1.26mm the
-other, which matches a measured ~1mm. But the reset and boot buttons sit on that same
-face, and an SMD tactile runs 1.40mm typical and up to 1.75mm. At 1.75mm the MCU fouls
-by 0.09mm; at 1.00mm it clears by 0.66mm. **Measure the tallest thing on that face, not
-the USB.**
+**The MCU is settled and clears.** Its down-facing face carries the mid-mount USB-C and
+the Mill-Max pin stubs along the edges, both about 1mm proud, with the buttons shorter.
+That is consistent with a ~3.26mm mid-mount connector splitting across a 1.00mm PCB. So
+the stack is 2.41 + 1.00 + 1.00 = 4.41mm and the MCU has 0.66mm.
+
+**The TRRS jack is the only open dimension left.** It has 5.55mm and needs 5.0 to 6.0mm,
+so it clears or fouls depending on a number nobody has measured.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
