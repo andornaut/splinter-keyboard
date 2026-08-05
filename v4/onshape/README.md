@@ -24,9 +24,9 @@ width holds at the straight side edges.
 - **Measure the cut line itself** (KiCad's board outline polygon), not the board
   bounding box: the box is inflated by the 0.15mm `Edge.Cuts` stroke on every
   side, which is 0.3mm of case pocket that is not there.
-- **The support-wall lip rests on the board's outer ~2mm margin.** The perimeter
-  copper keepout keeps that margin clear, so the lip presses on bare substrate,
-  not copper.
+- **The board is carried on the bosses**, not on a lip: see the topology section
+  for why a lip cannot exist here. The perimeter copper keepout still keeps the
+  outer margin clear, so a wall or gasket landing there meets bare substrate.
 - **The outline mirrors; the switch cutouts do not.** Both halves' outer edges come
   from the same mirrored anchors, so the tray can be modelled once and mirrored.
   The key field cannot be: the left pinky is 1.5u where the right is 1u plus an
@@ -35,12 +35,23 @@ width holds at the straight side edges.
   half of the DXF**, which is why the export carries both halves. Export every
   part as its own `*.step` (JLCCNC quantity is set per file).
 
-## Topology: two-piece sandwich
+## Topology: shell plus bottom plate
 
-Design each half as a **bottom tray + a separate switch plate** that bolt
-together (the v3 model does this: 2 trays + 2 plates). This keeps every part a
-shallow 2.5D shape with no enclosed cavities, which is what both FDM and 3-axis
-CNC want. Avoid a single body with an internal hollow.
+Design each half as a **shell** (top face and side walls in one piece, switch
+cutouts in the top) closed by a separate **bottom plate**. The cavity is then
+open to exactly one face, which is what both FDM and 3-axis CNC want, and screws
+enter from below so the whole shell machines in one setup.
+
+**No perimeter lip is possible in this topology.** The cavity opens only at the
+bottom, so everything cut must be visible looking straight up; the board pocket
+is at least as wide as the board and sits above any lip, making a lip an
+undercut. The board rides on the bosses and the bottom plate clamps it. The
+board's outer 2mm copper keepout still bounds where the wall lands, but it is no
+longer a bearing surface.
+
+The alternative, a separate thin switch plate, keeps the switch cutouts off the
+machined body and is cheaper to mill. It costs a part and needs the two halves'
+plates cut separately, since the key fields are not mirrors.
 
 ## Printed case (OrcaSlicer)
 
