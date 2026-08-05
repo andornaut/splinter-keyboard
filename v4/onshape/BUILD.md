@@ -79,8 +79,8 @@ two marked rows against a switch and your assembled v3 before printing.**
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
 | Boss radius | 2.75 mm | DXF boss circles |
-| Boss height (top underside to PCB) | 3.50 mm | z stack |
-| Insert hole (print) | 3.60 dia x 5.50 deep | M2.5 heat-set melt diameter |
+| Boss height (top underside to PCB) | 2.00 mm | z stack |
+| Insert hole (print) | 3.60 dia x 4.00 deep | M2.5 melt diameter; 5.00mm available, 1.00mm left |
 | Tapped hole (machined) | 2.05 dia tap drill, M2.5x0.45 | README CNC note |
 | Screw clearance (bottom plate) | 2.90 dia, counterbored | M2.5 |
 
@@ -117,7 +117,7 @@ print and 0.2-0.3mm machined.
 2. **Extrude "Shell body"**, from the left-half outline region of (1), offset outward
    **3.25mm** (clearance + wall), blind **15.60mm**, -Z.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
-   **z -1.50** down through the open bottom. Apply the **2.0mm minimum internal fillet**
+   **z -3.00** (the top underside) down through the open bottom. Apply the **2.0mm minimum internal fillet**
    to its vertical corners.
 4. **Extrude cut "Switch relief"**, the 16.0mm curves from the import, from the top
    underside (z -3.00) **upward to z -1.50**. This is on the **underside**, not the top
