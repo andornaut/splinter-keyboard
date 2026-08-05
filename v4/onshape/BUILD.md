@@ -160,41 +160,34 @@ a KB2040, not a socketed Liatris, so the inherited 15.60mm cavity was never meas
 against these parts. And the jack's height also fixes where its opening lands in the side
 wall, so shrinking the cavity moves that opening.
 
-### Slant trades against the MCU, not the jack
+### The slant is measured, and the clearance it leaves is thin
 
-If the case is slanted, the floor is no longer parallel to the PCB and clearance varies
-with position. Then **span matters as much as height**, and the two tall parts behave
-very differently:
+The case is slanted **1.4445 deg**: the top face is flat and the bottom slopes, from
+**15.86mm** at the inner edge down to **11.5mm** at the outer. Confirmed two ways, from
+the tilted face normals in the v4.5 STEP and from Onshape directly.
 
-| Part | Footprint | Reaches |
-| --- | --- | --- |
-| TRRS jack | 6.20 x 12.65 mm | The corner: 0.25mm from the top edge, 2.25mm from the inner |
-| Liatris | 18.02 x 30.72 mm | **33.14mm** in from the top edge, **27.22mm** in from the inner |
+Both tall parts sit near the inner (deep) edge, which is the right place for them, but
+the inset plate leaves very little:
 
-The jack is tall but local, and it sits where a case tented inner-edge-up is deepest. The
-Liatris is shorter but reaches far inboard, so its far end samples a much shallower floor.
-It loses **0.58mm of depth per degree** slanted about the top edge, or **0.48mm per
-degree** about the inner edge.
+| Part | x span | Usable at its worst x | Needs | Margin |
+| --- | --- | --- | --- | --- |
+| TRRS jack | 71.55 .. 77.75 | 5.55 mm | 5.0 - 6.0 | -0.45 .. +0.55 |
+| Liatris | 52.78 .. 70.80 | 5.07 mm | 4.91 | **+0.16** |
 
-Holding the deep edge at the current 7.50mm cavity, the Liatris needs 4.91mm, leaving
-2.59mm of headroom:
+**The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
+and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
+cheapest first:
 
-| Cavity at the deep edge | Max slant (about top edge) | Max slant (about inner edge) |
-| --- | --- | --- |
-| 7.50 mm (current) | 4.47 deg | 5.44 deg |
-| 7.00 mm | 3.61 deg | 4.39 deg |
-| 6.50 mm | 2.75 deg | 3.34 deg |
-| 6.00 mm | 1.88 deg | 2.29 deg |
-| 5.50 mm | 1.02 deg | 1.24 deg |
+| Option | Recovers |
+| --- | --- |
+| Measure the jack; if it is 5.0mm rather than 6.0mm | resolves it outright, +0.55mm at the jack |
+| Thin the plate to 1.2mm | +0.80mm everywhere |
+| Grow the thick end 15.86 -> 17.31mm | +1.45mm, for a 1.0mm margin on a 6mm jack |
+| Hang the plate below the rim instead of insetting | +2.00mm, but loses the flush look |
 
-**So the height slack and the slant are the same budget spent twice.** The earlier
-finding that 1.5-2.5mm can come off the case assumed a flat floor; spend it on height and
-there is no room left to tilt. The current v4.5 model is flat, and the v3 notes describe a
-slant, so this needs settling before the cavity depth is fixed.
-
-Both figures assume the slant pivots at the deep edge, keeping the maximum height where
-it is. Tilting about the centre, or letting the tall edge grow, changes the arithmetic and
-costs external height instead.
+Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
+edge against the jack's 2.25mm, so it loses three times as much depth to the slope
+despite being the shorter part.
 
 Socket height is read off the series drawing rather than a labelled table: `.165"` recurs
 in the two figures that differ only in tail length, which identifies it as the
