@@ -33,7 +33,7 @@ the bottom plate and every shell feature is reachable from one direction.
 | Process | Print first, same model must machine | Drives the no-undercut rule above |
 | Print orientation | Shell top-face-down on the bed | Bosses and walls rise from a flat first layer; no supports |
 | Wall thickness | 3.0mm | Print wants a multiple of 0.4; CNC wants >= 1.5mm and dislikes thin tall walls |
-| Top thickness | 1.5mm | MX switch clip latch depth |
+| Top thickness | 3.0mm, relieved to 1.5mm at each switch | Stiff top that still latches MX clips |
 | Cavity internal fillet | 2.0mm minimum | CNC tool radius; harmless when printed |
 | Board pocket clearance | 0.25mm per side | Along the straight edges the hull *is* the board edge, so this is the whole fit allowance |
 
@@ -61,7 +61,8 @@ two marked rows against a switch and your assembled v3 before printing.**
 | Level | z | Source |
 | --- | --- | --- |
 | Shell top face | 0.00 | datum |
-| Top underside | -1.50 | top thickness |
+| Switch latch surface (relief ceiling) | -1.50 | MX plate thickness |
+| Top underside (full 3.0mm) | -3.00 | v4.5 model |
 | PCB top face | -5.00 | MX plate-to-PCB standard **(verify)** |
 | PCB bottom face | -6.60 | PCB 1.6mm |
 | Cavity floor / shell bottom rim | -15.60 | v4.5 model **(verify against the MCU + Mill-Max stack)** |
@@ -72,7 +73,8 @@ two marked rows against a switch and your assembled v3 before printing.**
 | Parameter | Value | Source |
 | --- | --- | --- |
 | Wall thickness | 3.00 mm | decision |
-| Top thickness | 1.50 mm | MX latch |
+| Top thickness | 3.00 mm | stiffness; thinned locally at each switch |
+| Material at a switch cutout | 1.50 mm | MX latch |
 | Bottom plate thickness | 2.00 mm | decision |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
@@ -117,15 +119,20 @@ print and 0.2-0.3mm machined.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
    **z -1.50** down through the open bottom. Apply the **2.0mm minimum internal fillet**
    to its vertical corners.
-4. **Extrude cut "Switch cutouts"**, using the switch-hole curves already in the import,
-   through the top face. Cut them **as imported** rather than dimensioning them: they
-   carry the correct corner fillets, and the two halves' patterns differ.
-5. **Bosses**, sketch on the top underside (z -1.50): three circles r **2.75** at the
-   positions above, extruded down **3.50mm** to meet the PCB top face.
-6. **Boss holes**, from each boss's lower face: 3.60 dia x 5.50 deep for a heat-set
-   insert, or 2.05 dia tap drill for M2.5x0.45 when machined.
-7. **Port openings** through the side wall at the two positions above.
-8. Nothing else. The USB notch is in the imported profile and (2) carries it through.
+4. **Extrude cut "Switch relief"**, the 16.0mm curves from the import, from the top
+   underside (z -3.00) **upward to z -1.50**. This is on the **underside**, not the top
+   face: see below.
+5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
+   remaining 1.50mm to the top face. Cut both sets **as imported** rather than
+   dimensioning them: they carry the correct corner fillets, and the two halves'
+   patterns differ.
+6. **Bosses**, sketch on the top underside (z -3.00): three circles r **2.75** at the
+   positions above, extruded down **2.00mm** to meet the PCB top face.
+7. **Boss holes**, from each boss's lower face upward: 3.60 dia x 4.00 deep for a
+   heat-set insert, or 2.05 dia tap drill for M2.5x0.45 when machined. There is 5.00mm
+   of material above the PCB, so 4.00mm leaves 1.00mm of top face intact.
+8. **Port openings** through the side wall at the two positions above.
+9. Nothing else. The USB notch is in the imported profile and (2) carries it through.
 
 ## Part B: bottom plate
 
@@ -144,11 +151,30 @@ Cut the right half's cutouts from the **right half of the DXF**, not from a mirr
 copy of the left half's: the halves carry 30 and 32 switch cutouts and 14 of those
 positions have no mirrored counterpart, so a mirrored key field is the wrong key field.
 
+## Why the switch relief is on the underside
+
+Each switch needs 1.50mm of plate for the MX clips to latch, and the top wants to be
+3.00mm for stiffness, so the plate is thinned locally at every cutout. **Which side that
+step faces decides whether the shell machines in one setup.**
+
+Widths going up from the open bottom must never grow, or a 3-axis mill cannot reach:
+
+| Relief on | Widths going up | One setup |
+| --- | --- | --- |
+| Top face (v4.5) | 14.5 -> 16.0 | no, needs a second setup from the top |
+| **Underside** | 16.0 -> 14.5 | **yes** |
+
+Functionally the two are identical, and keycaps are unaffected: an MX cap sits ~6.2mm
+above the plate at rest and travels 4mm, so it never descends below the top face.
+
 ## Screw stack
 
-Bottom plate (2.00) + PCB (1.60) = 3.60mm before the fastener enters the boss. An
-M2.5x8 leaves 4.40mm of engagement, which suits a 5mm insert or a tapped boss. A
-counterbore in the bottom plate recovers whatever depth it removes.
+The MX plate-to-PCB spacing fixes the material above the PCB at each boss at **5.00mm**,
+whatever top thickness is chosen: the boss and the top always sum to it.
+
+Bottom plate (2.00) + PCB (1.60) = 3.60mm consumed before the fastener enters. An
+M2.5x8 leaves 4.40mm to engage, inside the 5.00mm available. A counterbore in the bottom
+plate recovers whatever depth it removes.
 
 ## Verify before printing
 
