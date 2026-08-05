@@ -40,7 +40,14 @@ width holds at the straight side edges.
 Design each half as a **shell** (top face and side walls in one piece, switch
 cutouts in the top) closed by a separate **bottom plate**. The cavity is then
 open to exactly one face, which is what both FDM and 3-axis CNC want, and screws
-enter from below so the whole shell machines in one setup.
+enter from below so their heads land in the bottom plate.
+
+The switch cutouts are **nested**: a 16mm opening at the top face over a 14.5mm
+hole, so each switch drops in and the surrounding top wall covers its lower body.
+That look is inherently wider at the top, so it cannot be reached from below and
+the machined variant takes a second setup for those recesses alone. Flattening
+the top to a single 14.5mm hole would buy one setup back, at the cost of the
+switch sitting proud on a flat face.
 
 **No perimeter lip is possible in this topology.** The cavity opens only at the
 bottom, so everything cut must be visible looking straight up; the board pocket
