@@ -160,6 +160,42 @@ a KB2040, not a socketed Liatris, so the inherited 15.60mm cavity was never meas
 against these parts. And the jack's height also fixes where its opening lands in the side
 wall, so shrinking the cavity moves that opening.
 
+### Slant trades against the MCU, not the jack
+
+If the case is slanted, the floor is no longer parallel to the PCB and clearance varies
+with position. Then **span matters as much as height**, and the two tall parts behave
+very differently:
+
+| Part | Footprint | Reaches |
+| --- | --- | --- |
+| TRRS jack | 6.20 x 12.65 mm | The corner: 0.25mm from the top edge, 2.25mm from the inner |
+| Liatris | 18.02 x 30.72 mm | **33.14mm** in from the top edge, **27.22mm** in from the inner |
+
+The jack is tall but local, and it sits where a case tented inner-edge-up is deepest. The
+Liatris is shorter but reaches far inboard, so its far end samples a much shallower floor.
+It loses **0.58mm of depth per degree** slanted about the top edge, or **0.48mm per
+degree** about the inner edge.
+
+Holding the deep edge at the current 7.50mm cavity, the Liatris needs 4.91mm, leaving
+2.59mm of headroom:
+
+| Cavity at the deep edge | Max slant (about top edge) | Max slant (about inner edge) |
+| --- | --- | --- |
+| 7.50 mm (current) | 4.47 deg | 5.44 deg |
+| 7.00 mm | 3.61 deg | 4.39 deg |
+| 6.50 mm | 2.75 deg | 3.34 deg |
+| 6.00 mm | 1.88 deg | 2.29 deg |
+| 5.50 mm | 1.02 deg | 1.24 deg |
+
+**So the height slack and the slant are the same budget spent twice.** The earlier
+finding that 1.5-2.5mm can come off the case assumed a flat floor; spend it on height and
+there is no room left to tilt. The current v4.5 model is flat, and the v3 notes describe a
+slant, so this needs settling before the cavity depth is fixed.
+
+Both figures assume the slant pivots at the deep edge, keeping the maximum height where
+it is. Tilting about the centre, or letting the tall edge grow, changes the arithmetic and
+costs external height instead.
+
 Socket height is read off the series drawing rather than a labelled table: `.165"` recurs
 in the two figures that differ only in tail length, which identifies it as the
 above-board dimension, and the ultra-low-profile figure gives `.095"` in that position.
