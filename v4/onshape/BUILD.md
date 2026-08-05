@@ -120,7 +120,7 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Cavity floor / shell bottom rim | -15.60 | carried from v3; ~0.3mm over the computed MCU floor **(check on the print)** |
+| Cavity floor / shell bottom rim | -15.60 | carried from v3; 1.5-2.5mm over the computed floor, so there is room to shrink |
 | Bottom plate underside | -17.60 | + 2.00mm plate |
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
@@ -131,35 +131,34 @@ Everything tall mounts on side B, below the PCB: the MCU, the TRRS jack, the hot
 sockets, the resistor and the TVS. So the 3.50mm above the PCB only has to clear the
 switches, and the whole height question is below the board.
 
-The MCU stack binds:
-
 | Below the PCB | mm | Source |
 | --- | --- | --- |
 | Mill-Max 315-43-112-41-003000 socket, above board | 2.41 | datasheet, `.095"`, ultra low profile |
-| Liatris PCB | 1.60 | Pro Micro form factor |
-| Liatris bottom-side components, USB-C tallest | 3.20 | typical top-mount receptacle, 2.7-3.3 |
-| **MCU stack** | **7.21** | |
-| TRRS jack body, for comparison | 5.00 | PJ-320A |
-| Hotswap socket, for comparison | 1.85 | Kailh CPG151101S11 |
+| Liatris PCB | 1.00 | splitkb states a 1mm PCB |
+| Liatris bottom-side components, USB-C tallest | 1.50 | **mid-mounted** USB-C, so it sits in a slot in the PCB rather than on top of it |
+| MCU stack | 4.91 | |
+| **TRRS jack body (PJ-320A)** | **5.0 - 6.0** | **binds**; sources give 5 to 6mm, no datasheet retrieved |
+| Hotswap socket | 1.85 | Kailh CPG151101S11 |
 
-Which gives a floor for the whole case:
+**The TRRS jack sets the depth, not the MCU.** The Liatris is a deliberately low-profile
+board and its socketed stack comes in under the jack.
 
 | | mm |
 | --- | --- |
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
-| Below-PCB, set by the MCU | 7.21 |
+| Below-PCB, set by the TRRS jack | 5.0 - 6.0 |
 | Bottom plate | 2.00 |
-| **Minimum total** | **17.31** |
+| **Minimum total** | **15.1 - 16.1** |
 | Current design | 17.60 |
 
-**There is about 0.3mm of slack under the MCU, and 0.2 to 0.8mm across the plausible
-USB-C height range.** The design is already at its floor: do not try to make it thinner,
-and treat MCU clearance as the thing the printed prototype exists to check.
+**There is 1.5 to 2.5mm of slack.** The case can lose height if you want it thinner,
+and the amount depends on the jack, which is the number worth measuring on your v3.
 
-**The v3 service history does not transfer here.** v3 carried a KB2040; v4 carries a
-Liatris on Mill-Max sockets, which is a different stack. The 15.60mm cavity is inherited
-from a case that worked, not from one that was measured against these parts.
+Two caveats on using that slack. **The v3 service history does not transfer**: v3 carried
+a KB2040, not a socketed Liatris, so the inherited 15.60mm cavity was never measured
+against these parts. And the jack's height also fixes where its opening lands in the side
+wall, so shrinking the cavity moves that opening.
 
 Socket height is read off the series drawing rather than a labelled table: `.165"` recurs
 in the two figures that differ only in tail length, which identifies it as the
