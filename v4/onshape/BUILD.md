@@ -194,17 +194,17 @@ anywhere near the MCU or the jack. A **1.20mm plate with local bosses** gives +0
 | General plate | Thick end | MCU | Jack |
 | --- | --- | --- | --- |
 | Uniform 2.00mm | 15.86 | -0.33 | +0.35 |
-| 1.50mm + local bosses | 15.86 | +0.17 | +0.85 |
-| **1.50mm + local bosses** | **16.16** | **+0.47** | **+1.15** |
+| **1.20mm + standoffs** | **15.86** | **+0.47** | **+1.15** |
 
-**A 1.50mm plate cannot bury the head by itself.** A countersunk M2.5 head is 1.50mm
-tall, so flush mounting needs a countersink exactly that deep, which consumes the whole
-plate and leaves the head bearing on a knife edge. The local pad takes it to 2.00mm at
-the hole, leaving 0.50mm under the cone. That pad is the base of the standoff, so it
-costs nothing extra.
+**The plate thickness does not have to bury the head.** The standoff is wider than the
+head, so the head pocket cuts up through the plate and into the standoff above it. In the
+v4 lid the pocket is 6.50mm across and 1.357mm deep in a 1.20mm plate, cutting 0.157mm
+into an 8.00mm standoff, against a 4.70mm head. **Size the standoff to exceed the head
+diameter and the plate becomes a pure stiffness choice.**
 
-Taking 1.50mm rather than 1.20mm for general stiffness costs 0.30mm of MCU margin, which
-0.30mm of case height buys back.
+The pocket must still be at least the head height: 1.50mm countersunk, 2.00mm pan,
+2.50mm socket cap. Depth costs nothing here, since it is taken out of standoff material
+that is doing no work at the centre.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
@@ -222,8 +222,8 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 1.50 mm general | **inset**, so it consumes cavity |
-| Plate at the screw bosses | 2.00 mm local | a 1.50mm plate is consumed exactly by the countersink |
+| Bottom plate thickness | 1.20 mm | **inset**, so it consumes cavity; a stiffness choice, not a head-burial one |
+| Standoff diameter | 8.00 mm | must exceed the head so the head pocket can cut up into it |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
