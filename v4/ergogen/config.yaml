@@ -521,8 +521,10 @@ outlines:
     - name: _usbright
       operation: subtract
   # The same walls without the exterior fillet: the nominal hull, and what the case
-  # is modelled to. The fillet only removes material, so this is a strict superset
-  # of the PCB edge cut and a case pocket built to it can never come out undersized.
+  # is modelled to. The fillet cuts convex corners back and adds at most 0.03mm at
+  # the one shallow concave corner, so the hull contains the PCB edge cut to well
+  # within the case pocket clearance and a pocket built to it cannot come out
+  # undersized.
   # Not used by any pcb; it exists to be exported as a DXF for CAD.
   _wallsleft_unfilleted:
     - name: _boxleft
