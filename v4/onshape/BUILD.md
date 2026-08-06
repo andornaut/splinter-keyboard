@@ -116,10 +116,10 @@ half of that. The values here are already converted.
 | Level | z | Source |
 | --- | --- | --- |
 | Shell top face | 0.00 | datum |
-| Recess floor; switch flange bears here | -1.60 | from the v4.5 design |
-| Top underside | -3.00 | top thickness; leaves a 1.40mm switch plate |
-| PCB top face | -6.00 | **4.40mm below the bearing surface, from the working design** |
-| PCB bottom face | -7.60 | PCB 1.6mm |
+| Recess floor; switch flange bears here | -1.50 | switch nests 1.50mm into the top |
+| Top underside | -3.00 | top thickness; leaves a **1.50mm** switch plate, the MX standard |
+| PCB top face | -5.90 | **4.40mm below the bearing surface, from the working design** |
+| PCB bottom face | -7.50 | PCB 1.6mm |
 | Bottom plate top face | -14.50 | usable cavity ends here |
 | Shell bottom rim / plate underside | -16.00 | plate is **inset**, flush with the rim |
 
@@ -155,7 +155,7 @@ board and its socketed stack comes in under the jack.
 
 | | mm |
 | --- | --- |
-| Top face to PCB top (4.40 + 1.60 recess) | 6.00 |
+| Top face to PCB top (1.50 recess + 4.40) | 5.90 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
 | Clearance | 0.77 |
@@ -182,8 +182,8 @@ the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 6.62 mm | 5.20 | **+1.42** |
-| Liatris | 52.78 .. 70.80 | 6.17 mm | 5.40 | **+0.77** |
+| TRRS jack | 71.55 .. 77.75 | 6.72 mm | 5.20 | **+1.52** |
+| Liatris | 52.78 .. 70.80 | 6.27 mm | 5.40 | **+0.87** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -203,15 +203,15 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | --- | --- | --- |
 | Wall thickness | 3.00 mm | decision |
 | Top thickness | 3.00 mm | decision |
-| Switch recess depth | 1.60 mm | from the v4.5 design |
-| Plate at a switch cutout | 1.40 mm | from the v4.5 design; MX nominal is 1.50 |
+| Switch recess depth | 1.50 mm | nesting |
+| Plate at a switch cutout | 1.50 mm | MX standard |
 | Bottom plate thickness | 1.50 mm | takes the countersunk head's full height, so the pocket never enters the standoff |
 | Standoff diameter | 5.50 mm | = 2 x `screw_boss_radius`, so it is the DXF's own boss circle |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
 | Boss radius | 2.75 mm | DXF boss circles |
-| Boss height (top underside to PCB) | 3.00 mm | z stack |
+| Boss height (top underside to PCB) | 2.90 mm | z stack |
 | Insert hole (print) | 3.60 dia x 5.00 deep | M2.5 melt diameter; leaves 1.50mm of top face |
 | Tapped hole (machined) | 2.05 dia tap drill, M2.5x0.45 | README CNC note |
 | Screw clearance (bottom plate) | 2.90 dia, 90 deg countersink | M2.5 countersunk head, ISO 7046 |
@@ -375,17 +375,17 @@ height therefore bites on the right half first.
 
 | | Socket margin |
 | --- | --- |
-| Left, closest land 16.73mm in | +1.53 |
-| **Right, closest land 3.68mm in** | **+1.22** |
+| Left, closest land 16.73mm in | +1.63 |
+| **Right, closest land 3.68mm in** | **+1.32** |
 
 Always evaluate outer-edge changes on the right half.
 
 ### The MCU margin rests on one unmeasured thing
 
-At 16.00/12.00 the MCU has **+0.77mm**, the tightest item in the design. That assumes the
+At 16.00/12.00 the MCU has **+0.87mm**, the tightest item in the design. That assumes the
 module's 4.75mm pin tail passes through the 4.01mm of socket and board bore and stands
 proud above the main PCB. If it bottoms out instead, the MCU seats 0.74mm lower and the
-margin is **+0.03mm**.
+margin is **+0.13mm**.
 
 **The printed prototype settles it.** With the MCU installed, measure from the main PCB's
 underside to the lowest point of the MCU: 5.40mm means the pins passed through and the
