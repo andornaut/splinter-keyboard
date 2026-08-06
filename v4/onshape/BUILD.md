@@ -24,34 +24,36 @@ itself so they track the board.
    top face   ------------------------------   z   0.00
                     | |            <- boss, 5.50 dia
    recess floor ----| |------------------      z  -1.50   switch flange bears here
-   top underside ---+-+------------------      z  -3.00
-   PCB top    ------+-+------------------      z  -6.00   boss ends here
-   PCB        #######o#######################  <- 3.00mm NPTH
-                    | |            <- standoff, 5.50 dia
-   plate      -------#------------------       M2.5 countersunk, up from below
+   top underside ---+-+---------------+##+     z  -3.00
+   PCB top    ------+-+---------------+##+     z  -6.00   boss ends; SHELF underside
+   PCB        #######o#################|  |    <- 3.00mm NPTH
+                    | |               |##|     z  -7.60   PLATE WALL top
+   plate      -------#----------------+##+     M2.5 flat head, up from below
 ```
 
-The PCB is clamped between the boss ends and the standoffs. Nothing rests on a perimeter
-lip, because this topology cannot have one.
+The board is clamped all the way round, not only at the three screws: a **shelf** hangs
+from the case's top and the plate carries a matching **wall** up to meet it. The bosses and
+standoffs are the same sandwich at the three screw points.
 
 ## Topology
 
 | Part | Contents |
 | --- | --- |
-| **Shell** | Top face and side walls, one piece. Switch cutouts in the top |
-| **Bottom plate** | Flat closing plate, inset, carries the screw heads and the standoffs |
+| **Shell** | Top face and side walls, one piece. Switch cutouts in the top, shelf inside the walls |
+| **Bottom plate** | Inset closing plate with a perimeter wall, the screw heads and the standoffs |
 
-**No perimeter lip.** The cavity opens only at the bottom, so a 3-axis mill reaches in
-from below and everything it cuts must be visible looking straight up. The board pocket is
-at least as wide as the board and sits above any lip, so a lip puts a wider region above a
-narrower one: an undercut no setup reaches. The same geometry blocks a printed part, since
-the board also goes in from below.
+**The shelf goes above the board, never below it.** Which side it sits on decides whether
+it can be made at all. A shelf the board is pressed UP against narrows the opening going
+up, which a mill reaches from below without trouble. A lip the board RESTS DOWN on would
+put the full-width board pocket above a narrower lip, which is an undercut no setup
+reaches, and it blocks a printed part equally since the board also goes in from below.
 
 **The plate is inset**, finishing flush with the shell rim, so its outline is the cavity
-outline less a fit clearance rather than the shell's outer profile. It consumes 1.50mm of
-cavity depth. No rebate is needed: the cavity is a straight extrusion and the screws hold
-the plate against the stack above it. A rebate would be legal, being wider at the open
-face, but it would thin the wall at the rim for nothing.
+outline less a fit clearance rather than the shell's outer profile. Deriving it from the
+cavity rather than from the hull is what makes its corners match the pocket it drops into.
+It consumes 1.50mm of cavity depth. No rebate is needed: the cavity is a straight extrusion
+and the screws hold the plate against the stack above it. A rebate would be legal, being
+wider at the open face, but it would thin the wall at the rim for nothing.
 
 **Undercut, precisely.** Cutting from below, a feature may narrow going up but never
 widen. So a chamfer or rebate at the rim is fine, and a lip under the board pocket is not.
@@ -64,7 +66,7 @@ widen. So a chamfer or rebate at the rim is fine, and a lip under the board pock
 | Shell | 2 | above | The 16mm switch recesses |
 | Shell | 3 | the top edge (+y face) | TRRS and USB openings |
 | Plate | 1 | inner face | Profile, standoffs, screw holes, MCU relief pocket |
-| Plate | 2 | outer face | Countersinks, bumper recesses |
+| Plate | 2 | outer face | Counterbores, bumper recesses |
 
 **Setup 3 is not optional.** Both ports are holes through a vertical wall, and a 3-axis
 mill reaches those from neither above nor below. A right-angle head folds it back into
@@ -154,7 +156,7 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Top thickness | 3.00 | decision |
 | Switch recess depth | 1.50 | nesting |
 | Plate at a switch cutout | 1.50 | MX standard, 1.5mm +-0.1mm |
-| Bottom plate | 1.50 | takes the countersunk head's full height |
+| Bottom plate | 1.50 | takes the flat head's full height |
 | Board pocket | 160.50 x 119.50 | hull + 0.25/side; the board itself is 0.457/side loose in y |
 | Shell outer profile | 166.50 x 125.50 | pocket + wall |
 | Boss and standoff diameter | 5.50 | = 2 x `screw_boss_radius`, the DXF's own circle |
@@ -162,9 +164,24 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Material above the PCB at a boss | 6.00 | top 3.00 + boss 3.00; **4.50 where a recess overlaps** |
 | Insert hole, printed | 3.60 dia | M2.5 melt diameter; depth is per boss, see below |
 | Tapped hole, machined | 2.05 tap drill, M2.5x0.45 | same per-boss depths |
-| Screw | M2.5 countersunk, ISO 7046 | head 4.70 dia x 1.50; two lengths, see below |
-| Screw clearance in the plate | 2.90 dia, 90 deg countersink | |
-| Cavity mouth lead-in | 1.00 x 45 deg | the board goes in blind onto 60 socket pins |
+| Screw | M2.5 button head, ISO 7380 | head 4.70 dia x 1.50, **flat underside**; two lengths, see below |
+| Screw clearance in the plate | 2.90 dia | |
+| Counterbore in the plate | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base |
+| Perimeter shelf, on the shell | 2.00 wide, underside at -6.00 | = the board's own keepout ring |
+| Perimeter wall, on the plate | 2.00 wide, top at -7.60 | meets the shelf through the board |
+| Wall relief | none inward of x +-50.00 above y +45.00 | the MCU, the jack and both ports are there |
+| Flared standoff base | 7.00 dia, up to -9.45 | gives the counterbore a 1.00 annulus to sit in |
+
+**The wall stops short of the top-inner corner.** Everything hanging below the board is
+there, the MCU and the jack, and so are both ports. A wall running the full perimeter sits
+on the jack's body and blocks both plugs.
+
+**The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
+without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
+mm2 per boss: the head bears on the standoff and the plate hangs off that ring, which on an
+FDM part is under one extrusion width. Flaring the base to 7.00 makes the annulus 1.00mm
+and 18.85 mm2. Height is capped by the hotswap sockets hanging 1.85 below the board, not by
+diameter, so the flare stops at -9.45.
 | Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
 
 **The 14.50 cutout is not slack.** An internal corner rounds *into* the void, so an R1.00
@@ -176,19 +193,30 @@ not by this hole.
 
 Left half, from the outline centre. The right half is the exact mirror (negate x).
 
-| Boss | Position | Standoff height | Plate + standoff + PCB | Bore depth | Screw | Engagement |
+| Boss | Position | Standoff height | Standoff + PCB | Bore depth | Screw | Engagement |
 | --- | --- | --- | --- | --- | --- | --- |
-| Outer pinky | (-42.375, -3.650) | 3.88 | 6.98 | 5.00 | M2.5x11 | 4.02 |
-| Inner pinky | (33.825, 0.050) | 5.71 | 8.81 | **4.00** | M2.5x12 | 3.19 |
-| Centre | (-3.325, 22.175) | 4.82 | 7.92 | **4.00** | M2.5x11 | 3.08 |
+| Outer pinky | (-42.375, -3.650) | 3.88 | 5.48 | 5.00 | M2.5x10 | 4.52 |
+| Inner pinky | (33.825, 0.050) | 5.71 | 7.31 | **4.00** | M2.5x11 | 3.69 |
+| Centre | (-3.325, 22.175) | 4.82 | 6.42 | **4.00** | M2.5x10 | 3.58 |
+
+**The plate is not in the stack.** A flat-underside head bears on the counterbore floor,
+which is the standoff's base, and its length is measured from there. A countersunk head
+would have added the plate's 1.50 to every row and needed a longer screw.
+
+**Any flat-underside head works; the counterbore diameter is what follows from the choice.**
+5.00 suits a 4.70 head (button ISO 7380, socket cap DIN 912) with 0.30 to spare, and leaves
+0.25 of standoff outside it. A 5.00 pan head needs 5.30, which leaves 0.10 and a knife edge
+on the standoff, so grow the standoff if you go that way. Head height decides flushness
+only: 1.50 finishes level with the plate, 1.70 stands 0.20 proud, and neither affects the
+screw length, since that is measured under the head.
 
 The outer pair sits 3.70mm apart in y. That is forced: the pinky columns are asymmetric,
 so the two screws cannot share a y while clearing both switch holes and pads. Do not level
 them.
 
 **Two bosses take a 4.00 bore, not 5.00.** A 16.00 switch recess overlaps the inner-pinky
-and centre bosses, so the material above them is 1.50 (plate) + 3.00 (boss) = 4.50, not
-6.00. A 5.00 bore breaks out into the recess floor:
+and centre bosses, so the material above them is 1.50 (top left over the recess) + 3.00
+(boss) = 4.50, not 6.00. A 5.00 bore breaks out into the recess floor:
 
 | Boss | Recess edge from the boss axis | 1.80 bore radius | Breakout |
 | --- | --- | --- | --- |
@@ -199,10 +227,16 @@ The placement rule holds the boss clear of the 14.50 **hole** (tangent on both h
 these two), which is what stops the boss fouling the switch body. It says nothing about the
 16.00 **recess** above, which is what the bore has to miss.
 
+**The bosses mirror; the key field they sit in does not.** On the right half a recess also
+clips the outer-pinky boss, putting its recess edge 2.26mm from the bore axis against a
+1.80 bore radius. That is 0.46mm of wall over the bore's top 0.50mm, where the left half
+has 1.12mm. No breakout either way, so the 5.00 bore stands, but do not read the table's
+"exact mirror" as covering what surrounds them.
+
 **The standoffs are three different heights** because the plate is sloped, so the three
-screws see stacks from 6.98 to 8.81mm. Two screw lengths cover it, as tabulated: every
-screw takes at least 3.00mm of thread and none bottoms in its bore. Do not try to absorb
-the spread in the countersink: the plate is 1.50 and the head is 1.50, so there is no depth
+screws see stacks from 5.48 to 7.31mm. Two lengths cover it, as tabulated: every screw
+takes at least 3.00mm of thread and none bottoms in its bore. Do not try to absorb the
+spread in the counterbore: it is 1.50 deep and the head is 1.50 tall, so there is no depth
 to give.
 
 **Clearance to the nearest side-B pad**: 3.54mm outer pinky, **2.04mm inner pinky**,
@@ -263,7 +297,6 @@ top edge is straight and both ports are simply openings in the back wall.
    **12.00mm** at the outer edge.
 3. **Extrude cut "Cavity"**, the same region offset outward **0.25mm**, from **z -3.00**
    down through the open bottom. Fillet its vertical corners at **2.0mm, 2.35mm maximum**.
-   Chamfer the mouth **1.00 x 45 deg** at the rim.
 4. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
    **z -1.50**.
 5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
@@ -284,7 +317,9 @@ The USB notch needs no step; it is in the imported profile and (2) carries it th
    with the rim.
 2. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table.
-3. **Screw holes**, 2.90 dia with a 90 degree countersink taking the head's full 1.50mm.
+3. **Screw holes**, 2.90 dia, each with a flat-bottomed 5.00 counterbore through the
+   plate's full 1.50mm. The floor is the standoff's base, so the standoff keeps its
+   height and nothing is cut into it.
 4. **MCU relief pocket**, on the inner face, **0.75mm deep**, over x **+51.75 .. +71.80**,
    y **+25.35 .. +58.10** (the Liatris footprint plus 1.00mm), trimmed to the plate outline
    where it meets the USB notch. Leaves 0.75mm of plate.
@@ -319,8 +354,8 @@ into the plate from the outside, then bring the board up into the cavity onto ev
 at once.
 
 The cavity is a straight bore, so the board cannot be rocked in the way a bare
-plate-and-switch assembly usually is. That is what the 1.00 x 45 deg mouth chamfer is for.
-Seat the board evenly, thumb cluster last.
+plate-and-switch assembly usually is. Seat it evenly, thumb cluster last, until it meets
+the shelf all the way round. Then the plate goes on and its wall closes the sandwich.
 
 **Nothing datums the board.** The 5.50 boss butts its top face and never enters the 3.00mm
 hole, and a boss cannot pilot into that hole because the 3.60 insert bore is wider than the

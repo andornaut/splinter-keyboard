@@ -52,8 +52,8 @@ straight side edges.
 
 - **Model to the un-filleted hull.** The fillet cuts convex corners back, so the hull
   contains the fabricated edge and a pocket cut to it cannot come out undersized. The board
-  then sits with a little corner gap, which is clearance rather than slop, since nothing
-  bears on the perimeter.
+  then sits with a little corner gap, which is clearance rather than slop: the shelf and the
+  plate's wall bear on the flat margin along every straight edge, not at the corners.
 - **Measure the cut line**, KiCad's board outline polygon, not the board bounding box. The
   box is inflated by the `Edge.Cuts` stroke on every side.
 - **Nothing follows the board's USB notch.** Not the outer profile, not the cavity, not the
@@ -80,11 +80,22 @@ inherently wider at the top, so nothing reaches it from below and the machined v
 a second setup for the recesses alone. There is no separate switch plate; the shell's top
 face is the plate.
 
-**No perimeter lip is possible here.** The cavity opens only at the bottom, so everything
-cut must be visible looking straight up, and the board pocket is at least as wide as the
-board and sits above any lip. That makes a lip an undercut no setup reaches. The board is
-clamped between the bosses above and the plate's standoffs below instead. The board's outer
-copper keepout still bounds where the wall lands, but it is not a bearing surface.
+**The board is clamped around its whole perimeter**, between a shelf hanging from the case's
+top and a matching wall rising from the plate, with the bosses and standoffs doing the same
+at the three screw points. Both land on the board's outer keepout ring, which exists for
+exactly this, so neither bears on a ground plane. Tracks are a different matter: the route
+ring is deliberately carved open over the TRRS so the jack's through-holes are not flagged,
+so the shelf can cross copper there, under soldermask.
+
+**The plate's wall stops short of the top-inner corner.** Everything that hangs below the
+board is there, the MCU and the jack, and so are both ports. A wall running the full
+perimeter would sit on the jack's body and block both plugs.
+
+**Which side the shelf sits on decides whether it can be made.** Above the board, pressed up
+against, it narrows the opening going up and a mill reaches it from below without trouble.
+Below the board, rested down on, it would put the full-width board pocket above a narrower
+lip: an undercut no setup reaches, and equally impossible to print, since the board also
+goes in from below.
 
 ## Printed case (OrcaSlicer)
 
