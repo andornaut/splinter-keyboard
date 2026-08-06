@@ -116,16 +116,16 @@ half of that. The values here are already converted.
 | Level | z | Source |
 | --- | --- | --- |
 | Shell top face | 0.00 | datum |
-| Recess floor; switch flange bears here | -1.50 | switch nests 1.5mm into the top |
-| Top underside | -3.00 | top thickness |
-| PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
-| PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -15.00 | usable cavity ends here |
-| Shell bottom rim / plate underside | -16.50 | plate is **inset**, flush with the rim |
+| Recess floor; switch flange bears here | -1.60 | from the v4.5 design |
+| Top underside | -3.00 | top thickness; leaves a 1.40mm switch plate |
+| PCB top face | -6.00 | **4.40mm below the bearing surface, from the working design** |
+| PCB bottom face | -7.60 | PCB 1.6mm |
+| Bottom plate top face | -14.50 | usable cavity ends here |
+| Shell bottom rim / plate underside | -16.00 | plate is **inset**, flush with the rim |
 
 Those last two are at the **inner (thick) edge**.
 
-**Specify the two edge heights, not the angle: 16.50mm inner, 12.50mm outer.** Over the
+**Specify the two edge heights, not the angle: 16.00mm inner, 12.00mm outer.** Over the
 166.50mm shell that is 1.3762 deg, but the angle is the derived quantity. If the wall
 thickness ever changes, the case width changes with it and the angle should follow while
 the two heights stay put.
@@ -155,12 +155,12 @@ board and its socketed stack comes in under the jack.
 
 | | mm |
 | --- | --- |
-| Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
+| Top face to PCB top (4.40 + 1.60 recess) | 6.00 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
 | Clearance | 0.77 |
 | Bottom plate, inset | 1.50 |
-| **Total at the thick edge** | **16.50** |
+| **Total at the thick edge** | **16.00** |
 
 **There is 1.5 to 2.5mm of slack.** The case can lose height if you want it thinner,
 and the amount depends on the jack, which is the number worth measuring on your v3.
@@ -172,8 +172,8 @@ wall, so shrinking the cavity moves that opening.
 
 ### The slant is measured, and the clearance it leaves is thin
 
-The top face is flat and the bottom slopes, **16.50mm** at the inner edge down to
-**12.50mm** at the outer, which is 1.3762 deg over the 166.50mm shell. The v4.5 model
+The top face is flat and the bottom slopes, **16.00mm** at the inner edge down to
+**12.00mm** at the outer, which is 1.3762 deg over the 166.50mm shell. The v4.5 model
 measured 1.4445 deg (15.86 to 11.5mm), confirmed from its tilted face normals and from
 Onshape; the heights are now rounded and the angle follows from them.
 
@@ -203,15 +203,15 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | --- | --- | --- |
 | Wall thickness | 3.00 mm | decision |
 | Top thickness | 3.00 mm | decision |
-| Switch recess depth | 1.50 mm | nesting |
-| Plate at a switch cutout | 1.50 mm | MX latch |
+| Switch recess depth | 1.60 mm | from the v4.5 design |
+| Plate at a switch cutout | 1.40 mm | from the v4.5 design; MX nominal is 1.50 |
 | Bottom plate thickness | 1.50 mm | takes the countersunk head's full height, so the pocket never enters the standoff |
 | Standoff diameter | 5.50 mm | = 2 x `screw_boss_radius`, so it is the DXF's own boss circle |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
 | Boss radius | 2.75 mm | DXF boss circles |
-| Boss height (top underside to PCB) | 3.50 mm | z stack |
+| Boss height (top underside to PCB) | 3.00 mm | z stack |
 | Insert hole (print) | 3.60 dia x 5.00 deep | M2.5 melt diameter; leaves 1.50mm of top face |
 | Tapped hole (machined) | 2.05 dia tap drill, M2.5x0.45 | README CNC note |
 | Screw clearance (bottom plate) | 2.90 dia, 90 deg countersink | M2.5 countersunk head, ISO 7046 |
@@ -247,8 +247,8 @@ print and 0.2-0.3mm machined.
    centre to the origin. **Never draw in this sketch.** Re-importing is the only edit it
    should ever take.
 2. **Extrude "Shell body"**, from the left-half outline region of (1), offset outward
-   **3.25mm** (clearance + wall), blind **16.50mm** at the inner edge, -Z, with the
-   bottom face sloped down to **12.50mm** at the outer edge.
+   **3.25mm** (clearance + wall), blind **16.00mm** at the inner edge, -Z, with the
+   bottom face sloped down to **12.00mm** at the outer edge.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
    **z -3.00** (the top underside) down through the open bottom. Apply the **2.0mm
    minimum internal fillet** to its vertical corners.
@@ -355,6 +355,17 @@ The standoffs must dodge components on the underside of the board, which the thr
 positions already do: none is near the MCU or the jack. The boss has 5.00mm of material
 above the PCB to engage, fixed by the MX plate-to-PCB spacing.
 
+### Where the switch stack came from
+
+The MX bearing-surface-to-PCB spacing is **4.40mm**, taken from the v4.5 design rather
+than from a reference. Community sources give 5.00mm at a 1.50mm plate, and that is what
+this sheet used until it was compared against a design that works in practice. The v4.5
+numbers (1.60mm recess, 1.40mm plate, PCB at -6.00) are adopted as a set, since the
+spacing and the plate thickness go together.
+
+Adopting them lifts the PCB 0.50mm, and the case follows: 16.00/12.00 gives exactly the
+margins 16.50/12.50 gave before.
+
 ### The hotswap sockets: check the RIGHT half
 
 The halves are not equivalent here. The left pinky is 1.5u so its switches sit well
@@ -371,7 +382,7 @@ Always evaluate outer-edge changes on the right half.
 
 ### The MCU margin rests on one unmeasured thing
 
-At 16.50/12.50 the MCU has **+0.77mm**, the tightest item in the design. That assumes the
+At 16.00/12.00 the MCU has **+0.77mm**, the tightest item in the design. That assumes the
 module's 4.75mm pin tail passes through the 4.01mm of socket and board bore and stands
 proud above the main PCB. If it bottoms out instead, the MCU seats 0.74mm lower and the
 margin is **+0.03mm**.
