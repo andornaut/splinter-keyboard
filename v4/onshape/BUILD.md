@@ -62,14 +62,14 @@ widen. So a chamfer or rebate at the rim is fine, and a lip under the board pock
 | --- | --- | --- | --- |
 | Shell | 1 | below | Outer profile, cavity, bosses, boss holes |
 | Shell | 2 | above | The 16mm switch recesses |
-| Shell | 3 | the top edge (+y face) | TRRS opening, USB opening, USB counterbore |
+| Shell | 3 | the top edge (+y face) | TRRS and USB openings |
 | Plate | 1 | inner face | Profile, standoffs, screw holes, MCU relief pocket |
 | Plate | 2 | outer face | Countersinks, bumper recesses |
 
 **Setup 3 is not optional.** Both ports are holes through a vertical wall, and a 3-axis
 mill reaches those from neither above nor below. A right-angle head folds it back into
 setup 1 if the shop has one; otherwise it is a third fixturing. Both ports sit on the same
-face, so it is one setup for all three features.
+face, so one setup covers both.
 
 The plate's two setups are inherent to it having features on both faces.
 
@@ -220,27 +220,37 @@ the standoff is 5.50 and not larger.
 **Both parts mount on side B, so both openings sit entirely below the PCB.** Neither is
 anywhere near the z=-6.00 board plane, which is the mistake to avoid.
 
-| Opening | Size | Centre z | Derived from |
+| Opening | Size | Centre z | Source |
 | --- | --- | --- | --- |
-| TRRS, round | 6.00 dia | **-10.20** | 5.20 body below the PCB, barrel on its mid-height |
-| USB-C, through the wall | 9.50 w x 3.60 h | **-10.10** | width is the cavity notch, height is the Liatris midplane |
-| USB-C overmold counterbore, outer face only | 13.00 w x 7.00 h x 1.50 deep | -10.10 | so a cable seats whatever its boot |
+| TRRS, round | 5.50 dia | **-10.50** | measured off the built v4 case |
+| USB-C, through the wall | 9.50 w x 4.00 h | **-10.75** | height measured off the built v4 case; width is the cavity notch |
 
-Add 0.3-0.4mm printed, 0.2-0.3mm machined. The counterbore exists because the connector
-sits back from the case face and a USB-C plug shell is only about 6.5mm long: without it,
-a cable with a fat boot bottoms on the case before it seats.
+**The heights are measured, not derived.** The built v4 case shares this z stack exactly
+(top face 0, top underside -3.00, PCB -6.00 to -7.60), so its port centres transfer
+directly. It carries 5.50 dia at -10.50 and a 9.00 x 4.00 slot at -10.75, and it works.
 
-**The USB width is the notch, not the plug.** The board's 10.00 notch becomes a 9.50 void
-in the cavity, and an opening narrower than that leaves a sliver of wall down each side of
-it. 9.50 also clears an 8.34mm plug shell by 0.58 per side, so there is nothing to gain by
-going narrower. The z is derived from the module stack: 2.00 of Mill-Max plus half the
-Liatris' 1.00 PCB below the board's -7.60 underside.
+Add 0.3-0.4mm printed, 0.2-0.3mm machined. **Both are plain cutouts straight through the
+wall.** No counterbore and no recess: a pocket on the outer face reads as the port being
+sunk into the case rather than opened through it.
 
-Wall left below each opening: 2.59mm at the TRRS, 1.88mm at the USB counterbore. Both are
-thin enough that a printed shell wants an extra perimeter there.
+The cost is cable boots. The connector sits back from the case face and a USB-C plug shell
+is only about 6.5mm long, so a cable with a fat overmold may bottom on the outer face
+before it seats. Settle it on the printed half with the cables you actually own; a
+13.00 x 7.00 x 1.50 counterbore on the outer face is the fix if one of them will not go.
 
-**Confirm both centre heights on the assembled board before cutting metal.** They are
-derived from the part stack, not measured.
+**Why 9.50 wide.** It sits inside the board's own 10.00 notch, so the plug clears the board
+edge, and it clears an 8.34mm plug shell by 0.58 per side.
+
+Wall left below each opening: 2.54mm at the TRRS, 2.73mm at the USB. Thin enough that a
+printed shell wants an extra perimeter at both.
+
+**Nothing in the case follows the board's USB notch.** Not the outer profile, not the
+cavity, not the plate. That notch clears the plug's overmold, which sits below the board
+entirely, so to the case it is only a bite out of an edge that should run straight.
+Inheriting it puts a jog in all three outlines and leaves a pointless tongue of material in
+the pocket. Fill it in the hull before offsetting any of them. The result is a void where
+the board is absent, which costs nothing and gives the plug more room rather than less: the
+top edge is straight and both ports are simply openings in the back wall.
 
 ## Part A: shell
 
@@ -263,7 +273,7 @@ derived from the part stack, not measured.
    extruded down **3.00mm** to the PCB top face.
 7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
    **to the per-boss depth in the boss table**: 5.00 outer pinky, 4.00 the other two.
-8. **Port openings** through the side wall, plus the USB counterbore on the outer face.
+8. **Port openings** cut straight through the side wall.
 
 The USB notch needs no step; it is in the imported profile and (2) carries it through.
 
@@ -375,16 +385,23 @@ as much depth to the slope and is the binding part.
 
 **Switch seating.** The PCB sits 4.50 below the bearing surface.
 
-| Shoulder to PCB | PCB top | Source |
-| --- | --- | --- |
-| 4.50 | **-6.00** (used here) | a design that works in practice |
-| 5.00 | -6.50 | Cherry's 5mm PCB-to-plate figure, if measured to the plate top |
+| Shoulder to PCB | Recess floor | PCB top | Source |
+| --- | --- | --- | --- |
+| **4.25** | -1.75 | -6.00 | the built v4 case, measured off its STEP |
+| 4.50 | -1.50 | **-6.00** (used here) | this sheet's 1.50 recess on the same PCB plane |
+| 5.00 | -1.50 | -6.50 | Cherry's 5mm PCB-to-plate figure, if measured to the plate top |
+
+The built case puts its PCB plane at exactly -6.00 and -7.60, the same as here, so that
+much is confirmed on hardware. What differs is the recess: it is 1.75 deep there and 1.50
+here, which moves the bearing surface up 0.25 and is the whole of the 4.25-to-4.50 change.
+The 1.50 recess is a deliberate choice for a 1.50mm switch plate, not a carry-over.
 
 **Deeper is the safe direction**: too deep and the switch seats on the plate with its base
 floating clear; too shallow and the base hits the PCB before the shoulder reaches the
-recess floor, so the switch sits proud. -6.00 is the riskier of the two. Whether Cherry's
-5mm is to the plate's top or bottom face could not be established; the datasheet drawings
-are raster images. **To settle it**, pull a switch and measure plate top to PCB top.
+recess floor, so the switch sits proud. 4.50 is therefore 0.25 to the safe side of a case
+that works, which is the reassuring direction to be wrong in. Whether Cherry's 5mm is to
+the plate's top or bottom face could not be established; the datasheet drawings are raster
+images. **To settle it**, pull a switch and measure plate top to PCB top.
 
 **Switch seating and MCU clearance pull against each other.** Dropping the PCB to -6.50
 spends the entire MCU margin, since every millimetre the board goes down is a millimetre
@@ -418,7 +435,8 @@ Export the shell as STEP and check it against the outline rather than by eye:
 | Gap from cavity to board outline | near-constant around the perimeter |
 | Board outline points outside the cavity | none |
 | Boss bore depths | 5.00 outer pinky, 4.00 the other two; none breaks into a recess |
-| Port opening centres | z -10.20 TRRS, -10.10 USB, both below the board |
+| Port opening centres | z -10.50 TRRS, -10.75 USB, both below the board |
+| Top edge in plan | straight across; no notch inherited from the board |
 | Plate relief pocket | present, 0.75 deep, over the whole Liatris footprint |
 
 A wide spread in that gap means the profile is not the outline. Then **print and assemble
