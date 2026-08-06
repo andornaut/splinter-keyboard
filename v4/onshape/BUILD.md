@@ -170,7 +170,7 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Perimeter shelf, on the shell | 2.00 wide, underside at -6.00 | = the board's own keepout ring |
 | Perimeter wall, on the plate | 2.00 wide, top at -7.60 | meets the shelf through the board |
 | Wall relief | none inward of x +-50.00 above y +45.00 | the MCU, the jack and both ports are there |
-| Flared standoff base | 7.00 dia, up to -9.45 | gives the counterbore a 1.00 annulus to sit in |
+| Flared standoff base | 8.00 dia, up to -9.75 | = the built v4 lid; gives the counterbore a 1.50 annulus |
 
 **The wall stops short of the top-inner corner.** Everything hanging below the board is
 there, the MCU and the jack, and so are both ports. A wall running the full perimeter sits
@@ -179,9 +179,14 @@ on the jack's body and blocks both plugs.
 **The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
 without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
 mm2 per boss: the head bears on the standoff and the plate hangs off that ring, which on an
-FDM part is under one extrusion width. Flaring the base to 7.00 makes the annulus 1.00mm
-and 18.85 mm2. Height is capped by the hotswap sockets hanging 1.85 below the board, not by
-diameter, so the flare stops at -9.45.
+FDM part is under one extrusion width. Flaring the base to 8.00 makes it 1.50mm and 30.63
+mm2, seven times the area. The built v4 lid uses 8.00 as well.
+
+**Height is what constrains a flare, not diameter.** It stops under the hotswap sockets
+hanging 1.85 below the board, and every pad it would otherwise have to dodge is above it,
+so the 2.04mm inner-pinky pad clearance that caps the standoff does not cap this. Stopping
+at -9.75 leaves 0.30 to the sockets. Do not let it reach them: that clearance is the only
+thing between the flare and a part.
 | Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
 
 **The 14.50 cutout is not slack.** An internal corner rounds *into* the void, so an R1.00

@@ -74,11 +74,12 @@ WALL_RELIEF_X = 50.00
 WALL_RELIEF_Y = 45.00
 # Flared standoff base. Without it the counterbore runs the plate's full thickness inside a
 # 5.50 standoff, leaving the two joined by a 0.25mm annulus: the screw head would bear on
-# the standoff and the plate would hang off 4.12 mm2 per boss. The flare is capped by the
-# hotswap sockets hanging below the board, which is what limits its height rather than its
-# diameter.
-FLARE_R       = 3.50
+# the standoff and the plate would hang off 4.12 mm2 per boss. 8.00 matches the built v4
+# lid. HEIGHT is what constrains a flare, not diameter: it stops below the hotswap sockets
+# hanging under the board, and the pads it would otherwise have to dodge are all above it.
+FLARE_R       = 4.00
 SOCKET_H      = 1.85
+SOCKET_CLR    = 0.30
 
 # Port heights are MEASURED off the built v4 case, which shares this z stack exactly (top
 # face 0, top underside -3.00, PCB -6.00 to -7.60). They are not derived from the part
@@ -113,10 +114,11 @@ EXPECT_CYL = {
     "shell": {1.75: 1, 1.80: 3, 2.00: 10, 2.75: 4, 3.25: 5},
     # 1.85 x5: the plate outline, the cavity's 2.00 corners less the fit clearance, which
     # is the point of deriving it from the cavity. 2.50 x3: the flat counterbores. 3.50 x3:
-    # the flared standoff bases. 2.00 x4 rather than x5: the wall's fifth inner corner falls
+    # 4.00 x7: four bumper recesses and three flared standoff bases, same radius by
+    # coincidence. 2.00 x4 rather than x5: the wall's fifth inner corner falls
     # inside the top-inner relief.
     "plate": {0.15: 1, 1.45: 3, 1.85: 5, 1.90: 1, 2.00: 4, 2.50: 3, 2.75: 3,
-              3.50: 3, 4.00: 4},
+              4.00: 7},
 }
 CNC_FILLET_R = 1.00
 
@@ -373,7 +375,8 @@ def build(dxf, half, explode):
     for bx, by in bosses:
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(
             half_space(sign, ang, 0.0)))
-        plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - SOCKET_H, bx, by).cut(
+        plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - SOCKET_H - SOCKET_CLR,
+                                bx, by).cut(
             half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
 
