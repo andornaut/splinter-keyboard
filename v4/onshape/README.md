@@ -100,7 +100,9 @@ goes in from below.
 ## Printed case (OrcaSlicer)
 
 - Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
-  layer and nothing needs support.
+  layer and nothing needs support. The outer edge bezel is the one place the part flares
+  outward, at 45 degrees over the first millimetre, which prints unsupported and keeps
+  elephant's foot off the edge you actually look at.
 - Mounting holes take heat-set inserts, so size them for the insert's melt diameter, not a
   tap.
 - **Expect the switch recesses to come out tight.** FDM holes shrink, and the recess locates
@@ -130,8 +132,10 @@ cylindrical end mill from one of the setups.
    they share a spec.
 5. **Add clearance at the port openings.** CNC tolerance is tight, so a slip-fit modelled
    opening can come out too snug.
-6. **Chamfers over fillets on top edges** for a prototype: a chamfer is one pass, while
-   top-edge fillets each need a separate ball or chamfer operation.
+6. **Chamfers over fillets on top edges**: a chamfer is one pass with a chamfer mill,
+   while a top-edge fillet needs a separate ball or profiling operation. The outer edge
+   bezel rides along in the setup that cuts the switch recesses, so it costs almost
+   nothing.
 7. **Prefer through holes to blind**, and keep pocket depth modest relative to tool
    diameter.
 

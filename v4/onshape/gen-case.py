@@ -52,6 +52,7 @@ H_INNER       = 16.00
 H_OUTER       = 12.00
 PLATE         = 1.50
 CAVITY_FILLET = 2.00     # tool radius; 2.35 is the maximum before it fouls the board
+TOP_BEZEL     = 1.00     # chamfer where the top face meets the outer wall
 BOSS_R        = 2.75
 BORE_R        = 1.80     # 3.60 dia heat-set insert
 BORE_DEEP     = 5.00     # outer pinky
@@ -299,6 +300,21 @@ def unnotched_hull(wall, sign):
     return moved(max(tops, key=lambda f: f.Area).OuterWire, Vector(0, 0, -1.0))
 
 
+def bezel_top(body, size):
+    """Chamfer where the top face meets the outer wall.
+
+    Only the top face's OUTER wire: its inner wires are the switch recesses, which are
+    meant to stay square.
+    """
+    tops = [f for f in body.Faces
+            if isinstance(f.Surface, Part.Plane)
+            and abs(f.Surface.Axis.z) > 0.999
+            and abs(f.CenterOfMass.z) < 1e-6]
+    if not tops:
+        raise SystemExit("FAIL gen-case: no top face to bezel")
+    return body.makeChamfer(size, max(tops, key=lambda f: f.Area).OuterWire.Edges)
+
+
 # ---- build ---------------------------------------------------------------
 def build(dxf, half, explode):
     wall, holes, recess, bosses = classify(dxf, half)
@@ -359,7 +375,7 @@ def build(dxf, half, explode):
     for i, (bx, by) in enumerate(bosses):
         body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP +
                             (BORE_DEEP if i == outer_i else BORE_SHALLOW), bx, by))
-    shell = body.removeSplitter()
+    shell = bezel_top(body.removeSplitter(), TOP_BEZEL)
 
     # --- plate
     slab = half_space(sign, ang, PLATE).cut(half_space(sign, ang, 0.0))
@@ -481,6 +497,18 @@ def check(out, half, explode, keys):
                              % (name, r, got.get(r, 0), n))
         if os.environ.get("FC_SHOW_CYL"):
             print("  note %s: cylinders %s" % (name, dict(sorted(got.items()))))
+
+    tops = [f for f in shell.Faces
+            if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.999
+            and abs(f.CenterOfMass.z) < 1e-6]
+    if not tops:
+        fails.append("no top face at z=0")
+    else:
+        tb = max(tops, key=lambda f: f.Area).BoundBox
+        if abs((bb.XLength - tb.XLength) - 2 * TOP_BEZEL) > 0.01:
+            fails.append("top face is %.3f narrower than the widest section, expected "
+                         "%.3f: bezel wrong or missing"
+                         % (bb.XLength - tb.XLength, 2 * TOP_BEZEL))
 
     # Prismatic features are invisible to a cylinder census, so test them by volume. Both
     # of these have failed silently: a relief box that missed the plate entirely, and a

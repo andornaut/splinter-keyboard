@@ -63,7 +63,7 @@ widen. So a chamfer or rebate at the rim is fine, and a lip under the board pock
 | Part | Setup | From | Features |
 | --- | --- | --- | --- |
 | Shell | 1 | below | Outer profile, cavity, bosses, boss holes |
-| Shell | 2 | above | The 16mm switch recesses |
+| Shell | 2 | above | The 16mm switch recesses, the top edge bezel |
 | Shell | 3 | the top edge (+y face) | TRRS and USB openings |
 | Plate | 1 | inner face | Profile, standoffs, screw holes, relief pocket |
 | Plate | 2 | outer face | Counterbores, bumper recesses |
@@ -188,6 +188,7 @@ so the 2.04mm inner-pinky pad clearance that caps the standoff does not cap this
 at -9.75 leaves 0.30 to the sockets. Do not let it reach them: that clearance is the only
 thing between the flare and a part.
 | Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
+| Top outer edge bezel | 1.00 x 45 deg | one chamfer pass; the switch recesses stay square |
 
 **The 14.50 cutout is not slack.** An internal corner rounds *into* the void, so an R1.00
 corner cut into a 14.00 hole would bind a switch by 0.207mm. At 14.50 it clears by 0.146mm
@@ -307,6 +308,8 @@ top edge is straight and both ports are simply openings in the back wall.
 5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
    remaining 1.50mm. Cut both sets **as imported**: they carry the correct corner fillets,
    and the two halves' patterns differ.
+5a. **Bezel**, 1.00 x 45 deg on the top face's outer edge only. The recess openings stay
+   square: the nesting look depends on the switch meeting a crisp edge.
 6. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
    extruded down **3.00mm** to the PCB top face.
 7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
