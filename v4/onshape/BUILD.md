@@ -120,8 +120,11 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -14.69 | usable cavity ends here |
-| Shell bottom rim / plate underside | -16.69 | plate is **inset**, flush with the rim |
+| Bottom plate top face | -14.66 | usable cavity ends here |
+| Shell bottom rim / plate underside | -16.16 | plate is **inset**, flush with the rim |
+
+Those last two are at the **inner (thick) edge**. The bottom slopes 1.4445 deg, so at
+the outer edge the rim is at -12.13 and the cavity is 4.03mm shallower.
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -148,9 +151,9 @@ board and its socketed stack comes in under the jack.
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
-| Bottom plate | 2.00 |
-| **Minimum total** | **15.1 - 16.1** |
-| Current design | 17.60 |
+| Clearance | 0.47 |
+| Bottom plate, inset | 1.50 |
+| **Total at the thick edge** | **16.16** |
 
 **There is 1.5 to 2.5mm of slack.** The case can lose height if you want it thinner,
 and the amount depends on the jack, which is the number worth measuring on your v3.
@@ -177,68 +180,6 @@ the inset plate leaves very little:
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
 cheapest first:
-
-| Option | Recovers |
-| --- | --- |
-| Measure the jack; if it is 5.0mm rather than 6.0mm | resolves it outright, +0.55mm at the jack |
-| Thin the plate to 1.2mm | +0.80mm everywhere |
-| Grow the thick end 15.86 -> 17.31mm | +1.45mm, for a 1.0mm margin on a 6mm jack |
-| Hang the plate below the rim instead of insetting | +2.00mm, but loses the flush look |
-
-**Thicken the plate only where the screws are.** The MCU hangs 5.40mm below the board
-and the jack 5.20mm, and a uniform 2.00mm plate leaves -0.33mm and +0.35mm. But the plate
-only needs to be thick where a screw head is buried, and none of the three screws is
-anywhere near the MCU or the jack. A **1.20mm plate with local bosses** gives +0.47mm and
-+1.15mm at the **current** case height, so no growth is needed.
-
-| General plate | Thick end | MCU | Jack |
-| --- | --- | --- | --- |
-| Uniform 2.00mm | 15.86 | -0.33 | +0.35 |
-| 1.20mm, head pocket cutting into the standoff | 15.86 | +0.47 | +1.15 |
-| **1.50mm, head fully inside the plate** | **16.16** | **+0.47** | **+1.15** |
-
-**Keep the head pocket out of the standoff.** A countersunk M2.5 head is exactly 1.50mm,
-so a 1.50mm plate takes it entirely and the standoff stays solid. The alternative works
-geometrically, since the standoff is wider than the head, but every millimetre of pocket
-forces the standoff's wide portion higher, and higher up is where the hotswap sockets are.
-
-The standoffs have room, but not much at one position:
-
-| Boss | Nearest side-B pad | at 8.00mm | at **5.50mm** |
-| --- | --- | --- | --- |
-| Outer pinky | 6.29 | 2.29 | 3.54 |
-| **Inner pinky** | **4.79** | **0.79** | **2.04** |
-| Centre | 6.73 | 2.73 | 3.98 |
-
-**Use 6.00mm.** Those distances are measured to the pads, and the Kailh socket body is
-larger than its lands, so the real gap is smaller by an amount the board file cannot
-tell us. At 8.00mm the tightest position has 0.79mm to absorb that; at 6.00mm it has
-1.79mm. Switch pitch is 19.05mm against a ~13.9mm body, leaving about 5.15mm between
-switches, so there is no room to recover if it turns out tight.
-
-**Use 5.50mm, because it is the one diameter already in the source.** It equals
-2 x `screw_boss_radius`, which the DXF draws as the `_screwbosses` circles, and it is the
-same diameter as the shell boss above the PCB. Project it from the import rather than
-dimensioning it, and it tracks a retuned screw automatically; the board is then clamped
-between identical diameters above and below.
-
-It gives 1.00mm of wall around a 3.50mm bore, 14.1mm^2 in compression and a 1.25mm
-bearing ring on the PCB, all far beyond what a clamp screw needs.
-
-### An aluminium plate does not short anything
-
-The only intended contact is the three standoff faces, and all three are copper-free:
-`keepout_screw_bosses` clears pour, tracks and vias to 3.75mm radius and the `.kicad_dru`
-rule excludes conductive pads, so a 5.50mm standoff sits well inside. Verified on the
-board rather than inferred from the rule.
-
-Elsewhere the plate stays clear: +0.47mm from the MCU, +1.07mm from the outermost hotswap
-socket, +1.15mm from the jack. **Do not treat anodising as the insulator**: the layer is
-microns thick, brittle, and breached by a burr or an assembly scratch. The clearance is
-what protects the board. If the +0.47mm at the MCU feels thin once assembled, a film on
-the plate's inner face is the cheap belt-and-braces.
-
-The 0.30mm of cavity that a 1.50mm plate costs is bought back by 0.30mm of case height.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
