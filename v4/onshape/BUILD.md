@@ -171,6 +171,8 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Perimeter wall, on the plate | 2.00 wide, top at -7.60 | meets the shelf through the board |
 | Wall relief | none inward of x +-50.00 above y +45.00 | the MCU, the jack and both ports are there |
 | Flared standoff base | 8.00 dia, up to -9.75 | = the built v4 lid; gives the counterbore a 1.50 annulus |
+| Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
+| Top outer edge bezel | 1.00 x 45 deg | one chamfer pass; the switch recesses stay square |
 
 **The wall stops short of the top-inner corner.** Everything hanging below the board is
 there, the MCU and the jack, and so are both ports. A wall running the full perimeter sits
@@ -187,8 +189,6 @@ hanging 1.85 below the board, and every pad it would otherwise have to dodge is 
 so the 2.04mm inner-pinky pad clearance that caps the standoff does not cap this. Stopping
 at -9.75 leaves 0.30 to the sockets. Do not let it reach them: that clearance is the only
 thing between the flare and a part.
-| Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
-| Top outer edge bezel | 1.00 x 45 deg | one chamfer pass; the switch recesses stay square |
 
 **The 14.50 cutout is not slack.** An internal corner rounds *into* the void, so an R1.00
 corner cut into a 14.00 hole would bind a switch by 0.207mm. At 14.50 it clears by 0.146mm
@@ -308,13 +308,13 @@ top edge is straight and both ports are simply openings in the back wall.
 5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
    remaining 1.50mm. Cut both sets **as imported**: they carry the correct corner fillets,
    and the two halves' patterns differ.
-5a. **Bezel**, 1.00 x 45 deg on the top face's outer edge only. The recess openings stay
+6. **Bezel**, 1.00 x 45 deg on the top face's outer edge only. The recess openings stay
    square: the nesting look depends on the switch meeting a crisp edge.
-6. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
+7. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
    extruded down **3.00mm** to the PCB top face.
-7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
+8. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
    **to the per-boss depth in the boss table**: 5.00 outer pinky, 4.00 the other two.
-8. **Port openings** cut straight through the side wall.
+9. **Port openings** cut straight through the side wall.
 
 The USB notch needs no step; it is in the imported profile and (2) carries it through.
 

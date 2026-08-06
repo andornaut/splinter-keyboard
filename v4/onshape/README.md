@@ -101,8 +101,10 @@ goes in from below.
 
 - Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
   layer and nothing needs support. The outer edge bezel is the one place the part flares
-  outward, at 45 degrees over the first millimetre, which prints unsupported and keeps
-  elephant's foot off the edge you actually look at.
+  outward, at 45 degrees over the first millimetre, which prints unsupported. It does not
+  move elephant's foot, since the first layer IS the top face and its perimeter IS the
+  visible top edge; what it does is put that perimeter 1.00mm inboard of the widest
+  section, so first-layer squish can no longer stand proud of the outer profile.
 - Mounting holes take heat-set inserts, so size them for the insert's melt diameter, not a
   tap.
 - **Expect the switch recesses to come out tight.** FDM holes shrink, and the recess locates
