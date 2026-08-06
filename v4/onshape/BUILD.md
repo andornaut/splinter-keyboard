@@ -65,7 +65,7 @@ widen. So a chamfer or rebate at the rim is fine, and a lip under the board pock
 | Shell | 1 | below | Outer profile, cavity, bosses, boss holes |
 | Shell | 2 | above | The 16mm switch recesses |
 | Shell | 3 | the top edge (+y face) | TRRS and USB openings |
-| Plate | 1 | inner face | Profile, standoffs, screw holes, MCU relief pocket |
+| Plate | 1 | inner face | Profile, standoffs, screw holes, relief pocket |
 | Plate | 2 | outer face | Counterbores, bumper recesses |
 
 **Setup 3 is not optional.** Both ports are holes through a vertical wall, and a 3-axis
@@ -325,17 +325,21 @@ The USB notch needs no step; it is in the imported profile and (2) carries it th
 3. **Screw holes**, 2.90 dia, each with a flat-bottomed 5.00 counterbore through the
    plate's full 1.50mm. The floor is the standoff's base, so the standoff keeps its
    height and nothing is cut into it.
-4. **MCU relief pocket**, on the inner face, **0.75mm deep**, over x **+51.75 .. +71.80**,
-   y **+25.35 .. +58.10** (the Liatris footprint plus 1.00mm), trimmed to the plate outline
-   where it meets the USB notch. Leaves 0.75mm of plate.
+4. **Relief pocket**, on the inner face, **0.75mm deep**, one plain rectangle over
+   x **+51.75 .. +77.60**, y **+25.35 .. +58.60**. Leaves 0.75mm of plate.
 5. **Bumper recesses**, 8.00 dia x 0.50 deep on the outer face at (-70, +50), (+70, +50),
    (-70, -32), (+65, -50). All are well clear of the three screw heads.
 
 **The relief pocket is not optional on an aluminium plate.** The MCU stack has +0.77mm of
 nominal clearance and +0.03mm if the module bottoms out in its sockets, and the plate would
 be a conductor that close to exposed pin tails. The pocket takes the worst case to +1.52mm
-and costs nothing to machine in the same setup. Kapton over the pocket if you want a second
-barrier.
+and costs nothing to machine in the same setup.
+
+**One rectangle, covering the Liatris and the jack together**, rather than a pocket each
+with an island between them: it is meant to be lined with tape, and a plain rectangle takes
+a strip. Its limits are not arbitrary. x stops at 77.60 because the plate's perimeter wall
+runs at 78.10 below y 45, and a pocket reaching it would undercut the wall; the jack's body
+ends at 77.15, so it is covered. y stops at 58.60 to leave a 1.00mm rim at the plate edge.
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate;
 access is by removing it, so no holes are needed.

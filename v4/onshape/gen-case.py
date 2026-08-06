@@ -93,9 +93,13 @@ USB_Z, USB_H = -10.75, 4.00
 # through it. The USB width sits inside the board's own 10.00 notch so the plug clears the
 # board edge, and clears an 8.34mm plug shell by 0.58 per side.
 
-MCU_X0, MCU_X1 = 51.75, 71.80
-MCU_Y0, MCU_Y1 = 25.35, 58.10
-MCU_RELIEF = 0.75
+# One rectangular relief over everything tall on side B: the Liatris and the TRRS jack.
+# Rectangular and continuous so a strip of tape can line it, rather than two pockets with
+# an island between them. Bounded by the plate's perimeter wall at x 78.10 (below y 45,
+# where the wall still runs) and held clear of the plate's own edge.
+RELIEF_X0, RELIEF_X1 = 51.75, 77.60
+RELIEF_Y0, RELIEF_Y1 = 25.35, 58.60
+RELIEF_DEPTH = 0.75
 
 BUMPERS = [(-70.0, 50.0), (70.0, 50.0), (-70.0, -32.0), (65.0, -50.0)]
 BUMPER_R, BUMPER_D = 4.00, 0.50
@@ -380,14 +384,15 @@ def build(dxf, half, explode):
             half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
 
-    # Relief over the Liatris. Without it an aluminium plate sits 0.77mm from the module's
-    # pin tails, or 0.03mm if it bottoms out in its sockets.
-    x0 = sign * MCU_X0 if sign > 0 else sign * MCU_X1
+    # Relief over the Liatris and the jack. Without it an aluminium plate sits 0.77mm from
+    # the module's pin tails, or 0.03mm if it bottoms out in its sockets.
+    x0 = sign * RELIEF_X0 if sign > 0 else sign * RELIEF_X1
     # Spans the full z range: the plate sits well below z=0, so a box starting there
     # intersects the relief slab in nothing and the cut silently does nothing.
-    relief = Part.makeBox(MCU_X1 - MCU_X0, MCU_Y1 - MCU_Y0, 2 * BIG,
-                          Vector(x0, MCU_Y0, -BIG)).common(
-        half_space(sign, ang, PLATE).cut(half_space(sign, ang, PLATE - MCU_RELIEF)))
+    relief = Part.makeBox(RELIEF_X1 - RELIEF_X0, RELIEF_Y1 - RELIEF_Y0, 2 * BIG,
+                          Vector(x0, RELIEF_Y0, -BIG)).common(
+        half_space(sign, ang, PLATE).cut(
+            half_space(sign, ang, PLATE - RELIEF_DEPTH)))
     if relief.Volume < 1.0:
         raise SystemExit("FAIL gen-case: MCU relief tool is empty, it would cut nothing")
     plate = plate.cut(relief)
@@ -482,16 +487,16 @@ def check(out, half, explode, keys):
     # perimeter wall built across both port openings.
     sign = 1 if half == "left" else -1
     dz = -explode
-    relief_zone = Part.makeBox(MCU_X1 - MCU_X0, MCU_Y1 - MCU_Y0, MCU_RELIEF,
-                               Vector(sign * MCU_X0 if sign > 0 else sign * MCU_X1,
-                                      MCU_Y0, plate.BoundBox.ZMin))
+    relief_zone = Part.makeBox(RELIEF_X1 - RELIEF_X0, RELIEF_Y1 - RELIEF_Y0, RELIEF_DEPTH,
+                               Vector(sign * RELIEF_X0 if sign > 0 else sign * RELIEF_X1,
+                                      RELIEF_Y0, plate.BoundBox.ZMin))
     swept = 0.0
     for i in range(60):
         probe = relief_zone.copy()
         probe.translate(Vector(0, 0, i * 0.15))
         swept += plate.common(probe).Volume
     if swept > 0.999 * relief_zone.Volume * 60:
-        fails.append("MCU relief pocket absent: plate is solid through its footprint")
+        fails.append("relief pocket absent: plate is solid through its footprint")
 
     usb_w = (USB_X1 - USB_X0) - 2 * POCKET_CLR
     ux = sign * (USB_X0 + USB_X1) / 2.0
