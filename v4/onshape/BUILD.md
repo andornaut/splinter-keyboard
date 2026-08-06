@@ -120,11 +120,14 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -14.66 | usable cavity ends here |
-| Shell bottom rim / plate underside | -16.16 | plate is **inset**, flush with the rim |
+| Bottom plate top face | -15.50 | usable cavity ends here |
+| Shell bottom rim / plate underside | -17.00 | plate is **inset**, flush with the rim |
 
 Those last two are at the **inner (thick) edge**. The bottom slopes 1.4445 deg, so at
-the outer edge the rim is at -12.13 and the cavity is 4.03mm shallower.
+the outer edge the rim is at -12.97 and the cavity is 4.03mm shallower.
+
+**Case height is 17.00mm at the thick edge**, rounded up from the 16.16mm the clearances
+strictly need. The 0.84mm goes to the MCU, which is the tightest item.
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -151,9 +154,9 @@ board and its socketed stack comes in under the jack.
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
-| Clearance | 0.47 |
+| Clearance | 1.31 |
 | Bottom plate, inset | 1.50 |
-| **Total at the thick edge** | **16.16** |
+| **Total at the thick edge** | **17.00** |
 
 **There is 1.5 to 2.5mm of slack.** The case can lose height if you want it thinner,
 and the amount depends on the jack, which is the number worth measuring on your v3.
@@ -174,8 +177,8 @@ the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 6.35 mm | 5.20 | **+1.15** |
-| Liatris | 52.78 .. 70.80 | 5.87 mm | 5.40 | **+0.47** |
+| TRRS jack | 71.55 .. 77.75 | 7.19 mm | 5.20 | **+1.99** |
+| Liatris | 52.78 .. 70.80 | 6.71 mm | 5.40 | **+1.31** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -239,7 +242,8 @@ print and 0.2-0.3mm machined.
    centre to the origin. **Never draw in this sketch.** Re-importing is the only edit it
    should ever take.
 2. **Extrude "Shell body"**, from the left-half outline region of (1), offset outward
-   **3.25mm** (clearance + wall), blind **15.60mm**, -Z.
+   **3.25mm** (clearance + wall), blind **17.00mm** at the inner edge, -Z, with the
+   bottom face sloped 1.4445 deg down toward the outer edge.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
    **z -3.00** (the top underside) down through the open bottom. Apply the **2.0mm
    minimum internal fillet** to its vertical corners.
