@@ -120,12 +120,12 @@ half of that. The values here are already converted.
 | Top underside | -3.00 | top thickness |
 | PCB top face | -6.50 | MX plate-to-PCB 5.00 below the bearing surface **(verify on the print)** |
 | PCB bottom face | -8.10 | PCB 1.6mm |
-| Bottom plate top face | -15.50 | usable cavity ends here |
-| Shell bottom rim / plate underside | -17.00 | plate is **inset**, flush with the rim |
+| Bottom plate top face | -15.00 | usable cavity ends here |
+| Shell bottom rim / plate underside | -16.50 | plate is **inset**, flush with the rim |
 
 Those last two are at the **inner (thick) edge**.
 
-**Specify the two edge heights, not the angle: 17.00mm inner, 13.00mm outer.** Over the
+**Specify the two edge heights, not the angle: 16.50mm inner, 12.50mm outer.** Over the
 166.50mm shell that is 1.3762 deg, but the angle is the derived quantity. If the wall
 thickness ever changes, the case width changes with it and the angle should follow while
 the two heights stay put.
@@ -158,9 +158,9 @@ board and its socketed stack comes in under the jack.
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
-| Clearance | 1.27 |
+| Clearance | 0.77 |
 | Bottom plate, inset | 1.50 |
-| **Total at the thick edge** | **17.00** |
+| **Total at the thick edge** | **16.50** |
 
 **There is 1.5 to 2.5mm of slack.** The case can lose height if you want it thinner,
 and the amount depends on the jack, which is the number worth measuring on your v3.
@@ -172,8 +172,8 @@ wall, so shrinking the cavity moves that opening.
 
 ### The slant is measured, and the clearance it leaves is thin
 
-The top face is flat and the bottom slopes, **17.00mm** at the inner edge down to
-**13.00mm** at the outer, which is 1.3762 deg over the 166.50mm shell. The v4.5 model
+The top face is flat and the bottom slopes, **16.50mm** at the inner edge down to
+**12.50mm** at the outer, which is 1.3762 deg over the 166.50mm shell. The v4.5 model
 measured 1.4445 deg (15.86 to 11.5mm), confirmed from its tilted face normals and from
 Onshape; the heights are now rounded and the angle follows from them.
 
@@ -182,8 +182,8 @@ the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 7.12 mm | 5.20 | **+1.92** |
-| Liatris | 52.78 .. 70.80 | 6.67 mm | 5.40 | **+1.27** |
+| TRRS jack | 71.55 .. 77.75 | 6.62 mm | 5.20 | **+1.42** |
+| Liatris | 52.78 .. 70.80 | 6.17 mm | 5.40 | **+0.77** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -247,8 +247,8 @@ print and 0.2-0.3mm machined.
    centre to the origin. **Never draw in this sketch.** Re-importing is the only edit it
    should ever take.
 2. **Extrude "Shell body"**, from the left-half outline region of (1), offset outward
-   **3.25mm** (clearance + wall), blind **17.00mm** at the inner edge, -Z, with the
-   bottom face sloped down to **13.00mm** at the outer edge.
+   **3.25mm** (clearance + wall), blind **16.50mm** at the inner edge, -Z, with the
+   bottom face sloped down to **12.50mm** at the outer edge.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
    **z -3.00** (the top underside) down through the open bottom. Apply the **2.0mm
    minimum internal fillet** to its vertical corners.
@@ -354,6 +354,31 @@ feature.
 The standoffs must dodge components on the underside of the board, which the three screw
 positions already do: none is near the MCU or the jack. The boss has 5.00mm of material
 above the PCB to engage, fixed by the MX plate-to-PCB spacing.
+
+### The hotswap sockets: check the RIGHT half
+
+The halves are not equivalent here. The left pinky is 1.5u so its switches sit well
+inboard, while the right uses 1u plus the `zones.extra` inner column, putting a socket
+land **3.68mm** from the outer board edge against the left's **16.73mm**. The outer edge
+height therefore bites on the right half first.
+
+| | Socket margin |
+| --- | --- |
+| Left, closest land 16.73mm in | +1.53 |
+| **Right, closest land 3.68mm in** | **+1.22** |
+
+Always evaluate outer-edge changes on the right half.
+
+### The MCU margin rests on one unmeasured thing
+
+At 16.50/12.50 the MCU has **+0.77mm**, the tightest item in the design. That assumes the
+module's 4.75mm pin tail passes through the 4.01mm of socket and board bore and stands
+proud above the main PCB. If it bottoms out instead, the MCU seats 0.74mm lower and the
+margin is **+0.03mm**.
+
+**The printed prototype settles it.** With the MCU installed, measure from the main PCB's
+underside to the lowest point of the MCU: 5.40mm means the pins passed through and the
+margin is real; 6.14mm means they did not, and the case needs the 0.50mm back.
 
 ## Verify
 
