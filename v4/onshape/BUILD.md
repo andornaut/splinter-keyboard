@@ -355,16 +355,32 @@ The standoffs must dodge components on the underside of the board, which the thr
 positions already do: none is near the MCU or the jack. The boss has 5.00mm of material
 above the PCB to engage, fixed by the MX plate-to-PCB spacing.
 
-### Where the switch stack came from
+### The switch stack, and its open risk
 
-The MX bearing-surface-to-PCB spacing is **4.40mm**, taken from the v4.5 design rather
-than from a reference. Community sources give 5.00mm at a 1.50mm plate, and that is what
-this sheet used until it was compared against a design that works in practice. The v4.5
-numbers (1.60mm recess, 1.40mm plate, PCB at -6.00) are adopted as a set, since the
-spacing and the plate thickness go together.
+The plate is **1.50mm**, the MX standard, confirmed as 1.5mm +-0.1mm. The v4.5 design's
+1.40mm is inside that tolerance rather than under-spec. The recess absorbs the difference
+so the top stays 3.00mm.
 
-Adopting them lifts the PCB 0.50mm, and the case follows: 16.00/12.00 gives exactly the
-margins 16.50/12.50 gave before.
+**The PCB sits at -6.00, which is 4.50 below the bearing surface, and this is the design's
+biggest open risk.**
+
+| Shoulder to PCB | PCB top | Source |
+| --- | --- | --- |
+| 4.50 | **-6.00** (used here) | the v4.5 design, which works in practice |
+| 5.00 | -6.50 | Cherry's 5mm PCB-to-plate figure, if measured to the plate top |
+
+The error is asymmetric and **deeper is the safe direction**: too deep and the switch
+seats on the plate with its base floating clear; too shallow and the base hits the PCB
+before the shoulder reaches the recess floor, so the switch sits proud and the board is
+unusable. -6.00 is therefore the *riskier* of the two, taken because it comes from
+hardware rather than a reference.
+
+What could not be established: whether Cherry's 5mm is measured to the top or the bottom
+of the plate. The datasheet dimensioned drawings are raster images.
+
+**To settle it**, pull a switch from an assembled board and measure from the plate's top
+surface to the PCB top. 4.4 to 4.5 confirms this sheet; 5.0 means moving the PCB to -6.50
+and giving back 0.50mm of case height.
 
 ### The hotswap sockets: check the RIGHT half
 
