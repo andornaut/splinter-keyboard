@@ -123,11 +123,15 @@ half of that. The values here are already converted.
 | Bottom plate top face | -15.50 | usable cavity ends here |
 | Shell bottom rim / plate underside | -17.00 | plate is **inset**, flush with the rim |
 
-Those last two are at the **inner (thick) edge**. The bottom slopes 1.4445 deg, so at
-the outer edge the rim is at -12.97 and the cavity is 4.03mm shallower.
+Those last two are at the **inner (thick) edge**.
 
-**Case height is 17.00mm at the thick edge**, rounded up from the 16.16mm the clearances
-strictly need. The 0.84mm goes to the MCU, which is the tightest item.
+**Specify the two edge heights, not the angle: 17.00mm inner, 13.00mm outer.** Over the
+166.50mm shell that is 1.3762 deg, but the angle is the derived quantity. If the wall
+thickness ever changes, the case width changes with it and the angle should follow while
+the two heights stay put.
+
+Both are rounded up from what the clearances strictly need. The spare goes to the MCU,
+which is the tightest item and the one carrying the most measurement uncertainty.
 
 The switch plate is the 1.50mm between the recess floor and the top underside.
 
@@ -154,7 +158,7 @@ board and its socketed stack comes in under the jack.
 | Top face to PCB top (MX 5.00 + 1.50 recess, fixed) | 6.50 |
 | PCB | 1.60 |
 | Below-PCB, set by the MCU | 5.40 |
-| Clearance | 1.31 |
+| Clearance | 1.27 |
 | Bottom plate, inset | 1.50 |
 | **Total at the thick edge** | **17.00** |
 
@@ -168,17 +172,18 @@ wall, so shrinking the cavity moves that opening.
 
 ### The slant is measured, and the clearance it leaves is thin
 
-The case is slanted **1.4445 deg**: the top face is flat and the bottom slopes, from
-**15.86mm** at the inner edge down to **11.5mm** at the outer. Confirmed two ways, from
-the tilted face normals in the v4.5 STEP and from Onshape directly.
+The top face is flat and the bottom slopes, **17.00mm** at the inner edge down to
+**13.00mm** at the outer, which is 1.3762 deg over the 166.50mm shell. The v4.5 model
+measured 1.4445 deg (15.86 to 11.5mm), confirmed from its tilted face normals and from
+Onshape; the heights are now rounded and the angle follows from them.
 
 Both tall parts sit near the inner (deep) edge, which is the right place for them, but
 the inset plate leaves very little:
 
 | Part | x span | Usable at its worst x | Needs | Margin |
 | --- | --- | --- | --- | --- |
-| TRRS jack | 71.55 .. 77.75 | 7.19 mm | 5.20 | **+1.99** |
-| Liatris | 52.78 .. 70.80 | 6.71 mm | 5.40 | **+1.31** |
+| TRRS jack | 71.55 .. 77.75 | 7.12 mm | 5.20 | **+1.92** |
+| Liatris | 52.78 .. 70.80 | 6.67 mm | 5.40 | **+1.27** |
 
 **The slant is not what is squeezing this.** At 1.4445 deg it costs 0.21mm at the jack
 and 0.69mm at the Liatris' far end. The 2.00mm inset plate costs far more. Four ways out,
@@ -243,7 +248,7 @@ print and 0.2-0.3mm machined.
    should ever take.
 2. **Extrude "Shell body"**, from the left-half outline region of (1), offset outward
    **3.25mm** (clearance + wall), blind **17.00mm** at the inner edge, -Z, with the
-   bottom face sloped 1.4445 deg down toward the outer edge.
+   bottom face sloped down to **13.00mm** at the outer edge.
 3. **Extrude cut "Cavity"**, from the same region offset outward **0.25mm**, from
    **z -3.00** (the top underside) down through the open bottom. Apply the **2.0mm
    minimum internal fillet** to its vertical corners.
