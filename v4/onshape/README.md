@@ -4,13 +4,18 @@ Case models live here. The case is modelled from the Ergogen outline
 (`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed (OrcaSlicer) or CNC-machined
 (JLCCNC). See the root `README.md` steps 6-7 for the import and order workflow.
 
-Three files, three jobs:
+Each file has one job:
 
 | File | Holds |
 | --- | --- |
 | [BUILD.md](./BUILD.md) | Every dimension, and the feature-by-feature recipe for Onshape |
 | [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified |
 | This file | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+
+**No STEP is committed here.** One was, and it went stale silently while the design moved
+on, which is the failure worth avoiding: a STEP in the repo reads as the thing to order
+from, and nothing about the file says how far behind it is. Run `gen-case.py` for current
+geometry, and export from Onshape only when there is something to order.
 
 ## Generating a model
 
@@ -37,16 +42,6 @@ if its product structure is missing, which is the failure it exists to catch.
 
 This is a check model and a cross-reference, not the master. The master is the Onshape
 document, built by hand from BUILD.md.
-
-## Board dimensions, per half
-
-| Outline | Width | Height |
-| --- | --- | --- |
-| Un-filleted hull, the nominal shape | 160.00 mm | 119.00 mm |
-| `Edge.Cuts`, as fabricated | 160.00 mm | 118.59 mm |
-
-The 1.5mm wall fillet rounds the corners, so the height drops while the width holds at the
-straight side edges.
 
 ## What the case takes from the board, and what it does not
 
@@ -101,10 +96,10 @@ goes in from below.
 
 - Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
   layer and nothing needs support. The outer edge bezel is the one place the part flares
-  outward, at 45 degrees over the first millimetre, which prints unsupported. It does not
-  move elephant's foot, since the first layer IS the top face and its perimeter IS the
-  visible top edge; what it does is put that perimeter 1.00mm inboard of the widest
-  section, so first-layer squish can no longer stand proud of the outer profile.
+  outward, shallowly enough to print unsupported. It does not move elephant's foot, since
+  the first layer IS the top face and its perimeter IS the visible top edge; what it does
+  is set that perimeter inboard of the widest section, so first-layer squish can no longer
+  stand proud of the outer profile.
 - Mounting holes take heat-set inserts, so size them for the insert's melt diameter, not a
   tap.
 - **Expect the switch recesses to come out tight.** FDM holes shrink, and the recess locates

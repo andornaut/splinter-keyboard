@@ -82,13 +82,15 @@ FLARE_R       = 4.00
 SOCKET_H      = 1.85
 SOCKET_CLR    = 0.30
 
-# Port heights are MEASURED off the built v4 case, which shares this z stack exactly (top
-# face 0, top underside -3.00, PCB -6.00 to -7.60). They are not derived from the part
-# stack; a derivation put both too high, the USB by 0.65.
+# Port heights are MEASURED, never derived from the part stack. The TRRS comes off the
+# built v4 case, which shares this z stack exactly (top face 0, top underside -3.00, PCB
+# -6.00 to -7.60), so its port centres transfer directly. The USB is 0.50 higher than that
+# case carries, set on a printed part of THIS design where the inherited height sat low.
+# Re-measure on hardware before changing either.
 TRRS_X, TRRS_Y = 74.650, 59.500
 TRRS_Z, TRRS_R = -10.50, 2.75
 USB_X0, USB_X1 = 56.663, 66.663
-USB_Z, USB_H = -10.75, 4.00
+USB_Z, USB_H = -10.25, 4.00
 # Both ports are plain cutouts straight through the wall. No counterbore and no recess: a
 # pocket on the outer face reads as the port being sunk into the case rather than opened
 # through it. The USB width sits inside the board's own 10.00 notch so the plug clears the
@@ -96,13 +98,25 @@ USB_Z, USB_H = -10.75, 4.00
 
 # One rectangular relief over everything tall on side B: the Liatris and the TRRS jack.
 # Rectangular and continuous so a strip of tape can line it, rather than two pockets with
-# an island between them. Bounded by the plate's perimeter wall at x 78.10 (below y 45,
-# where the wall still runs) and held clear of the plate's own edge.
-RELIEF_X0, RELIEF_X1 = 51.75, 77.60
-RELIEF_Y0, RELIEF_Y1 = 25.35, 58.60
+# an island between them.
+#
+# The margin around the parts is one-sided, and has to be. Inward it runs over bare board
+# and carries enough that board registration play cannot leave a part standing over
+# full-thickness plate. Outward there is nowhere to go: both parts run out to the board's
+# own top edge and the plate ends barely past it. The outward limits are therefore set by
+# the plate, not by the parts: +x stands off the perimeter wall, which still runs below
+# WALL_RELIEF_Y and would be undercut by a pocket reaching its foot, and +y keeps a rim at
+# the plate edge.
+RELIEF_X0, RELIEF_X1 = 50.25, 77.60
+RELIEF_Y0, RELIEF_Y1 = 23.35, 58.60
 RELIEF_DEPTH = 0.75
 
-BUMPERS = [(-70.0, 50.0), (70.0, 50.0), (-70.0, -32.0), (65.0, -50.0)]
+# Bumper recesses cut the plate's OUTER face, so they never change the clearance above it.
+# What they must not do is land inside the relief pocket, which cuts the inner face: the
+# two together leave a membrane where the plate is thinnest, directly under the parts the
+# relief exists for. Nothing fits between the relief and the plate edge in the top-inner
+# corner, so the top-edge bumper sits inboard of the relief instead.
+BUMPERS = [(-70.0, 50.0), (45.0, 50.0), (-70.0, -32.0), (65.0, -50.0)]
 BUMPER_R, BUMPER_D = 4.00, 0.50
 
 BIG = 500.0
@@ -113,19 +127,26 @@ EPS = 1e-6
 # not listed because it is derived from the key field: 4 corner fillets on each cutout and
 # 4 on each recess, and the halves carry different numbers of keys.
 EXPECT_CYL = {
-    # 2.00 x10: the cavity's five tool-radius corners and the shelf's five. 2.75 x4: three
-    # bosses and the TRRS bore. The lone 1.75 is where the shelf's inset rounds a concave
-    # hull corner.
+    # 1.80 x3: the insert bores. 2.00 x10: the cavity's five tool-radius corners and the
+    # shelf's five. 2.75 x4: three bosses and the TRRS bore. 3.25 x5: the outer profile's
+    # corners, the hull offset out by clearance plus wall. The lone 1.75 is where the
+    # shelf's inset rounds the one concave hull corner, before the opening reaches it.
     "shell": {1.75: 1, 1.80: 3, 2.00: 10, 2.75: 4, 3.25: 5},
-    # 1.85 x5: the plate outline, the cavity's 2.00 corners less the fit clearance, which
-    # is the point of deriving it from the cavity. 2.50 x3: the flat counterbores. 3.50 x3:
-    # 4.00 x7: four bumper recesses and three flared standoff bases, same radius by
-    # coincidence. 2.00 x4 rather than x5: the wall's fifth inner corner falls
-    # inside the top-inner relief.
+    # 1.45 x3: the screw clearance holes. 1.85 x5: the plate outline, the cavity's 2.00
+    # corners less the fit clearance, which is the point of deriving it from the cavity.
+    # 2.00 x4 rather than x5: the plate wall's fifth inner corner falls inside the
+    # top-inner relief. 2.50 x3: the flat counterbores. 2.75 x3: the standoffs, above
+    # their flares. 4.00 x7: three flared bases and four bumper recesses, the same radius
+    # by coincidence. The lone 1.90 is the plate wall's twin of the shell's 1.75, and the
+    # 0.15 is the same concave corner on the plate outline, rounded by the fit clearance.
     "plate": {0.15: 1, 1.45: 3, 1.85: 5, 1.90: 1, 2.00: 4, 2.50: 3, 2.75: 3,
               4.00: 7},
 }
 CNC_FILLET_R = 1.00
+# Face area splitting a switch cutout from the recess above it. Only has to land between
+# two widely separated clusters; what actually holds the split is the nesting check in
+# classify(), which does not depend on where the threshold sits.
+CUTOUT_RECESS_SPLIT = 230.0
 
 
 # ---- DXF, as real edges --------------------------------------------------
@@ -206,10 +227,28 @@ def classify(path, half):
             "FAIL gen-case: found %d boss circle(s) of radius %.2f, expected 3. If "
             "screw_boss_radius changed in config.yaml, BOSS_R must follow"
             % (len(bosses), BOSS_R))
-    return (wall,
-            [w for w in rest if face_area(w) < 230.0],
-            [w for w in rest if face_area(w) >= 230.0],
-            bosses)
+    holes = [w for w in rest if face_area(w) < CUTOUT_RECESS_SPLIT]
+    recess = [w for w in rest if face_area(w) >= CUTOUT_RECESS_SPLIT]
+    # Every cutout nests inside its own recess, so pairing is the invariant to assert, not
+    # the threshold. Nothing downstream would catch a bad split: `keys` and the corner-arc
+    # census both count holes PLUS recesses, so a shell cut with no recesses at all reads
+    # back as correct.
+    if len(holes) != len(recess):
+        raise SystemExit(
+            "FAIL gen-case: %s half split into %d cutout(s) and %d recess(es), which must "
+            "be equal. Each switch is one cutout nested in one recess, so a change to "
+            "either size in config.yaml means CUTOUT_RECESS_SPLIT must follow"
+            % (half, len(holes), len(recess)))
+    faces = [Part.Face(w) for w in recess]
+    for w in holes:
+        hx, hy = centre_xy(w)
+        n = sum(1 for f in faces if f.isInside(Vector(hx, hy, 0.0), 1e-6, True))
+        if n != 1:
+            raise SystemExit(
+                "FAIL gen-case: the cutout at (%.3f, %.3f) sits inside %d recess(es), "
+                "expected exactly 1: the area split has misread the key field"
+                % (hx, hy, n))
+    return wall, holes, recess, bosses
 
 
 # ---- helpers -------------------------------------------------------------
@@ -300,6 +339,50 @@ def unnotched_hull(wall, sign):
     return moved(max(tops, key=lambda f: f.Area).OuterWire, Vector(0, 0, -1.0))
 
 
+def check_bores(recess, bosses, depths):
+    """Refuse an insert bore that reaches the recess band without clearing the recess wall.
+
+    A bore whose top passes RECESS_Z runs alongside the recesses, and one passing within
+    BORE_R of a recess wall opens through it. This is why two of the three bosses take the
+    shallow bore, and it cannot be left to readback: a breakout trims the bore's
+    cylindrical face without splitting it or changing its height, so both the face census
+    and the depth check pass a shell that has one.
+    """
+    for (bx, by), depth in zip(bosses, depths):
+        if PCB_TOP + depth <= RECESS_Z:
+            continue
+        v = Part.Vertex(bx, by, 0.0)
+        d = min(w.distToShape(v)[0] for w in recess)
+        if d < BORE_R:
+            raise SystemExit(
+                "FAIL gen-case: the bore at (%.3f, %.3f) reaches z %.2f, above the %.2f "
+                "recess floor, and a recess wall is %.3f from its axis against a %.2f "
+                "bore radius: it breaks out. This boss needs BORE_SHALLOW"
+                % (bx, by, PCB_TOP + depth, RECESS_Z, d, BORE_R))
+
+
+def check_bumpers(sign):
+    """Refuse a bumper recess that lands inside the relief pocket.
+
+    The two cut opposite faces of the plate, so an overlap leaves a membrane, and leaves
+    it directly under the parts the relief exists to clear. Readback cannot see it: both
+    features are present, the right size and at the right depth, and the plate is still
+    one closed solid.
+    """
+    rx0 = min(sign * RELIEF_X0, sign * RELIEF_X1)
+    rx1 = max(sign * RELIEF_X0, sign * RELIEF_X1)
+    for bx, by in BUMPERS:
+        x = sign * bx
+        d = math.hypot(max(rx0 - x, 0.0, x - rx1),
+                       max(RELIEF_Y0 - by, 0.0, by - RELIEF_Y1))
+        if d < BUMPER_R:
+            raise SystemExit(
+                "FAIL gen-case: the bumper recess at (%.3f, %.3f) reaches %.3f into the "
+                "relief pocket, which cuts the other face: that leaves %.2fmm of plate "
+                "under the parts the relief is there for. Move it clear of the pocket"
+                % (x, by, BUMPER_R - d, PLATE - RELIEF_DEPTH - BUMPER_D))
+
+
 def bezel_top(body, size):
     """Chamfer where the top face meets the outer wall.
 
@@ -344,6 +427,9 @@ def build(dxf, half, explode):
     # Only the outer pinky boss takes the deep bore: a 16.00 switch recess overlaps the
     # other two, leaving 4.50 of material there instead of 6.00.
     outer_i = min(range(len(bosses)), key=lambda i: sign * bosses[i][0])
+    depths = [BORE_DEEP if i == outer_i else BORE_SHALLOW for i in range(len(bosses))]
+    check_bores(recess, bosses, depths)
+    check_bumpers(sign)
 
     # --- shell
     body = prism(outer_w, -BIG, 0.0).cut(half_space(sign, ang, 0.0))
@@ -372,9 +458,8 @@ def build(dxf, half, explode):
         body = body.fuse(cyl(BOSS_R, PCB_TOP, -TOP_THICK, bx, by))
     body = body.removeSplitter()
 
-    for i, (bx, by) in enumerate(bosses):
-        body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP +
-                            (BORE_DEEP if i == outer_i else BORE_SHALLOW), bx, by))
+    for (bx, by), depth in zip(bosses, depths):
+        body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP + depth, bx, by))
     shell = bezel_top(body.removeSplitter(), TOP_BEZEL)
 
     # --- plate
@@ -411,19 +496,43 @@ def build(dxf, half, explode):
             half_space(sign, ang, PLATE - RELIEF_DEPTH)))
     if relief.Volume < 1.0:
         raise SystemExit("FAIL gen-case: MCU relief tool is empty, it would cut nothing")
+    # The pocket must not reach under the perimeter wall. The wall is half the board's
+    # clamp and it stands on the plate's full thickness, so a pocket at its foot thins the
+    # root. Tested as a footprint overlap, not a solid one: the wall rises FROM the plate's
+    # top face and the pocket cuts down from it, so the two touch without ever sharing
+    # volume, and an intersection test would read clean while the undercut is real.
+    column = Part.makeBox(RELIEF_X1 - RELIEF_X0, RELIEF_Y1 - RELIEF_Y0, 2 * BIG,
+                          Vector(x0, RELIEF_Y0, -BIG))
+    undercut = ring.common(column).Volume
+    if undercut > EPS:
+        raise SystemExit(
+            "FAIL gen-case: the relief pocket reaches under the plate's perimeter wall, "
+            "undercutting %.3f mm3 of it. Pull the pocket back inside the wall relief"
+            % undercut)
     plate = plate.cut(relief)
 
     # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside. It
     # runs the plate's full thickness and bears on the flare's base, so the standoff keeps
     # its full height and the flare still joins the plate over a 1.00mm annulus.
+    #
+    # Its floor is HORIZONTAL, alone among the features cut into this plate. The screw axis
+    # is vertical and a flat head seats square to its own axis, so the seat has to be
+    # perpendicular to the screw rather than parallel to the tilted plate. The price is a
+    # counterbore whose depth below the outer face varies across its width, which is the
+    # right trade here and the wrong one for the bumpers below.
     for bx, by in bosses:
         plate = plate.cut(cyl(SCREW_R, -BIG, BIG, bx, by))
         z = rim_z(sign, bx)
         plate = plate.cut(cyl(CBORE_R, z - 0.5, z + PLATE, bx, by))
+    # A bumper recess is a fixed removal, so its floor is PARALLEL to the plate faces and
+    # every foot leaves the same material behind. A horizontal floor would be a constant z
+    # in a plate that is not, making the recess shallower at one edge than the other and
+    # leaving a different thickness at each. A stuck-on foot has no axis wanting a
+    # horizontal seat, so the plate wins: bounded by two slope-parallel planes, exactly as
+    # the relief pocket is.
+    skin = half_space(sign, ang, BUMPER_D).cut(half_space(sign, ang, 0.0))
     for bx, by in BUMPERS:
-        x = sign * bx
-        z = rim_z(sign, x)
-        plate = plate.cut(cyl(BUMPER_R, z - 0.5, z + BUMPER_D, x, by))
+        plate = plate.cut(cyl(BUMPER_R, -BIG, BIG, sign * bx, by).common(skin))
     plate = plate.removeSplitter()
 
     if explode:
@@ -465,7 +574,7 @@ def check(out, half, explode, keys):
             fails.append("%s is not closed" % name)
 
     bb = shell.BoundBox
-    for lbl, got, want in (("width", bb.XLength, 160.001 + 2 * (POCKET_CLR + WALL)),
+    for lbl, got, want in (("width", bb.XLength, 160.0 + 2 * (POCKET_CLR + WALL)),
                            ("depth", bb.YLength, 119.0 + 2 * (POCKET_CLR + WALL)),
                            ("height", bb.ZLength, H_INNER)):
         if abs(got - want) > 0.01:
@@ -538,6 +647,25 @@ def check(out, half, explode, keys):
         v = plate.common(tool).Volume
         if v > 1e-6:
             fails.append("plate obstructs the %s by %.3f mm3" % (name, v))
+
+    # Every bumper must leave the SAME material behind. A floor at constant z in a plate
+    # that is not leaves a different thickness at each edge of every foot, and the solid is
+    # closed, correctly sized and correctly counted either way.
+    for bx, by in BUMPERS:
+        x = sign * bx
+        got = []
+        for dx, dy in ((-0.7 * BUMPER_R, 0.0), (0.7 * BUMPER_R, 0.0),
+                       (0.0, -0.7 * BUMPER_R), (0.0, 0.7 * BUMPER_R)):
+            probe = Part.makeCylinder(0.04, 4 * BIG, Vector(x + dx, by + dy, -2 * BIG),
+                                      Vector(0, 0, 1))
+            got.append(plate.common(probe).Volume / (math.pi * 0.04 ** 2))
+        if max(got) - min(got) > 0.005:
+            fails.append("bumper recess at (%.2f, %.2f) leaves %.3f to %.3f mm of plate "
+                         "across its width: the floor is not parallel to the plate"
+                         % (x, by, min(got), max(got)))
+        elif abs(got[0] - (PLATE - BUMPER_D)) > 0.01:
+            fails.append("bumper recess at (%.2f, %.2f) leaves %.3f mm of plate, expected "
+                         "%.3f" % (x, by, got[0], PLATE - BUMPER_D))
 
     bores = sorted(round(f.BoundBox.ZLength, 2) for f in shell.Faces
                    if isinstance(f.Surface, Part.Cylinder)
