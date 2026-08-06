@@ -194,17 +194,28 @@ anywhere near the MCU or the jack. A **1.20mm plate with local bosses** gives +0
 | General plate | Thick end | MCU | Jack |
 | --- | --- | --- | --- |
 | Uniform 2.00mm | 15.86 | -0.33 | +0.35 |
-| **1.20mm + standoffs** | **15.86** | **+0.47** | **+1.15** |
+| 1.20mm, head pocket cutting into the standoff | 15.86 | +0.47 | +1.15 |
+| **1.50mm, head fully inside the plate** | **16.16** | **+0.47** | **+1.15** |
 
-**The plate thickness does not have to bury the head.** The standoff is wider than the
-head, so the head pocket cuts up through the plate and into the standoff above it. In the
-v4 lid the pocket is 6.50mm across and 1.357mm deep in a 1.20mm plate, cutting 0.157mm
-into an 8.00mm standoff, against a 4.70mm head. **Size the standoff to exceed the head
-diameter and the plate becomes a pure stiffness choice.**
+**Keep the head pocket out of the standoff.** A countersunk M2.5 head is exactly 1.50mm,
+so a 1.50mm plate takes it entirely and the standoff stays solid. The alternative works
+geometrically, since the standoff is wider than the head, but every millimetre of pocket
+forces the standoff's wide portion higher, and higher up is where the hotswap sockets are.
 
-The pocket must still be at least the head height: 1.50mm countersunk, 2.00mm pan,
-2.50mm socket cap. Depth costs nothing here, since it is taken out of standoff material
-that is doing no work at the centre.
+The standoffs have room, but not much at one position:
+
+| Boss | Nearest side-B pad | Max standoff dia at 0.5mm clearance |
+| --- | --- | --- |
+| Outer pinky | 6.29 | 11.59 |
+| **Inner pinky** | **4.79** | **8.58** |
+| Centre | 6.73 | 12.46 |
+
+An 8.00mm standoff clears the inner pinky by 0.79mm. **That figure is optimistic**: it is
+measured to the pads, and the Kailh socket body is larger than its lands, so the real gap
+is smaller and is not measurable from the board. Switch pitch is 19.05mm against a ~13.9mm
+body, leaving about 5.15mm between switches.
+
+The 0.30mm of cavity that a 1.50mm plate costs is bought back by 0.30mm of case height.
 
 Span still matters more than height for the MCU: it reaches 27.22mm in from the inner
 edge against the jack's 2.25mm, so it loses three times as much depth to the slope
@@ -222,8 +233,8 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Top thickness | 3.00 mm | decision |
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
-| Bottom plate thickness | 1.20 mm | **inset**, so it consumes cavity; a stiffness choice, not a head-burial one |
-| Standoff diameter | 8.00 mm | must exceed the head so the head pocket can cut up into it |
+| Bottom plate thickness | 1.50 mm | takes the countersunk head's full height, so the pocket never enters the standoff |
+| Standoff diameter | 8.00 mm | fits all three positions; the inner pinky is the tightest |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
