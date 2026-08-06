@@ -204,11 +204,11 @@ forces the standoff's wide portion higher, and higher up is where the hotswap so
 
 The standoffs have room, but not much at one position:
 
-| Boss | Nearest side-B pad | Clearance at 8.00mm | at **6.00mm** |
+| Boss | Nearest side-B pad | at 8.00mm | at **5.50mm** |
 | --- | --- | --- | --- |
-| Outer pinky | 6.29 | 2.29 | 3.29 |
-| **Inner pinky** | **4.79** | **0.79** | **1.79** |
-| Centre | 6.73 | 2.73 | 3.73 |
+| Outer pinky | 6.29 | 2.29 | 3.54 |
+| **Inner pinky** | **4.79** | **0.79** | **2.04** |
+| Centre | 6.73 | 2.73 | 3.98 |
 
 **Use 6.00mm.** Those distances are measured to the pads, and the Kailh socket body is
 larger than its lands, so the real gap is smaller by an amount the board file cannot
@@ -216,10 +216,27 @@ tell us. At 8.00mm the tightest position has 0.79mm to absorb that; at 6.00mm it
 1.79mm. Switch pitch is 19.05mm against a ~13.9mm body, leaving about 5.15mm between
 switches, so there is no room to recover if it turns out tight.
 
-6.00mm gives 1.25mm of wall around a 3.50mm bore and 18.7mm^2 in compression, far more
-than a clamp screw needs, and a 1.50mm bearing ring on the PCB around its 3.00mm hole.
-It also nearly matches the 5.50mm shell boss above, so the board is clamped between
-similar diameters rather than pinched off-centre.
+**Use 5.50mm, because it is the one diameter already in the source.** It equals
+2 x `screw_boss_radius`, which the DXF draws as the `_screwbosses` circles, and it is the
+same diameter as the shell boss above the PCB. Project it from the import rather than
+dimensioning it, and it tracks a retuned screw automatically; the board is then clamped
+between identical diameters above and below.
+
+It gives 1.00mm of wall around a 3.50mm bore, 14.1mm^2 in compression and a 1.25mm
+bearing ring on the PCB, all far beyond what a clamp screw needs.
+
+### An aluminium plate does not short anything
+
+The only intended contact is the three standoff faces, and all three are copper-free:
+`keepout_screw_bosses` clears pour, tracks and vias to 3.75mm radius and the `.kicad_dru`
+rule excludes conductive pads, so a 5.50mm standoff sits well inside. Verified on the
+board rather than inferred from the rule.
+
+Elsewhere the plate stays clear: +0.47mm from the MCU, +1.07mm from the outermost hotswap
+socket, +1.15mm from the jack. **Do not treat anodising as the insulator**: the layer is
+microns thick, brittle, and breached by a burr or an assembly scratch. The clearance is
+what protects the board. If the +0.47mm at the MCU feels thin once assembled, a film on
+the plate's inner face is the cheap belt-and-braces.
 
 The 0.30mm of cavity that a 1.50mm plate costs is bought back by 0.30mm of case height.
 
@@ -240,7 +257,7 @@ above-board dimension, and the ultra-low-profile figure gives `.095"` in that po
 | Switch recess depth | 1.50 mm | nesting |
 | Plate at a switch cutout | 1.50 mm | MX latch |
 | Bottom plate thickness | 1.50 mm | takes the countersunk head's full height, so the pocket never enters the standoff |
-| Standoff diameter | 6.00 mm | 1.79mm clear at the tightest position; matches the 5.50mm shell boss above |
+| Standoff diameter | 5.50 mm | = 2 x `screw_boss_radius`, so it is the DXF's own boss circle |
 | Usable cavity below the PCB | 7.00 mm | PCB underside to plate top face |
 | Board pocket | 160.50 x 119.50 mm | hull + 0.25/side |
 | Shell outer profile | 166.50 x 125.50 mm | pocket + wall |
