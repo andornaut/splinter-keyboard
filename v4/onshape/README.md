@@ -1,124 +1,129 @@
 # v4 case design (Onshape)
 
-3D case models (`*.step`) live here. The case is designed in Onshape from the
-Ergogen outline (`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed
-(OrcaSlicer) or CNC-machined (JLCCNC). See the root `README.md` steps 6-7 for
-the import/order workflow; this file is design guidance and [BUILD.md](./BUILD.md)
-is the feature-by-feature recipe with the numbers.
+Case models live here. The case is modelled from the Ergogen outline
+(`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed (OrcaSlicer) or CNC-machined
+(JLCCNC). See the root `README.md` steps 6-7 for the import and order workflow.
 
-Each half:
+Three files, three jobs:
+
+| File | Holds |
+| --- | --- |
+| [BUILD.md](./BUILD.md) | Every dimension, and the feature-by-feature recipe for Onshape |
+| [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified |
+| This file | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+
+## Generating a model
+
+```bash
+npm run ergogen                     # the DXF this reads
+freecadcmd v4/onshape/gen-case.py
+```
+
+Writes both halves to `dist/v4/onshape/`, then reads each file back and checks it before
+exiting. Options come from the environment, since `freecadcmd` treats trailing arguments as
+documents to open:
+
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `FC_HALF` | `both` | `left`, `right` or `both` |
+| `FC_EXPLODE` | `0` | mm to drop the plate by, for viewing the cavity |
+| `FC_DXF` | the Ergogen hull | source outline |
+| `FC_OUTDIR` | `dist/v4/onshape` | destination |
+
+Output is solid B-rep, not a mesh, so curved features measure their nominal size and the
+result can be sketched against. The self-check reads the exported file rather than the
+shape in memory, because **a STEP can carry valid geometry and still import as nothing**
+if its product structure is missing, which is the failure it exists to catch.
+
+This is a check model and a cross-reference, not the master. The master is the Onshape
+document, built by hand from BUILD.md.
+
+## Board dimensions, per half
 
 | Outline | Width | Height |
 | --- | --- | --- |
-| Un-filleted hull (the nominal shape) | 160.00 mm | 119.00 mm |
+| Un-filleted hull, the nominal shape | 160.00 mm | 119.00 mm |
 | `Edge.Cuts`, as fabricated | 160.00 mm | 118.59 mm |
 
-The 1.5mm wall fillet rounds the corners, so the height drops 0.41mm while the
-width holds at the straight side edges.
+The 1.5mm wall fillet rounds the corners, so the height drops while the width holds at the
+straight side edges.
 
-- **Model the case to the un-filleted hull**, which is what `full_unfilleted.dxf`
-  carries. The fillet only removes material, so the hull is a strict superset of
-  the board and a pocket cut to it can never come out undersized. The board then
-  sits with up to ~0.62mm of corner gap, which is clearance, not slop: the lip
-  still bears on the flat margin along every straight edge.
-- **Measure the cut line itself** (KiCad's board outline polygon), not the board
-  bounding box: the box is inflated by the 0.15mm `Edge.Cuts` stroke on every
-  side, which is 0.3mm of case pocket that is not there.
-- **The board is carried on the bosses**, not on a lip: see the topology section
-  for why a lip cannot exist here. The perimeter copper keepout still keeps the
-  outer margin clear, so a wall or gasket landing there meets bare substrate.
-- **The outline mirrors; the switch cutouts do not.** Both halves' outer edges come
-  from the same mirrored anchors, so the tray can be modelled once and mirrored.
-  The key field cannot be: the left pinky is 1.5u where the right is 1u plus an
-  extra inner column, so the halves carry 30 and 32 switch cutouts with 14
-  positions having no mirrored counterpart. **Cut each switch plate from its own
-  half of the DXF**, which is why the export carries both halves. Export every
-  part as its own `*.step` (JLCCNC quantity is set per file).
+## What the case takes from the board, and what it does not
+
+- **Model to the un-filleted hull.** The fillet cuts convex corners back, so the hull
+  contains the fabricated edge and a pocket cut to it cannot come out undersized. The board
+  then sits with a little corner gap, which is clearance rather than slop, since nothing
+  bears on the perimeter.
+- **Measure the cut line**, KiCad's board outline polygon, not the board bounding box. The
+  box is inflated by the `Edge.Cuts` stroke on every side.
+- **Nothing follows the board's USB notch.** Not the outer profile, not the cavity, not the
+  plate. That notch clears the plug's overmold, which sits below the board entirely, so to
+  the case it is only a bite out of an edge that should run straight. The top edge is
+  straight and both ports are simply openings in the back wall.
+- **The outline mirrors; the switch cutouts do not.** Both halves' outer edges come from the
+  same mirrored anchors, so the shell can be modelled once and mirrored. The key field
+  cannot be: the left pinky is 1.5u where the right is 1u plus an extra inner column, so the
+  halves carry different cutout counts and many positions have no counterpart. **Cut each
+  half's switch openings from its own half of the DXF**, which is why the export carries
+  both. Export every part as its own file, since JLCCNC quantity is per file.
 
 ## Topology: shell plus bottom plate
 
-Design each half as a **shell** (top face and side walls in one piece, switch
-cutouts in the top) closed by a separate **bottom plate**. The cavity is then
-open to exactly one face, which is what both FDM and 3-axis CNC want, and screws
-enter from below so their heads land in the bottom plate.
+Each half is a **shell**, top face and side walls in one piece with the switch openings in
+the top, closed by a separate **bottom plate**. The cavity then opens to exactly one face,
+which is what both FDM and 3-axis CNC want, and screws enter from below so their heads land
+in the plate.
 
-The switch cutouts are **nested**: a 16mm opening at the top face over a 14.5mm
-hole, so each switch drops in and the surrounding top wall covers its lower body.
-That look is inherently wider at the top, so it cannot be reached from below and
-the machined variant takes a second setup for those recesses alone. Flattening
-the top to a single 14.5mm hole would buy one setup back, at the cost of the
-switch sitting proud on a flat face.
+The switch openings are **nested**: a wider recess at the top face over the plate cutout, so
+each switch drops in and the surrounding top wall covers its lower body. That look is
+inherently wider at the top, so nothing reaches it from below and the machined variant takes
+a second setup for the recesses alone. There is no separate switch plate; the shell's top
+face is the plate.
 
-**No perimeter lip is possible in this topology.** The cavity opens only at the
-bottom, so everything cut must be visible looking straight up; the board pocket
-is at least as wide as the board and sits above any lip, making a lip an
-undercut. The board rides on the bosses and the bottom plate clamps it. The
-board's outer 2mm copper keepout still bounds where the wall lands, but it is no
-longer a bearing surface.
-
-The alternative, a separate thin switch plate, keeps the switch cutouts off the
-machined body and is cheaper to mill. It costs a part and needs the two halves'
-plates cut separately, since the key fields are not mirrors.
+**No perimeter lip is possible here.** The cavity opens only at the bottom, so everything
+cut must be visible looking straight up, and the board pocket is at least as wide as the
+board and sits above any lip. That makes a lip an undercut no setup reaches. The board is
+clamped between the bosses above and the plate's standoffs below instead. The board's outer
+copper keepout still bounds where the wall lands, but it is not a bearing surface.
 
 ## Printed case (OrcaSlicer)
 
-- Internal corners can be sharp; fillet only for feel/strength.
-- M2.5 mounting holes use heat-set inserts (see the v4 BOM), so size the holes
-  for the insert's melt diameter (~3.6mm), not a tap.
-- Mounting-boss wall is thin at the PCB face: the boss is ~5.5mm across (it sits
-  tangent in the diagonal gap between switch cutouts, so it cannot grow in-plane),
-  and a ~3.6mm insert leaves under ~1mm of wall, which can split under install
-  heat or clamp load. Flare the boss below the plate plane (e.g. ~5.5mm at the
-  face, ~7-8mm lower down, away from the switch cutouts) so the insert sits in
-  thicker wall. The DXF boss-reference circle and PCB keepout only constrain the
-  board plane, not the geometry below it.
-- The insert is ~5mm deep, so make each boss column >= ~6mm tall (this is
-  separate from the floor >= 1mm rule below).
-- Cut the USB-C and TRRS port openings into the side wall (the PCB keepout
-  already carves the route ring above the TRRS so its top through-holes reach the
-  board edge). Add ~0.3-0.4mm clearance around each plug body for FDM tolerance.
-- Recess each screw head in a counterbored well so it sits flush. The case is
-  slanted (inner edge taller than the outer), so vary each well's depth to keep a
-  single screw length (M2.5x8mm) at every boss instead of stocking two lengths.
-- The 8 silicone bumpers (4 per half) mount on the bottom face; leave a flat pad
-  or shallow recess for each, clear of the screw wells.
-- Watch overhangs > 45 degrees and bridging over the switch cutouts.
+- Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
+  layer and nothing needs support.
+- Mounting holes take heat-set inserts, so size them for the insert's melt diameter, not a
+  tap.
+- **Expect the switch recesses to come out tight.** FDM holes shrink, and the recess locates
+  the switch, so open them up on the print and settle the figure on a coupon before
+  committing a whole shell. The same goes for the plate's fit clearance.
+- Port openings are holes in a vertical wall, so their top edges bridge. Chamfer or teardrop
+  them if they sag.
+- The silicone bumpers mount on the plate's outer face; leave a shallow recess for each,
+  clear of the screw heads.
 
 ## CNC case (JLCCNC, 6061/6063 aluminium)
 
-A mill removes material with a round tool from above. Every feature must be
-reachable by a cylindrical end mill from the top (or after one flip).
+A mill removes material with a round tool. Every feature has to be reachable by a
+cylindrical end mill from one of the setups.
 
-1. **No sub-tool internal corners.** Every internal vertical corner carries the
-   tool radius. Design body pockets with **>= 2mm internal fillets** so a fast
-   tool clears them. The MX switch cutouts (14 x 14mm; the 14.5mm figure in the
-   PCB keepout/boss-clearance rules is the surround inset around each hole, a
-   separate feature) need only ~1mm corner fillets, but those force a <= 2mm end
-   mill on the plate, which is slow and fragile. This is why the switch plate
-   should be a **separate thin flat part** (1.5mm steel or aluminium, cut as a 2D
-   profile) rather than 60+ pockets milled into a thick body.
-2. **No true internal cavities and no undercuts.** Open every pocket to one
-   face. Keep the curved outer hull walls vertical (no overhang that narrows
-   toward the bottom), or a 3-axis mill cannot reach them.
-3. **Wall >= 1.5mm, floor >= 1mm.** Print walls are often thinner than what
-   mills without chatter; thicken them for the CNC variant.
-4. **Shallow pockets.** Keep pocket depth <= ~4x the tool diameter; widen or
-   step deep narrow pockets.
-5. **Chamfers over fillets on top edges (prototype).** A 45-degree chamfer is
-   one pass and looks sharp on anodized aluminium; top-edge fillets each need a
-   separate ball/chamfer operation. Keep fillets only where you want soft feel.
-6. **M2.5 holes: model at ~2.05mm tap-drill** (no modeled threads) and add CAD
-   **counterbores** for the screw heads (free to machine, lets the plate sit
-   flush). Upload a 2D PDF with an `M2.5x0.45` thread callout (depth, through/blind)
-   for JLCCNC to tap; one note "all mounting holes M2.5x0.45 tapped, N mm deep" is
-   accepted since every hole shares the spec.
-7. **Connector cutouts:** add ~0.2-0.3mm clearance around the USB and TRRS
-   openings for the plug body. CNC tolerance is tight, so a slip-fit modeled
+1. **Internal corners carry the tool radius**, so the cavity's corners are specified as a
+   *maximum* rather than a minimum: too large a tool leaves material where the board goes.
+   Do not let a shop substitute a bigger end mill.
+2. **No true internal cavities and no undercuts.** Cutting from below, a feature may narrow
+   going up but never widen. A chamfer or rebate at the rim is fine; a lip under the board
+   pocket is not.
+3. **Ports need their own setup.** Both are holes through a vertical wall, which a 3-axis
+   mill reaches from neither above nor below. A right-angle head folds it back into the
+   first setup if the shop has one.
+4. **Model tapped holes at the tap drill**, without modelled threads, and put the thread
+   callout on a 2D PDF for JLCCNC. One note covering all mounting holes is accepted, since
+   they share a spec.
+5. **Add clearance at the port openings.** CNC tolerance is tight, so a slip-fit modelled
    opening can come out too snug.
-8. **One setup is cheapest.** Put the precision features (plate, port cutouts)
-   on one face; each flip to reach the bottom adds a setup and cost. Through
-   holes are cheaper than blind.
+6. **Chamfers over fillets on top edges** for a prototype: a chamfer is one pass, while
+   top-edge fillets each need a separate ball or chamfer operation.
+7. **Prefer through holes to blind**, and keep pocket depth modest relative to tool
+   diameter.
 
-**Order one half first** as a prototype before the mirrored pair: aluminium CNC
-is far more expensive than a print, and a plate/port/boss fit problem is cheaper
-to catch on a single part.
+**Print and assemble a half before ordering aluminium.** The printed part settles switch
+seating, MCU clearance and the port openings for a few hours of filament, and aluminium is
+far more expensive to get wrong.
