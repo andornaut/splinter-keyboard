@@ -125,8 +125,8 @@ cylindrical end mill from one of the setups.
    mill reaches from neither above nor below. A right-angle head folds it back into the
    first setup if the shop has one.
 4. **Model tapped holes at the tap drill**, without modelled threads, and put the thread
-   callout on a 2D PDF for JLCCNC. One note covering all mounting holes is accepted, since
-   they share a spec.
+   callout on a 2D PDF for JLCCNC. Every hole shares the thread spec, but the depths differ
+   where a switch recess overlaps a boss, so the callout has to give them per boss.
 5. **Add clearance at the port openings.** CNC tolerance is tight, so a slip-fit modelled
    opening can come out too snug.
 6. **Chamfers over fillets on top edges**: a chamfer is one pass with a chamfer mill,

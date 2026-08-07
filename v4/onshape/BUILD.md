@@ -16,6 +16,7 @@ itself so they track the board.
 | **Standoff** | The matching pillar rising from the bottom plate to the PCB underside |
 | **Hull** | The un-filleted board outline, 160.000 x 119.000mm, in `full_unfilleted.dxf`. The case is modelled to this, not to the fabricated edge |
 | **Recess** | The 16mm opening at the top face each switch nests into, so the surrounding wall covers its lower body |
+| **Plate** | The bottom plate, always. The shell's top face is what the switches clip into, but it is never called a plate here |
 | **Setup** | One fixturing of the part in the mill. Every flip is another setup and another fixed fee |
 
 ## How it goes together
@@ -414,8 +415,8 @@ counterpart, so a mirrored key field is the wrong key field.
 
 **Switches go into the shell first, then the board goes on.** A 15.6mm top housing cannot
 pass a 14.5mm hole from below, so there is no other order: clip all 30 (or 32) switches
-into the plate from the outside, then bring the board up into the cavity onto every socket
-at once.
+into the shell's top face from the outside, then bring the board up into the cavity onto
+every socket at once.
 
 The cavity is a straight bore, so the board cannot be rocked in the way a bare
 plate-and-switch assembly usually is. Seat it evenly, thumb cluster last, until it meets

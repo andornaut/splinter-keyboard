@@ -25,7 +25,7 @@ The fillet rounds the corners off the height; the straight side edges hold the w
 
 The [splitkb Liatris](https://splitkb.com/products/liatris) wires its USB VBUS line to GP19, so QMK senses USB presence via `USB_VBUS_PIN` instead of the `SPLIT_USB_DETECT` polling loop. That removes the roughly two-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
-The MCU is socketed rather than soldered: it sits in two pairs of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused. It mounts on the bottom of the board, the same side as the diodes, hotswap sockets and the rest of the SMD parts, with its own components facing away from the board so the reset and boot buttons stay reachable. That seating determines which header column each matrix net lands on, so it is not interchangeable with the opposite orientation.
+The MCU is socketed rather than soldered: each one sits in a pair of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused. It mounts on the bottom of the board, the same side as the diodes, hotswap sockets and the rest of the SMD parts, with its own components facing away from the board so the reset and boot buttons stay reachable. That seating determines which header column each matrix net lands on, so it is not interchangeable with the opposite orientation.
 
 The matching firmware config (the `USB_VBUS_PIN` define and the `development_board` and split settings) lives in the [firmware repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).
 
@@ -111,12 +111,12 @@ Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating h
 | Key switches | 62 | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html)) |
 | Microcontrollers | 2 | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) |
 | Resistors | 2 | [100Ω 0805 1%](https://www.lcsc.com/product-detail/C17408.html) (C17408, UNI-ROYAL 0805W8F1000T5E; JLCPCB Basic, alt YAGEO C105577) |
-| Screws | 6 | [M2.5x8mm screws](https://www.amazon.ca/gp/product/B0DLKCYKN6) (one per boss, 3 per half; the slanted case varies each screw-well depth so one length fits every boss) |
+| Screws | 6 | M2.5 button head, ISO 7380 (one per boss, 3 per half). The sloped plate puts the three standoffs at different heights, so two lengths are needed: 4 x 10mm and 2 x 11mm, per boss in the [case build sheet](./onshape/BUILD.md#screw-bosses) |
 | Silicon bumpers | 8 | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html) |
 | Sockets (12-pin) | 4 | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000) ([series documentation](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2481/310%2C%20311%2C%20315%20Series%20%28in.%29.pdf)) |
 | Socket pins | 48 | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030) |
 | Switches/buttons (reset) | 2 | [5.2mm SMD tact switch](https://www.lcsc.com/product-detail/C115351.html) (C115351, ALPS SKQGABE010; JLCPCB Extended, alt ALPS SKQGAFE010 C202424; hand-soldered) |
-| Threaded inserts | 6 | [M2.5 threaded inserts](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (one per boss, 3 per half; ~3.6mm hole, ~5mm deep) |
+| Threaded inserts | 6 | [M2.5 threaded inserts](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (one per boss, 3 per half; 3.6mm hole, bore depth per boss in the [case build sheet](./onshape/BUILD.md#screw-bosses)) |
 | TRRS cables | 1 | [King Cables TRRS Cable](https://www.kingcables.org/) |
 | TRRS jacks | 2 | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html) |
 | TVS diodes | 2 | [Littelfuse SMF5.0CA](https://www.lcsc.com/product-detail/C1851363.html) (C1851363, SOD-123FL bidirectional, 5V standoff; JLCPCB Extended; alt MDD C364279, TWGMC C726939) |

@@ -10,7 +10,7 @@ Related notes: [3D printing](https://github.com/andornaut/til/blob/master/docs/3
 
 | Version | MCU | Changes from previous | Firmware | Photo |
 | --- | --- | --- | --- | --- |
-| [v4](./v4) | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | Added USB VBUS detection and TRRS data-line protection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | [![v4](./v4/v4-300width.jpg)](./v4/v4.jpg) |
+| [v4](./v4) | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) | Added USB VBUS detection and TRRS data-line protection | [splinter](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter) | Pending |
 | [v3](./v3) | [Adafruit KB2040](https://www.adafruit.com/product/5302) (RP2040) | Switched from AVR to RP2040 | [splinter-v3.0](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter) | [![v3](./v3/v3-300width.jpg)](./v3/v3.jpg) |
 | [v2](./v2) | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Symmetrical enclosures; added a key (62 keys) | [splinter-v2.0](https://github.com/andornaut/qmk_firmware/tree/splinter-2.0/keyboards/splinter) | [![v2](./v2/v2-300width.jpg)](./v2/v2.jpg) |
 | [v1](./v1) | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) | Initial version: 61 keys, columnar layout, asymmetrical enclosures | [splinter-v1.0](https://github.com/andornaut/qmk_firmware/tree/splinter-1.0/keyboards/splinter) | [![v1](./v1/v1-300width.jpg)](./v1/v1.jpg) |
@@ -22,12 +22,12 @@ Every version directory (`v1/` .. `v4/`) follows the same shape, though not ever
 | Path | Contents |
 | --- | --- |
 | `ergogen/config.yaml` | Keyboard definition. The source of truth for everything downstream. |
-| `ergogen/footprints/` | Vendored footprint submodules. Do not edit. |
+| `ergogen/footprints/` | Symlink to the shared footprints below, so every version builds against one pinned set. Do not edit. |
 | `keyboard-layout-editor/` | Layout prototypes. |
 | `kicad/unrouted/` | Working boards. Ergogen generates into these; you route here. |
 | `kicad/routed/` | Routed masters. The fab source. |
 | `kicad/jlcpcb-parts.json` | LCSC part numbers, kept outside the `.kicad_pcb` so they survive regeneration. v4 only, and what makes assembly files appear. |
-| `onshape/` | Case design: the build sheet, the rationale, and a script that builds the same design as geometry. No STEP is committed; generate or export to `dist/`. |
+| `onshape/` | Case design. v1 to v3 keep their exported STEP here. v4 commits none, carrying the build sheet, the rationale, and a script that builds the same design as geometry; generate or export to `dist/`. |
 | `orcaslicer/` | Slicer projects. v2 and v3 only. |
 
 Shared across versions:
@@ -188,8 +188,6 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 
 ### Step 6. [Onshape](https://cad.onshape.com)
 
-![Onshape preview](./v4/onshape/onshape.png)
-
 1. Create a document and start a sketch.
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export `*.step` files to `dist/${VERSION}/onshape/`. They are build output and are not committed, so a stale one cannot sit in the repo looking like the thing to order.
@@ -212,7 +210,7 @@ Upload each half's `*.step` to [JLCCNC](https://jlccnc.com) (left and right are 
 | Tolerance | Default (ISO 2768 medium) |
 | Threaded holes | Tap the M2.5 holes directly; the heat-set inserts are for the printed case only |
 
-A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Every hole shares one spec, so a single note ("All mounting holes: M2.5x0.45 tapped, N mm deep") is enough; in Onshape, a Drawing with a hole callout (right-click the hole edge > Callout) emits it.
+A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Every hole shares the thread spec, but not the depth: the two bosses a switch recess overlaps take a shallower hole, so call the depths out per boss from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). In Onshape, a Drawing with a hole callout (right-click the hole edge > Callout) emits it.
 
 ### Step 8. [QMK firmware](https://qmk.fm/)
 
