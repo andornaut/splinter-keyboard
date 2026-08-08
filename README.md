@@ -26,6 +26,7 @@ Every version directory (`v1/` .. `v4/`) follows the same shape, though not ever
 | `keyboard-layout-editor/` | Layout prototypes. |
 | `kicad/unrouted/` | Working boards. Ergogen generates into these; you route here. |
 | `kicad/routed/` | Routed masters. The fab source. |
+| `kicad/unrouted-backups/` | Timestamped copies of the `unrouted/` boards, taken each time fresh ones overwrite them. Gitignored, and only the last few per board are kept. |
 | `kicad/jlcpcb-parts.json` | LCSC part numbers, kept outside the `.kicad_pcb` so they survive regeneration. v4 only, and what makes assembly files appear. |
 | `onshape/` | Case design. v1 to v3 keep their exported STEP here. v4 commits none, carrying the build sheet, the rationale, and a script that builds the same design as geometry; generate or export to `dist/`. |
 | `orcaslicer/` | Slicer projects. v2 and v3 only. |
@@ -87,7 +88,7 @@ Run everything through `npm run` from the repo root: the scripts read the active
 | `pipeline` | The full build, every gate in order. The normal entry point. Add `-- -v` for the full log. |
 | `ergogen` | Generate outlines and PCBs into `dist/${VERSION}/ergogen/` |
 | `watch` / `watch:sync-unrouted` | Re-run `ergogen` on every `config.yaml` change, the second also copying into `unrouted/` |
-| `copy:dist-to-unrouted` | `dist/` -> `unrouted/` (backs up the old boards first) |
+| `copy:dist-to-unrouted` | `dist/` -> `unrouted/` (backs the old boards up to `unrouted-backups/` first) |
 | `copy:traces-to-unrouted` | Traces and teardrops from `routed/` back into `unrouted/` |
 | `copy:unrouted-to-routed` | `unrouted/` -> `routed/` (see [Saving to routed/](#saving-to-routed)) |
 | `fab` | Gerbers, drill, and assembly BOM/CPL via `kicad-cli` |
