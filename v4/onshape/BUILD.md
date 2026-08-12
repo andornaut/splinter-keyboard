@@ -115,8 +115,10 @@ exterior fillet. Do not let a shop substitute a larger end mill.
 | 3.20 | +0.003 |
 | 3.50 | -0.121 |
 
-At 2.00 the corner clearance is the tool radius less the board's own fillet, which comes
-out equal to the straight-edge clearance, so no corner is tighter than the edges.
+At 2.00 the pocket's corner arc comes out **concentric** with the board's own 1.5mm fillet,
+both centred 1.50 in from the sharp hull corner, so at a 90 deg corner the clearance is the
+tool radius less the board fillet uniformly around the arc rather than only at its tightest
+point. That is 0.500, the same as the straight edges, and no corner is tighter than an edge.
 
 ## Frame
 
@@ -387,10 +389,11 @@ with an island between them: it is meant to be lined with tape, and a plain rect
 a strip.
 
 **The margin around the parts is one-sided, and has to be.** Inward the pocket runs over
-bare board and carries 2.58 in x and 3.00 in y, comfortably past the 0.71 of board
-registration play, so a part cannot end up standing over full-thickness plate. Outward
-there is nowhere to buffer into, because both parts run out to the board's own top edge and
-the plate ends 0.35 past it. Every limit here is set by the plate, not by the parts:
+bare board and carries 2.58 in x and 3.00 in y, comfortably past the 0.71 the pocket allows
+in y, which is the widest the board can sit off centre at any point in assembly, so a part
+cannot end up standing over full-thickness plate. Outward there is nowhere to buffer into,
+because both parts run out to the board's own top edge and the plate ends 0.35 past it.
+Every limit here is set by the plate, not by the parts:
 
 | Edge | Limit | Set by |
 | --- | --- | --- |
@@ -436,23 +439,37 @@ The cavity is a straight bore, so the board cannot be rocked in the way a bare
 plate-and-switch assembly usually is. Seat it evenly, thumb cluster last, until it meets
 the shelf all the way round. Then the plate goes on and its wall closes the sandwich.
 
+**If the sockets fight the pins, fit the plate first and let the screws press the board
+home.** The plate's perimeter wall and its three standoffs all top out at -7.60, the board's
+underside, and the screws draw the plate up toward the shell, so the wall bears on the
+board right around its edge and pushes it onto every pin at once while the screws hold it
+to 0.25 per side. That is tighter than the pocket and it spreads the seating load over the
+whole perimeter rather than through the three bosses. Draw the three evenly, a turn at a
+time, so the board goes up flat.
+
 **Nothing datums the board.** The 5.50 boss butts its top face and never enters the 3.00mm
 hole, and a boss cannot pilot into that hole because the 3.60 insert bore is wider than the
-hole itself. Registration is therefore the tighter of the pocket and the screws, which is
-the screws:
+hole itself. **Which constraint registers it depends on whether the screws are in.** Press
+the board on by hand and only the pocket is holding it; fit the plate and draw the screws
+and they take over at 0.25, which is tighter.
 
-| Constraint | Play, per side |
-| --- | --- |
-| Pocket in x | 0.50 |
-| Pocket in y | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) |
-| Screw in its 3.00 hole | 0.25 |
-| Switch in its 16.00 recess | 0.20 |
+| Constraint | Play, per side | In force |
+| --- | --- | --- |
+| Pocket in x | 0.50 | whenever the screws are not |
+| Pocket in y | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) | whenever the screws are not |
+| Screw in its 3.00 hole | 0.25 | once the plate is on, including while it presses the board home |
+| Switch in its 16.00 recess | 0.20 | always |
 
-So a socket can sit up to about 0.3mm off its switch pins. That is ordinary for a hotswap
-plate build. If the printed half shows the switches fighting the sockets, the fix is a
-close-fit band in the cavity over the board's own 1.60mm of height, cut to `full.dxf`
-plus 0.10 rather than to the hull. Narrower above wider is legal, so it machines from
-below like everything else.
+So a socket seated by hand can sit **0.54mm** off its switch pins in x and **0.73mm** in y,
+root sum square against the switch's own play, and 0.70 / 0.91 worst case. Seated on the
+screws it is **0.32mm**, whatever the pocket is cut to. That is the reason to reach for the
+plate rather than for a tighter pocket if the sockets fight: the pocket has to stay loose
+enough that a printed shell accepts the board at all.
+
+**A printed shell and a milled one part company on the hand-seated figures**, and the
+pocket clearance is what splits them. A printed pocket comes out undersize, which is the
+whole reason the clearance is 0.50, so its effective play lands near half those numbers. A
+milled pocket is 0.50 true. The screw-seated figure is the same for both.
 
 ## Printing
 

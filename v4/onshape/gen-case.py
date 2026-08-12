@@ -66,10 +66,13 @@ SCREW_R       = 1.45     # 2.90 dia clearance
 CBORE_R       = 2.50     # 5.00 dia, flat-bottomed, for a flat-underside head
 LID_CLR       = 0.15
 # The board is clamped around its whole perimeter, not only at the three bosses: a shelf
-# hangs from the case's top and the plate carries a matching wall up to meet it. 2.00 is
-# the board's own perimeter keepout (add-keepout-zones.py PERIMETER_INSET), so neither
-# lands on a ground plane. Tracks are a different matter: the ROUTE ring is carved open
-# over the TRRS, so copper under soldermask is legal there and the shelf can cross it.
+# hangs from the case's top and the plate carries a matching wall up to meet it. Both are
+# measured in from the CAVITY, so what laps the board is the width less the clearance:
+# SHELF_W - POCKET_CLR, and PLATE_WALL_W - (POCKET_CLR - LID_CLR). The lap is what has to
+# stay inside the board's own perimeter keepout (add-keepout-zones.py PERIMETER_INSET) so
+# neither lands on a ground plane, and it shrinks 1:1 with any loosening of POCKET_CLR.
+# Tracks are a different matter: the ROUTE ring is carved open over the TRRS, so copper
+# under soldermask is legal there and the shelf can cross it.
 SHELF_W       = 2.00
 PLATE_WALL_W  = 2.00
 # The plate's wall clamps the board, so it has to stop wherever something hangs below the
@@ -685,6 +688,16 @@ def check(out, half, explode, keys):
 
 
 def main():
+    # USB_W is a stated width, so the invariant it has to satisfy is asserted rather than
+    # guaranteed by construction. Nothing downstream would catch a violation: check() tests
+    # the opening against the PLATE, never against the notch it has to sit inside.
+    if USB_W > USB_X1 - USB_X0:
+        raise SystemExit(
+            "FAIL gen-case: the %.2f USB opening is wider than the board's %.2f notch, so "
+            "a plug would foul the board edge. Narrow USB_W, or widen the notch in "
+            "config.yaml and move USB_X0/USB_X1 with it"
+            % (USB_W, USB_X1 - USB_X0))
+
     dxf = os.environ.get("FC_DXF", DEFAULT_DXF)
     outdir = os.environ.get("FC_OUTDIR", DEFAULT_OUTDIR)
     explode = float(os.environ.get("FC_EXPLODE", "0"))
