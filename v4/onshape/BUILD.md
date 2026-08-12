@@ -94,8 +94,14 @@ large, flatten the top for the aluminium variant only and keep the nesting on th
 | Print orientation | Shell top-face-down; walls and bosses rise from a flat first layer, no supports |
 | Wall thickness | 3.0mm |
 | Top thickness | 3.0mm, recessed to 1.5mm at each switch |
-| Cavity internal fillet | 2.0mm nominal, **2.35mm absolute maximum** |
-| Board pocket clearance | 0.25mm per side on the hull |
+| Cavity internal fillet | 2.0mm nominal, **3.20mm absolute maximum** |
+| Board pocket clearance | 0.50mm per side on the hull |
+
+**The pocket clearance is a print number, not a machining fit.** An FDM part loses 0.2 to
+0.3% to XY shrink across 160mm and another 0.1 to 0.2 per wall to perimeter
+over-extrusion, which closes a tenth-millimetre pocket outright and leaves a board that
+will not go in. 0.50 survives that and costs the milled variant nothing, because the board
+is located by its screws rather than by the pocket either way.
 
 **The cavity fillet is a maximum, not a minimum.** It is an internal corner, so the tool
 leaves material *inside* the pocket, and that material has to miss the board's own 1.5mm
@@ -103,10 +109,14 @@ exterior fillet. Do not let a shop substitute a larger end mill.
 
 | Cavity fillet | Clearance to the fabricated board at a 90 deg pocket corner |
 | --- | --- |
-| 1.50 | +0.354 |
-| 2.00 | +0.146 |
-| 2.35 | +0.001 |
-| 3.00 | -0.268 |
+| 1.50 | +0.707 |
+| 2.00 | +0.500 |
+| 2.35 | +0.355 |
+| 3.20 | +0.003 |
+| 3.50 | -0.121 |
+
+At 2.00 the corner clearance is the tool radius less the board's own fillet, which comes
+out equal to the straight-edge clearance, so no corner is tighter than the edges.
 
 ## Frame
 
@@ -140,14 +150,14 @@ holds at the straight side edges. The case is modelled to the hull, never to tha
 | Shell bottom rim / plate underside, inner edge | -16.00 |
 
 **Specify the two edge heights, not the angle: 16.00mm inner, 12.00mm outer.** Over the
-166.50mm shell that is 1.3762 deg, but the angle is derived. If the wall thickness
+167.00mm shell that is 1.3721 deg, but the angle is derived. If the wall thickness
 changes, the case width changes with it and the angle follows while the heights stay put.
 
 The bottom slopes, so the last two rows are at the inner edge; at the outer edge the rim
 is at -12.00. Usable cavity below the PCB runs **6.82mm at the inner edge to 2.98mm at the
 outer**, measured at the board edges rather than the shell's.
 
-**What the taper costs.** 1.3762 deg is not a working tent angle, so the slope is there for
+**What the taper costs.** 1.3721 deg is not a working tent angle, so the slope is there for
 the look, and it buys that at the price of three standoff heights, two screw lengths, and
 putting the tightest clearance in the design on the shallow side. A flat 15.50mm case would
 give the Liatris +1.00, the jack +1.20 and the socket +4.55 with one standoff height and
@@ -162,8 +172,8 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Switch recess depth | 1.50 | nesting |
 | Plate at a switch cutout | 1.50 | MX standard, 1.5mm +-0.1mm |
 | Bottom plate | 1.50 | takes the flat head's full height |
-| Board pocket | 160.50 x 119.50 | hull + 0.25/side; the board itself is 0.455/side loose in y |
-| Shell outer profile | 166.50 x 125.50 | pocket + wall |
+| Board pocket | 161.00 x 120.00 | hull + 0.50/side; the board itself is 0.705/side loose in y |
+| Shell outer profile | 167.00 x 126.00 | pocket + wall |
 | Boss and standoff diameter | 5.50 | = 2 x `screw_boss_radius`, the DXF's own circle |
 | Boss height | 3.00 | top underside to PCB |
 | Material above the PCB at a boss | 6.00 | top 3.00 + boss 3.00; **4.50 where a recess overlaps** |
@@ -172,8 +182,8 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Screw | M2.5 button head, ISO 7380 | head 4.70 dia x 1.50, **flat underside**; two lengths, see below |
 | Screw clearance in the plate | 2.90 dia | |
 | Counterbore in the plate | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base |
-| Perimeter shelf, on the shell | 2.00 wide, underside at -6.00 | = the board's own keepout ring |
-| Perimeter wall, on the plate | 2.00 wide, top at -7.60 | meets the shelf through the board |
+| Perimeter shelf, on the shell | 2.00 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.50, inside its 2.00 keepout ring |
+| Perimeter wall, on the plate | 2.00 wide, top at -7.60 | meets the shelf through the board, lapping it by 1.65 |
 | Wall relief | none inward of x +-50.00 above y +45.00 | the MCU, the jack and both ports are there |
 | Flared standoff base | 8.00 dia, up to -9.75 | = the built v4 lid; gives the counterbore a 1.50 annulus |
 | Switch cutout / recess | 14.50 / 16.00, R1.00 corners | see below |
@@ -273,7 +283,7 @@ anywhere near the z=-6.00 board plane, which is the mistake to avoid.
 | Opening | Size | Centre z | Source |
 | --- | --- | --- | --- |
 | TRRS, round | 5.50 dia | **-10.50** | measured off the built v4 case |
-| USB-C, through the wall | 9.50 w x 4.00 h | **-10.25** | measured on a printed part of this design; width is the cavity notch |
+| USB-C, through the wall | 9.50 w x 4.00 h | **-10.25** | measured on a printed part of this design; width is stated, see below |
 
 **The heights are measured, never derived.** The built v4 case shares this z stack exactly
 (top face 0, top underside -3.00, PCB -6.00 to -7.60), so its port centres transfer
@@ -291,8 +301,12 @@ is only about 6.5mm long, so a cable with a fat overmold may bottom on the outer
 before it seats. Settle it on the printed half with the cables you actually own; a
 13.00 x 7.00 x 1.50 counterbore on the outer face is the fix if one of them will not go.
 
-**Why 9.50 wide.** It sits inside the board's own 10.00 notch, so the plug clears the board
-edge, and it clears an 8.34mm plug shell by 0.58 per side.
+**Why 9.50 wide, and why it is stated rather than derived.** It sits inside the board's own
+10.00 notch, so the plug clears the board edge, and it clears an 8.34mm plug shell by 0.58
+per side. How far inside the notch it has to sit is set by how far the board can move,
+which is the screws and not the pocket: a 2.5mm screw in a 3.00mm hole is 0.25 per side
+whatever the pocket fit is. Deriving the width from the pocket clearance would shrink the
+port every time the pocket was loosened, which is the wrong direction.
 
 Wall left below each opening: 2.54mm at the TRRS, 3.23mm at the USB. The TRRS is thin
 enough that a printed shell wants an extra perimeter there.
@@ -311,11 +325,11 @@ top edge is straight and both ports are simply openings in the back wall.
    `dist/v4/ergogen/outlines/full_unfilleted.dxf`. Constrain the left half's outline centre
    to the origin. **Never draw in this sketch**; re-importing is the only edit it should
    take.
-2. **Extrude "Shell body"**, the left-half outline region offset outward **3.25mm**
+2. **Extrude "Shell body"**, the left-half outline region offset outward **3.50mm**
    (clearance + wall), blind **16.00mm** at the inner edge, -Z, bottom face sloped down to
    **12.00mm** at the outer edge.
-3. **Extrude cut "Cavity"**, the same region offset outward **0.25mm**, from **z -3.00**
-   down through the open bottom. Fillet its vertical corners at **2.0mm, 2.35mm maximum**.
+3. **Extrude cut "Cavity"**, the same region offset outward **0.50mm**, from **z -3.00**
+   down through the open bottom. Fillet its vertical corners at **2.0mm, 3.20mm maximum**.
 4. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
    **z -1.50**.
 5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
@@ -333,7 +347,7 @@ The USB notch needs no step; it is in the imported profile and (2) carries it th
 
 ## Part B: bottom plate
 
-1. **Extrude**, the left-half outline region offset outward **0.10mm** (cavity less a
+1. **Extrude**, the left-half outline region offset outward **0.35mm** (cavity less a
    0.15mm fit clearance), **1.50mm** thick, lying in the sloped bottom plane and flush
    with the rim.
 2. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
@@ -349,7 +363,7 @@ The USB notch needs no step; it is in the imported profile and (2) carries it th
    heads.
 
 **Only the screw counterbore has a horizontal floor.** The plate is a parallel-sided slab
-lying at 1.3762 deg, so "flat" and "level" are different instructions here and each feature
+lying at 1.3721 deg, so "flat" and "level" are different instructions here and each feature
 has to say which it means. The counterbore means level: the screw axis is vertical and a
 flat head seats square to its own axis, so its floor is horizontal and its depth below the
 outer face therefore varies 1.447 to 1.553 across its width. Every other feature means
@@ -373,17 +387,17 @@ with an island between them: it is meant to be lined with tape, and a plain rect
 a strip.
 
 **The margin around the parts is one-sided, and has to be.** Inward the pocket runs over
-bare board and carries 2.58 in x and 3.00 in y, comfortably past the 0.46 of board
+bare board and carries 2.58 in x and 3.00 in y, comfortably past the 0.71 of board
 registration play, so a part cannot end up standing over full-thickness plate. Outward
 there is nowhere to buffer into, because both parts run out to the board's own top edge and
-the plate ends 0.10 past it. Every limit here is set by the plate, not by the parts:
+the plate ends 0.35 past it. Every limit here is set by the plate, not by the parts:
 
 | Edge | Limit | Set by |
 | --- | --- | --- |
 | x +50.25 | 2.58 clear of the Liatris | the top perimeter wall survives inboard of x +50.00, and a pocket at its foot would undercut it |
 | y +23.35 | 3.00 clear of the Liatris | free; nothing is near |
-| x +77.60 | 0.18 short of the jack body | the perimeter wall runs at 78.10 below y 45, same undercut |
-| y +58.60 | 0.90 short of the board edge | a 1.00 rim at the plate edge |
+| x +77.60 | 0.18 short of the jack body | the perimeter wall runs at 78.35 below y 45, same undercut |
+| y +58.60 | 0.90 short of the board edge | a 1.25 rim at the plate edge |
 
 **The wall is what bounds the pocket on three sides.** It is half the board's clamp and it
 stands on the plate's full thickness, so a pocket reaching its foot thins the root. That
@@ -424,12 +438,13 @@ the shelf all the way round. Then the plate goes on and its wall closes the sand
 
 **Nothing datums the board.** The 5.50 boss butts its top face and never enters the 3.00mm
 hole, and a boss cannot pilot into that hole because the 3.60 insert bore is wider than the
-hole itself. Registration is therefore the looser of the pocket and the screws:
+hole itself. Registration is therefore the tighter of the pocket and the screws, which is
+the screws:
 
 | Constraint | Play, per side |
 | --- | --- |
-| Pocket in x | 0.25 |
-| Pocket in y | 0.455 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) |
+| Pocket in x | 0.50 |
+| Pocket in y | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) |
 | Screw in its 3.00 hole | 0.25 |
 | Switch in its 16.00 recess | 0.20 |
 
@@ -542,7 +557,7 @@ Export the shell as STEP and check it against the outline rather than by eye:
 
 | Check | Expected |
 | --- | --- |
-| Cavity loop size | 160.50 x 119.50 |
+| Cavity loop size | 161.00 x 120.00 |
 | Gap from cavity to board outline | near-constant around the perimeter |
 | Board outline points outside the cavity | none |
 | Boss bore depths | 5.00 outer pinky, 4.00 the other two; none breaks into a recess |

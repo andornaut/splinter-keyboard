@@ -43,7 +43,11 @@ DEFAULT_OUTDIR = "dist/v4/onshape"
 
 # ---- BUILD.md parameters -------------------------------------------------
 WALL          = 3.00
-POCKET_CLR    = 0.25
+# Per side, on the hull. 0.50 rather than a machining fit: an FDM part loses 0.2-0.3% to
+# XY shrink across 160mm and another 0.1-0.2 per wall to perimeter over-extrusion, which
+# closes a tenth-millimetre pocket outright. It costs nothing on the milled variant, since
+# the board is located by its screws either way (see USB_W).
+POCKET_CLR    = 0.50
 TOP_THICK     = 3.00
 RECESS_Z      = -1.50
 PCB_TOP       = -6.00
@@ -51,7 +55,7 @@ PCB_BOT       = -7.60
 H_INNER       = 16.00
 H_OUTER       = 12.00
 PLATE         = 1.50
-CAVITY_FILLET = 2.00     # tool radius; 2.35 is the maximum before it fouls the board
+CAVITY_FILLET = 2.00     # tool radius; 3.20 is the maximum before it fouls the board
 TOP_BEZEL     = 1.00     # chamfer where the top face meets the outer wall
 BOSS_R        = 2.75
 BORE_R        = 1.80     # 3.60 dia heat-set insert
@@ -91,10 +95,15 @@ TRRS_X, TRRS_Y = 74.650, 59.500
 TRRS_Z, TRRS_R = -10.50, 2.75
 USB_X0, USB_X1 = 56.663, 66.663
 USB_Z, USB_H = -10.25, 4.00
+# Stated, NOT derived from POCKET_CLR. The opening has to stay inside the board's own 10.00
+# notch so the plug clears the board edge, and how far inside is set by how far the board
+# can move, which is the screws and not the pocket: a 2.5mm screw in a 3.00mm hole is 0.25
+# per side whatever the pocket fit is. Deriving it would shrink the port every time the
+# pocket is loosened, which is the wrong direction.
+USB_W = 9.50
 # Both ports are plain cutouts straight through the wall. No counterbore and no recess: a
 # pocket on the outer face reads as the port being sunk into the case rather than opened
-# through it. The USB width sits inside the board's own 10.00 notch so the plug clears the
-# board edge, and clears an 8.34mm plug shell by 0.58 per side.
+# through it. The USB clears an 8.34mm plug shell by 0.58 per side.
 
 # One rectangular relief over everything tall on side B: the Liatris and the TRRS jack.
 # Rectangular and continuous so a strip of tape can line it, rather than two pockets with
@@ -128,18 +137,19 @@ EPS = 1e-6
 # 4 on each recess, and the halves carry different numbers of keys.
 EXPECT_CYL = {
     # 1.80 x3: the insert bores. 2.00 x10: the cavity's five tool-radius corners and the
-    # shelf's five. 2.75 x4: three bosses and the TRRS bore. 3.25 x5: the outer profile's
-    # corners, the hull offset out by clearance plus wall. The lone 1.75 is where the
-    # shelf's inset rounds the one concave hull corner, before the opening reaches it.
-    "shell": {1.75: 1, 1.80: 3, 2.00: 10, 2.75: 4, 3.25: 5},
+    # shelf's five. 2.75 x4: three bosses and the TRRS bore. 3.50 x5: the outer profile's
+    # corners, the hull offset out by clearance plus wall. The lone 1.50 is where the
+    # shelf's inset rounds the one concave hull corner, before the opening reaches it, so
+    # it measures SHELF_W less the clearance.
+    "shell": {1.50: 1, 1.80: 3, 2.00: 10, 2.75: 4, 3.50: 5},
     # 1.45 x3: the screw clearance holes. 1.85 x5: the plate outline, the cavity's 2.00
     # corners less the fit clearance, which is the point of deriving it from the cavity.
     # 2.00 x4 rather than x5: the plate wall's fifth inner corner falls inside the
     # top-inner relief. 2.50 x3: the flat counterbores. 2.75 x3: the standoffs, above
     # their flares. 4.00 x7: three flared bases and four bumper recesses, the same radius
-    # by coincidence. The lone 1.90 is the plate wall's twin of the shell's 1.75, and the
+    # by coincidence. The lone 1.65 is the plate wall's twin of the shell's 1.50, and the
     # 0.15 is the same concave corner on the plate outline, rounded by the fit clearance.
-    "plate": {0.15: 1, 1.45: 3, 1.85: 5, 1.90: 1, 2.00: 4, 2.50: 3, 2.75: 3,
+    "plate": {0.15: 1, 1.45: 3, 1.65: 1, 1.85: 5, 2.00: 4, 2.50: 3, 2.75: 3,
               4.00: 7},
 }
 CNC_FILLET_R = 1.00
@@ -443,10 +453,9 @@ def build(dxf, half, explode):
     # shell face, which would leave the solid non-manifold.
     body = body.cut(Part.makeCylinder(
         TRRS_R, 40.0, Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z), Vector(0, 1, 0)))
-    usb_w = (USB_X1 - USB_X0) - 2 * POCKET_CLR
     ux = sign * (USB_X0 + USB_X1) / 2.0
     body = body.cut(Part.makeBox(
-        usb_w, 40.0, USB_H, Vector(ux - usb_w / 2, TRRS_Y - 20.0, USB_Z - USB_H / 2)))
+        USB_W, 40.0, USB_H, Vector(ux - USB_W / 2, TRRS_Y - 20.0, USB_Z - USB_H / 2)))
 
     # Perimeter shelf: the board is pressed up against its underside. This narrows the
     # opening going up, which is the legal direction; a lip the board RESTS on would widen
@@ -635,11 +644,10 @@ def check(out, half, explode, keys):
     if swept > 0.999 * relief_zone.Volume * 60:
         fails.append("relief pocket absent: plate is solid through its footprint")
 
-    usb_w = (USB_X1 - USB_X0) - 2 * POCKET_CLR
     ux = sign * (USB_X0 + USB_X1) / 2.0
     for name, tool in (
-            ("USB opening", Part.makeBox(usb_w, 40.0, USB_H,
-                                         Vector(ux - usb_w / 2, TRRS_Y - 20.0,
+            ("USB opening", Part.makeBox(USB_W, 40.0, USB_H,
+                                         Vector(ux - USB_W / 2, TRRS_Y - 20.0,
                                                 USB_Z - USB_H / 2 + dz))),
             ("TRRS bore", Part.makeCylinder(
                 TRRS_R, 40.0, Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z + dz),
