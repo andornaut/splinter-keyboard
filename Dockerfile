@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM node:26-alpine
 RUN apk add --no-cache bash git
 WORKDIR /app
 RUN chown node:node /app
