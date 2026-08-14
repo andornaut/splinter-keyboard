@@ -33,6 +33,7 @@ so a manually-passed glob that matches nothing is harmless.
 
 Usage: apply-project-settings.py <project.kicad_pro> [more.kicad_pro ...]
 """
+
 import json
 import os
 import sys
@@ -118,9 +119,11 @@ def ensure_vcc(net_settings):
         # trunk width back out of this class rather than restating it, so a value
         # hand-edited in KiCad and left alone here would make that step match no
         # trunk at all and report "already on the pattern" having snapped nothing.
-        for key, want in (("clearance", VCC_CLEARANCE),
-                          ("track_width", VCC_TRACK_WIDTH),
-                          ("priority", VCC_PRIORITY)):
+        for key, want in (
+            ("clearance", VCC_CLEARANCE),
+            ("track_width", VCC_TRACK_WIDTH),
+            ("priority", VCC_PRIORITY),
+        ):
             if vcc.get(key) != want:
                 vcc[key] = want
                 changed = True
@@ -157,7 +160,7 @@ def ensure_severity_overrides(severities):
 def ensure_drc_rules(pro_path):
     """Write the sibling <board>.kicad_dru custom-rules file if missing or stale;
     return the path if it was (re)written, else None."""
-    dru_path = pro_path[:-len(".kicad_pro")] + ".kicad_dru"
+    dru_path = pro_path[: -len(".kicad_pro")] + ".kicad_dru"
     existing = None
     if os.path.isfile(dru_path):
         with open(dru_path) as f:

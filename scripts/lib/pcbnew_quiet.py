@@ -19,6 +19,7 @@ Two separate sources, so two separate guards:
 Use it in place of `import pcbnew`:
     from lib.pcbnew_quiet import pcbnew
 """
+
 import os
 
 _saved_stderr_fd = os.dup(2)

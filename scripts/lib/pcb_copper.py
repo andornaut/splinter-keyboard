@@ -13,6 +13,7 @@ proposals, so a caller builds them once and asks both.
 
 Not an entry point: import it, do not run it.
 """
+
 from .pcbnew_quiet import pcbnew
 
 TOUCH_TOL = pcbnew.FromMM(0.001)  # coincidence slack on top of the copper's own width
@@ -40,7 +41,8 @@ def net_class(board, name):
         raise SystemExit(
             f"ERROR {board.GetFileName()}: no '{name}' net class in this board's project\n"
             f"    found {sorted(classes)}; apply-project-settings.py writes them, and"
-            f" must run on a stage before any step that reads them")
+            f" must run on a stage before any step that reads them"
+        )
     return classes[name]
 
 
@@ -80,7 +82,10 @@ def covers(p, layer, track):
         return dist(p, track.GetPosition()) <= track.GetWidth(layer) / 2 + TOUCH_TOL
     if track.GetClass() == "PCB_ARC":
         return track.HitTest(p, TOUCH_TOL)
-    return point_to_segment(p, track.GetStart(), track.GetEnd()) <= track.GetWidth() / 2 + TOUCH_TOL
+    return (
+        point_to_segment(p, track.GetStart(), track.GetEnd())
+        <= track.GetWidth() / 2 + TOUCH_TOL
+    )
 
 
 def copper_pads(board):
@@ -96,8 +101,11 @@ def fill_zones(board):
     """Every filled copper pour. Rule areas carry no copper, and a teardrop is not
     independent copper: it is a flare on the very track/via under test, so counting
     it would let a dangling stub hold itself up."""
-    return [z for z in board.Zones()
-            if not z.GetIsRuleArea() and not z.IsTeardropArea() and z.IsFilled()]
+    return [
+        z
+        for z in board.Zones()
+        if not z.GetIsRuleArea() and not z.IsTeardropArea() and z.IsFilled()
+    ]
 
 
 def connected(p, layer, net, tracks, pads, zones, skip):
@@ -105,13 +113,20 @@ def connected(p, layer, net, tracks, pads, zones, skip):
     net-checked: copper of another net crossing this point is a clearance violation,
     not a connection, and treating it as one would keep dead copper alive."""
     for t in tracks:
-        if t is not skip and t.GetNetCode() == net and t.IsOnLayer(layer) and covers(p, layer, t):
+        if (
+            t is not skip
+            and t.GetNetCode() == net
+            and t.IsOnLayer(layer)
+            and covers(p, layer, t)
+        ):
             return True
     for pad in pads:
         if pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(p):
             return True
-    return any(z.GetNetCode() == net and z.IsOnLayer(layer) and z.HitTestFilledArea(layer, p)
-               for z in zones)
+    return any(
+        z.GetNetCode() == net and z.IsOnLayer(layer) and z.HitTestFilledArea(layer, p)
+        for z in zones
+    )
 
 
 def dangling_tracks(tracks, pads, zones):
@@ -126,8 +141,10 @@ def dangling_tracks(tracks, pads, zones):
         if is_via(t):
             continue
         layer, net = t.GetLayer(), t.GetNetCode()
-        if any(not connected(p, layer, net, tracks, pads, zones, t)
-               for p in (t.GetStart(), t.GetEnd())):
+        if any(
+            not connected(p, layer, net, tracks, pads, zones, t)
+            for p in (t.GetStart(), t.GetEnd())
+        ):
             doomed.append(t)
     return doomed
 
@@ -190,5 +207,7 @@ def keepout_blocker(zones, proposals):
 def describe(item):
     """An item named the way its DRC violation would name it."""
     p = item.GetPosition()
-    return (f"{item.GetClass()} [{item.GetNetname()}] at "
-            f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f})")
+    return (
+        f"{item.GetClass()} [{item.GetNetname()}] at "
+        f"({pcbnew.ToMM(p.x):.3f}, {pcbnew.ToMM(p.y):.3f})"
+    )

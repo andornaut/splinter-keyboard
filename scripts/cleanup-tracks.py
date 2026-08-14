@@ -54,10 +54,21 @@ running it on every build is safe.
 
 Usage: cleanup-tracks.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
+
 import sys
 
-from lib.pcb_copper import (TOUCH_TOL, connected, copper_pads, covers, dangling_tracks,
-                            dist, fill_zones, ids, is_via, point_to_segment)
+from lib.pcb_copper import (
+    TOUCH_TOL,
+    connected,
+    copper_pads,
+    covers,
+    dangling_tracks,
+    dist,
+    fill_zones,
+    ids,
+    is_via,
+    point_to_segment,
+)
 from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
 
@@ -79,8 +90,11 @@ def _dead_vias(vias, live_tracks, pads, zones):
     doomed = []
     for v in vias:
         p, net = v.GetPosition(), v.GetNetCode()
-        reached = sum(1 for layer in (v.TopLayer(), v.BottomLayer())
-                      if connected(p, layer, net, live_tracks, pads, zones, v))
+        reached = sum(
+            1
+            for layer in (v.TopLayer(), v.BottomLayer())
+            if connected(p, layer, net, live_tracks, pads, zones, v)
+        )
         if reached < 2:
             doomed.append(v)
     return doomed
@@ -93,12 +107,18 @@ def _redundant_vias(vias, pads):
     doomed = []
     for i, v in enumerate(vias):
         p, net = v.GetPosition(), v.GetNetCode()
-        if any(dist(p, other.GetPosition()) <= TOUCH_TOL and other.GetNetCode() == net
-               for other in vias[:i]):
+        if any(
+            dist(p, other.GetPosition()) <= TOUCH_TOL and other.GetNetCode() == net
+            for other in vias[:i]
+        ):
             doomed.append(v)
             continue
-        if any(pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH and pad.GetNetCode() == net
-               and pad.HitTest(p) for pad in pads):
+        if any(
+            pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH
+            and pad.GetNetCode() == net
+            and pad.HitTest(p)
+            for pad in pads
+        ):
             doomed.append(v)
     return doomed
 
@@ -113,10 +133,14 @@ def _tracks_in_pads(tracks, pads):
         if is_via(t):
             continue
         layer, net = t.GetLayer(), t.GetNetCode()
-        if any(pad.GetShape() != pcbnew.PAD_SHAPE_CUSTOM and pad.GetNetCode() == net
-               and pad.IsOnLayer(layer)
-               and pad.HitTest(t.GetStart()) and pad.HitTest(t.GetEnd())
-               for pad in pads):
+        if any(
+            pad.GetShape() != pcbnew.PAD_SHAPE_CUSTOM
+            and pad.GetNetCode() == net
+            and pad.IsOnLayer(layer)
+            and pad.HitTest(t.GetStart())
+            and pad.HitTest(t.GetEnd())
+            for pad in pads
+        ):
             doomed.append(t)
     return doomed
 
@@ -164,8 +188,9 @@ def _covered_tracks(tracks, doomed_ids):
     shares the other's circle as well as its extent, which is a different test, and
     a chord is never inside its own arc.
     """
-    segments = [t for t in tracks
-                if t.GetClass() == "PCB_TRACK" and id(t) not in doomed_ids]
+    segments = [
+        t for t in tracks if t.GetClass() == "PCB_TRACK" and id(t) not in doomed_ids
+    ]
     doomed = []
     dead = set(doomed_ids)
     for a in segments:
@@ -175,11 +200,16 @@ def _covered_tracks(tracks, doomed_ids):
             # this from taking the survivor too.
             if a is b or id(b) in dead:
                 continue
-            if (a.GetNetCode() != b.GetNetCode() or a.GetLayer() != b.GetLayer()
-                    or a.GetWidth() > b.GetWidth()):
+            if (
+                a.GetNetCode() != b.GetNetCode()
+                or a.GetLayer() != b.GetLayer()
+                or a.GetWidth() > b.GetWidth()
+            ):
                 continue
-            if all(point_to_segment(p, b.GetStart(), b.GetEnd()) <= TOUCH_TOL
-                   for p in (a.GetStart(), a.GetEnd())):
+            if all(
+                point_to_segment(p, b.GetStart(), b.GetEnd()) <= TOUCH_TOL
+                for p in (a.GetStart(), a.GetEnd())
+            ):
                 doomed.append(a)
                 dead.add(id(a))
                 break
@@ -217,22 +247,36 @@ def _mergeable(a, b, junction, tracks, pads):
     """True if segments a and b can become one segment through `junction`: same
     net/layer/width, nothing else meeting them there, and collinear to within
     TOUCH_TOL (so the merge moves no copper a fab could resolve)."""
-    if (a.GetNetCode() != b.GetNetCode() or a.GetLayer() != b.GetLayer()
-            or a.GetWidth() != b.GetWidth()):
+    if (
+        a.GetNetCode() != b.GetNetCode()
+        or a.GetLayer() != b.GetLayer()
+        or a.GetWidth() != b.GetWidth()
+    ):
         return False
     layer, net = a.GetLayer(), a.GetNetCode()
-    if any(t is not a and t is not b and t.IsOnLayer(layer) and covers(junction, layer, t)
-           for t in tracks):
+    if any(
+        t is not a and t is not b and t.IsOnLayer(layer) and covers(junction, layer, t)
+        for t in tracks
+    ):
         return False
-    if any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(junction)
-           for pad in pads):
+    if any(
+        pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(junction)
+        for pad in pads
+    ):
         return False
-    return point_to_segment(junction, _far_end(a, junction), _far_end(b, junction)) <= TOUCH_TOL
+    return (
+        point_to_segment(junction, _far_end(a, junction), _far_end(b, junction))
+        <= TOUCH_TOL
+    )
 
 
 def _far_end(track, junction):
     """The endpoint of `track` that is not the junction."""
-    return track.GetEnd() if dist(track.GetStart(), junction) <= TOUCH_TOL else track.GetStart()
+    return (
+        track.GetEnd()
+        if dist(track.GetStart(), junction) <= TOUCH_TOL
+        else track.GetStart()
+    )
 
 
 def _merge_collinear(board):
@@ -244,9 +288,11 @@ def _merge_collinear(board):
         segments = [t for t in tracks if t.GetClass() == "PCB_TRACK"]
         pair = None
         for i, a in enumerate(segments):
-            for b in segments[i + 1:]:
+            for b in segments[i + 1 :]:
                 for pa in (a.GetStart(), a.GetEnd()):
-                    if not any(dist(pa, pb) <= TOUCH_TOL for pb in (b.GetStart(), b.GetEnd())):
+                    if not any(
+                        dist(pa, pb) <= TOUCH_TOL for pb in (b.GetStart(), b.GetEnd())
+                    ):
                         continue
                     if _mergeable(a, b, pa, tracks, pads):
                         pair = (a, b, pa)
@@ -324,7 +370,9 @@ def _cleanup_pass(board):
         board.RemoveNative(z)
 
     if removed_tracks or removed_vias or merged or orphans:
-        _fill_zones(board)  # re-pour around the freed copper, before the next pass reads it
+        _fill_zones(
+            board
+        )  # re-pour around the freed copper, before the next pass reads it
     return removed_tracks, removed_vias, merged, len(orphans)
 
 
@@ -344,16 +392,19 @@ def cleanup_tracks(path):
         raise SystemExit(
             f"ERROR {path}: still cleaning up after {MAX_PASSES} passes\n"
             f"    the last pass removed {counts[0]} track(s), {counts[1]} via(s) and "
-            f"{counts[3]} teardrop(s), and merged {counts[2]} segment(s)")
+            f"{counts[3]} teardrop(s), and merged {counts[2]} segment(s)"
+        )
 
     if not any(totals):
         note(f"  unchanged {path}: nothing to clean up")
         return
 
     board.Save(path)
-    print(f"  CLEANED {path}: removed {totals[0]} dangling/buried/duplicate track(s), "
-          f"{totals[1]} unconnected/redundant via(s) and {totals[3]} stranded teardrop(s), "
-          f"merged {totals[2]} split segment(s) over {run - 1} pass(es), zones re-filled")
+    print(
+        f"  CLEANED {path}: removed {totals[0]} dangling/buried/duplicate track(s), "
+        f"{totals[1]} unconnected/redundant via(s) and {totals[3]} stranded teardrop(s), "
+        f"merged {totals[2]} split segment(s) over {run - 1} pass(es), zones re-filled"
+    )
 
 
 if __name__ == "__main__":

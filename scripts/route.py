@@ -27,6 +27,7 @@ dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
   route.py [pcb_path ...]
   pcb_path  working .kicad_pcb to route in place (default: all for the version)
 """
+
 import glob
 import json
 import os
@@ -65,8 +66,12 @@ def write_freerouting_config(config_dir, max_passes, scoring):
     """
     os.makedirs(config_dir, exist_ok=True)
     config = {
-        "profile": {"id": str(uuid.uuid4()), "email": "",
-                    "allow_telemetry": False, "allow_contact": False},
+        "profile": {
+            "id": str(uuid.uuid4()),
+            "email": "",
+            "allow_telemetry": False,
+            "allow_contact": False,
+        },
         "gui": {"enabled": False},
         "router": {
             "max_passes": int(max_passes),
@@ -118,14 +123,27 @@ def autoroute(pcb_path, work_dir, passes):
     # binder logs a spurious "Unknown settings property" warning). GUI/logging
     # are real settings keys, so they bind cleanly as env vars.
     subprocess.run(
-        [freerouting, "-de", dsn_path, "-do", ses_path,
-         "-mp", str(passes), "-us", strategy, "-is", selection,
-         f"--user_data_path={config_dir}"],
+        [
+            freerouting,
+            "-de",
+            dsn_path,
+            "-do",
+            ses_path,
+            "-mp",
+            str(passes),
+            "-us",
+            strategy,
+            "-is",
+            selection,
+            f"--user_data_path={config_dir}",
+        ],
         check=True,
-        env={**os.environ,
-             "FREEROUTING__GUI__ENABLED": "false",
-             "FREEROUTING__LOGGING__CONSOLE__LEVEL": LOG_LEVEL,
-             "FREEROUTING__LOGGING__FILE__LEVEL": LOG_LEVEL},
+        env={
+            **os.environ,
+            "FREEROUTING__GUI__ENABLED": "false",
+            "FREEROUTING__LOGGING__CONSOLE__LEVEL": LOG_LEVEL,
+            "FREEROUTING__LOGGING__FILE__LEVEL": LOG_LEVEL,
+        },
     )
     if not os.path.exists(ses_path):
         sys.exit(f"ERROR {pcb_path}: Freerouting produced no {ses_path}")
@@ -146,7 +164,9 @@ if __name__ == "__main__":
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
-    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb"))
+    pcbs = sys.argv[1:] or sorted(
+        glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb")
+    )
     if not pcbs:
         sys.exit(f"No boards in {version}/kicad/unrouted/ -- nothing to do")
     for pcb in pcbs:

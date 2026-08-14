@@ -39,6 +39,7 @@ the dist/ boards from scratch each run, so a normal build always re-derives them
 
 Usage: add-keepout-zones.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
+
 import math
 import sys
 
@@ -49,13 +50,15 @@ from lib.pipeline_log import note
 # PCB face), with margin for the board's shift in its pocket and case build
 # tolerance, so no pad or trace lands under the wall in the worst-case stack-up.
 PERIMETER_INSET = pcbnew.FromMM(2.0)
-NOTCH_BRIDGE = pcbnew.FromMM(6.0)     # bridge edge-open notches up to 2x this wide (USB cutout)
-BOSS_MARGIN = pcbnew.FromMM(1.0)      # keepout extends this far past the boss edge
+NOTCH_BRIDGE = pcbnew.FromMM(
+    6.0
+)  # bridge edge-open notches up to 2x this wide (USB cutout)
+BOSS_MARGIN = pcbnew.FromMM(1.0)  # keepout extends this far past the boss edge
 BOSS_FALLBACK_RADIUS = pcbnew.FromMM(2.75)  # if no Eco1 boss circle is found
-BOSS_FPID_KEY = "mounting_hole"       # footprint-id substring marking a screw boss
-CENTER_TOL = pcbnew.FromMM(0.05)      # boss-circle/mounting-hole coincidence tolerance
-ARC_ERROR = pcbnew.FromMM(0.01)       # inflate max error
-CIRCLE_SEGMENTS = 64                  # polygon approximation of each boss disk
+BOSS_FPID_KEY = "mounting_hole"  # footprint-id substring marking a screw boss
+CENTER_TOL = pcbnew.FromMM(0.05)  # boss-circle/mounting-hole coincidence tolerance
+ARC_ERROR = pcbnew.FromMM(0.01)  # inflate max error
+CIRCLE_SEGMENTS = 64  # polygon approximation of each boss disk
 DEGENERATE_EDGE_MAX = pcbnew.FromMM(0.001)  # drop Edge.Cuts shapes shorter than this
 # How far an endpoint may move to close the gap a stripped shape leaves, past which
 # it is real geometry and the build stops. It has to exceed DEGENERATE_EDGE_MAX: the
@@ -140,8 +143,9 @@ def _poly(points):
 
 def _footprints(board, fpid_key):
     """Footprints whose (lowercased) library id contains `fpid_key`."""
-    return [fp for fp in board.GetFootprints()
-            if fpid_key in fp.GetFPIDAsString().lower()]
+    return [
+        fp for fp in board.GetFootprints() if fpid_key in fp.GetFPIDAsString().lower()
+    ]
 
 
 def _top_notch_far_x(board, edges, trrs_cx, toward_right):
@@ -154,9 +158,12 @@ def _top_notch_far_x(board, edges, trrs_cx, toward_right):
     board.GetBoardPolygonOutlines(out, False)
     ch = out.Outline(0)
     pts = (ch.CPoint(p) for p in range(ch.PointCount()))
-    xs = [pt.x for pt in pts
-          if top + NOTCH_PROBE_MIN < pt.y < top + NOTCH_PROBE_MAX
-          and (pt.x > trrs_cx) == toward_right]
+    xs = [
+        pt.x
+        for pt in pts
+        if top + NOTCH_PROBE_MIN < pt.y < top + NOTCH_PROBE_MAX
+        and (pt.x > trrs_cx) == toward_right
+    ]
     return (max if toward_right else min)(xs, default=None)
 
 
@@ -178,7 +185,9 @@ def _trrs_carve(board):
     edges = board.GetBoardEdgesBoundingBox()
     box = trrs.GetBoundingBox()
     cx = box.GetCenter().x
-    toward_right = cx < edges.GetCenter().x   # TRRS near the left edge -> carve opens rightward
+    toward_right = (
+        cx < edges.GetCenter().x
+    )  # TRRS near the left edge -> carve opens rightward
 
     if toward_right:
         inner_edge = edges.GetLeft() - CARVE_OVERSHOOT
@@ -222,16 +231,21 @@ def _perimeter_ring(board):
 def _disk(center, radius):
     """A circle approximated by a CIRCLE_SEGMENTS-gon."""
     angles = (2 * math.pi * i / CIRCLE_SEGMENTS for i in range(CIRCLE_SEGMENTS))
-    return _poly((center.x + radius * math.cos(a), center.y + radius * math.sin(a))
-                 for a in angles)
+    return _poly(
+        (center.x + radius * math.cos(a), center.y + radius * math.sin(a))
+        for a in angles
+    )
 
 
 def _boss_radius(board, center):
     """Radius of the User.Eco1 boss circle coincident with `center`, or the
     fallback if none is found."""
     for d in board.GetDrawings():
-        if (d.GetClass() == "PCB_SHAPE" and d.GetLayerName() == "User.Eco1"
-                and d.GetShape() == pcbnew.SHAPE_T_CIRCLE):
+        if (
+            d.GetClass() == "PCB_SHAPE"
+            and d.GetLayerName() == "User.Eco1"
+            and d.GetShape() == pcbnew.SHAPE_T_CIRCLE
+        ):
             c = d.GetCenter()
             if abs(c.x - center.x) <= CENTER_TOL and abs(c.y - center.y) <= CENTER_TOL:
                 return d.GetRadius()
@@ -245,9 +259,15 @@ def _boss_centers(board):
 
 def _edge_shapes(board):
     """Every segment/arc currently on Edge.Cuts."""
-    return [d for d in board.GetDrawings()
-            if (d.GetClass() == "PCB_SHAPE" and d.GetLayer() == pcbnew.Edge_Cuts
-                and d.GetShape() in (pcbnew.SHAPE_T_SEGMENT, pcbnew.SHAPE_T_ARC))]
+    return [
+        d
+        for d in board.GetDrawings()
+        if (
+            d.GetClass() == "PCB_SHAPE"
+            and d.GetLayer() == pcbnew.Edge_Cuts
+            and d.GetShape() in (pcbnew.SHAPE_T_SEGMENT, pcbnew.SHAPE_T_ARC)
+        )
+    ]
 
 
 def _weld_edge_gap(board, path, a, b):
@@ -280,7 +300,8 @@ def _weld_edge_gap(board, path, a, b):
                     f"({pcbnew.ToMM(a.x)}, {pcbnew.ToMM(a.y)}) would move an endpoint "
                     f"{pcbnew.ToMM(move):.4f}mm, over the "
                     f"{pcbnew.ToMM(WELD_MAX + DEGENERATE_EDGE_MAX)}mm limit. "
-                    f"That is real geometry, not outline noise: fix the board outline.")
+                    f"That is real geometry, not outline noise: fix the board outline."
+                )
             set_(a)
             welded += 1
             max_move = max(max_move, move)
@@ -307,7 +328,10 @@ def _strip_degenerate_edges(board, path):
     shape off Edge.Cuts, so this terminates."""
     moved, welded, max_move = 0, 0, 0
     while True:
-        d = next((s for s in _edge_shapes(board) if s.GetLength() < DEGENERATE_EDGE_MAX), None)
+        d = next(
+            (s for s in _edge_shapes(board) if s.GetLength() < DEGENERATE_EDGE_MAX),
+            None,
+        )
         if d is None:
             return moved, welded, max_move
         a, b = d.GetStart(), d.GetEnd()
@@ -322,17 +346,24 @@ def add_keepout_zones(path):
     board = pcbnew.LoadBoard(path)
 
     keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME)
-    existing = {z.GetZoneName() for z in board.Zones()
-                if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
+    existing = {
+        z.GetZoneName()
+        for z in board.Zones()
+        if z.GetIsRuleArea() and z.GetZoneName() in keepout_names
+    }
     if existing:
-        note(f"  unchanged {path}: keepouts already present "
-             f"({', '.join(sorted(existing))})")
+        note(
+            f"  unchanged {path}: keepouts already present "
+            f"({', '.join(sorted(existing))})"
+        )
         return
 
     moved, welded, max_move = _strip_degenerate_edges(board, path)
     if moved:
-        print(f"  welded {path}: moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User, "
-              f"welded {welded} endpoint(s), largest move {pcbnew.ToMM(max_move):.6f}mm")
+        print(
+            f"  welded {path}: moved {moved} degenerate Edge.Cuts shape(s) to Cmts.User, "
+            f"welded {welded} endpoint(s), largest move {pcbnew.ToMM(max_move):.6f}mm"
+        )
 
     ring = _perimeter_ring(board)
     _add_keepout(board, PERIMETER_POUR_NAME, ring, pour=True, tracks_vias=False)
@@ -347,13 +378,20 @@ def add_keepout_zones(path):
     if not centers:
         raise SystemExit(f"{path}: no mounting-hole footprints found for boss keepouts")
     for center in centers:
-        _add_keepout(board, BOSS_NAME, _disk(center, _boss_radius(board, center) + BOSS_MARGIN),
-                     pour=True, tracks_vias=True)
+        _add_keepout(
+            board,
+            BOSS_NAME,
+            _disk(center, _boss_radius(board, center) + BOSS_MARGIN),
+            pour=True,
+            tracks_vias=True,
+        )
 
     board.Save(path)
-    print(f"  ADDED {path}: {pcbnew.ToMM(PERIMETER_INSET):.1f}mm perimeter pour ring + "
-          f"route ring (TRRS corner carved) + {len(centers)} screw-boss disk(s) "
-          f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm)")
+    print(
+        f"  ADDED {path}: {pcbnew.ToMM(PERIMETER_INSET):.1f}mm perimeter pour ring + "
+        f"route ring (TRRS corner carved) + {len(centers)} screw-boss disk(s) "
+        f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm)"
+    )
 
 
 if __name__ == "__main__":

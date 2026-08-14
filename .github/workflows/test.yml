@@ -55,3 +55,6 @@ jobs:
       # own interpreter, so this checks them without running them.
       - name: Run ruff check
         run: ruff check scripts/ v4/onshape/gen-case.py
+
+      - name: Run ruff format check
+        run: ruff format --check scripts/ v4/onshape/gen-case.py

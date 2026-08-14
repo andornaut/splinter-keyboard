@@ -52,12 +52,19 @@ Idempotent: a board already on the pattern is not modified or even re-saved.
 
 Usage: tidy-patterns.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
+
 import collections
 import math
 import sys
 
-from lib.pcb_copper import (VIA_CLASS, clearance_blocker, describe, ids, keepout_blocker,
-                            net_class)
+from lib.pcb_copper import (
+    VIA_CLASS,
+    clearance_blocker,
+    describe,
+    ids,
+    keepout_blocker,
+    net_class,
+)
 from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
 
@@ -125,7 +132,9 @@ def _paths(tracks, pads):
                 walked.add(id(first))
                 points, chain, here, came_from = [start, nxt], [first], nxt, first
                 while not terminal(here):
-                    onward = [(s, p) for s, p in adjacent[here] if id(s) != id(came_from)]
+                    onward = [
+                        (s, p) for s, p in adjacent[here] if id(s) != id(came_from)
+                    ]
                     if len(onward) != 1 or id(onward[0][0]) in walked:
                         break
                     s, p = onward[0]
@@ -144,8 +153,10 @@ def _blocked(tracks, pads, zones, proposals, replaced):
     crowded = clearance_blocker(tracks, pads, proposals, replaced)
     if crowded is not None:
         other, gap = crowded
-        return (f"put copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
-                f"{describe(other)}")
+        return (
+            f"put copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
+            f"{describe(other)}"
+        )
     area = keepout_blocker(zones, proposals)
     if area is not None:
         return f"put copper inside the {area.GetZoneName()} rule area"
@@ -159,7 +170,9 @@ def _row_legs(trunk_width, tracks, pads, zones):
     for points, chain, via_ends in _paths(tracks, pads):
         if not via_ends or len(chain) != 3:
             continue
-        if any(s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != trunk_width for s in chain):
+        if any(
+            s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != trunk_width for s in chain
+        ):
             continue
         start, corner_a, corner_b, end = points
         if corner_a[1] != corner_b[1] or abs(corner_a[0] - corner_b[0]) < MIN_LEG:
@@ -181,9 +194,14 @@ def _row_legs(trunk_width, tracks, pads, zones):
             moves.append((corner, (x, want)))
         travel = max(_dist(old, new) for old, new in moves)
         if travel > MAX_MOVE:
-            skipped.append((net, points,
-                            f"leg is {pcbnew.ToMM(abs(want - corner_a[1])):.3f}mm off the "
-                            f"pattern, which would move copper {pcbnew.ToMM(travel):.3f}mm"))
+            skipped.append(
+                (
+                    net,
+                    points,
+                    f"leg is {pcbnew.ToMM(abs(want - corner_a[1])):.3f}mm off the "
+                    f"pattern, which would move copper {pcbnew.ToMM(travel):.3f}mm",
+                )
+            )
             continue
         why = _blocked(tracks, pads, zones, _leg_shapes(chain, moves), ids(chain))
         if why is not None:
@@ -204,8 +222,10 @@ def _want_leg_y(start, end, leg_y):
     needing a move right across its own vias, which is not a stray and not a move
     anyone would want made."""
     lower, upper = max(start[1], end[1]), min(start[1], end[1])
-    return min((_snap(lower - LEG_DROP), _snap(upper - LEG_DROP), _snap(lower + LEG_DROP)),
-               key=lambda y: abs(y - leg_y))
+    return min(
+        (_snap(lower - LEG_DROP), _snap(upper - LEG_DROP), _snap(lower + LEG_DROP)),
+        key=lambda y: abs(y - leg_y),
+    )
 
 
 def _leg_shapes(chain, moves):
@@ -214,9 +234,18 @@ def _leg_shapes(chain, moves):
     moved = {old: new for old, new in moves}
     out = []
     for s in chain:
-        a, b = moved.get(_pt(s.GetStart()), _pt(s.GetStart())), moved.get(_pt(s.GetEnd()), _pt(s.GetEnd()))
-        out.append((s.GetLayer(), s.GetNetCode(), s.GetOwnClearance(s.GetLayer()),
-                    pcbnew.SHAPE_SEGMENT(_vec(a), _vec(b), s.GetWidth())))
+        a, b = (
+            moved.get(_pt(s.GetStart()), _pt(s.GetStart())),
+            moved.get(_pt(s.GetEnd()), _pt(s.GetEnd())),
+        )
+        out.append(
+            (
+                s.GetLayer(),
+                s.GetNetCode(),
+                s.GetOwnClearance(s.GetLayer()),
+                pcbnew.SHAPE_SEGMENT(_vec(a), _vec(b), s.GetWidth()),
+            )
+        )
     return out
 
 
@@ -252,17 +281,30 @@ def _key_families(board, tracks):
         origin = switch[net][0].GetPosition()
 
         def relative(p):
-            return (_snap(p.x - origin.x, FAMILY_GRID), _snap(p.y - origin.y, FAMILY_GRID))
+            return (
+                _snap(p.x - origin.x, FAMILY_GRID),
+                _snap(p.y - origin.y, FAMILY_GRID),
+            )
 
-        family = (relative(switch[net][1].GetPosition()),
-                  relative(diode[net].GetPosition()) if net in diode else None,
-                  tuple(sorted(relative(v.GetPosition()) for v in vias[net])))
+        family = (
+            relative(switch[net][1].GetPosition()),
+            relative(diode[net].GetPosition()) if net in diode else None,
+            tuple(sorted(relative(v.GetPosition()) for v in vias[net])),
+        )
         shape = []
         for t in tracks:
             a, b = _pt(t.GetStart()), _pt(t.GetEnd())
             a, b = (a, b) if a <= b else (b, a)
-            shape.append((t.GetLayer(), t.GetWidth(),
-                          a[0] - origin.x, a[1] - origin.y, b[0] - origin.x, b[1] - origin.y))
+            shape.append(
+                (
+                    t.GetLayer(),
+                    t.GetWidth(),
+                    a[0] - origin.x,
+                    a[1] - origin.y,
+                    b[0] - origin.x,
+                    b[1] - origin.y,
+                )
+            )
         families[family].setdefault(tuple(sorted(shape)), []).append(net)
     return families, switch, runs
 
@@ -280,8 +322,10 @@ def _reshape_cost(have, want):
     switch. Symmetric, because a vertex the rewrite drops still has to collapse
     onto one it keeps."""
     a, b = _vertices(have), _vertices(want)
-    return max(max(min(_dist(p, q) for q in b) for p in a),
-               max(min(_dist(q, p) for p in a) for q in b))
+    return max(
+        max(min(_dist(p, q) for q in b) for p in a),
+        max(min(_dist(q, p) for p in a) for q in b),
+    )
 
 
 def _profile(shape):
@@ -300,9 +344,11 @@ def _profile(shape):
 def _profile_desc(board, shape):
     """A shape's profile, named so a report can put two of them side by side."""
     counts = collections.Counter(
-        (board.GetLayerName(layer), pcbnew.ToMM(width)) for layer, width, *_ in shape)
-    return ", ".join(f"{n} x {layer} {width:.2f}mm"
-                     for (layer, width), n in sorted(counts.items()))
+        (board.GetLayerName(layer), pcbnew.ToMM(width)) for layer, width, *_ in shape
+    )
+    return ", ".join(
+        f"{n} x {layer} {width:.2f}mm" for (layer, width), n in sorted(counts.items())
+    )
 
 
 def _key_motifs(board, tracks, pads, zones):
@@ -316,36 +362,64 @@ def _key_motifs(board, tracks, pads, zones):
         if best < 2:
             # No two keys route the same way, so there is no pattern here to snap
             # to and the "dominant" shape would be whichever one sorted first.
-            skipped.append((", ".join(sorted(n for _, nets in ranked for n in nets)),
-                            f"no two of these {len(ranked)} keys route the same shape, "
-                            f"so the family has no pattern to snap to"))
+            skipped.append(
+                (
+                    ", ".join(sorted(n for _, nets in ranked for n in nets)),
+                    f"no two of these {len(ranked)} keys route the same shape, "
+                    f"so the family has no pattern to snap to",
+                )
+            )
             continue
         # A tie has no majority to defer to, so take the medoid: the shape that
         # asks the least of the others.
         canon, canon_nets = min(
             (s for s in ranked if len(s[1]) == best),
-            key=lambda s: max([_reshape_cost(o, s[0]) for o, _ in ranked if o is not s[0]] or [0]))
+            key=lambda s: max(
+                [_reshape_cost(o, s[0]) for o, _ in ranked if o is not s[0]] or [0]
+            ),
+        )
         for shape, nets in ranked:
             if shape == canon:
                 continue
             cost = _reshape_cost(shape, canon)
             for net in nets:
                 if _profile(shape) != _profile(canon):
-                    skipped.append((net, f"its run is {_profile_desc(board, shape)} where the "
-                                         f"other {best} are {_profile_desc(board, canon)}, so it "
-                                         f"is not the same motif"))
+                    skipped.append(
+                        (
+                            net,
+                            f"its run is {_profile_desc(board, shape)} where the "
+                            f"other {best} are {_profile_desc(board, canon)}, so it "
+                            f"is not the same motif",
+                        )
+                    )
                     continue
                 if cost > MAX_MOVE:
-                    skipped.append((net, f"its run is a different shape, not a stray: "
-                                         f"matching the other {best} would move copper "
-                                         f"{pcbnew.ToMM(cost):.3f}mm"))
+                    skipped.append(
+                        (
+                            net,
+                            f"its run is a different shape, not a stray: "
+                            f"matching the other {best} would move copper "
+                            f"{pcbnew.ToMM(cost):.3f}mm",
+                        )
+                    )
                     continue
                 origin = switch[net][0].GetPosition()
-                want = [(layer, width,
-                         (ax + origin.x, ay + origin.y), (bx + origin.x, by + origin.y))
-                        for layer, width, ax, ay, bx, by in canon]
-                why = _blocked(tracks, pads, zones, _motif_shapes(runs[net][0], want),
-                               ids(runs[net]))
+                want = [
+                    (
+                        layer,
+                        width,
+                        (ax + origin.x, ay + origin.y),
+                        (bx + origin.x, by + origin.y),
+                    )
+                    for layer, width, ax, ay, bx, by in canon
+                ]
+                why = _blocked(
+                    tracks,
+                    pads,
+                    zones,
+                    _motif_shapes(runs[net][0], want),
+                    ids(runs[net]),
+                )
                 if why is not None:
                     skipped.append((net, f"re-laying it would {why}"))
                     continue
@@ -355,9 +429,15 @@ def _key_motifs(board, tracks, pads, zones):
 
 def _motif_shapes(proto, want):
     """The re-laid run where the rewrite would put it, for the clearance test."""
-    return [(layer, proto.GetNetCode(), proto.GetOwnClearance(layer),
-             pcbnew.SHAPE_SEGMENT(_vec(a), _vec(b), width))
-            for layer, width, a, b in want]
+    return [
+        (
+            layer,
+            proto.GetNetCode(),
+            proto.GetOwnClearance(layer),
+            pcbnew.SHAPE_SEGMENT(_vec(a), _vec(b), width),
+        )
+        for layer, width, a, b in want
+    ]
 
 
 def _apply_row_leg(chain, moves):
@@ -403,9 +483,11 @@ def tidy_patterns(path):
 
     for net, points, why in leg_skips:
         a, b = points[0], points[-1]
-        print(f"  LEFT ALONE {net}: {why}, hop "
-              f"({pcbnew.ToMM(a[0]):.3f}, {pcbnew.ToMM(a[1]):.3f}) -> "
-              f"({pcbnew.ToMM(b[0]):.3f}, {pcbnew.ToMM(b[1]):.3f})")
+        print(
+            f"  LEFT ALONE {net}: {why}, hop "
+            f"({pcbnew.ToMM(a[0]):.3f}, {pcbnew.ToMM(a[1]):.3f}) -> "
+            f"({pcbnew.ToMM(b[0]):.3f}, {pcbnew.ToMM(b[1]):.3f})"
+        )
     for net, why in motif_skips:
         print(f"  LEFT ALONE {net}: {why}")
 
@@ -414,17 +496,23 @@ def tidy_patterns(path):
         return
 
     for net, _, _, was, now, travel in legs:
-        print(f"  SNAPPED {net}: row leg y {pcbnew.ToMM(was):.3f} -> "
-              f"{pcbnew.ToMM(now):.3f}, copper moved {pcbnew.ToMM(travel):.3f}mm")
+        print(
+            f"  SNAPPED {net}: row leg y {pcbnew.ToMM(was):.3f} -> "
+            f"{pcbnew.ToMM(now):.3f}, copper moved {pcbnew.ToMM(travel):.3f}mm"
+        )
     for net, _, _, cost in motifs:
-        print(f"  RELAID {net}: onto its family's shape, copper moved "
-              f"{pcbnew.ToMM(cost):.3f}mm")
+        print(
+            f"  RELAID {net}: onto its family's shape, copper moved "
+            f"{pcbnew.ToMM(cost):.3f}mm"
+        )
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper
     board.Save(path)
     worst = max([t for *_, t in legs] + [c for *_, c in motifs])
-    print(f"  TIDIED {path}: {len(legs)} row leg(s) and {len(motifs)} key run(s) snapped "
-          f"to the pattern within {pcbnew.ToMM(worst):.3f}mm, zones re-filled")
+    print(
+        f"  TIDIED {path}: {len(legs)} row leg(s) and {len(motifs)} key run(s) snapped "
+        f"to the pattern within {pcbnew.ToMM(worst):.3f}mm, zones re-filled"
+    )
 
 
 if __name__ == "__main__":

@@ -41,6 +41,7 @@ Active version comes from npm_package_config_VERSION, so run via npm:
 By default both stages are checked; pass stage names to narrow it:
   validate-symmetry.py routed
 """
+
 import argparse
 import collections
 import glob
@@ -110,12 +111,16 @@ STEP = 0.05
 # the very asymmetry this gate exists to catch pass unmeasured.
 LINE_RE = re.compile(
     r'\(gr_line\s+\(start\s+(\S+)\s+(\S+)\)\s+\(end\s+(\S+)\s+(\S+)\)(.*?)\(layer\s+"([^"]+)"',
-    re.S)
+    re.S,
+)
 ARC_RE = re.compile(
-    r'\(gr_arc\s+\(start\s+(\S+)\s+(\S+)\)\s+\(mid\s+(\S+)\s+(\S+)\)\s+\(end\s+(\S+)\s+(\S+)\)'
+    r"\(gr_arc\s+\(start\s+(\S+)\s+(\S+)\)\s+\(mid\s+(\S+)\s+(\S+)\)\s+\(end\s+(\S+)\s+(\S+)\)"
     r'(.*?)\(layer\s+"([^"]+)"',
-    re.S)
-OTHER_RE = re.compile(r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.S)
+    re.S,
+)
+OTHER_RE = re.compile(
+    r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.S
+)
 
 
 def arc_points(start, mid, end):
@@ -124,10 +129,16 @@ def arc_points(start, mid, end):
     d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2))
     if abs(d) < 1e-12:  # collinear: a straight run, not an arc
         return [start, end]
-    cx = ((x1**2 + y1**2) * (y2 - y3) + (x2**2 + y2**2) * (y3 - y1)
-          + (x3**2 + y3**2) * (y1 - y2)) / d
-    cy = ((x1**2 + y1**2) * (x3 - x2) + (x2**2 + y2**2) * (x1 - x3)
-          + (x3**2 + y3**2) * (x2 - x1)) / d
+    cx = (
+        (x1**2 + y1**2) * (y2 - y3)
+        + (x2**2 + y2**2) * (y3 - y1)
+        + (x3**2 + y3**2) * (y1 - y2)
+    ) / d
+    cy = (
+        (x1**2 + y1**2) * (x3 - x2)
+        + (x2**2 + y2**2) * (x1 - x3)
+        + (x3**2 + y3**2) * (x2 - x1)
+    ) / d
     r = math.hypot(x1 - cx, y1 - cy)
 
     def ang(p):
@@ -137,8 +148,10 @@ def arc_points(start, mid, end):
     ccw = ((am - a1) % (2 * math.pi)) < ((a3 - a1) % (2 * math.pi))
     sweep = (a3 - a1) % (2 * math.pi) if ccw else -((a1 - a3) % (2 * math.pi))
     n = max(2, int(abs(sweep) * r / STEP) + 1)
-    return [(cx + r * math.cos(a1 + sweep * i / n), cy + r * math.sin(a1 + sweep * i / n))
-            for i in range(n + 1)]
+    return [
+        (cx + r * math.cos(a1 + sweep * i / n), cy + r * math.sin(a1 + sweep * i / n))
+        for i in range(n + 1)
+    ]
 
 
 def edge_segments(pcb_path):
@@ -153,21 +166,28 @@ def edge_segments(pcb_path):
     segs = []
     for m in LINE_RE.finditer(text):
         if m.group(6) == "Edge.Cuts":
-            segs.append(((float(m.group(1)), float(m.group(2))),
-                         (float(m.group(3)), float(m.group(4)))))
+            segs.append(
+                (
+                    (float(m.group(1)), float(m.group(2))),
+                    (float(m.group(3)), float(m.group(4))),
+                )
+            )
     for m in ARC_RE.finditer(text):
         if m.group(8) == "Edge.Cuts":
             g = [float(m.group(i)) for i in range(1, 7)]
             pts = arc_points((g[0], g[1]), (g[2], g[3]), (g[4], g[5]))
             segs += list(zip(pts, pts[1:]))
 
-    unhandled = sorted({m.group(1) for m in OTHER_RE.finditer(text)
-                        if m.group(3) == "Edge.Cuts"})
+    unhandled = sorted(
+        {m.group(1) for m in OTHER_RE.finditer(text) if m.group(3) == "Edge.Cuts"}
+    )
     if unhandled:
-        sys.exit(f"ERROR {pcb_path}: unhandled Edge.Cuts graphic(s): "
-                 f"{', '.join('gr_' + u for u in unhandled)}. "
-                 "Teach validate-symmetry.py to flatten them; skipping one would "
-                 "leave part of the outline unchecked")
+        sys.exit(
+            f"ERROR {pcb_path}: unhandled Edge.Cuts graphic(s): "
+            f"{', '.join('gr_' + u for u in unhandled)}. "
+            "Teach validate-symmetry.py to flatten them; skipping one would "
+            "leave part of the outline unchecked"
+        )
     if not segs:
         sys.exit(f"ERROR {pcb_path}: no Edge.Cuts outline found")
     return segs
@@ -184,8 +204,9 @@ def normalize(segs, mirror_x):
     x0, y0, x1, y1 = bbox(segs)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     sx = -1 if mirror_x else 1
-    return [(((a[0] - cx) * sx, a[1] - cy), ((b[0] - cx) * sx, b[1] - cy))
-            for a, b in segs]
+    return [
+        (((a[0] - cx) * sx, a[1] - cy), ((b[0] - cx) * sx, b[1] - cy)) for a, b in segs
+    ]
 
 
 class SegmentIndex:
@@ -282,9 +303,13 @@ def zone_segments(zone, cx, cy, s):
     poly = zone.Outline()
     segs = []
     for i in range(poly.OutlineCount()):
-        for chain in [poly.Outline(i)] + [poly.Hole(i, h) for h in range(poly.HoleCount(i))]:
-            ring = [(((chain.CPoint(v).x / MM) - cx) * s, (chain.CPoint(v).y / MM) - cy)
-                    for v in range(chain.PointCount())]
+        for chain in [poly.Outline(i)] + [
+            poly.Hole(i, h) for h in range(poly.HoleCount(i))
+        ]:
+            ring = [
+                (((chain.CPoint(v).x / MM) - cx) * s, (chain.CPoint(v).y / MM) - cy)
+                for v in range(chain.PointCount())
+            ]
             segs += [(ring[v], ring[(v + 1) % len(ring)]) for v in range(len(ring))]
     return segs
 
@@ -302,37 +327,64 @@ def components(pcb_path, mirror):
             # The pad's name is part of the key: without it a 180 rotation that swaps
             # two pads symmetric about the origin leaves the position set unchanged and
             # reads as mirrored, which is exactly the TVS regression this must catch.
-            absolute[(pad.GetNumber(), _q((pad.GetPosition().x / MM - cx) * s),
-                      _q(pad.GetPosition().y / MM - cy),
-                      pad.GetSizeX(), pad.GetSizeY())] += 1
+            absolute[
+                (
+                    pad.GetNumber(),
+                    _q((pad.GetPosition().x / MM - cx) * s),
+                    _q(pad.GetPosition().y / MM - cy),
+                    pad.GetSizeX(),
+                    pad.GetSizeY(),
+                )
+            ] += 1
             sizes[(pad.GetSizeX(), pad.GetSizeY(), pad.GetShape())] += 1
-        fps.append(dict(lib=str(fp.GetFPIDAsString()).split(":")[-1], ref=fp.GetReference(),
-                        layer=fp.GetLayerName(), x=(origin.x / MM - cx) * s, y=origin.y / MM - cy,
-                        rot=(-rot if mirror else rot) % 360, absolute=absolute, sizes=sizes))
+        fps.append(
+            dict(
+                lib=str(fp.GetFPIDAsString()).split(":")[-1],
+                ref=fp.GetReference(),
+                layer=fp.GetLayerName(),
+                x=(origin.x / MM - cx) * s,
+                y=origin.y / MM - cy,
+                rot=(-rot if mirror else rot) % 360,
+                absolute=absolute,
+                sizes=sizes,
+            )
+        )
 
     for i in range(board.GetAreaCount()):
         z = board.GetArea(i)
         if not z.GetIsRuleArea():
             continue  # a filled copper zone is routing, not generated geometry
         bb = z.GetBoundingBox()
-        areas.append(dict(name=z.GetZoneName() or z.GetNetname(), layer=z.GetLayerName(),
-                          x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
-                          y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
-                          w=_q(bb.GetWidth() / MM), h=_q(bb.GetHeight() / MM),
-                          shape=zone_segments(z, cx, cy, s)))
+        areas.append(
+            dict(
+                name=z.GetZoneName() or z.GetNetname(),
+                layer=z.GetLayerName(),
+                x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
+                y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
+                w=_q(bb.GetWidth() / MM),
+                h=_q(bb.GetHeight() / MM),
+                shape=zone_segments(z, cx, cy, s),
+            )
+        )
 
     for d in board.GetDrawings():
         if d.GetLayerName() == "Edge.Cuts":
             continue  # the outline has its own, finer check
         bb = d.GetBoundingBox()
-        gfx.append(dict(kind=d.GetClass(), layer=d.GetLayerName(),
-                        text=d.GetShownText(True) if hasattr(d, "GetShownText") else "",
-                        # Same string, same box, reversed on the board: a text carrying the
-                        # wrong mirror flag is invisible to every other field here.
-                        mirrored=bool(d.IsMirrored()) if hasattr(d, "IsMirrored") else False,
-                        x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
-                        y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
-                        w=_q(bb.GetWidth() / MM), h=_q(bb.GetHeight() / MM)))
+        gfx.append(
+            dict(
+                kind=d.GetClass(),
+                layer=d.GetLayerName(),
+                text=d.GetShownText(True) if hasattr(d, "GetShownText") else "",
+                # Same string, same box, reversed on the board: a text carrying the
+                # wrong mirror flag is invisible to every other field here.
+                mirrored=bool(d.IsMirrored()) if hasattr(d, "IsMirrored") else False,
+                x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
+                y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
+                w=_q(bb.GetWidth() / MM),
+                h=_q(bb.GetHeight() / MM),
+            )
+        )
     return fps, areas, gfx
 
 
@@ -391,18 +443,26 @@ def check_components(a_path, b_path):
             # Position, orientation and library between them pin the placement, and the
             # library pins the pin field, so this says everything that can be said.
             if a["sizes"] != b["sizes"]:
-                fails.append(f"{where}: same footprint name but a different set of pads")
+                fails.append(
+                    f"{where}: same footprint name but a different set of pads"
+                )
             elif abs(((a["rot"] - b["rot"] + 180) % 360) - 180) > ROT_TOLERANCE:
-                fails.append(f"{where}: rotated {a['rot']:.2f} vs {b['rot']:.2f} mirrored")
+                fails.append(
+                    f"{where}: rotated {a['rot']:.2f} vs {b['rot']:.2f} mirrored"
+                )
         elif a["absolute"] != b["absolute"]:
-            fails.append(f"{where}: pads do not land on mirrored positions; a part whose "
-                         f"pin field is not mirror-symmetric needs a compensating rotation")
+            fails.append(
+                f"{where}: pads do not land on mirrored positions; a part whose "
+                f"pin field is not mirror-symmetric needs a compensating rotation"
+            )
 
     for item, half in [(i, a_path) for i in only_a] + [(i, b_path) for i in only_b]:
         if item["lib"] not in KEY_FOOTPRINTS:
-            fails.append(f"{item['ref']} ({item['lib']}) on {os.path.basename(half)}: "
-                         f"no counterpart at the mirrored position, and only keys may "
-                         f"differ between the halves")
+            fails.append(
+                f"{item['ref']} ({item['lib']}) on {os.path.basename(half)}: "
+                f"no counterpart at the mirrored position, and only keys may "
+                f"differ between the halves"
+            )
     for half, unpaired in ((a_path, only_a), (b_path, only_b)):
         stem = os.path.splitext(os.path.basename(half))[0]
         # Keys only: a non-key with no counterpart is already its own failure above,
@@ -410,18 +470,26 @@ def check_components(a_path, b_path):
         unpaired = [i for i in unpaired if i["lib"] in KEY_FOOTPRINTS]
         expected = UNPAIRED_KEYS.get(stem)
         if expected is None:
-            fails.append(f"{os.path.basename(half)}: no expected unpaired-key count is "
-                         f"recorded for this half in UNPAIRED_KEYS")
+            fails.append(
+                f"{os.path.basename(half)}: no expected unpaired-key count is "
+                f"recorded for this half in UNPAIRED_KEYS"
+            )
         elif len(unpaired) != expected:
-            fails.append(f"{os.path.basename(half)}: {len(unpaired)} unpaired key "
-                         f"footprint(s), expected {expected} for the outer pinky columns")
+            fails.append(
+                f"{os.path.basename(half)}: {len(unpaired)} unpaired key "
+                f"footprint(s), expected {expected} for the outer pinky columns"
+            )
 
-    zone_pairs, zone_a, zone_b = _pair(a_zones, b_zones,
-                                       lambda p, q: (p["name"], p["layer"])
-                                       == (q["name"], q["layer"]))
+    zone_pairs, zone_a, zone_b = _pair(
+        a_zones,
+        b_zones,
+        lambda p, q: (p["name"], p["layer"]) == (q["name"], q["layer"]),
+    )
     for z, half in [(i, a_path) for i in zone_a] + [(i, b_path) for i in zone_b]:
-        fails.append(f"zone {z['name']} on {z['layer']} of {os.path.basename(half)}: "
-                     f"no counterpart at the mirrored position")
+        fails.append(
+            f"zone {z['name']} on {z['layer']} of {os.path.basename(half)}: "
+            f"no counterpart at the mirrored position"
+        )
     for a, b in zone_pairs:
         # Outline, not bounding box. A rule area can be reshaped without moving its box:
         # keepout_perimeter_route is a full-board ring with the TRRS band carved out of
@@ -434,37 +502,50 @@ def check_components(a_path, b_path):
         # describing the same border. A carve on the wrong side is millimetres.
         shape_dist, _ = hausdorff(a["shape"], b["shape"])
         if shape_dist > TOLERANCE:
-            fails.append(f"zone {a['name']} on {a['layer']}: same position and extent but "
-                         f"an outline differing by {shape_dist * 1000:.2f}um, so one half "
-                         f"is shaped differently inside")
+            fails.append(
+                f"zone {a['name']} on {a['layer']}: same position and extent but "
+                f"an outline differing by {shape_dist * 1000:.2f}um, so one half "
+                f"is shaped differently inside"
+            )
 
-    _, gfx_a, gfx_b = _pair(a_gfx, b_gfx,
-                            lambda p, q: (p["kind"], p["layer"], p["text"], p["mirrored"],
-                                          p["w"], p["h"])
-                            == (q["kind"], q["layer"], q["text"], q["mirrored"],
-                                q["w"], q["h"]))
+    _, gfx_a, gfx_b = _pair(
+        a_gfx,
+        b_gfx,
+        lambda p, q: (
+            (p["kind"], p["layer"], p["text"], p["mirrored"], p["w"], p["h"])
+            == (q["kind"], q["layer"], q["text"], q["mirrored"], q["w"], q["h"])
+        ),
+    )
     for g, half in [(i, a_path) for i in gfx_a] + [(i, b_path) for i in gfx_b]:
         # User.Eco1 carries the per-key case-reference curves (switch cutouts, keycap
         # recesses), so the keys that differ leave unpaired shapes there by design.
         # A graphic anywhere else is silk or copper and has to mirror.
         if g["layer"] != KEY_REFERENCE_LAYER:
-            fails.append(f"{g['kind']} on {g['layer']} of {os.path.basename(half)} at "
-                         f"({g['x']:.3f}, {g['y']:.3f}){': ' + g['text'] if g['text'] else ''}: "
-                         f"no counterpart at the mirrored position")
+            fails.append(
+                f"{g['kind']} on {g['layer']} of {os.path.basename(half)} at "
+                f"({g['x']:.3f}, {g['y']:.3f}){': ' + g['text'] if g['text'] else ''}: "
+                f"no counterpart at the mirrored position"
+            )
     return fails
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     add_stage_argument(ap, "stage(s) to validate (default: both)")
-    ap.add_argument("--tolerance", type=float, default=TOLERANCE,
-                    help=f"worst accepted mirrored gap in mm (default {TOLERANCE})")
+    ap.add_argument(
+        "--tolerance",
+        type=float,
+        default=TOLERANCE,
+        help=f"worst accepted mirrored gap in mm (default {TOLERANCE})",
+    )
     args = ap.parse_args()
     stages = selected(args)
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:symmetry)")
+        sys.exit(
+            "npm_package_config_VERSION not set -- run via npm (npm run validate:symmetry)"
+        )
 
     failed = set()
     checked = 0
@@ -473,8 +554,10 @@ def main():
         if not boards:
             sys.exit(f"No boards under {version}/kicad/{stage}/ to validate")
         if len(boards) != 2:
-            sys.exit(f"{version}/kicad/{stage}/: expected 2 halves to compare, "
-                     f"found {len(boards)}: {', '.join(map(os.path.basename, boards))}")
+            sys.exit(
+                f"{version}/kicad/{stage}/: expected 2 halves to compare, "
+                f"found {len(boards)}: {', '.join(map(os.path.basename, boards))}"
+            )
 
         a, b = boards
         a_segs, b_segs = edge_segments(a), edge_segments(b)
@@ -485,18 +568,25 @@ def main():
 
         name_a, name_b = os.path.basename(a), os.path.basename(b)
         if dist <= args.tolerance:
-            note(f"  ok {version}/kicad/{stage}/: {name_a} and {name_b} mirror "
-                 f"within {dist * 1000:.2f}um "
-                 f"({ax1 - ax0:.4f} x {ay1 - ay0:.4f} vs {bx1 - bx0:.4f} x {by1 - by0:.4f} mm)")
+            note(
+                f"  ok {version}/kicad/{stage}/: {name_a} and {name_b} mirror "
+                f"within {dist * 1000:.2f}um "
+                f"({ax1 - ax0:.4f} x {ay1 - ay0:.4f} vs {bx1 - bx0:.4f} x {by1 - by0:.4f} mm)"
+            )
         else:
             failed.add(stage)
             sys.stdout.flush()  # held `note` lines are stdout; a pipe would reorder them
-            print(f"  ASYMMETRIC {version}/kicad/{stage}/: {name_a} and {name_b} differ by "
-                  f"{dist * 1000:.2f}um (tolerance {args.tolerance * 1000:.0f}um), worst at "
-                  f"({at[0]:.4f}, {at[1]:.4f}) relative to the board center",
-                  file=sys.stderr)
-            print(f"    {name_a}: {ax1 - ax0:.4f} x {ay1 - ay0:.4f} mm, "
-                  f"{name_b}: {bx1 - bx0:.4f} x {by1 - by0:.4f} mm", file=sys.stderr)
+            print(
+                f"  ASYMMETRIC {version}/kicad/{stage}/: {name_a} and {name_b} differ by "
+                f"{dist * 1000:.2f}um (tolerance {args.tolerance * 1000:.0f}um), worst at "
+                f"({at[0]:.4f}, {at[1]:.4f}) relative to the board center",
+                file=sys.stderr,
+            )
+            print(
+                f"    {name_a}: {ax1 - ax0:.4f} x {ay1 - ay0:.4f} mm, "
+                f"{name_b}: {bx1 - bx0:.4f} x {by1 - by0:.4f} mm",
+                file=sys.stderr,
+            )
 
         # The outline is only the envelope. Everything inside it -- components, their
         # pads, the keepout zones and the silk -- has to mirror too, or the halves are
@@ -509,37 +599,49 @@ def main():
         if dist > FP_TOLERANCE:
             failed.add(stage)
             sys.stdout.flush()
-            print(f"  ASYMMETRIC {version}/kicad/{stage}/: outlines differ by "
-                  f"{dist * 1000:.2f}um, over the {FP_TOLERANCE * 1000:.0f}um the component "
-                  f"check needs of the frame both halves are measured from; components not "
-                  f"compared until the outline mirrors", file=sys.stderr)
+            print(
+                f"  ASYMMETRIC {version}/kicad/{stage}/: outlines differ by "
+                f"{dist * 1000:.2f}um, over the {FP_TOLERANCE * 1000:.0f}um the component "
+                f"check needs of the frame both halves are measured from; components not "
+                f"compared until the outline mirrors",
+                file=sys.stderr,
+            )
             continue
 
         component_fails = check_components(a, b)
         if not component_fails:
-            note(f"  ok {version}/kicad/{stage}/: components, pads, zones and silk mirror")
+            note(
+                f"  ok {version}/kicad/{stage}/: components, pads, zones and silk mirror"
+            )
         else:
             failed.add(stage)
             sys.stdout.flush()
-            print(f"  ASYMMETRIC {version}/kicad/{stage}/: {len(component_fails)} item(s) "
-                  f"are not mirrored between {name_a} and {name_b}", file=sys.stderr)
+            print(
+                f"  ASYMMETRIC {version}/kicad/{stage}/: {len(component_fails)} item(s) "
+                f"are not mirrored between {name_a} and {name_b}",
+                file=sys.stderr,
+            )
             for line in component_fails:
                 print(f"    {line}", file=sys.stderr)
 
     if failed:
         sys.stdout.flush()  # keep the per-stage lines above this summary under a pipe
-        print(f"validate:symmetry: {len(failed)}/{checked} stage(s) have halves that are "
-              "not mirror images. Both halves are built from one set of mirrored anchors in "
-              "config.yaml, so this is a config change to undo, not a board to edit: the "
-              "usual cause is a shape re-anchored to one half's own keys (the outer edge to "
-              "its own pinky column) or a part placed on each half independently. Fix the "
-              "config and re-run the pipeline",
-              file=sys.stderr)
+        print(
+            f"validate:symmetry: {len(failed)}/{checked} stage(s) have halves that are "
+            "not mirror images. Both halves are built from one set of mirrored anchors in "
+            "config.yaml, so this is a config change to undo, not a board to edit: the "
+            "usual cause is a shape re-anchored to one half's own keys (the outer edge to "
+            "its own pinky column) or a part placed on each half independently. Fix the "
+            "config and re-run the pipeline",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    print(f"OK: validate:symmetry: {checked} stage(s) have mirror-exact halves: outline "
-          f"within {args.tolerance * 1000:.0f}um, components within "
-          f"{FP_TOLERANCE * 1000:.0f}um")
+    print(
+        f"OK: validate:symmetry: {checked} stage(s) have mirror-exact halves: outline "
+        f"within {args.tolerance * 1000:.0f}um, components within "
+        f"{FP_TOLERANCE * 1000:.0f}um"
+    )
 
 
 if __name__ == "__main__":

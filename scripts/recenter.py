@@ -9,15 +9,22 @@ fractional shift); each board lands within ~0.5mm of the true page center.
 
 Usage: recenter.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
+
 import re
 import sys
 from lib.pcbnew_quiet import pcbnew
 
 # Standard KiCad page sizes in landscape orientation (width, height) mm.
 PAGE_SIZES = {
-    "A5": (210.0, 148.0), "A4": (297.0, 210.0), "A3": (420.0, 297.0),
-    "A2": (594.0, 420.0), "A1": (841.0, 594.0), "A0": (1189.0, 841.0),
-    "A": (279.4, 215.9), "B": (431.8, 279.4), "C": (558.8, 431.8),
+    "A5": (210.0, 148.0),
+    "A4": (297.0, 210.0),
+    "A3": (420.0, 297.0),
+    "A2": (594.0, 420.0),
+    "A1": (841.0, 594.0),
+    "A0": (1189.0, 841.0),
+    "A": (279.4, 215.9),
+    "B": (431.8, 279.4),
+    "C": (558.8, 431.8),
 }
 
 
@@ -63,13 +70,19 @@ def recenter(path):
     dx, dy = round(px - cx), round(py - cy)
     offset = pcbnew.VECTOR2I(pcbnew.FromMM(dx), pcbnew.FromMM(dy))
 
-    for item in list(board.GetFootprints()) + list(board.GetDrawings()) \
-            + list(board.GetTracks()) + list(board.Zones()):
+    for item in (
+        list(board.GetFootprints())
+        + list(board.GetDrawings())
+        + list(board.GetTracks())
+        + list(board.Zones())
+    ):
         item.Move(offset)
 
     board.Save(path)
-    print(f"  centered {path}: ({cx:.3f},{cy:.3f}) -> ({cx+dx:.3f},{cy+dy:.3f}), "
-          f"offset ({dx},{dy})mm, page center ({px:.1f},{py:.1f})")
+    print(
+        f"  centered {path}: ({cx:.3f},{cy:.3f}) -> ({cx + dx:.3f},{cy + dy:.3f}), "
+        f"offset ({dx},{dy})mm, page center ({px:.1f},{py:.1f})"
+    )
 
 
 if __name__ == "__main__":

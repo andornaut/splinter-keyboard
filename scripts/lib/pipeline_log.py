@@ -15,6 +15,7 @@ see pipeline.sh. common.sh has the bash `note` for the wrappers.
 
 Not an entry point: import it, do not run it.
 """
+
 import os
 
 VERBOSE = bool(os.environ.get("PIPELINE_VERBOSE"))

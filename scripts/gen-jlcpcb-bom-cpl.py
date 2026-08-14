@@ -19,6 +19,7 @@ Placement rules (see jlcpcb-parts.json `_comment`):
 Usage:
   gen-jlcpcb-bom-cpl.py --pos POS.csv --parts parts.json --bom BOM.csv --cpl CPL.csv
 """
+
 import argparse
 import csv
 import json
@@ -49,9 +50,9 @@ def main():
     with open(args.pos, newline="") as f:
         rows = list(csv.DictReader(f))
 
-    placed = []                          # (pos_row, spec) for footprints we place
-    dnp = defaultdict(list)              # package -> refs with no JSON entry
-    no_lcsc = defaultdict(list)          # package -> refs listed but unassigned
+    placed = []  # (pos_row, spec) for footprints we place
+    dnp = defaultdict(list)  # package -> refs with no JSON entry
+    no_lcsc = defaultdict(list)  # package -> refs listed but unassigned
 
     for r in rows:
         spec = parts.get(r["Package"])
@@ -66,8 +67,11 @@ def main():
     # output rather than silently dropping the part from the assembly.
     if no_lcsc:
         for pkg, refs in sorted(no_lcsc.items()):
-            print(f"  ERROR {pkg}: no lcsc for its {len(refs)} part(s), "
-                  f"set one in {args.parts}", file=sys.stderr)
+            print(
+                f"  ERROR {pkg}: no lcsc for its {len(refs)} part(s), "
+                f"set one in {args.parts}",
+                file=sys.stderr,
+            )
         sys.exit(1)
 
     # CPL: one row per placed footprint, rotation corrected.
@@ -91,8 +95,9 @@ def main():
         for lcsc, refs in sorted(refs_by_lcsc.items()):
             spec = spec_by_lcsc[lcsc]
             designators = ",".join(sorted(refs, key=ref_key))
-            w.writerow([spec.get("comment", ""), designators,
-                        spec.get("package", ""), lcsc])
+            w.writerow(
+                [spec.get("comment", ""), designators, spec.get("package", ""), lcsc]
+            )
 
     # List the Do-Not-Place footprints (grouped by package) so a part that fell
     # through unintentionally -- e.g. a renamed footprint no longer matching a
@@ -101,8 +106,10 @@ def main():
     # sockets.
     dnp_items = sorted(dnp.items())
     n_dnp = sum(len(refs) for _, refs in dnp_items)
-    print(f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), "
-          f"{n_dnp} do-not-place")
+    print(
+        f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), "
+        f"{n_dnp} do-not-place"
+    )
     # Which packages they are is verbose-only: validate:fab is the gate that a
     # part meant for assembly did not fall through to here (it requires every
     # footprint with an lcsc to appear in the CPL exactly once), so this listing

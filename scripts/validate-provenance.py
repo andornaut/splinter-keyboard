@@ -26,6 +26,7 @@ there would block a legitimate fab of a current routed master on unrelated
 unrouted/ drift):
   validate-provenance.py routed
 """
+
 import argparse
 import collections
 import glob
@@ -53,23 +54,30 @@ def stamped_text(pcb_path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     add_stage_argument(ap, "stage(s) to validate (default: both)")
-    ap.add_argument("--quiet", action="store_true",
-                    help="say nothing when every board passes (for use as a gate inside\n"
-                         "another step, which reports its own result)")
+    ap.add_argument(
+        "--quiet",
+        action="store_true",
+        help="say nothing when every board passes (for use as a gate inside\n"
+        "another step, which reports its own result)",
+    )
     args = ap.parse_args()
     stages = selected(args)
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)")
+        sys.exit(
+            "npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)"
+        )
 
     config = f"{version}/ergogen/config.yaml"
     if not os.path.isfile(config):
         sys.exit(f"ERROR {config}: not found")
     expected = config_hash(config)
 
-    staged = {stage: sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb"))
-              for stage in stages}
+    staged = {
+        stage: sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb"))
+        for stage in stages
+    }
     boards = [pcb for stage in stages for pcb in staged[stage]]
     if not boards:
         sys.exit(f"No boards under {version}/kicad/{{{','.join(stages)}}}/ to validate")
@@ -82,19 +90,26 @@ def main():
             note(f"  ok {pcb}: config={stored}")
         elif stored is None:
             sys.stdout.flush()  # this line is stderr; keep it in step with the ok lines
-            print(f"  MISSING {pcb}: no provenance stamp, rebuild to stamp", file=sys.stderr)
+            print(
+                f"  MISSING {pcb}: no provenance stamp, rebuild to stamp",
+                file=sys.stderr,
+            )
             failures += 1
         else:
             sys.stdout.flush()
-            print(f"  MISMATCH {pcb}: stamped config={stored}, current config={expected}",
-                  file=sys.stderr)
+            print(
+                f"  MISMATCH {pcb}: stamped config={stored}, current config={expected}",
+                file=sys.stderr,
+            )
             failures += 1
 
     if failures:
         sys.stdout.flush()  # keep the ok lines above this summary under a pipe
-        print(f"validate:provenance: {failures}/{len(boards)} board(s) stale or unstamped "
-              f"for {version} (config={expected}). Rebuild, re-copy and re-route to clear",
-              file=sys.stderr)
+        print(
+            f"validate:provenance: {failures}/{len(boards)} board(s) stale or unstamped "
+            f"for {version} (config={expected}). Rebuild, re-copy and re-route to clear",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # Every board above hashes to the current config, so anything left here is a
@@ -108,20 +123,26 @@ def main():
         by_stamp = collections.defaultdict(list)
         for pcb in staged[stage]:
             by_stamp[stamps[pcb]].append(os.path.basename(pcb))
-        print(f"  SPLIT {version}/kicad/{stage}/: boards were not built in one run",
-              file=sys.stderr)
+        print(
+            f"  SPLIT {version}/kicad/{stage}/: boards were not built in one run",
+            file=sys.stderr,
+        )
         for text, names in sorted(by_stamp.items()):
             print(f"    {', '.join(names)}: {text}", file=sys.stderr)
     if split:
-        print(f"validate:provenance: {len(split)} stage(s) mix boards from different builds. "
-              "The config hash cannot see this, since identical config bytes hash the same "
-              "across builds. Re-run the pipeline so every board is built in one run",
-              file=sys.stderr)
+        print(
+            f"validate:provenance: {len(split)} stage(s) mix boards from different builds. "
+            "The config hash cannot see this, since identical config bytes hash the same "
+            "across builds. Re-run the pipeline so every board is built in one run",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     if not args.quiet:
-        print(f"OK: validate:provenance: {len(boards)} board(s) match {config} "
-              f"(config={expected})")
+        print(
+            f"OK: validate:provenance: {len(boards)} board(s) match {config} "
+            f"(config={expected})"
+        )
 
 
 if __name__ == "__main__":

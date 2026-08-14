@@ -43,6 +43,7 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      tree (clean=no/unknown), which makes its commit= stamp meaningless; the config=
      hash match says nothing about it, so validate:provenance never flags it.
 """
+
 import csv
 import glob
 import json
@@ -56,6 +57,7 @@ from lib.pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT 
 # Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
 # emits to stderr each time it re-inits image handlers on a board load.
 import wx
+
 wx.Log.SetLogLevel(wx.LOG_Warning)
 
 COMMON_SH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "common.sh")
@@ -75,8 +77,10 @@ def _layer_fragments():
     with open(COMMON_SH) as f:
         match = JLCPCB_LAYERS_RE.search(f.read())
     if not match:
-        raise SystemExit(f"ERROR {COMMON_SH}: no JLCPCB_LAYERS= assignment; it is the "
-                         "list of layers fab exports and this check reads it from there")
+        raise SystemExit(
+            f"ERROR {COMMON_SH}: no JLCPCB_LAYERS= assignment; it is the "
+            "list of layers fab exports and this check reads it from there"
+        )
     return tuple(name.replace(".", "_") for name in match.group(1).split(","))
 
 
@@ -106,6 +110,7 @@ COORD_Y_RE = re.compile(r"Y(-?\d+)")
 
 
 # --- check 1: GND ground plane -------------------------------------------------
+
 
 def _zone_filled_area_mm2(zone, layer):
     """Filled area of a zone on a layer in mm^2, or None if the API is unavailable."""
@@ -209,18 +214,23 @@ def gnd_flood_in_gerber(zip_path, board_w, board_h):
 
 # --- check 2: gerber-set completeness ------------------------------------------
 
+
 def gerber_zip_missing(zip_path):
     """Return the list of expected gerber/drill members absent from the zip."""
     with zipfile.ZipFile(zip_path) as z:
         names = z.namelist()
-    missing = [frag for frag in LAYER_FRAGMENTS
-               if not any(frag in n and n.endswith(".gbr") for n in names)]
+    missing = [
+        frag
+        for frag in LAYER_FRAGMENTS
+        if not any(frag in n and n.endswith(".gbr") for n in names)
+    ]
     if not any(n.endswith(".drl") for n in names):
         missing.append("drill(.drl)")
     return missing
 
 
 # --- check 3: assembly placement sanity ----------------------------------------
+
 
 def assembled_refs_on_board(board, assembled_pkgs):
     """Map ref -> package for footprints whose package is an assembled part. The
@@ -240,10 +250,13 @@ def csv_designators(path, column):
 
 # --- driver --------------------------------------------------------------------
 
+
 def main():
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:fab)")
+        sys.exit(
+            "npm_package_config_VERSION not set -- run via npm (npm run validate:fab)"
+        )
 
     config = f"{version}/ergogen/config.yaml"
     routed = sorted(glob.glob(f"{version}/kicad/routed/[!_]*.kicad_pcb"))
@@ -254,8 +267,9 @@ def main():
     assembled_pkgs = {}
     if os.path.isfile(parts_path):
         with open(parts_path) as f:
-            assembled_pkgs = {k: v for k, v in json.load(f).get("parts", {}).items()
-                              if v.get("lcsc")}
+            assembled_pkgs = {
+                k: v for k, v in json.load(f).get("parts", {}).items() if v.get("lcsc")
+            }
 
     config_mtime = os.path.getmtime(config) if os.path.isfile(config) else 0
     failures, warnings = [], []
@@ -268,7 +282,9 @@ def main():
         print(f"  audit {pcb}: {out}/")
 
         if not os.path.isdir(out):
-            failures.append(f"{name}: no fab output at {out}/ -- run `npm run fab` first")
+            failures.append(
+                f"{name}: no fab output at {out}/ -- run `npm run fab` first"
+            )
             continue
 
         board = pcbnew.LoadBoard(pcb)
@@ -278,12 +294,18 @@ def main():
         # 1. GND ground plane: master zone + exported gerber flood.
         present, filled, area = gnd_zone_master(board)
         if not present:
-            failures.append(f"{name}: routed master has no non-teardrop GND zone on a copper layer")
+            failures.append(
+                f"{name}: routed master has no non-teardrop GND zone on a copper layer"
+            )
         elif not filled:
-            failures.append(f"{name}: GND zone present but not filled in the routed master")
+            failures.append(
+                f"{name}: GND zone present but not filled in the routed master"
+            )
         elif area is not None and area < ZONE_AREA_FRAC * board_w * board_h:
-            failures.append(f"{name}: GND fill only {area:.0f}mm^2 of {board_w * board_h:.0f}mm^2 "
-                            f"board (< {ZONE_AREA_FRAC:.0%}); looks like islands, not a plane")
+            failures.append(
+                f"{name}: GND fill only {area:.0f}mm^2 of {board_w * board_h:.0f}mm^2 "
+                f"board (< {ZONE_AREA_FRAC:.0%}); looks like islands, not a plane"
+            )
         else:
             shown = f"{area:.0f}mm^2" if area is not None else "filled"
             print(f"    ok GND zone (master): {shown}")
@@ -294,8 +316,10 @@ def main():
             if gnd_flood_in_gerber(zip_path, board_w, board_h):
                 print("    ok GND flood (gerber)")
             else:
-                failures.append(f"{name}: no copper flood spanning the board in {name}-gerber.zip "
-                                f"-- the shipped gerbers have no ground plane")
+                failures.append(
+                    f"{name}: no copper flood spanning the board in {name}-gerber.zip "
+                    f"-- the shipped gerbers have no ground plane"
+                )
 
             # 2. gerber-set completeness.
             missing = gerber_zip_missing(zip_path)
@@ -313,14 +337,18 @@ def main():
             if not (os.path.isfile(cpl) and os.path.getsize(cpl) > 0):
                 failures.append(f"{name}: CPL missing or empty ({cpl})")
             elif not expected:
-                failures.append(f"{name}: no assembled footprints found on the board "
-                                f"(expected {', '.join(assembled_pkgs)})")
+                failures.append(
+                    f"{name}: no assembled footprints found on the board "
+                    f"(expected {', '.join(assembled_pkgs)})"
+                )
             else:
                 placed = set(csv_designators(cpl, "Designator"))
                 dropped = sorted(set(expected) - placed)
                 if dropped:
-                    failures.append(f"{name}: {len(dropped)} assembled part(s) absent from the CPL: "
-                                    f"{', '.join(dropped)}")
+                    failures.append(
+                        f"{name}: {len(dropped)} assembled part(s) absent from the CPL: "
+                        f"{', '.join(dropped)}"
+                    )
                 else:
                     print(f"    ok assembly: {len(expected)} placement(s) in CPL")
 
@@ -334,14 +362,20 @@ def main():
         stamp = board.GetTitleBlock().GetComment(0)
         clean = re.search(r"\bclean=(\w+)", stamp) if stamp else None
         if not clean or clean.group(1) != "yes":
-            warnings.append(f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})")
+            warnings.append(
+                f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})"
+            )
 
         # 4. freshness ordering (gate).
         pcb_mtime = os.path.getmtime(pcb)
         if config_mtime and pcb_mtime < config_mtime:
-            failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
+            failures.append(
+                f"{name}: routed master older than config.yaml -- rebuild (stale)"
+            )
         if os.path.isfile(zip_path) and os.path.getmtime(zip_path) < pcb_mtime:
-            failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
+            failures.append(
+                f"{name}: gerber zip older than the routed master -- re-run fab (stale)"
+            )
 
     # 5. teardrop consistency (gate): the mirrored halves should carry comparable
     # teardrop counts; a board far below the best-teardropped one lost them.
@@ -352,7 +386,8 @@ def main():
             if count < floor:
                 failures.append(
                     f"{name}: only {count} teardrops vs {max_count} on the best-teardropped "
-                    f"board (< {TEARDROP_MIN_FRAC:.0%}); teardrops were lost -- restore the master")
+                    f"board (< {TEARDROP_MIN_FRAC:.0%}); teardrops were lost -- restore the master"
+                )
 
     if warnings or failures:
         sys.stdout.flush()  # keep the per-board lines above these under a pipe
@@ -361,10 +396,15 @@ def main():
     if failures:
         for fmsg in failures:
             print(f"  FAIL {fmsg}", file=sys.stderr)
-        print(f"validate:fab: {len(failures)} check(s) failed for {version}", file=sys.stderr)
+        print(
+            f"validate:fab: {len(failures)} check(s) failed for {version}",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    print(f"OK: validate:fab: {len(routed)} board(s) passed all gates for {version}"
-          f"{f' ({len(warnings)} warning(s))' if warnings else ''}")
+    print(
+        f"OK: validate:fab: {len(routed)} board(s) passed all gates for {version}"
+        f"{f' ({len(warnings)} warning(s))' if warnings else ''}"
+    )
 
 
 if __name__ == "__main__":

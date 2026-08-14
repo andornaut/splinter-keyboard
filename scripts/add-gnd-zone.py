@@ -32,6 +32,7 @@ left untouched, so re-running (e.g. on every build) is safe.
 
 Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
+
 import sys
 from collections import namedtuple
 
@@ -79,8 +80,9 @@ def _signal_track_len_mm(tracks, doomed_ids, layer):
 
 
 def _gnd_pads(board):
-    return [p for fp in board.GetFootprints() for p in fp.Pads()
-            if p.GetNetname() == "GND"]
+    return [
+        p for fp in board.GetFootprints() for p in fp.Pads() if p.GetNetname() == "GND"
+    ]
 
 
 def choose_gnd_layer(board):
@@ -101,7 +103,9 @@ def choose_gnd_layer(board):
         signal_mm = _signal_track_len_mm(tracks, doomed_ids, layer)
         reach = sum(1 for p in gnd_pads if p.IsOnLayer(layer))
         cost = signal_mm + UNREACHABLE_GND_PAD_COST_MM * (total_gnd - reach)
-        rows.append(LayerScore(layer, board.GetLayerName(layer), signal_mm, reach, cost))
+        rows.append(
+            LayerScore(layer, board.GetLayerName(layer), signal_mm, reach, cost)
+        )
     # CANDIDATE_LAYERS is in tie-break order, and min() is stable, so the first
     # (B.Cu) wins an exact cost tie.
     best = min(rows, key=lambda r: r.cost)
@@ -112,8 +116,10 @@ def _print_analysis(path, best, rows, total_gnd):
     note(f"  analysis {path}: GND pour layer")
     for r in rows:
         mark = "  <- selected" if r.layer == best.layer else ""
-        note(f"    {r.name}: signal={r.signal_mm:7.1f}mm  "
-             f"GND-pads-reachable={r.reach}/{total_gnd}  cost={r.cost:7.1f}{mark}")
+        note(
+            f"    {r.name}: signal={r.signal_mm:7.1f}mm  "
+            f"GND-pads-reachable={r.reach}/{total_gnd}  cost={r.cost:7.1f}{mark}"
+        )
     note(f"    selected {best.name}")
 
 
@@ -135,10 +141,14 @@ def add_gnd_zone(path):
     # is a GND zone on its layer. Counting them here made the guard see a "GND
     # pour" that was never flooded and skip the actual fill once teardrop-copying
     # entered the pipeline (copy:traces-to-unrouted carries GND teardrops in).
-    existing = [board.GetLayerName(cand) for cand in CANDIDATE_LAYERS
-                if any(z.GetNetname() == "GND" and z.IsOnLayer(cand)
-                       and not z.IsTeardropArea()
-                       for z in board.Zones())]
+    existing = [
+        board.GetLayerName(cand)
+        for cand in CANDIDATE_LAYERS
+        if any(
+            z.GetNetname() == "GND" and z.IsOnLayer(cand) and not z.IsTeardropArea()
+            for z in board.Zones()
+        )
+    ]
     if existing:
         msg = f"GND pour already present on {', '.join(existing)}, leaving as-is"
         if layer_name not in existing:
@@ -168,8 +178,10 @@ def add_gnd_zone(path):
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # sets the zone's filled state
 
     board.Save(path)
-    print(f"  ADDED {path}: {layer_name} GND pour, {pcbnew.ToMM(x1 - x0):.1f} x "
-          f"{pcbnew.ToMM(y1 - y0):.1f}mm pour extent (larger than the board outline)")
+    print(
+        f"  ADDED {path}: {layer_name} GND pour, {pcbnew.ToMM(x1 - x0):.1f} x "
+        f"{pcbnew.ToMM(y1 - y0):.1f}mm pour extent (larger than the board outline)"
+    )
 
 
 if __name__ == "__main__":
