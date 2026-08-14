@@ -1,5 +1,7 @@
 # Splinter keyboard
 
+[![CI](https://github.com/andornaut/splinter-keyboard/actions/workflows/test.yml/badge.svg)](https://github.com/andornaut/splinter-keyboard/actions/workflows/test.yml)
+
 A 62-key split columnar ergonomic keyboard.
 
 This repo holds the hardware design files; firmware lives in a [separate repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter). Design pipeline: Keyboard Layout Editor -> Ergogen -> KiCad -> fabrication -> Onshape -> OrcaSlicer -> QMK (see [Developing](#developing)).
