@@ -25,7 +25,7 @@ _saved_stderr_fd = os.dup(2)
 _devnull_fd = os.open(os.devnull, os.O_WRONLY)
 os.dup2(_devnull_fd, 2)
 try:
-    import pcbnew
+    import pcbnew  # noqa: F401  # re-exported; this module exists to import it quietly
 finally:
     os.dup2(_saved_stderr_fd, 2)
     os.close(_devnull_fd)

@@ -25,6 +25,7 @@ has_human_routes() {
   # Use grep -v | wc -l (not grep -vq): the system grep may be ugrep, whose -vq
   # reports "pattern absent" rather than "a non-matching line exists".
   local n
+  # shellcheck disable=SC2126 # grep -c would reintroduce the ugrep problem above.
   n=$(grep -A4 '(segment' "$1" | grep '(width ' | grep -v '(width 0.25)' | wc -l)
   [ "$n" -gt 0 ]
 }

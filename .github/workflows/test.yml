@@ -1,0 +1,57 @@
+name: Test
+
+# Every branch, not just main and pull requests: work lands on main directly as
+# often as it arrives through one, so a check that only runs on main is a check
+# that runs after the fact.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keyed on the branch rather than the ref, so the push event and the pull
+# request event for one branch share a group instead of running the same checks
+# twice. Qualified by the repository the branch lives in, since a fork names its
+# branches itself: a pull request from a fork's main would otherwise share a
+# group with a push to this one and cancel it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      # Scoped to scripts/, since ergogen/ and v4/ergogen/ carry vendored
+      # footprint libraries this repository does not maintain. Each script
+      # sources lib/common.sh through a path built from BASH_SOURCE, which
+      # shellcheck cannot resolve on its own: -x follows the source and
+      # -P SCRIPTDIR tells it to look beside the script doing the sourcing.
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        env:
+          SHELLCHECK_OPTS: -x -P SCRIPTDIR
+        with:
+          scandir: "./scripts"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install ruff==0.15.16
+
+      # The pipeline scripts import pcbnew, which only exists inside KiCad's
+      # own interpreter, so this checks them without running them.
+      - name: Run ruff check
+        run: ruff check scripts/ v4/onshape/gen-case.py
