@@ -35,8 +35,8 @@ import re
 import sys
 
 from lib.pipeline_log import note
-from lib.stages import add_stage_argument, selected
 from lib.provenance import config_hash, parse_config_field
+from lib.stages import add_stage_argument, selected
 
 COMMENT1_RE = re.compile(r'\(comment\s+1\s+"([^"]*)"\)')
 

@@ -269,8 +269,10 @@ def tidy_slivers(path):
     refused = [(s, _refusal(tracks, pads, zones, s)) for s in _slivers(tracks)]
     if refused:
         lines = [
-            f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within "
-            f"{pcbnew.ToMM(MAX_MOVE):.2f}mm"
+            (
+                f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within "
+                f"{pcbnew.ToMM(MAX_MOVE):.2f}mm"
+            )
         ]
         for sliver, detail in refused:
             p = sliver.GetStart()

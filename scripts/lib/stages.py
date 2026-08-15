@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """The two board stages, and the argument every validator uses to scope itself.
 
 `unrouted/` is where routing is done and `routed/` holds the masters fab exports

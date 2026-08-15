@@ -52,7 +52,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install ruff==0.15.16
+        run: pip install ruff==0.16.3
 
       # The pipeline scripts import pcbnew, which only exists inside KiCad's
       # own interpreter, so this checks them without running them.

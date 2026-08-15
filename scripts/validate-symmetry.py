@@ -45,6 +45,7 @@ By default both stages are checked; pass stage names to narrow it:
 import argparse
 import collections
 import glob
+import itertools
 import math
 import os
 import re
@@ -53,7 +54,6 @@ import sys
 from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
 from lib.stages import add_stage_argument, selected
-
 
 MM = 1e6  # pcbnew internal units (nm) per mm
 
@@ -111,15 +111,15 @@ STEP = 0.05
 # the very asymmetry this gate exists to catch pass unmeasured.
 LINE_RE = re.compile(
     r'\(gr_line\s+\(start\s+(\S+)\s+(\S+)\)\s+\(end\s+(\S+)\s+(\S+)\)(.*?)\(layer\s+"([^"]+)"',
-    re.S,
+    re.DOTALL,
 )
 ARC_RE = re.compile(
     r"\(gr_arc\s+\(start\s+(\S+)\s+(\S+)\)\s+\(mid\s+(\S+)\s+(\S+)\)\s+\(end\s+(\S+)\s+(\S+)\)"
     r'(.*?)\(layer\s+"([^"]+)"',
-    re.S,
+    re.DOTALL,
 )
 OTHER_RE = re.compile(
-    r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.S
+    r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.DOTALL
 )
 
 
@@ -176,7 +176,7 @@ def edge_segments(pcb_path):
         if m.group(8) == "Edge.Cuts":
             g = [float(m.group(i)) for i in range(1, 7)]
             pts = arc_points((g[0], g[1]), (g[2], g[3]), (g[4], g[5]))
-            segs += list(zip(pts, pts[1:]))
+            segs += list(itertools.pairwise(pts))
 
     unhandled = sorted(
         {m.group(1) for m in OTHER_RE.finditer(text) if m.group(3) == "Edge.Cuts"}
@@ -229,12 +229,12 @@ class SegmentIndex:
                 self.cells.setdefault(self._key(p), set()).add(i)
 
     def _key(self, p):
-        return (int(math.floor(p[0] / self.CELL)), int(math.floor(p[1] / self.CELL)))
+        return (math.floor(p[0] / self.CELL), math.floor(p[1] / self.CELL))
 
     def distance(self, p):
         cx, cy = self._key(p)
         best = math.inf
-        for ring in range(0, 64):
+        for ring in range(64):
             found = False
             for gx in range(cx - ring, cx + ring + 1):
                 for gy in range(cy - ring, cy + ring + 1):
@@ -338,16 +338,16 @@ def components(pcb_path, mirror):
             ] += 1
             sizes[(pad.GetSizeX(), pad.GetSizeY(), pad.GetShape())] += 1
         fps.append(
-            dict(
-                lib=str(fp.GetFPIDAsString()).split(":")[-1],
-                ref=fp.GetReference(),
-                layer=fp.GetLayerName(),
-                x=(origin.x / MM - cx) * s,
-                y=origin.y / MM - cy,
-                rot=(-rot if mirror else rot) % 360,
-                absolute=absolute,
-                sizes=sizes,
-            )
+            {
+                "lib": str(fp.GetFPIDAsString()).split(":")[-1],
+                "ref": fp.GetReference(),
+                "layer": fp.GetLayerName(),
+                "x": (origin.x / MM - cx) * s,
+                "y": origin.y / MM - cy,
+                "rot": (-rot if mirror else rot) % 360,
+                "absolute": absolute,
+                "sizes": sizes,
+            }
         )
 
     for i in range(board.GetAreaCount()):
@@ -356,15 +356,15 @@ def components(pcb_path, mirror):
             continue  # a filled copper zone is routing, not generated geometry
         bb = z.GetBoundingBox()
         areas.append(
-            dict(
-                name=z.GetZoneName() or z.GetNetname(),
-                layer=z.GetLayerName(),
-                x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
-                y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
-                w=_q(bb.GetWidth() / MM),
-                h=_q(bb.GetHeight() / MM),
-                shape=zone_segments(z, cx, cy, s),
-            )
+            {
+                "name": z.GetZoneName() or z.GetNetname(),
+                "layer": z.GetLayerName(),
+                "x": ((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
+                "y": (bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
+                "w": _q(bb.GetWidth() / MM),
+                "h": _q(bb.GetHeight() / MM),
+                "shape": zone_segments(z, cx, cy, s),
+            }
         )
 
     for d in board.GetDrawings():
@@ -372,18 +372,18 @@ def components(pcb_path, mirror):
             continue  # the outline has its own, finer check
         bb = d.GetBoundingBox()
         gfx.append(
-            dict(
-                kind=d.GetClass(),
-                layer=d.GetLayerName(),
-                text=d.GetShownText(True) if hasattr(d, "GetShownText") else "",
+            {
+                "kind": d.GetClass(),
+                "layer": d.GetLayerName(),
+                "text": d.GetShownText(True) if hasattr(d, "GetShownText") else "",
                 # Same string, same box, reversed on the board: a text carrying the
                 # wrong mirror flag is invisible to every other field here.
-                mirrored=bool(d.IsMirrored()) if hasattr(d, "IsMirrored") else False,
-                x=((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
-                y=(bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
-                w=_q(bb.GetWidth() / MM),
-                h=_q(bb.GetHeight() / MM),
-            )
+                "mirrored": bool(d.IsMirrored()) if hasattr(d, "IsMirrored") else False,
+                "x": ((bb.GetLeft() + bb.GetRight()) / 2 / MM - cx) * s,
+                "y": (bb.GetTop() + bb.GetBottom()) / 2 / MM - cy,
+                "w": _q(bb.GetWidth() / MM),
+                "h": _q(bb.GetHeight() / MM),
+            }
         )
     return fps, areas, gfx
 

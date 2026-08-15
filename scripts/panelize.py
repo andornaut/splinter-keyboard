@@ -21,10 +21,13 @@ import argparse
 import os
 import sys
 
-from lib.pcbnew_quiet import pcbnew
-from kikit.panelize import Panel, Origin
-from kikit.units import mm
+# First, and marked so the import sort leaves it there: it silences pcbnew's
+# startup wxASSERT by swapping fd 2 across the import, which only works if
+# nothing has imported pcbnew yet. kikit below imports pcbnew itself.
+from lib.pcbnew_quiet import pcbnew  # isort: skip
 
+from kikit.panelize import Origin, Panel
+from kikit.units import mm
 from lib.provenance import read_stamp, write_stamp
 
 
@@ -169,7 +172,7 @@ def main():
     # KiCad internal units are integer nanometres; mm scales up, so round to int
     # (argparse gives floats) before these reach pcbnew/KiKit geometry calls.
     def nm(v):
-        return int(round(v * mm))
+        return round(v * mm)
 
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     build(

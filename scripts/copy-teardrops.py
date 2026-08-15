@@ -12,6 +12,7 @@ copy. Usage: copy-teardrops.py <src.kicad_pcb> <dst.kicad_pcb>
 """
 
 import sys
+
 from lib.pcbnew_quiet import pcbnew
 
 

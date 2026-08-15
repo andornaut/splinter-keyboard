@@ -53,10 +53,9 @@ import sys
 import urllib.error
 import urllib.request
 
+from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
 from lib.stages import add_stage_argument, selected
-
-from lib.pcbnew_quiet import pcbnew
 
 FOOTPRINT_JS = "ergogen/footprints/mcu_liatris.js"
 FETCH_TIMEOUT_S = 15
@@ -73,8 +72,11 @@ def pin_labels():
     The leading boundary matters: without it `GP15_label` also matches `P15_label`
     and the extra-pin entries silently overwrite the header pins.
     """
-    src = open(FOOTPRINT_JS).read()
-    return dict(re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.M))
+    with open(FOOTPRINT_JS) as fh:
+        src = fh.read()
+    return dict(
+        re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.MULTILINE)
+    )
 
 
 def mcu_pad_map(board):
@@ -130,9 +132,8 @@ def matrix_order(board):
         if "switch_mx" in fpid:
             splayed = abs(fp.GetOrientationDegrees() % 180.0) > 0.5
             for pad in fp.Pads():
-                if pad.GetPadName() == "1":
-                    if not splayed:
-                        cols.setdefault(pad.GetNetname(), []).append(pos.x)
+                if pad.GetPadName() == "1" and not splayed:
+                    cols.setdefault(pad.GetNetname(), []).append(pos.x)
         elif "diode" in fpid:
             for pad in fp.Pads():
                 if pad.GetPadName() == "1":  # cathode, carries the row net

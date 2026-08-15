@@ -35,9 +35,9 @@ for _p in ("/usr/lib/freecad-python3/lib", "/usr/lib/freecad/lib"):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import FreeCAD as App  # noqa: E402
-import Part  # noqa: E402
-from FreeCAD import Placement, Rotation, Vector  # noqa: E402
+import FreeCAD as App
+import Part
+from FreeCAD import Placement, Rotation, Vector
 
 DEFAULT_DXF = "dist/v4/ergogen/outlines/full_unfilleted.dxf"
 DEFAULT_OUTDIR = "dist/v4/onshape"
@@ -165,7 +165,8 @@ CUTOUT_RECESS_SPLIT = 230.0
 # ---- DXF, as real edges --------------------------------------------------
 def dxf_entities(path):
     """Group codes we care about, per LINE/ARC/CIRCLE entity."""
-    lines = open(path).read().splitlines()
+    with open(path) as fh:
+        lines = fh.read().splitlines()
     out, kind, g = [], None, {}
     for i in range(0, len(lines) - 1, 2):
         code, val = lines[i].strip(), lines[i + 1].strip()
@@ -213,7 +214,9 @@ def centre_xy(shape):
 def face_area(wire):
     try:
         return Part.Face(wire).Area
-    except Exception:
+    # Broad on purpose: a wire that does not bound a face is the ordinary case
+    # here, and FreeCAD raises whatever its OCC binding raises for it.
+    except Exception:  # noqa: BLE001
         return 0.0
 
 
@@ -237,9 +240,9 @@ def classify(path, half):
     bosses = [c for c, r in circles if abs(r - BOSS_R) < 0.01]
     if len(bosses) != 3:
         raise SystemExit(
-            "FAIL gen-case: found %d boss circle(s) of radius %.2f, expected 3. If "
-            "screw_boss_radius changed in config.yaml, BOSS_R must follow"
-            % (len(bosses), BOSS_R)
+            f"FAIL gen-case: found {len(bosses)} boss circle(s) of radius "
+            f"{BOSS_R:.2f}, expected 3. If screw_boss_radius changed in "
+            "config.yaml, BOSS_R must follow"
         )
     holes = [w for w in rest if face_area(w) < CUTOUT_RECESS_SPLIT]
     recess = [w for w in rest if face_area(w) >= CUTOUT_RECESS_SPLIT]
@@ -249,10 +252,10 @@ def classify(path, half):
     # back as correct.
     if len(holes) != len(recess):
         raise SystemExit(
-            "FAIL gen-case: %s half split into %d cutout(s) and %d recess(es), which must "
-            "be equal. Each switch is one cutout nested in one recess, so a change to "
-            "either size in config.yaml means CUTOUT_RECESS_SPLIT must follow"
-            % (half, len(holes), len(recess))
+            f"FAIL gen-case: {half} half split into {len(holes)} cutout(s) and "
+            f"{len(recess)} recess(es), which must be equal. Each switch is one "
+            "cutout nested in one recess, so a change to either size in "
+            "config.yaml means CUTOUT_RECESS_SPLIT must follow"
         )
     faces = [Part.Face(w) for w in recess]
     for w in holes:
@@ -260,9 +263,9 @@ def classify(path, half):
         n = sum(1 for f in faces if f.isInside(Vector(hx, hy, 0.0), 1e-6, True))
         if n != 1:
             raise SystemExit(
-                "FAIL gen-case: the cutout at (%.3f, %.3f) sits inside %d recess(es), "
-                "expected exactly 1: the area split has misread the key field"
-                % (hx, hy, n)
+                f"FAIL gen-case: the cutout at ({hx:.3f}, {hy:.3f}) sits inside "
+                f"{n} recess(es), expected exactly 1: the area split has "
+                "misread the key field"
             )
     return wall, holes, recess, bosses
 
@@ -279,11 +282,13 @@ def offset(wire, dist):
     for d in (dist, -dist):
         try:
             a = wire.makeOffset2D(d, 0, False, False, False)
-        except Exception:
+        # Broad on purpose, and nothing to log: trying the other sign is the
+        # whole point of the loop, and only the failure of both is an error.
+        except Exception:  # noqa: BLE001, S112
             continue  # the wrong sign can throw outright, not just come back wrong
         if (a.BoundBox.XLength > wire.BoundBox.XLength) == (dist > 0):
             return a
-    raise SystemExit("FAIL gen-case: no offset of %+.3f produced an outline" % dist)
+    raise SystemExit(f"FAIL gen-case: no offset of {dist:+.3f} produced an outline")
 
 
 def opened(wire, r):
@@ -387,10 +392,9 @@ def check_bores(recess, bosses, depths):
         d = min(w.distToShape(v)[0] for w in recess)
         if d < BORE_R:
             raise SystemExit(
-                "FAIL gen-case: the bore at (%.3f, %.3f) reaches z %.2f, above the %.2f "
-                "recess floor, and a recess wall is %.3f from its axis against a %.2f "
+                f"FAIL gen-case: the bore at ({bx:.3f}, {by:.3f}) reaches z {PCB_TOP + depth:.2f}, above the {RECESS_Z:.2f} "
+                f"recess floor, and a recess wall is {d:.3f} from its axis against a {BORE_R:.2f} "
                 "bore radius: it breaks out. This boss needs BORE_SHALLOW"
-                % (bx, by, PCB_TOP + depth, RECESS_Z, d, BORE_R)
             )
 
 
@@ -411,10 +415,9 @@ def check_bumpers(sign):
         )
         if d < BUMPER_R:
             raise SystemExit(
-                "FAIL gen-case: the bumper recess at (%.3f, %.3f) reaches %.3f into the "
-                "relief pocket, which cuts the other face: that leaves %.2fmm of plate "
+                f"FAIL gen-case: the bumper recess at ({x:.3f}, {by:.3f}) reaches {BUMPER_R - d:.3f} into the "
+                f"relief pocket, which cuts the other face: that leaves {PLATE - RELIEF_DEPTH - BUMPER_D:.2f}mm of plate "
                 "under the parts the relief is there for. Move it clear of the pocket"
-                % (x, by, BUMPER_R - d, PLATE - RELIEF_DEPTH - BUMPER_D)
             )
 
 
@@ -571,8 +574,7 @@ def build(dxf, half, explode):
     if undercut > EPS:
         raise SystemExit(
             "FAIL gen-case: the relief pocket reaches under the plate's perimeter wall, "
-            "undercutting %.3f mm3 of it. Pull the pocket back inside the wall relief"
-            % undercut
+            f"undercutting {undercut:.3f} mm3 of it. Pull the pocket back inside the wall relief"
         )
     plate = plate.cut(relief)
 
@@ -611,7 +613,7 @@ def export(shell, plate, half, out):
     for name, shp in (("shell", shell), ("plate", plate)):
         o = doc.addObject("Part::Feature", name)
         o.Shape = shp
-        o.Label = "splinter_v4_%s_%s" % (half, name)
+        o.Label = f"splinter_v4_{half}_{name}"
     doc.recompute()
     import Import
 
@@ -629,15 +631,15 @@ def check(out, half, explode, keys):
     shp.read(out)
     fails = []
     if len(shp.Solids) != 2:
-        fails.append("expected 2 solids, found %d" % len(shp.Solids))
+        fails.append(f"expected 2 solids, found {len(shp.Solids)}")
         return fails
     shell, plate = sorted(shp.Solids, key=lambda s: -s.Volume)
 
     for name, s in (("shell", shell), ("plate", plate)):
         if not s.isValid():
-            fails.append("%s is not a valid solid" % name)
+            fails.append(f"{name} is not a valid solid")
         if not s.isClosed():
-            fails.append("%s is not closed" % name)
+            fails.append(f"{name} is not closed")
 
     bb = shell.BoundBox
     for lbl, got, want in (
@@ -646,12 +648,11 @@ def check(out, half, explode, keys):
         ("height", bb.ZLength, H_INNER),
     ):
         if abs(got - want) > 0.01:
-            fails.append("shell %s %.3f, expected %.3f" % (lbl, got, want))
+            fails.append(f"shell {lbl} {got:.3f}, expected {want:.3f}")
 
     if not explode and abs(plate.BoundBox.ZMax - PCB_BOT) > 0.01:
         fails.append(
-            "plate wall top %.3f, expected the board underside %.3f"
-            % (plate.BoundBox.ZMax, PCB_BOT)
+            f"plate wall top {plate.BoundBox.ZMax:.3f}, expected the board underside {PCB_BOT:.3f}"
         )
     # The shelf's underside is what the board is clamped against, so it must be a real
     # horizontal face at the board's top, not merely somewhere in the right region.
@@ -664,12 +665,11 @@ def check(out, half, explode, keys):
     ]
     if not shelf:
         fails.append(
-            "no horizontal face at the board top %.2f: shelf missing" % PCB_TOP
+            f"no horizontal face at the board top {PCB_TOP:.2f}: shelf missing"
         )
     elif sum(f.Area for f in shelf) < 800.0:
         fails.append(
-            "shelf plus boss ends only %.0f mm2, expected a perimeter shelf"
-            % sum(f.Area for f in shelf)
+            f"shelf plus boss ends only {sum(f.Area for f in shelf):.0f} mm2, expected a perimeter shelf"
         )
 
     for name, s in (("shell", shell), ("plate", plate)):
@@ -684,10 +684,10 @@ def check(out, half, explode, keys):
         for r, n in sorted(want.items()):
             if got.get(r, 0) != n:
                 fails.append(
-                    "%s r=%.2f cylinders: %d, expected %d" % (name, r, got.get(r, 0), n)
+                    f"{name} r={r:.2f} cylinders: {got.get(r, 0)}, expected {n}"
                 )
         if os.environ.get("FC_SHOW_CYL"):
-            print("  note %s: cylinders %s" % (name, dict(sorted(got.items()))))
+            print(f"  note {name}: cylinders {dict(sorted(got.items()))}")
 
     tops = [
         f
@@ -702,9 +702,8 @@ def check(out, half, explode, keys):
         tb = max(tops, key=lambda f: f.Area).BoundBox
         if abs((bb.XLength - tb.XLength) - 2 * TOP_BEZEL) > 0.01:
             fails.append(
-                "top face is %.3f narrower than the widest section, expected "
-                "%.3f: bezel wrong or missing"
-                % (bb.XLength - tb.XLength, 2 * TOP_BEZEL)
+                f"top face is {bb.XLength - tb.XLength:.3f} narrower than the widest section, expected "
+                f"{2 * TOP_BEZEL:.3f}: bezel wrong or missing"
             )
 
     # Prismatic features are invisible to a cylinder census, so test them by volume. Both
@@ -753,7 +752,7 @@ def check(out, half, explode, keys):
     ):
         v = plate.common(tool).Volume
         if v > 1e-6:
-            fails.append("plate obstructs the %s by %.3f mm3" % (name, v))
+            fails.append(f"plate obstructs the {name} by {v:.3f} mm3")
 
     # Every bumper must leave the SAME material behind. A floor at constant z in a plate
     # that is not leaves a different thickness at each edge of every foot, and the solid is
@@ -773,14 +772,13 @@ def check(out, half, explode, keys):
             got.append(plate.common(probe).Volume / (math.pi * 0.04**2))
         if max(got) - min(got) > 0.005:
             fails.append(
-                "bumper recess at (%.2f, %.2f) leaves %.3f to %.3f mm of plate "
+                f"bumper recess at ({x:.2f}, {by:.2f}) leaves {min(got):.3f} to {max(got):.3f} mm of plate "
                 "across its width: the floor is not parallel to the plate"
-                % (x, by, min(got), max(got))
             )
         elif abs(got[0] - (PLATE - BUMPER_D)) > 0.01:
             fails.append(
-                "bumper recess at (%.2f, %.2f) leaves %.3f mm of plate, expected "
-                "%.3f" % (x, by, got[0], PLATE - BUMPER_D)
+                f"bumper recess at ({x:.2f}, {by:.2f}) leaves {got[0]:.3f} mm of plate, expected "
+                f"{PLATE - BUMPER_D:.3f}"
             )
 
     bores = sorted(
@@ -791,8 +789,7 @@ def check(out, half, explode, keys):
     )
     if bores != [BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP]:
         fails.append(
-            "insert bore depths %s, expected %s"
-            % (bores, [BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP])
+            f"insert bore depths {bores}, expected {[BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP]}"
         )
     return fails
 
@@ -803,9 +800,9 @@ def main():
     # the opening against the PLATE, never against the notch it has to sit inside.
     if USB_W > USB_X1 - USB_X0:
         raise SystemExit(
-            "FAIL gen-case: the %.2f USB opening is wider than the board's %.2f notch, so "
+            f"FAIL gen-case: the {USB_W:.2f} USB opening is wider than the board's {USB_X1 - USB_X0:.2f} notch, so "
             "a plug would foul the board edge. Narrow USB_W, or widen the notch in "
-            "config.yaml and move USB_X0/USB_X1 with it" % (USB_W, USB_X1 - USB_X0)
+            "config.yaml and move USB_X0/USB_X1 with it"
         )
 
     dxf = os.environ.get("FC_DXF", DEFAULT_DXF)
@@ -814,47 +811,43 @@ def main():
     halves = os.environ.get("FC_HALF", "both")
     if halves not in ("left", "right", "both"):
         raise SystemExit(
-            "FAIL gen-case: FC_HALF=%r, expected left, right or both. A typo "
+            f"FAIL gen-case: FC_HALF={halves!r}, expected left, right or both. A typo "
             "would otherwise write the wrong half under the given name and "
-            "still pass readback, the checks being mirror-symmetric" % halves
+            "still pass readback, the checks being mirror-symmetric"
         )
     halves = ["left", "right"] if halves == "both" else [halves]
 
     if not os.path.exists(dxf):
         raise SystemExit(
-            "FAIL gen-case: %s: no such file, run 'npm run ergogen' first" % dxf
+            f"FAIL gen-case: {dxf}: no such file, run 'npm run ergogen' first"
         )
     os.makedirs(outdir, exist_ok=True)
 
     bad = 0
     for half in halves:
         suffix = "-exploded" if explode else ""
-        out = os.path.join(outdir, "splinter-v4-%s-case%s.step" % (half, suffix))
+        out = os.path.join(outdir, f"splinter-v4-{half}-case{suffix}.step")
         shell, plate, keys = build(dxf, half, explode)
         export(shell, plate, half, out)
         fails = check(out, half, explode, keys)
         if fails:
             bad += 1
             for f in fails:
-                print("  FAIL %s: %s" % (out, f), file=sys.stderr)
+                print(f"  FAIL {out}: {f}", file=sys.stderr)
         else:
             print(
-                "  wrote %s: shell %d faces, plate %d faces, %.0f KB"
-                % (
-                    out,
-                    len(shell.Faces),
-                    len(plate.Faces),
-                    os.path.getsize(out) / 1024.0,
-                )
+                f"  wrote {out}: shell {len(shell.Faces)} faces, "
+                f"plate {len(plate.Faces)} faces, "
+                f"{os.path.getsize(out) / 1024.0:.0f} KB"
             )
     sys.stdout.flush()
     if bad:
         raise SystemExit(
-            "FAIL gen-case: %d of %d file(s) failed readback" % (bad, len(halves))
+            f"FAIL gen-case: {bad} of {len(halves)} file(s) failed readback"
         )
     print(
-        "OK: gen-case: %d case(s) written to %s and verified on readback"
-        % (len(halves), outdir)
+        f"OK: gen-case: {len(halves)} case(s) written to {outdir} "
+        "and verified on readback"
     )
 
 
@@ -867,7 +860,7 @@ except SystemExit as e:
     sys.stdout.flush()
     sys.stderr.flush()
     os._exit(1 if e.code else 0)
-except BaseException:
+except BaseException:  # noqa: BLE001  # the point: nothing may reach freecadcmd
     import traceback
 
     traceback.print_exc(file=sys.stderr)

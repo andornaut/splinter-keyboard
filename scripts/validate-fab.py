@@ -52,7 +52,10 @@ import re
 import sys
 import zipfile
 
-from lib.pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
+# First, and marked so the import sort leaves it there: it silences pcbnew's
+# startup wxASSERT by swapping fd 2 across the import, which only works if
+# nothing has imported pcbnew yet.
+from lib.pcbnew_quiet import pcbnew  # isort: skip
 
 # Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
 # emits to stderr each time it re-inits image handlers on a board load.
@@ -61,7 +64,7 @@ import wx
 wx.Log.SetLogLevel(wx.LOG_Warning)
 
 COMMON_SH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "common.sh")
-JLCPCB_LAYERS_RE = re.compile(r'^JLCPCB_LAYERS="([^"]*)"', re.M)
+JLCPCB_LAYERS_RE = re.compile(r'^JLCPCB_LAYERS="([^"]*)"', re.MULTILINE)
 
 
 def _layer_fragments():
@@ -120,7 +123,9 @@ def _zone_filled_area_mm2(zone, layer):
         except TypeError:
             polys = zone.GetFilledPolysList()  # older API takes no layer arg
         return polys.Area() / 1e12  # Area() is in nm^2; 1 mm^2 = (1e6 nm)^2
-    except Exception:
+    # Broad on purpose: this probes a pcbnew API that varies by version, and the
+    # docstring promises None rather than a raise when it is not there.
+    except Exception:  # noqa: BLE001
         return None
 
 

@@ -155,7 +155,7 @@ def _duplicate_tracks(tracks):
     for t in tracks:
         if is_via(t):
             continue
-        ends = tuple(sorted(((p.x, p.y) for p in (t.GetStart(), t.GetEnd()))))
+        ends = tuple(sorted((p.x, p.y) for p in (t.GetStart(), t.GetEnd())))
         mid = (t.GetMid().x, t.GetMid().y) if t.GetClass() == "PCB_ARC" else None
         key = (t.GetNetCode(), t.GetLayer(), ends, mid)
         kept = seen.get(key)

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Shared copper geometry: does anything touch this point, and may copper go here?
 
 cleanup-tracks.py deletes the copper nothing connects to, and add-gnd-zone.py

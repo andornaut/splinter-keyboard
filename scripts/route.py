@@ -36,7 +36,11 @@ import subprocess
 import sys
 import uuid
 
-from lib.pcbnew_quiet import pcbnew  # imports pcbnew with its startup wxASSERT silenced
+# First, and marked so the import sort leaves it there: it silences pcbnew's
+# startup wxASSERT by swapping fd 2 across the import, which only works if
+# nothing has imported pcbnew yet.
+from lib.pcbnew_quiet import pcbnew  # isort: skip
+
 import wx
 
 # Single tuneable log level (env FREEROUTING_LOG_LEVEL, default WARN) applied to

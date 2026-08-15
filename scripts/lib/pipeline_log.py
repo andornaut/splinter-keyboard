@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """The quiet half of the pipeline's log voice (the convention itself is at the top
 of scripts/lib/common.sh).
 

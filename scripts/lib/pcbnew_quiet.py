@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Import KiCad's pcbnew with its harmless noise silenced.
 
 Two separate sources, so two separate guards:

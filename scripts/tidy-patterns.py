@@ -83,7 +83,7 @@ MATRIX_NETS = ("GND", "VCC", "RST", "DATA_RAW")  # never a key-local net
 
 
 def _snap(v, grid=GRID):
-    return int(round(v / grid)) * grid
+    return round(v / grid) * grid
 
 
 def _pt(p):
@@ -119,7 +119,9 @@ def _paths(tracks, pads):
             adjacent[a].append((s, b))
             adjacent[b].append((s, a))
 
-        def terminal(p):
+        # `adjacent` bound as a default: it is rebuilt per group, and a closure
+        # over the loop variable would read whichever group ran last.
+        def terminal(p, adjacent=adjacent):
             return len(adjacent[p]) != 2 or p in vias or p in pads
 
         walked = set()
@@ -198,8 +200,10 @@ def _row_legs(trunk_width, tracks, pads, zones):
                 (
                     net,
                     points,
-                    f"leg is {pcbnew.ToMM(abs(want - corner_a[1])):.3f}mm off the "
-                    f"pattern, which would move copper {pcbnew.ToMM(travel):.3f}mm",
+                    (
+                        f"leg is {pcbnew.ToMM(abs(want - corner_a[1])):.3f}mm off the "
+                        f"pattern, which would move copper {pcbnew.ToMM(travel):.3f}mm"
+                    ),
                 )
             )
             continue
@@ -275,12 +279,14 @@ def _key_families(board, tracks):
             continue
         (vias if t.GetClass() == VIA_CLASS else runs)[net].append(t)
     families = collections.defaultdict(dict)
-    for net, tracks in runs.items():
-        if any(t.GetClass() != SEGMENT_CLASS for t in tracks):
+    for net, run in runs.items():
+        if any(t.GetClass() != SEGMENT_CLASS for t in run):
             continue  # an arc cannot be rebuilt from a straight-segment template
         origin = switch[net][0].GetPosition()
 
-        def relative(p):
+        # `origin` bound as a default: it is rebuilt per net, and a closure over
+        # the loop variable would read whichever net ran last.
+        def relative(p, origin=origin):
             return (
                 _snap(p.x - origin.x, FAMILY_GRID),
                 _snap(p.y - origin.y, FAMILY_GRID),
@@ -292,7 +298,7 @@ def _key_families(board, tracks):
             tuple(sorted(relative(v.GetPosition()) for v in vias[net])),
         )
         shape = []
-        for t in tracks:
+        for t in run:
             a, b = _pt(t.GetStart()), _pt(t.GetEnd())
             a, b = (a, b) if a <= b else (b, a)
             shape.append(
@@ -365,14 +371,16 @@ def _key_motifs(board, tracks, pads, zones):
             skipped.append(
                 (
                     ", ".join(sorted(n for _, nets in ranked for n in nets)),
-                    f"no two of these {len(ranked)} keys route the same shape, "
-                    f"so the family has no pattern to snap to",
+                    (
+                        f"no two of these {len(ranked)} keys route the same shape, "
+                        f"so the family has no pattern to snap to"
+                    ),
                 )
             )
             continue
         # A tie has no majority to defer to, so take the medoid: the shape that
         # asks the least of the others.
-        canon, canon_nets = min(
+        canon, _canon_nets = min(
             (s for s in ranked if len(s[1]) == best),
             key=lambda s: max(
                 [_reshape_cost(o, s[0]) for o, _ in ranked if o is not s[0]] or [0]
@@ -387,9 +395,11 @@ def _key_motifs(board, tracks, pads, zones):
                     skipped.append(
                         (
                             net,
-                            f"its run is {_profile_desc(board, shape)} where the "
-                            f"other {best} are {_profile_desc(board, canon)}, so it "
-                            f"is not the same motif",
+                            (
+                                f"its run is {_profile_desc(board, shape)} where the "
+                                f"other {best} are {_profile_desc(board, canon)}, so it "
+                                f"is not the same motif"
+                            ),
                         )
                     )
                     continue
@@ -397,9 +407,11 @@ def _key_motifs(board, tracks, pads, zones):
                     skipped.append(
                         (
                             net,
-                            f"its run is a different shape, not a stray: "
-                            f"matching the other {best} would move copper "
-                            f"{pcbnew.ToMM(cost):.3f}mm",
+                            (
+                                f"its run is a different shape, not a stray: "
+                                f"matching the other {best} would move copper "
+                                f"{pcbnew.ToMM(cost):.3f}mm"
+                            ),
                         )
                     )
                     continue

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Shared helpers for the PCB provenance stamp.
 
 The stamp is one string written into each generated PCB's title_block comment 1
