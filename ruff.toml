@@ -7,7 +7,11 @@ line-length = 120
 # ergogen directory reaches them again through symlinks. Excluded here rather
 # than by naming paths on the command line, so a script added anywhere else is
 # covered without an edit to the gate.
-exclude = [
+#
+# extend-exclude, not exclude: the latter replaces ruff's own list, which is
+# what keeps it out of node_modules. A checkout without this machine's global
+# gitignore - CI, or anyone else's - has nothing else stopping it walking in.
+extend-exclude = [
     "ergogen/footprints/ceoloide",
     "ergogen/footprints/infused-kim",
     "ergogen/kb_ergogen_helper",

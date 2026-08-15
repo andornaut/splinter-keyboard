@@ -6,3 +6,4 @@ __pycache__/
 */kicad/**/*.lck
 */kicad/**/*-backups/
 */kicad/**/.history/
+node_modules/
