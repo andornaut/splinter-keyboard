@@ -1,5 +1,14 @@
 version: 2
 updates:
+  # The vendored ergogen footprint libraries, which this repository tracks but
+  # does not maintain. Without this nothing proposes a bump and the pins move
+  # only when someone remembers to move them.
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
