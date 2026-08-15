@@ -9,6 +9,14 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+  # requirements-dev.txt holds the lint gate's tooling. Nothing here runs on a
+  # host: the pipeline scripts reach Python through KiCad's own interpreter.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "/"
     schedule:

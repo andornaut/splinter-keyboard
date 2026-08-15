@@ -1,0 +1,5 @@
+# The lint gate's own tooling, pinned so a release upstream cannot turn a check
+# red without a commit here. Dependabot proposes the bump through the pip
+# ecosystem, which it only reads from a manifest: pinned in the workflow
+# instead, this pin would never be offered one.
+ruff==0.16.3

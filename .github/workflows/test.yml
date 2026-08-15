@@ -66,8 +66,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Pinned in a manifest rather than installed by name, so Dependabot can
+      # see the version and a ruff release cannot turn this red on a commit
+      # that did not touch the sources.
       - name: Install dependencies
-        run: pip install ruff==0.16.3
+        run: pip install -r requirements-dev.txt
 
       # The pipeline scripts import pcbnew, which only exists inside KiCad's
       # own interpreter, so this checks them without running them.
