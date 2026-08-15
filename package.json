@@ -15,6 +15,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.1.0",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-sort-destructure-keys": "^3.0.0",
     "globals": "^17.6.0",
     "nodemon": "^3.1.14"
   },
@@ -25,7 +27,7 @@
     "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
     "ergogen": "./scripts/ergogen.sh",
     "fab": "./scripts/fab.sh",
-    "lint": "eslint .",
+    "lint": "eslint --max-warnings 0 .",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
     "route": "python3 ./scripts/route.py",
