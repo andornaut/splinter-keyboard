@@ -76,9 +76,12 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       # The pipeline scripts import pcbnew, which only exists inside KiCad's
-      # own interpreter, so this checks them without running them.
+      # own interpreter, so this checks them without running them. The whole
+      # tree rather than a list of paths: ruff.toml excludes the vendored
+      # libraries, so a script added outside scripts/ is covered without an
+      # edit here.
       - name: Run ruff check
-        run: ruff check scripts/ v4/onshape/gen-case.py
+        run: ruff check .
 
       - name: Run ruff format check
-        run: ruff format --check scripts/ v4/onshape/gen-case.py
+        run: ruff format --check .
