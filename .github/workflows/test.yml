@@ -34,17 +34,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
-      # Scoped to scripts/, which holds every shell file here: ergogen/ carries
-      # none, and what it does carry from upstream are the two footprint
-      # submodules. Each script sources lib/common.sh through a path built from
-      # BASH_SOURCE, which shellcheck cannot resolve on its own: -x follows the
-      # source and -P SCRIPTDIR tells it to look beside the script doing the
-      # sourcing.
+      # -x follows a `source` into the file it names and -P SCRIPTDIR looks for
+      # it beside the script doing the sourcing, which shellcheck cannot resolve
+      # on its own. Set everywhere rather than only where something sources
+      # today, so a script that starts to is already covered.
+      #
+      # scandir is the one thing local here: scripts/ holds every shell file,
+      # and pointing at the root would walk the two vendored footprint
+      # submodules under ergogen/.
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: -x -P SCRIPTDIR
         with:
+          ignore_paths: node_modules
           scandir: "./scripts"
 
       - name: Set up Node.js
