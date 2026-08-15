@@ -71,12 +71,7 @@ def recenter(path):
     dx, dy = round(px - cx), round(py - cy)
     offset = pcbnew.VECTOR2I(pcbnew.FromMM(dx), pcbnew.FromMM(dy))
 
-    for item in (
-        list(board.GetFootprints())
-        + list(board.GetDrawings())
-        + list(board.GetTracks())
-        + list(board.Zones())
-    ):
+    for item in list(board.GetFootprints()) + list(board.GetDrawings()) + list(board.GetTracks()) + list(board.Zones()):
         item.Move(offset)
 
     board.Save(path)

@@ -74,9 +74,7 @@ def pin_labels():
     """
     with open(FOOTPRINT_JS) as fh:
         src = fh.read()
-    return dict(
-        re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.MULTILINE)
-    )
+    return dict(re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.MULTILINE))
 
 
 def mcu_pad_map(board):
@@ -100,9 +98,7 @@ def mcu_pad_map(board):
         x, y = pad.GetPosition().x, pad.GetPosition().y
         if abs(abs(x - ox) - 7620000) > 50000:  # header columns sit at +-7.62mm
             continue
-        rows.setdefault(round((y - oy) / 1e6, 2), {})["L" if x < ox else "R"] = (
-            pad.GetNetname()
-        )
+        rows.setdefault(round((y - oy) / 1e6, 2), {})["L" if x < ox else "R"] = pad.GetNetname()
     if len(rows) != HEADER_ROWS or any(len(r) != 2 for r in rows.values()):
         raise SystemExit(
             f"{name}: found {len(rows)} MCU header row(s), expected {HEADER_ROWS} of 2 pads.\n"
@@ -189,8 +185,7 @@ def check_symmetry(boards):
             for key, pads in sorted(mapped.items()):
                 top = pads[0]
                 print(
-                    f"    {key}: row 0 is {top.get('L')} (front-left) | "
-                    f"{top.get('R')} (front-right)",
+                    f"    {key}: row 0 is {top.get('L')} (front-left) | {top.get('R')} (front-right)",
                     file=sys.stderr,
                 )
             print(
@@ -276,8 +271,7 @@ def check_firmware(boards, fw, labels):
             failures.append(key)
             sys.stdout.flush()  # keep the ok lines above this under a pipe
             print(
-                f"  FAIL {key}: serial pin, board {got_serial}, "
-                f"firmware {fw['split']['serial']['pin']}",
+                f"  FAIL {key}: serial pin, board {got_serial}, firmware {fw['split']['serial']['pin']}",
                 file=sys.stderr,
             )
         if key not in failures:
@@ -286,24 +280,19 @@ def check_firmware(boards, fw, labels):
 
 
 def main():
-    ap = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     add_stage_argument(ap, "stage(s) to check (default: both)")
     ap.add_argument(
         "--firmware",
         metavar="SOURCE",
-        help="keyboard.json URL or path (default: $SPLINTER_FIRMWARE_JSON, "
-        "else package.json's config.FIRMWARE)",
+        help="keyboard.json URL or path (default: $SPLINTER_FIRMWARE_JSON, else package.json's config.FIRMWARE)",
     )
     args = ap.parse_args()
 
     stages = selected(args)
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        raise SystemExit(
-            "set npm_package_config_VERSION via npm (npm run validate:firmware)"
-        )
+        raise SystemExit("set npm_package_config_VERSION via npm (npm run validate:firmware)")
 
     labels = pin_labels()
     boards = load_boards(version, stages)

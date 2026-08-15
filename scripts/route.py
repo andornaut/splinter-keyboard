@@ -168,9 +168,7 @@ if __name__ == "__main__":
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
-    pcbs = sys.argv[1:] or sorted(
-        glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb")
-    )
+    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb"))
     if not pcbs:
         sys.exit(f"No boards in {version}/kicad/unrouted/ -- nothing to do")
     for pcb in pcbs:

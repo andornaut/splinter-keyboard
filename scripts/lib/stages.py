@@ -20,9 +20,7 @@ def add_stage_argument(parser, help_text):
     default=None rather than list(STAGES): argparse validates the default against
     `choices` as well as the parsed values, and a list is not one of the choices,
     so a list default makes every no-argument run fail."""
-    parser.add_argument(
-        "stages", nargs="*", choices=STAGES, default=None, help=help_text
-    )
+    parser.add_argument("stages", nargs="*", choices=STAGES, default=None, help=help_text)
 
 
 def selected(args):

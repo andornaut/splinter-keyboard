@@ -134,9 +134,7 @@ def _paths(tracks, pads):
                 walked.add(id(first))
                 points, chain, here, came_from = [start, nxt], [first], nxt, first
                 while not terminal(here):
-                    onward = [
-                        (s, p) for s, p in adjacent[here] if id(s) != id(came_from)
-                    ]
+                    onward = [(s, p) for s, p in adjacent[here] if id(s) != id(came_from)]
                     if len(onward) != 1 or id(onward[0][0]) in walked:
                         break
                     s, p = onward[0]
@@ -155,10 +153,7 @@ def _blocked(tracks, pads, zones, proposals, replaced):
     crowded = clearance_blocker(tracks, pads, proposals, replaced)
     if crowded is not None:
         other, gap = crowded
-        return (
-            f"put copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
-            f"{describe(other)}"
-        )
+        return f"put copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of {describe(other)}"
     area = keepout_blocker(zones, proposals)
     if area is not None:
         return f"put copper inside the {area.GetZoneName()} rule area"
@@ -172,9 +167,7 @@ def _row_legs(trunk_width, tracks, pads, zones):
     for points, chain, via_ends in _paths(tracks, pads):
         if not via_ends or len(chain) != 3:
             continue
-        if any(
-            s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != trunk_width for s in chain
-        ):
+        if any(s.GetLayer() != pcbnew.F_Cu or s.GetWidth() != trunk_width for s in chain):
             continue
         start, corner_a, corner_b, end = points
         if corner_a[1] != corner_b[1] or abs(corner_a[0] - corner_b[0]) < MIN_LEG:
@@ -349,12 +342,8 @@ def _profile(shape):
 
 def _profile_desc(board, shape):
     """A shape's profile, named so a report can put two of them side by side."""
-    counts = collections.Counter(
-        (board.GetLayerName(layer), pcbnew.ToMM(width)) for layer, width, *_ in shape
-    )
-    return ", ".join(
-        f"{n} x {layer} {width:.2f}mm" for (layer, width), n in sorted(counts.items())
-    )
+    counts = collections.Counter((board.GetLayerName(layer), pcbnew.ToMM(width)) for layer, width, *_ in shape)
+    return ", ".join(f"{n} x {layer} {width:.2f}mm" for (layer, width), n in sorted(counts.items()))
 
 
 def _key_motifs(board, tracks, pads, zones):
@@ -382,9 +371,7 @@ def _key_motifs(board, tracks, pads, zones):
         # asks the least of the others.
         canon, _canon_nets = min(
             (s for s in ranked if len(s[1]) == best),
-            key=lambda s: max(
-                [_reshape_cost(o, s[0]) for o, _ in ranked if o is not s[0]] or [0]
-            ),
+            key=lambda s: max([_reshape_cost(o, s[0]) for o, _ in ranked if o is not s[0]] or [0]),
         )
         for shape, nets in ranked:
             if shape == canon:
@@ -513,10 +500,7 @@ def tidy_patterns(path):
             f"{pcbnew.ToMM(now):.3f}, copper moved {pcbnew.ToMM(travel):.3f}mm"
         )
     for net, _, _, cost in motifs:
-        print(
-            f"  RELAID {net}: onto its family's shape, copper moved "
-            f"{pcbnew.ToMM(cost):.3f}mm"
-        )
+        print(f"  RELAID {net}: onto its family's shape, copper moved {pcbnew.ToMM(cost):.3f}mm")
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper
     board.Save(path)

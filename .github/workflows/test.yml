@@ -34,17 +34,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
-      # Scoped to scripts/, since ergogen/ and v4/ergogen/ carry vendored
-      # footprint libraries this repository does not maintain. Each script
-      # sources lib/common.sh through a path built from BASH_SOURCE, which
-      # shellcheck cannot resolve on its own: -x follows the source and
-      # -P SCRIPTDIR tells it to look beside the script doing the sourcing.
+      # Scoped to scripts/, which holds every shell file here: ergogen/ carries
+      # none, and what it does carry from upstream are the two footprint
+      # submodules. Each script sources lib/common.sh through a path built from
+      # BASH_SOURCE, which shellcheck cannot resolve on its own: -x follows the
+      # source and -P SCRIPTDIR tells it to look beside the script doing the
+      # sourcing.
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: -x -P SCRIPTDIR
         with:
           scandir: "./scripts"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      # eslint.config.mjs scopes this to the footprints written here rather
+      # than pulled from the two upstream submodules.
+      - name: Lint the footprints
+        run: npm run lint
 
       - name: Set up Python
         uses: actions/setup-python@v7.0.0

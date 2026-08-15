@@ -72,35 +72,21 @@ from lib.pipeline_log import note
 
 MAX_MOVE = pcbnew.FromMM(0.2)  # furthest a tidy may drag copper, per endpoint
 
-SEGMENT_CLASS = (
-    "PCB_TRACK"  # a straight segment; an arc endpoint cannot be moved freely
-)
+SEGMENT_CLASS = "PCB_TRACK"  # a straight segment; an arc endpoint cannot be moved freely
 
 
 def _slivers(tracks):
     """Segments shorter than their own width. A segment that cannot be as long as
     it is wide is a rounding artifact of an edit, never a routing decision."""
-    return [
-        t
-        for t in tracks
-        if t.GetClass() == SEGMENT_CLASS and t.GetLength() < t.GetWidth()
-    ]
+    return [t for t in tracks if t.GetClass() == SEGMENT_CLASS and t.GetLength() < t.GetWidth()]
 
 
 def _pinned(tracks, pads, sliver, point):
     """True if a via or a pad of the sliver's net holds this point in place."""
     net, layer = sliver.GetNetCode(), sliver.GetLayer()
-    if any(
-        is_via(v)
-        and v.GetNetCode() == net
-        and dist(point, v.GetPosition()) <= TOUCH_TOL
-        for v in tracks
-    ):
+    if any(is_via(v) and v.GetNetCode() == net and dist(point, v.GetPosition()) <= TOUCH_TOL for v in tracks):
         return True
-    return any(
-        pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(point)
-        for pad in pads
-    )
+    return any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(point) for pad in pads)
 
 
 def _movers(tracks, sliver, point):
@@ -172,8 +158,7 @@ def _moved(ends, target, mover):
     """Where `mover` would sit after the collapse, as a shape. Not applied: the
     clearance test has to ask before the board is changed, not after."""
     points = [
-        target if any(dist(p, end) <= TOUCH_TOL for end in ends) else p
-        for p in (mover.GetStart(), mover.GetEnd())
+        target if any(dist(p, end) <= TOUCH_TOL for end in ends) else p for p in (mover.GetStart(), mover.GetEnd())
     ]
     return pcbnew.SHAPE_SEGMENT(points[0], points[1], mover.GetWidth())
 
@@ -196,10 +181,7 @@ def _blocked(tracks, pads, zones, sliver, target, movers):
     crowded = clearance_blocker(tracks, pads, proposals, replaced={id(sliver)})
     if crowded is not None:
         other, gap = crowded
-        return (
-            f"swing copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of "
-            f"{describe(other)}"
-        )
+        return f"swing copper inside the {pcbnew.ToMM(gap):.2f}mm clearance of {describe(other)}"
     area = keepout_blocker(zones, proposals)
     if area is not None:
         return f"swing copper inside the {area.GetZoneName()} rule area"
@@ -230,8 +212,7 @@ def _refusal(tracks, pads, zones, sliver):
         return detail
     if detail > MAX_MOVE:
         return (
-            f"collapsing it would move copper {pcbnew.ToMM(detail):.4f}mm, "
-            f"over the {pcbnew.ToMM(MAX_MOVE):.2f}mm cap"
+            f"collapsing it would move copper {pcbnew.ToMM(detail):.4f}mm, over the {pcbnew.ToMM(MAX_MOVE):.2f}mm cap"
         )
     why = _blocked(tracks, pads, zones, sliver, target, movers)
     if why is not None:
@@ -268,12 +249,7 @@ def tidy_slivers(path):
     zones = list(board.Zones())
     refused = [(s, _refusal(tracks, pads, zones, s)) for s in _slivers(tracks)]
     if refused:
-        lines = [
-            (
-                f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within "
-                f"{pcbnew.ToMM(MAX_MOVE):.2f}mm"
-            )
-        ]
+        lines = [(f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within {pcbnew.ToMM(MAX_MOVE):.2f}mm")]
         for sliver, detail in refused:
             p = sliver.GetStart()
             lines.append(
@@ -296,23 +272,17 @@ def tidy_slivers(path):
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())  # re-pour around the moved copper
     board.Save(path)
-    print(
-        f"  TIDIED {path}: collapsed {collapsed} sliver(s) within "
-        f"{pcbnew.ToMM(MAX_MOVE):.2f}mm, zones re-filled"
-    )
+    print(f"  TIDIED {path}: collapsed {collapsed} sliver(s) within {pcbnew.ToMM(MAX_MOVE):.2f}mm, zones re-filled")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("boards", nargs="+", metavar="board.kicad_pcb")
     parser.add_argument(
         "--max-move",
         type=float,
         metavar="MM",
-        help="raise the copper-movement cap for this run (default "
-        f"{pcbnew.ToMM(MAX_MOVE)}mm); re-run DRC afterwards",
+        help=f"raise the copper-movement cap for this run (default {pcbnew.ToMM(MAX_MOVE)}mm); re-run DRC afterwards",
     )
     args = parser.parse_args()
     if args.max_move is not None:

@@ -13,6 +13,9 @@
     "ergogen": "^4.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.1.0",
+    "globals": "^17.6.0",
     "nodemon": "^3.1.14"
   },
   "scripts": {
@@ -22,6 +25,7 @@
     "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
     "ergogen": "./scripts/ergogen.sh",
     "fab": "./scripts/fab.sh",
+    "lint": "eslint .",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
     "route": "python3 ./scripts/route.py",

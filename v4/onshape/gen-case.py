@@ -314,9 +314,7 @@ def moved(shape, vec):
 def half_space(sign, ang, up):
     """Everything below the sloped bottom plane, raised by `up`."""
     box = Part.makeBox(BIG * 2, BIG * 2, BIG, Vector(-BIG, -BIG, -BIG))
-    box.Placement = Placement(
-        Vector(0, 0, rim_z(sign, 0.0) + up), Rotation(Vector(0, 1, 0), sign * ang)
-    )
+    box.Placement = Placement(Vector(0, 0, rim_z(sign, 0.0) + up), Rotation(Vector(0, 1, 0), sign * ang))
     return box
 
 
@@ -360,18 +358,11 @@ def unnotched_hull(wall, sign):
     # Fuse as solids and read the top face back: fusing two coplanar FACES leaves the union
     # split into pieces that removeSplitter will not merge, and picking one of them yields
     # a fragment rather than the hull.
-    merged = (
-        Part.Face(wall)
-        .extrude(Vector(0, 0, 1.0))
-        .fuse(fill.extrude(Vector(0, 0, 1.0)))
-        .removeSplitter()
-    )
+    merged = Part.Face(wall).extrude(Vector(0, 0, 1.0)).fuse(fill.extrude(Vector(0, 0, 1.0))).removeSplitter()
     tops = [
         f
         for f in merged.Faces
-        if isinstance(f.Surface, Part.Plane)
-        and abs(f.Surface.Axis.z) > 0.999
-        and abs(f.CenterOfMass.z - 1.0) < 1e-6
+        if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.999 and abs(f.CenterOfMass.z - 1.0) < 1e-6
     ]
     return moved(max(tops, key=lambda f: f.Area).OuterWire, Vector(0, 0, -1.0))
 
@@ -410,9 +401,7 @@ def check_bumpers(sign):
     rx1 = max(sign * RELIEF_X0, sign * RELIEF_X1)
     for bx, by in BUMPERS:
         x = sign * bx
-        d = math.hypot(
-            max(rx0 - x, 0.0, x - rx1), max(RELIEF_Y0 - by, 0.0, by - RELIEF_Y1)
-        )
+        d = math.hypot(max(rx0 - x, 0.0, x - rx1), max(RELIEF_Y0 - by, 0.0, by - RELIEF_Y1))
         if d < BUMPER_R:
             raise SystemExit(
                 f"FAIL gen-case: the bumper recess at ({x:.3f}, {by:.3f}) reaches {BUMPER_R - d:.3f} into the "
@@ -430,9 +419,7 @@ def bezel_top(body, size):
     tops = [
         f
         for f in body.Faces
-        if isinstance(f.Surface, Part.Plane)
-        and abs(f.Surface.Axis.z) > 0.999
-        and abs(f.CenterOfMass.z) < 1e-6
+        if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.999 and abs(f.CenterOfMass.z) < 1e-6
     ]
     if not tops:
         raise SystemExit("FAIL gen-case: no top face to bezel")
@@ -463,9 +450,7 @@ def build(dxf, half, explode):
     # Chaining them off cavity_w would offset inward by exactly CAVITY_FILLET, collapsing
     # its corner arcs to zero radius, which OCC rejects outright.
     shelf_w = opened(offset(hull, POCKET_CLR - SHELF_W), CAVITY_FILLET)
-    plate_wall_w = opened(
-        offset(hull, POCKET_CLR - LID_CLR - PLATE_WALL_W), CAVITY_FILLET
-    )
+    plate_wall_w = opened(offset(hull, POCKET_CLR - LID_CLR - PLATE_WALL_W), CAVITY_FILLET)
 
     # Only the outer pinky boss takes the deep bore: a 16.00 switch recess overlaps the
     # other two, leaving 4.50 of material there instead of 6.00.
@@ -484,26 +469,14 @@ def build(dxf, half, explode):
 
     # Ports overshoot the outer face on both sides, so no cut face lands coplanar with a
     # shell face, which would leave the solid non-manifold.
-    body = body.cut(
-        Part.makeCylinder(
-            TRRS_R, 40.0, Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z), Vector(0, 1, 0)
-        )
-    )
+    body = body.cut(Part.makeCylinder(TRRS_R, 40.0, Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z), Vector(0, 1, 0)))
     ux = sign * (USB_X0 + USB_X1) / 2.0
-    body = body.cut(
-        Part.makeBox(
-            USB_W, 40.0, USB_H, Vector(ux - USB_W / 2, TRRS_Y - 20.0, USB_Z - USB_H / 2)
-        )
-    )
+    body = body.cut(Part.makeBox(USB_W, 40.0, USB_H, Vector(ux - USB_W / 2, TRRS_Y - 20.0, USB_Z - USB_H / 2)))
 
     # Perimeter shelf: the board is pressed up against its underside. This narrows the
     # opening going up, which is the legal direction; a lip the board RESTS on would widen
     # going up and no setup could reach it.
-    body = body.fuse(
-        prism(cavity_w, PCB_TOP, -TOP_THICK).cut(
-            prism(shelf_w, PCB_TOP - 1.0, -TOP_THICK + 1.0)
-        )
-    )
+    body = body.fuse(prism(cavity_w, PCB_TOP, -TOP_THICK).cut(prism(shelf_w, PCB_TOP - 1.0, -TOP_THICK + 1.0)))
 
     for bx, by in bosses:
         body = body.fuse(cyl(BOSS_R, PCB_TOP, -TOP_THICK, bx, by))
@@ -527,19 +500,11 @@ def build(dxf, half, explode):
     )
     rx0 = min(sign * WALL_RELIEF_X, sign * BIG)
     rx1 = max(sign * WALL_RELIEF_X, sign * BIG)
-    ring = ring.cut(
-        Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, WALL_RELIEF_Y, -BIG))
-    )
+    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, WALL_RELIEF_Y, -BIG)))
     plate = plate.fuse(ring)
     for bx, by in bosses:
-        plate = plate.fuse(
-            cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0))
-        )
-        plate = plate.fuse(
-            cyl(FLARE_R, -BIG, PCB_BOT - SOCKET_H - SOCKET_CLR, bx, by).cut(
-                half_space(sign, ang, 0.0)
-            )
-        )
+        plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
+        plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - SOCKET_H - SOCKET_CLR, bx, by).cut(half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
 
     # Relief over the Liatris and the jack. Without it an aluminium plate sits 0.77mm from
@@ -552,13 +517,9 @@ def build(dxf, half, explode):
         RELIEF_Y1 - RELIEF_Y0,
         2 * BIG,
         Vector(x0, RELIEF_Y0, -BIG),
-    ).common(
-        half_space(sign, ang, PLATE).cut(half_space(sign, ang, PLATE - RELIEF_DEPTH))
-    )
+    ).common(half_space(sign, ang, PLATE).cut(half_space(sign, ang, PLATE - RELIEF_DEPTH)))
     if relief.Volume < 1.0:
-        raise SystemExit(
-            "FAIL gen-case: MCU relief tool is empty, it would cut nothing"
-        )
+        raise SystemExit("FAIL gen-case: MCU relief tool is empty, it would cut nothing")
     # The pocket must not reach under the perimeter wall. The wall is half the board's
     # clamp and it stands on the plate's full thickness, so a pocket at its foot thins the
     # root. Tested as a footprint overlap, not a solid one: the wall rises FROM the plate's
@@ -651,9 +612,7 @@ def check(out, half, explode, keys):
             fails.append(f"shell {lbl} {got:.3f}, expected {want:.3f}")
 
     if not explode and abs(plate.BoundBox.ZMax - PCB_BOT) > 0.01:
-        fails.append(
-            f"plate wall top {plate.BoundBox.ZMax:.3f}, expected the board underside {PCB_BOT:.3f}"
-        )
+        fails.append(f"plate wall top {plate.BoundBox.ZMax:.3f}, expected the board underside {PCB_BOT:.3f}")
     # The shelf's underside is what the board is clamped against, so it must be a real
     # horizontal face at the board's top, not merely somewhere in the right region.
     shelf = [
@@ -664,37 +623,25 @@ def check(out, half, explode, keys):
         and abs(f.CenterOfMass.z - PCB_TOP) < 0.01
     ]
     if not shelf:
-        fails.append(
-            f"no horizontal face at the board top {PCB_TOP:.2f}: shelf missing"
-        )
+        fails.append(f"no horizontal face at the board top {PCB_TOP:.2f}: shelf missing")
     elif sum(f.Area for f in shelf) < 800.0:
-        fails.append(
-            f"shelf plus boss ends only {sum(f.Area for f in shelf):.0f} mm2, expected a perimeter shelf"
-        )
+        fails.append(f"shelf plus boss ends only {sum(f.Area for f in shelf):.0f} mm2, expected a perimeter shelf")
 
     for name, s in (("shell", shell), ("plate", plate)):
-        got = collections.Counter(
-            round(f.Surface.Radius, 2)
-            for f in s.Faces
-            if isinstance(f.Surface, Part.Cylinder)
-        )
+        got = collections.Counter(round(f.Surface.Radius, 2) for f in s.Faces if isinstance(f.Surface, Part.Cylinder))
         want = dict(EXPECT_CYL[name])
         if name == "shell":
             want[CNC_FILLET_R] = 4 * keys  # each cutout and each recess
         for r, n in sorted(want.items()):
             if got.get(r, 0) != n:
-                fails.append(
-                    f"{name} r={r:.2f} cylinders: {got.get(r, 0)}, expected {n}"
-                )
+                fails.append(f"{name} r={r:.2f} cylinders: {got.get(r, 0)}, expected {n}")
         if os.environ.get("FC_SHOW_CYL"):
             print(f"  note {name}: cylinders {dict(sorted(got.items()))}")
 
     tops = [
         f
         for f in shell.Faces
-        if isinstance(f.Surface, Part.Plane)
-        and abs(f.Surface.Axis.z) > 0.999
-        and abs(f.CenterOfMass.z) < 1e-6
+        if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.999 and abs(f.CenterOfMass.z) < 1e-6
     ]
     if not tops:
         fails.append("no top face at z=0")
@@ -766,9 +713,7 @@ def check(out, half, explode, keys):
             (0.0, -0.7 * BUMPER_R),
             (0.0, 0.7 * BUMPER_R),
         ):
-            probe = Part.makeCylinder(
-                0.04, 4 * BIG, Vector(x + dx, by + dy, -2 * BIG), Vector(0, 0, 1)
-            )
+            probe = Part.makeCylinder(0.04, 4 * BIG, Vector(x + dx, by + dy, -2 * BIG), Vector(0, 0, 1))
             got.append(plate.common(probe).Volume / (math.pi * 0.04**2))
         if max(got) - min(got) > 0.005:
             fails.append(
@@ -777,20 +722,16 @@ def check(out, half, explode, keys):
             )
         elif abs(got[0] - (PLATE - BUMPER_D)) > 0.01:
             fails.append(
-                f"bumper recess at ({x:.2f}, {by:.2f}) leaves {got[0]:.3f} mm of plate, expected "
-                f"{PLATE - BUMPER_D:.3f}"
+                f"bumper recess at ({x:.2f}, {by:.2f}) leaves {got[0]:.3f} mm of plate, expected {PLATE - BUMPER_D:.3f}"
             )
 
     bores = sorted(
         round(f.BoundBox.ZLength, 2)
         for f in shell.Faces
-        if isinstance(f.Surface, Part.Cylinder)
-        and abs(f.Surface.Radius - BORE_R) < 1e-3
+        if isinstance(f.Surface, Part.Cylinder) and abs(f.Surface.Radius - BORE_R) < 1e-3
     )
     if bores != [BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP]:
-        fails.append(
-            f"insert bore depths {bores}, expected {[BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP]}"
-        )
+        fails.append(f"insert bore depths {bores}, expected {[BORE_SHALLOW, BORE_SHALLOW, BORE_DEEP]}")
     return fails
 
 
@@ -818,9 +759,7 @@ def main():
     halves = ["left", "right"] if halves == "both" else [halves]
 
     if not os.path.exists(dxf):
-        raise SystemExit(
-            f"FAIL gen-case: {dxf}: no such file, run 'npm run ergogen' first"
-        )
+        raise SystemExit(f"FAIL gen-case: {dxf}: no such file, run 'npm run ergogen' first")
     os.makedirs(outdir, exist_ok=True)
 
     bad = 0
@@ -842,13 +781,8 @@ def main():
             )
     sys.stdout.flush()
     if bad:
-        raise SystemExit(
-            f"FAIL gen-case: {bad} of {len(halves)} file(s) failed readback"
-        )
-    print(
-        f"OK: gen-case: {len(halves)} case(s) written to {outdir} "
-        "and verified on readback"
-    )
+        raise SystemExit(f"FAIL gen-case: {bad} of {len(halves)} file(s) failed readback")
+    print(f"OK: gen-case: {len(halves)} case(s) written to {outdir} and verified on readback")
 
 
 # freecadcmd swallows an uncaught exception and still exits 0, so report and exit here.

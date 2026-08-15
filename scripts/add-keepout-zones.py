@@ -50,9 +50,7 @@ from lib.pipeline_log import note
 # PCB face), with margin for the board's shift in its pocket and case build
 # tolerance, so no pad or trace lands under the wall in the worst-case stack-up.
 PERIMETER_INSET = pcbnew.FromMM(2.0)
-NOTCH_BRIDGE = pcbnew.FromMM(
-    6.0
-)  # bridge edge-open notches up to 2x this wide (USB cutout)
+NOTCH_BRIDGE = pcbnew.FromMM(6.0)  # bridge edge-open notches up to 2x this wide (USB cutout)
 BOSS_MARGIN = pcbnew.FromMM(1.0)  # keepout extends this far past the boss edge
 BOSS_FALLBACK_RADIUS = pcbnew.FromMM(2.75)  # if no Eco1 boss circle is found
 BOSS_FPID_KEY = "mounting_hole"  # footprint-id substring marking a screw boss
@@ -143,9 +141,7 @@ def _poly(points):
 
 def _footprints(board, fpid_key):
     """Footprints whose (lowercased) library id contains `fpid_key`."""
-    return [
-        fp for fp in board.GetFootprints() if fpid_key in fp.GetFPIDAsString().lower()
-    ]
+    return [fp for fp in board.GetFootprints() if fpid_key in fp.GetFPIDAsString().lower()]
 
 
 def _top_notch_far_x(board, edges, trrs_cx, toward_right):
@@ -159,10 +155,7 @@ def _top_notch_far_x(board, edges, trrs_cx, toward_right):
     ch = out.Outline(0)
     pts = (ch.CPoint(p) for p in range(ch.PointCount()))
     xs = [
-        pt.x
-        for pt in pts
-        if top + NOTCH_PROBE_MIN < pt.y < top + NOTCH_PROBE_MAX
-        and (pt.x > trrs_cx) == toward_right
+        pt.x for pt in pts if top + NOTCH_PROBE_MIN < pt.y < top + NOTCH_PROBE_MAX and (pt.x > trrs_cx) == toward_right
     ]
     return (max if toward_right else min)(xs, default=None)
 
@@ -185,9 +178,7 @@ def _trrs_carve(board):
     edges = board.GetBoardEdgesBoundingBox()
     box = trrs.GetBoundingBox()
     cx = box.GetCenter().x
-    toward_right = (
-        cx < edges.GetCenter().x
-    )  # TRRS near the left edge -> carve opens rightward
+    toward_right = cx < edges.GetCenter().x  # TRRS near the left edge -> carve opens rightward
 
     if toward_right:
         inner_edge = edges.GetLeft() - CARVE_OVERSHOOT
@@ -231,21 +222,14 @@ def _perimeter_ring(board):
 def _disk(center, radius):
     """A circle approximated by a CIRCLE_SEGMENTS-gon."""
     angles = (2 * math.pi * i / CIRCLE_SEGMENTS for i in range(CIRCLE_SEGMENTS))
-    return _poly(
-        (center.x + radius * math.cos(a), center.y + radius * math.sin(a))
-        for a in angles
-    )
+    return _poly((center.x + radius * math.cos(a), center.y + radius * math.sin(a)) for a in angles)
 
 
 def _boss_radius(board, center):
     """Radius of the User.Eco1 boss circle coincident with `center`, or the
     fallback if none is found."""
     for d in board.GetDrawings():
-        if (
-            d.GetClass() == "PCB_SHAPE"
-            and d.GetLayerName() == "User.Eco1"
-            and d.GetShape() == pcbnew.SHAPE_T_CIRCLE
-        ):
+        if d.GetClass() == "PCB_SHAPE" and d.GetLayerName() == "User.Eco1" and d.GetShape() == pcbnew.SHAPE_T_CIRCLE:
             c = d.GetCenter()
             if abs(c.x - center.x) <= CENTER_TOL and abs(c.y - center.y) <= CENTER_TOL:
                 return d.GetRadius()
@@ -346,16 +330,9 @@ def add_keepout_zones(path):
     board = pcbnew.LoadBoard(path)
 
     keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME)
-    existing = {
-        z.GetZoneName()
-        for z in board.Zones()
-        if z.GetIsRuleArea() and z.GetZoneName() in keepout_names
-    }
+    existing = {z.GetZoneName() for z in board.Zones() if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
     if existing:
-        note(
-            f"  unchanged {path}: keepouts already present "
-            f"({', '.join(sorted(existing))})"
-        )
+        note(f"  unchanged {path}: keepouts already present ({', '.join(sorted(existing))})")
         return
 
     moved, welded, max_move = _strip_degenerate_edges(board, path)

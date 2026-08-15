@@ -80,9 +80,7 @@ def _signal_track_len_mm(tracks, doomed_ids, layer):
 
 
 def _gnd_pads(board):
-    return [
-        p for fp in board.GetFootprints() for p in fp.Pads() if p.GetNetname() == "GND"
-    ]
+    return [p for fp in board.GetFootprints() for p in fp.Pads() if p.GetNetname() == "GND"]
 
 
 def choose_gnd_layer(board):
@@ -103,9 +101,7 @@ def choose_gnd_layer(board):
         signal_mm = _signal_track_len_mm(tracks, doomed_ids, layer)
         reach = sum(1 for p in gnd_pads if p.IsOnLayer(layer))
         cost = signal_mm + UNREACHABLE_GND_PAD_COST_MM * (total_gnd - reach)
-        rows.append(
-            LayerScore(layer, board.GetLayerName(layer), signal_mm, reach, cost)
-        )
+        rows.append(LayerScore(layer, board.GetLayerName(layer), signal_mm, reach, cost))
     # CANDIDATE_LAYERS is in tie-break order, and min() is stable, so the first
     # (B.Cu) wins an exact cost tie.
     best = min(rows, key=lambda r: r.cost)
@@ -144,10 +140,7 @@ def add_gnd_zone(path):
     existing = [
         board.GetLayerName(cand)
         for cand in CANDIDATE_LAYERS
-        if any(
-            z.GetNetname() == "GND" and z.IsOnLayer(cand) and not z.IsTeardropArea()
-            for z in board.Zones()
-        )
+        if any(z.GetNetname() == "GND" and z.IsOnLayer(cand) and not z.IsTeardropArea() for z in board.Zones())
     ]
     if existing:
         msg = f"GND pour already present on {', '.join(existing)}, leaving as-is"

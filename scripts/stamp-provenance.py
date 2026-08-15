@@ -51,9 +51,7 @@ def _pinky_is_left(board):
     Defaults to the right edge if no TRRS footprint is found."""
     center_x = board.GetBoardEdgesBoundingBox().GetCenter().x
     for fp in board.GetFootprints():
-        if "trrs" in str(
-            fp.GetFPID().GetLibItemName()
-        ).lower() or fp.GetReference().upper().startswith("TRRS"):
+        if "trrs" in str(fp.GetFPID().GetLibItemName()).lower() or fp.GetReference().upper().startswith("TRRS"):
             return fp.GetPosition().x > center_x
     return False
 
@@ -80,9 +78,7 @@ def _add_silk(board, text):
         t.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
         t.SetVertJustify(pcbnew.GR_TEXT_V_ALIGN_CENTER)
         board.Add(t)
-        half_width = (
-            t.GetBoundingBox().GetWidth() // 2
-        )  # rendered width, position-independent
+        half_width = t.GetBoundingBox().GetWidth() // 2  # rendered width, position-independent
         if pinky_left:
             x = bbox.GetLeft() + margin + half_width
         else:

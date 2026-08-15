@@ -1,0 +1,4 @@
+# Matches ai-maintainer and keylight, the other repositories linted with ruff
+# here, so one number governs Python everywhere rather than three gates each
+# rejecting a different width.
+line-length = 120

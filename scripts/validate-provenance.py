@@ -65,19 +65,14 @@ def main():
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit(
-            "npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)"
-        )
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)")
 
     config = f"{version}/ergogen/config.yaml"
     if not os.path.isfile(config):
         sys.exit(f"ERROR {config}: not found")
     expected = config_hash(config)
 
-    staged = {
-        stage: sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb"))
-        for stage in stages
-    }
+    staged = {stage: sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb")) for stage in stages}
     boards = [pcb for stage in stages for pcb in staged[stage]]
     if not boards:
         sys.exit(f"No boards under {version}/kicad/{{{','.join(stages)}}}/ to validate")
@@ -139,10 +134,7 @@ def main():
         sys.exit(1)
 
     if not args.quiet:
-        print(
-            f"OK: validate:provenance: {len(boards)} board(s) match {config} "
-            f"(config={expected})"
-        )
+        print(f"OK: validate:provenance: {len(boards)} board(s) match {config} (config={expected})")
 
 
 if __name__ == "__main__":

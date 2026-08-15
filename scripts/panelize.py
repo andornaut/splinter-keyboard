@@ -70,9 +70,7 @@ def build(
     # Frame (rails on all four sides) + mouse-bite tabs joining boards to it.
     panel.makeFrame(widthH=rail, widthV=rail, hspace=frame_space, vspace=frame_space)
     panel.buildPartitionLineFromBB()
-    panel.buildTabAnnotationsFixed(
-        tabs, tabs, tab_width, tab_width, tab_min_distance, []
-    )
+    panel.buildTabAnnotationsFixed(tabs, tabs, tab_width, tab_width, tab_min_distance, [])
     cuts = panel.buildTabsFromAnnotations(0)
     panel.makeMouseBites(cuts, diameter=mb_diameter, spacing=mb_spacing)
 
@@ -102,8 +100,7 @@ def stamp(boards, output):
     missing = [name for name, text in stamps if not text]
     if missing:
         sys.exit(
-            f"ERROR {', '.join(missing)}: no provenance stamp, re-run the "
-            "pipeline to stamp the boards, then panel them"
+            f"ERROR {', '.join(missing)}: no provenance stamp, re-run the pipeline to stamp the boards, then panel them"
         )
     if len({text for _, text in stamps}) > 1:
         listing = "\n".join(f"    {name}: {text}" for name, text in stamps)
@@ -121,28 +118,18 @@ def stamp(boards, output):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument(
-        "board", nargs="+", help="routed .kicad_pcb file(s), laid out left-to-right"
-    )
+    ap.add_argument("board", nargs="+", help="routed .kicad_pcb file(s), laid out left-to-right")
     ap.add_argument("--output", required=True, help="output panel .kicad_pcb path")
-    ap.add_argument(
-        "--rail", type=float, default=5.0, help="frame rail width, mm (default 5)"
-    )
-    ap.add_argument(
-        "--gap", type=float, default=3.0, help="gap between boards, mm (default 3)"
-    )
+    ap.add_argument("--rail", type=float, default=5.0, help="frame rail width, mm (default 5)")
+    ap.add_argument("--gap", type=float, default=3.0, help="gap between boards, mm (default 3)")
     ap.add_argument(
         "--frame-space",
         type=float,
         default=3.0,
         help="board-to-frame gap, mm (default 3)",
     )
-    ap.add_argument(
-        "--tabs", type=int, default=2, help="tabs per board edge (default 2)"
-    )
-    ap.add_argument(
-        "--tab-width", type=float, default=3.0, help="tab width, mm (default 3)"
-    )
+    ap.add_argument("--tabs", type=int, default=2, help="tabs per board edge (default 2)")
+    ap.add_argument("--tab-width", type=float, default=3.0, help="tab width, mm (default 3)")
     ap.add_argument(
         "--mousebite-diameter",
         type=float,

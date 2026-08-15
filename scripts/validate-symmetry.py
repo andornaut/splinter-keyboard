@@ -118,9 +118,7 @@ ARC_RE = re.compile(
     r'(.*?)\(layer\s+"([^"]+)"',
     re.DOTALL,
 )
-OTHER_RE = re.compile(
-    r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.DOTALL
-)
+OTHER_RE = re.compile(r'\(gr_(rect|circle|poly|curve|bbox)\b(.*?)\(layer\s+"([^"]+)"', re.DOTALL)
 
 
 def arc_points(start, mid, end):
@@ -129,16 +127,8 @@ def arc_points(start, mid, end):
     d = 2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2))
     if abs(d) < 1e-12:  # collinear: a straight run, not an arc
         return [start, end]
-    cx = (
-        (x1**2 + y1**2) * (y2 - y3)
-        + (x2**2 + y2**2) * (y3 - y1)
-        + (x3**2 + y3**2) * (y1 - y2)
-    ) / d
-    cy = (
-        (x1**2 + y1**2) * (x3 - x2)
-        + (x2**2 + y2**2) * (x1 - x3)
-        + (x3**2 + y3**2) * (x2 - x1)
-    ) / d
+    cx = ((x1**2 + y1**2) * (y2 - y3) + (x2**2 + y2**2) * (y3 - y1) + (x3**2 + y3**2) * (y1 - y2)) / d
+    cy = ((x1**2 + y1**2) * (x3 - x2) + (x2**2 + y2**2) * (x1 - x3) + (x3**2 + y3**2) * (x2 - x1)) / d
     r = math.hypot(x1 - cx, y1 - cy)
 
     def ang(p):
@@ -148,10 +138,7 @@ def arc_points(start, mid, end):
     ccw = ((am - a1) % (2 * math.pi)) < ((a3 - a1) % (2 * math.pi))
     sweep = (a3 - a1) % (2 * math.pi) if ccw else -((a1 - a3) % (2 * math.pi))
     n = max(2, int(abs(sweep) * r / STEP) + 1)
-    return [
-        (cx + r * math.cos(a1 + sweep * i / n), cy + r * math.sin(a1 + sweep * i / n))
-        for i in range(n + 1)
-    ]
+    return [(cx + r * math.cos(a1 + sweep * i / n), cy + r * math.sin(a1 + sweep * i / n)) for i in range(n + 1)]
 
 
 def edge_segments(pcb_path):
@@ -178,9 +165,7 @@ def edge_segments(pcb_path):
             pts = arc_points((g[0], g[1]), (g[2], g[3]), (g[4], g[5]))
             segs += list(itertools.pairwise(pts))
 
-    unhandled = sorted(
-        {m.group(1) for m in OTHER_RE.finditer(text) if m.group(3) == "Edge.Cuts"}
-    )
+    unhandled = sorted({m.group(1) for m in OTHER_RE.finditer(text) if m.group(3) == "Edge.Cuts"})
     if unhandled:
         sys.exit(
             f"ERROR {pcb_path}: unhandled Edge.Cuts graphic(s): "
@@ -204,9 +189,7 @@ def normalize(segs, mirror_x):
     x0, y0, x1, y1 = bbox(segs)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     sx = -1 if mirror_x else 1
-    return [
-        (((a[0] - cx) * sx, a[1] - cy), ((b[0] - cx) * sx, b[1] - cy)) for a, b in segs
-    ]
+    return [(((a[0] - cx) * sx, a[1] - cy), ((b[0] - cx) * sx, b[1] - cy)) for a, b in segs]
 
 
 class SegmentIndex:
@@ -303,12 +286,9 @@ def zone_segments(zone, cx, cy, s):
     poly = zone.Outline()
     segs = []
     for i in range(poly.OutlineCount()):
-        for chain in [poly.Outline(i)] + [
-            poly.Hole(i, h) for h in range(poly.HoleCount(i))
-        ]:
+        for chain in [poly.Outline(i)] + [poly.Hole(i, h) for h in range(poly.HoleCount(i))]:
             ring = [
-                (((chain.CPoint(v).x / MM) - cx) * s, (chain.CPoint(v).y / MM) - cy)
-                for v in range(chain.PointCount())
+                (((chain.CPoint(v).x / MM) - cx) * s, (chain.CPoint(v).y / MM) - cy) for v in range(chain.PointCount())
             ]
             segs += [(ring[v], ring[(v + 1) % len(ring)]) for v in range(len(ring))]
     return segs
@@ -443,13 +423,9 @@ def check_components(a_path, b_path):
             # Position, orientation and library between them pin the placement, and the
             # library pins the pin field, so this says everything that can be said.
             if a["sizes"] != b["sizes"]:
-                fails.append(
-                    f"{where}: same footprint name but a different set of pads"
-                )
+                fails.append(f"{where}: same footprint name but a different set of pads")
             elif abs(((a["rot"] - b["rot"] + 180) % 360) - 180) > ROT_TOLERANCE:
-                fails.append(
-                    f"{where}: rotated {a['rot']:.2f} vs {b['rot']:.2f} mirrored"
-                )
+                fails.append(f"{where}: rotated {a['rot']:.2f} vs {b['rot']:.2f} mirrored")
         elif a["absolute"] != b["absolute"]:
             fails.append(
                 f"{where}: pads do not land on mirrored positions; a part whose "
@@ -471,8 +447,7 @@ def check_components(a_path, b_path):
         expected = UNPAIRED_KEYS.get(stem)
         if expected is None:
             fails.append(
-                f"{os.path.basename(half)}: no expected unpaired-key count is "
-                f"recorded for this half in UNPAIRED_KEYS"
+                f"{os.path.basename(half)}: no expected unpaired-key count is recorded for this half in UNPAIRED_KEYS"
             )
         elif len(unpaired) != expected:
             fails.append(
@@ -487,8 +462,7 @@ def check_components(a_path, b_path):
     )
     for z, half in [(i, a_path) for i in zone_a] + [(i, b_path) for i in zone_b]:
         fails.append(
-            f"zone {z['name']} on {z['layer']} of {os.path.basename(half)}: "
-            f"no counterpart at the mirrored position"
+            f"zone {z['name']} on {z['layer']} of {os.path.basename(half)}: no counterpart at the mirrored position"
         )
     for a, b in zone_pairs:
         # Outline, not bounding box. A rule area can be reshaped without moving its box:
@@ -543,9 +517,7 @@ def main():
 
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        sys.exit(
-            "npm_package_config_VERSION not set -- run via npm (npm run validate:symmetry)"
-        )
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:symmetry)")
 
     failed = set()
     checked = 0
@@ -583,8 +555,7 @@ def main():
                 file=sys.stderr,
             )
             print(
-                f"    {name_a}: {ax1 - ax0:.4f} x {ay1 - ay0:.4f} mm, "
-                f"{name_b}: {bx1 - bx0:.4f} x {by1 - by0:.4f} mm",
+                f"    {name_a}: {ax1 - ax0:.4f} x {ay1 - ay0:.4f} mm, {name_b}: {bx1 - bx0:.4f} x {by1 - by0:.4f} mm",
                 file=sys.stderr,
             )
 
@@ -610,9 +581,7 @@ def main():
 
         component_fails = check_components(a, b)
         if not component_fails:
-            note(
-                f"  ok {version}/kicad/{stage}/: components, pads, zones and silk mirror"
-            )
+            note(f"  ok {version}/kicad/{stage}/: components, pads, zones and silk mirror")
         else:
             failed.add(stage)
             sys.stdout.flush()

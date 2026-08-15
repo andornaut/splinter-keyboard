@@ -77,10 +77,7 @@ def build_stamp(config_path, version):
     else:
         clean = "yes" if status == "" else "no"
     built = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    return (
-        f"{STAMP_PREFIX} v={version} built={built} "
-        f"config={config_hash(config_path)} commit={commit} clean={clean}"
-    )
+    return f"{STAMP_PREFIX} v={version} built={built} config={config_hash(config_path)} commit={commit} clean={clean}"
 
 
 def parse_config_field(comment_text):

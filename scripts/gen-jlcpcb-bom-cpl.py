@@ -68,8 +68,7 @@ def main():
     if no_lcsc:
         for pkg, refs in sorted(no_lcsc.items()):
             print(
-                f"  ERROR {pkg}: no lcsc for its {len(refs)} part(s), "
-                f"set one in {args.parts}",
+                f"  ERROR {pkg}: no lcsc for its {len(refs)} part(s), set one in {args.parts}",
                 file=sys.stderr,
             )
         sys.exit(1)
@@ -95,9 +94,7 @@ def main():
         for lcsc, refs in sorted(refs_by_lcsc.items()):
             spec = spec_by_lcsc[lcsc]
             designators = ",".join(sorted(refs, key=ref_key))
-            w.writerow(
-                [spec.get("comment", ""), designators, spec.get("package", ""), lcsc]
-            )
+            w.writerow([spec.get("comment", ""), designators, spec.get("package", ""), lcsc])
 
     # List the Do-Not-Place footprints (grouped by package) so a part that fell
     # through unintentionally -- e.g. a renamed footprint no longer matching a
@@ -106,10 +103,7 @@ def main():
     # sockets.
     dnp_items = sorted(dnp.items())
     n_dnp = sum(len(refs) for _, refs in dnp_items)
-    print(
-        f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), "
-        f"{n_dnp} do-not-place"
-    )
+    print(f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), {n_dnp} do-not-place")
     # Which packages they are is verbose-only: validate:fab is the gate that a
     # part meant for assembly did not fall through to here (it requires every
     # footprint with an lcsc to appear in the CPL exactly once), so this listing
