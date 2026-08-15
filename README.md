@@ -7,7 +7,7 @@ A 62-key split columnar ergonomic keyboard.
 
 This repo holds the hardware design files; firmware lives in a [separate repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter). Design pipeline: Keyboard Layout Editor -> Ergogen -> KiCad -> fabrication -> Onshape -> OrcaSlicer -> QMK (see [Developing](#developing)).
 
-Related notes: [3D printing](https://github.com/andornaut/til/blob/master/docs/3d-printing.md), [electronics](https://github.com/andornaut/til/blob/master/docs/electronics.md), [keyboards](https://github.com/andornaut/til/blob/master/docs/keyboards.md).
+Related notes: [3D printing](https://github.com/andornaut/til/blob/main/docs/3d-printing.md), [electronics](https://github.com/andornaut/til/blob/main/docs/electronics.md), [keyboards](https://github.com/andornaut/til/blob/main/docs/keyboards.md).
 
 ## Versions
 
