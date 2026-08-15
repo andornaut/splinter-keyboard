@@ -39,16 +39,17 @@ jobs:
       # on its own. Set everywhere rather than only where something sources
       # today, so a script that starts to is already covered.
       #
-      # scandir is the one thing local here: scripts/ holds every shell file,
-      # and pointing at the root would walk the two vendored footprint
-      # submodules under ergogen/.
+      # The whole tree, with ergogen/ skipped alongside node_modules: it holds
+      # the vendored footprint libraries, and the one shell file under it is
+      # upstream's. Scoping to scripts/ instead would leave a script added
+      # anywhere else unchecked until someone remembered to widen this.
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: -x -P SCRIPTDIR
         with:
-          ignore_paths: node_modules
-          scandir: "./scripts"
+          ignore_paths: node_modules ergogen
+          scandir: "."
 
       - name: Set up Node.js
         uses: actions/setup-node@v7.0.0
