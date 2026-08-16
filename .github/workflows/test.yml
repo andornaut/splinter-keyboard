@@ -36,6 +36,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
+        with:
+          # Nothing in this job uses the token, so it is not left
+          # in .git/config for a later step to read.
+          persist-credentials: false
 
       # -x follows a `source` into the file it names and -P SCRIPTDIR looks for
       # it beside the script doing the sourcing, which shellcheck cannot resolve
