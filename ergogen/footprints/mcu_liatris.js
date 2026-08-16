@@ -168,13 +168,13 @@ module.exports = {
     };
 
     const get_pin_label_override = (p, pin_name) => {
-      let prop_name = `${pin_name}_label`;
+      const prop_name = `${pin_name}_label`;
       return p[prop_name];
     };
 
     const get_pin_label = (p, pin_name) => {
       let label = get_pin_label_override(p, pin_name);
-      if (label == '') {
+      if (label === '') {
         label = get_pin_net_name(p, pin_name);
       }
 
@@ -215,7 +215,7 @@ module.exports = {
       let traces = '';
       for (let i = 0; i < 12; i++) {
         if (i < 4 || !p.only_required_jumpers) {
-          let row_traces = gen_traces_row(i)
+          const row_traces = gen_traces_row(i)
           traces += row_traces
         }
       }
@@ -256,18 +256,18 @@ module.exports = {
       const net_silk_back_left = via_label_right
       const net_silk_back_right = via_label_left
 
-      let socket_row_base = `
+      const socket_row_base = `
     ${''/* Socket Holes */}
     (pad "${socket_hole_num_left}" thru_hole circle (at -7.62 ${-12.7 + row_offset_y} ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.reversible && (row_num < 4 || !p.only_required_jumpers) ? p.local_net(socket_hole_num_left).str : net_left})
     (pad "${socket_hole_num_right}" thru_hole circle (at 7.62 ${-12.7 + row_offset_y} ${p.r}) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask") ${p.reversible && (row_num < 4 || !p.only_required_jumpers) ? p.local_net(socket_hole_num_right).str : net_right})
       `
-      let socket_row_vias = `
+      const socket_row_vias = `
     ${''/* Inside VIAS */}
     (pad "${via_num_left}" thru_hole circle (at -3.4 ${-12.7 + row_offset_y} ${p.r}) (size ${p.via_size} ${p.via_size}) (drill ${p.via_drill}) (layers "*.Cu" "*.Mask") ${net_left})
     (pad "${via_num_right}" thru_hole circle (at 3.4 ${-12.7 + row_offset_y} ${p.r}) (size ${p.via_size} ${p.via_size}) (drill ${p.via_drill}) (layers "*.Cu" "*.Mask") ${net_right})
       `
 
-      let socket_row_rectangular_jumpers = `
+      const socket_row_rectangular_jumpers = `
     ${''/* Jumper Pads - Front Left */}
     (pad "${socket_hole_num_left}" smd rect (at -5.48 ${-12.7 + row_offset_y} ${p.r}) (size 0.6 1.2) (layers "F.Cu" "F.Paste" "F.Mask") ${p.local_net(socket_hole_num_left).str})
     (pad "${via_num_left}" smd rect (at -4.58 ${-12.7 + row_offset_y} ${p.r}) (size 0.6 1.2) (layers "F.Cu" "F.Paste" "F.Mask") ${net_left})
@@ -285,7 +285,7 @@ module.exports = {
     (pad "${socket_hole_num_right}" smd rect (at 5.48 ${-12.7 + row_offset_y} ${p.r}) (size 0.6 1.2) (layers "B.Cu" "B.Paste" "B.Mask") ${p.local_net(socket_hole_num_right).str})
         `
 
-      let socket_row_chevron_jumpers = `
+      const socket_row_chevron_jumpers = `
     ${''/* Jumper Pads - Front Left */}
     (pad "${socket_hole_num_left}" smd custom (at -5.5 ${-12.7 + row_offset_y} ${p.r}) (size 0.2 0.2) (layers "F.Cu" "F.Paste" "F.Mask") ${p.local_net(socket_hole_num_left).str}
       (zone_connect 2)
@@ -368,8 +368,8 @@ module.exports = {
           socket_row += socket_row_chevron_jumpers
         }
       }
-      if (show_silk_labels == true) {
-        if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'F') {
+      if (show_silk_labels === true) {
+        if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'F') {
           // Silkscreen labels - front
           socket_row += `
     (fp_text user "${net_silk_front_left}" (at -${p.reversible && (row_num < 4 || !p.only_required_jumpers) ? (net_silk_front_left.length > 2 ? 1.45 : 2.04) : 4.47} ${-12.7 + row_offset_y} ${p.r}) (layer "F.SilkS")
@@ -382,7 +382,7 @@ module.exports = {
     )
           `
         }
-        if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'B') {
+        if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'B') {
           // Silkscreen labels - back
           socket_row += `
     (fp_text user "${net_silk_back_left}" (at ${p.reversible ? '-' : ''}${p.reversible && (row_num < 4 || !p.only_required_jumpers) ? (net_silk_back_left.length > 2 ? 1.45 : 2.04) : 4.47} ${-12.7 + row_offset_y} ${p.r}) (layer "B.SilkS")
@@ -440,8 +440,8 @@ module.exports = {
 
       let socket_rows = '';
       for (let i = 0; i < pin_names.length; i++) {
-        let pin_name_left = pin_names[i][invert_pins ? 1 : 0]
-        let pin_name_right = pin_names[i][invert_pins ? 0 : 1]
+        const pin_name_left = pin_names[i][invert_pins ? 1 : 0]
+        const pin_name_right = pin_names[i][invert_pins ? 0 : 1]
 
         const socket_row = gen_socket_row(
           i, pin_name_left, pin_name_right,
@@ -452,8 +452,8 @@ module.exports = {
       }
       // Socket silkscreen
       // GP0 is marked according to orientation
-      if (show_silk_labels == true) {
-        if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'F') {
+      if (show_silk_labels === true) {
+        if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'F') {
           socket_rows += `
     (fp_line (start 6.29 -14.03) (end 8.95 -14.03) (layer "F.SilkS") (stroke (width 0.12) (type solid)))
     (fp_line (start 6.29 -14.03) (end 6.29 16.57) (layer "F.SilkS") (stroke (width 0.12) (type solid)))
@@ -466,7 +466,7 @@ module.exports = {
     (fp_line (start ${invert_pins ? '' : '-'}6.29 -11.43) (end ${invert_pins ? '' : '-'}8.95 -11.43) (layer "F.SilkS") (stroke (width 0.12) (type solid)))
             `
         }
-        if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'B') {
+        if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'B') {
           socket_rows += `
     (fp_line (start -6.29 -14.03) (end -8.95 -14.03) (layer "B.SilkS") (stroke (width 0.12) (type solid)))
     (fp_line (start -6.29 -14.03) (end -6.29 16.57) (layer "B.SilkS") (stroke (width 0.12) (type solid)))
@@ -523,9 +523,9 @@ module.exports = {
     const traces = gen_traces()
 
     const gen_extra_pin_labels = () => {
-      if (!p.show_silk_labels) return ''
+      if (!p.show_silk_labels) {return ''}
       let labels = ''
-      if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'F') {
+      if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'F') {
         labels += `
     (fp_text user "${p.GP12_label}" (at ${invert_pins ? '' : '-'}5.08 13.7 ${p.r}) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)))
@@ -544,7 +544,7 @@ module.exports = {
     )
         `
       }
-      if (p.reversible || p.show_silk_labels_on_both_sides || p.side == 'B') {
+      if (p.reversible || p.show_silk_labels_on_both_sides || p.side === 'B') {
         labels += `
     (fp_text user "${p.GP12_label}" (at ${invert_pins ? '' : '-'}5.08 13.7 ${p.r}) (layer "B.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.12)) (justify mirror))

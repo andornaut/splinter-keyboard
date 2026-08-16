@@ -178,20 +178,20 @@ module.exports = {
     const smd_pad_traces = `
     (segment
       (start ${p.eaxy(1.65, 0)})
-      (end ${p.eaxy(1.65 + 1*p.trace_distance, 0)})
+      (end ${p.eaxy(1.65 + Number(p.trace_distance), 0)})
       (width ${p.trace_width})
       (layer "F.Cu")
       (net ${p.from.index})
     )
     (via
-      (at ${p.eaxy(1.65 + 1*p.trace_distance, 0)})
+      (at ${p.eaxy(1.65 + Number(p.trace_distance), 0)})
       (size ${p.via_size})
       (drill ${p.via_drill})
       (layers "F.Cu" "B.Cu")
       (net ${p.from.index})
     )
     (segment
-      (start ${p.eaxy(1.65 + 1*p.trace_distance, 0)})
+      (start ${p.eaxy(1.65 + Number(p.trace_distance), 0)})
       (end ${p.eaxy(1.65, 0)})
       (width ${p.trace_width})
       (layer "B.Cu")
@@ -199,20 +199,20 @@ module.exports = {
     )
     (segment
       (start ${p.eaxy(-1.65, 0)})
-      (end ${p.eaxy(-1.65 - 1*p.trace_distance, 0)})
+      (end ${p.eaxy(-1.65 - Number(p.trace_distance), 0)})
       (width ${p.trace_width})
       (layer "F.Cu")
       (net ${p.to.index})
     )
     (via
-      (at ${p.eaxy(-1.65 - 1*p.trace_distance, 0)})
+      (at ${p.eaxy(-1.65 - Number(p.trace_distance), 0)})
       (size ${p.via_size})
       (drill ${p.via_drill})
       (layers "F.Cu" "B.Cu")
       (net ${p.to.index})
     )
     (segment
-      (start ${p.eaxy(-1.65 - 1*p.trace_distance, 0)})
+      (start ${p.eaxy(-1.65 - Number(p.trace_distance), 0)})
       (end ${p.eaxy(-1.65, 0)})
       (width ${p.trace_width})
       (layer "B.Cu")
@@ -222,13 +222,13 @@ module.exports = {
 
     let final = standard_opening;
 
-    if (p.side == "F" || p.reversible) {
+    if (p.side === "F" || p.reversible) {
       final += front_silk;
       if(!p.include_thru_hole_smd_pads) {
         final += front_smd_pads;
       }
     }
-    if (p.side == "B" || p.reversible) {
+    if (p.side === "B" || p.reversible) {
       final += back_silk;
       if(!p.include_thru_hole_smd_pads) {
         final += back_smd_pads;
