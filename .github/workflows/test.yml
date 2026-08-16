@@ -74,7 +74,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7.0.0
         with:
-          python-version: "3.12"
+          python-version-file: .python-version
 
       # Pinned in a manifest rather than installed by name, so Dependabot can
       # see the version and a ruff release cannot turn this red on a commit
