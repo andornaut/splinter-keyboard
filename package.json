@@ -29,6 +29,7 @@
     "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
     "ergogen": "./scripts/ergogen.sh",
     "fab": "./scripts/fab.sh",
+    "format": "prettier --write . && eslint --fix .",
     "lint": "prettier --check . && eslint --max-warnings 0 .",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
