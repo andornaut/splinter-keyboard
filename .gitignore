@@ -7,3 +7,4 @@ __pycache__/
 */kicad/**/*-backups/
 */kicad/**/.history/
 node_modules/
+.venv/
