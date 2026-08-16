@@ -44,12 +44,12 @@ By default both stages are checked; pass stage names to narrow it:
 
 import argparse
 import collections
-import glob
 import itertools
 import math
 import os
 import re
 import sys
+from pathlib import Path
 
 from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
@@ -147,7 +147,7 @@ def edge_segments(pcb_path):
     Read from the file text rather than through pcbnew: this is a pipeline gate,
     and loading a board costs seconds where a regex costs milliseconds (the same
     trade validate-provenance.py makes)."""
-    with open(pcb_path, encoding="utf-8") as f:
+    with Path(pcb_path).open(encoding="utf-8") as f:
         text = f.read()
 
     segs = [
@@ -433,23 +433,23 @@ def check_components(a_path, b_path):
     for item, half in [(i, a_path) for i in only_a] + [(i, b_path) for i in only_b]:
         if item["lib"] not in KEY_FOOTPRINTS:
             fails.append(
-                f"{item['ref']} ({item['lib']}) on {os.path.basename(half)}: "
+                f"{item['ref']} ({item['lib']}) on {Path(half).name}: "
                 f"no counterpart at the mirrored position, and only keys may "
                 f"differ between the halves"
             )
     for half, unpaired in ((a_path, only_a), (b_path, only_b)):
-        stem = os.path.splitext(os.path.basename(half))[0]
+        stem = Path(half).stem
         # Keys only: a non-key with no counterpart is already its own failure above,
         # and counting it here would report the same thing twice.
         key_unpaired = [i for i in unpaired if i["lib"] in KEY_FOOTPRINTS]
         expected = UNPAIRED_KEYS.get(stem)
         if expected is None:
             fails.append(
-                f"{os.path.basename(half)}: no expected unpaired-key count is recorded for this half in UNPAIRED_KEYS"
+                f"{Path(half).name}: no expected unpaired-key count is recorded for this half in UNPAIRED_KEYS"
             )
         elif len(key_unpaired) != expected:
             fails.append(
-                f"{os.path.basename(half)}: {len(key_unpaired)} unpaired key "
+                f"{Path(half).name}: {len(key_unpaired)} unpaired key "
                 f"footprint(s), expected {expected} for the outer pinky columns"
             )
 
@@ -459,9 +459,7 @@ def check_components(a_path, b_path):
         lambda p, q: (p["name"], p["layer"]) == (q["name"], q["layer"]),
     )
     for z, half in [(i, a_path) for i in zone_a] + [(i, b_path) for i in zone_b]:
-        fails.append(
-            f"zone {z['name']} on {z['layer']} of {os.path.basename(half)}: no counterpart at the mirrored position"
-        )
+        fails.append(f"zone {z['name']} on {z['layer']} of {Path(half).name}: no counterpart at the mirrored position")
     for a, b in zone_pairs:
         # Outline, not bounding box. A rule area can be reshaped without moving its box:
         # keepout_perimeter_route is a full-board ring with the TRRS band carved out of
@@ -494,7 +492,7 @@ def check_components(a_path, b_path):
         # A graphic anywhere else is silk or copper and has to mirror.
         if g["layer"] != KEY_REFERENCE_LAYER:
             fails.append(
-                f"{g['kind']} on {g['layer']} of {os.path.basename(half)} at "
+                f"{g['kind']} on {g['layer']} of {Path(half).name} at "
                 f"({g['x']:.3f}, {g['y']:.3f}){': ' + g['text'] if g['text'] else ''}: "
                 f"no counterpart at the mirrored position"
             )
@@ -520,7 +518,8 @@ def main():
     failed = set()
     checked = 0
     for stage in stages:
-        boards = sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb"))
+        # str(): these are handed to pcbnew, which takes a file name.
+        boards = [str(p) for p in sorted(Path(f"{version}/kicad/{stage}").glob("[!_]*.kicad_pcb"))]
         if not boards:
             sys.exit(f"No boards under {version}/kicad/{stage}/ to validate")
         if len(boards) != 2:
@@ -536,7 +535,7 @@ def main():
         dist, at = hausdorff(normalize(a_segs, False), normalize(b_segs, True))
         checked += 1
 
-        name_a, name_b = os.path.basename(a), os.path.basename(b)
+        name_a, name_b = Path(a).name, Path(b).name
         if dist <= args.tolerance:
             note(
                 f"  ok {version}/kicad/{stage}/: {name_a} and {name_b} mirror "

@@ -52,6 +52,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 from lib.pcbnew_quiet import pcbnew
 from lib.pipeline_log import note
@@ -72,7 +73,7 @@ def pin_labels():
     The leading boundary matters: without it `GP15_label` also matches `P15_label`
     and the extra-pin entries silently overwrite the header pins.
     """
-    with open(FOOTPRINT_JS) as fh:
+    with Path(FOOTPRINT_JS).open() as fh:
         src = fh.read()
     return dict(re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.MULTILINE))
 
@@ -87,7 +88,7 @@ def mcu_pad_map(board):
     compare empty maps and report agreement, passing the gate having measured
     nothing.
     """
-    name = os.path.basename(board.GetFileName()) or "<board>"
+    name = Path(board.GetFileName()).name or "<board>"
     fps = [f for f in board.GetFootprints() if "mcu_liatris" in f.GetFPIDAsString()]
     if len(fps) != 1:
         raise SystemExit(f"{name}: expected exactly 1 MCU footprint, found {len(fps)}")
@@ -156,12 +157,14 @@ def load_boards(version, stages):
     boards = {}
     for stage in stages:
         d = f"{version}/kicad/{stage}"
-        if not os.path.isdir(d):
+        if not Path(d).is_dir():
             continue
-        for name in sorted(os.listdir(d)):
+        for entry in sorted(Path(d).iterdir()):
+            name = entry.name
             if not name.endswith(".kicad_pcb") or name.startswith("_"):
                 continue
-            boards[f"{stage}/{name}"] = pcbnew.LoadBoard(os.path.join(d, name))
+            # str(): pcbnew takes a file name, not a Path.
+            boards[f"{stage}/{name}"] = pcbnew.LoadBoard(str(entry))
     return boards
 
 
@@ -228,11 +231,11 @@ def load_firmware(source):
             return None, f"could not fetch {source}: {exc}"
         except (ValueError, UnicodeDecodeError) as exc:
             return None, f"{source} is not valid JSON: {exc}"
-    path = os.path.expanduser(source)
-    if not os.path.isfile(path):
+    path = Path(source).expanduser()
+    if not path.is_file():
         return None, f"{path} not found"
     try:
-        with open(path) as fh:
+        with path.open() as fh:
             return json.load(fh), None
     except ValueError as exc:
         return None, f"{path} is not valid JSON: {exc}"
@@ -248,7 +251,7 @@ def check_firmware(boards, fw, labels):
     }
     failures = []
     for key, board in sorted(boards.items()):
-        half = os.path.basename(key).replace(".kicad_pcb", "")
+        half = key.rsplit("/", 1)[-1].replace(".kicad_pcb", "")
         if half not in want:
             continue
         cols, rows = matrix_order(board)

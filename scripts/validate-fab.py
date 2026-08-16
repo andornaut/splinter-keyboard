@@ -45,7 +45,6 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
 """
 
 import csv
-import glob
 import json
 import os
 import re
@@ -59,11 +58,13 @@ from lib.pcbnew_quiet import pcbnew  # isort: skip
 
 # Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
 # emits to stderr each time it re-inits image handlers on a board load.
+from pathlib import Path
+
 import wx
 
 wx.Log.SetLogLevel(wx.LOG_Warning)
 
-COMMON_SH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "common.sh")
+COMMON_SH = Path(__file__).resolve().parent / "lib" / "common.sh"
 JLCPCB_LAYERS_RE = re.compile(r'^JLCPCB_LAYERS="([^"]*)"', re.MULTILINE)
 
 
@@ -77,7 +78,7 @@ def _layer_fragments():
 
     The only transformation is the spelling. kicad-cli takes a layer as F.Cu on
     the command line and writes it into a filename as F_Cu."""
-    with open(COMMON_SH) as f:
+    with COMMON_SH.open() as f:
         match = JLCPCB_LAYERS_RE.search(f.read())
     if not match:
         raise SystemExit(
@@ -245,7 +246,7 @@ def assembled_refs_on_board(board, assembled_pkgs):
 
 
 def csv_designators(path, column):
-    with open(path, newline="") as f:
+    with Path(path).open(newline="") as f:
         return [row[column] for row in csv.DictReader(f)]
 
 
@@ -258,27 +259,28 @@ def main():
         sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:fab)")
 
     config = f"{version}/ergogen/config.yaml"
-    routed = sorted(glob.glob(f"{version}/kicad/routed/[!_]*.kicad_pcb"))
+    # str(): these are handed to pcbnew, which takes a file name.
+    routed = [str(p) for p in sorted(Path(f"{version}/kicad/routed").glob("[!_]*.kicad_pcb"))]
     if not routed:
         sys.exit(f"No routed boards under {version}/kicad/routed/ to validate")
 
     parts_path = f"{version}/kicad/jlcpcb-parts.json"
     assembled_pkgs = {}
-    if os.path.isfile(parts_path):
-        with open(parts_path) as f:
+    if Path(parts_path).is_file():
+        with Path(parts_path).open() as f:
             assembled_pkgs = {k: v for k, v in json.load(f).get("parts", {}).items() if v.get("lcsc")}
 
-    config_mtime = os.path.getmtime(config) if os.path.isfile(config) else 0
+    config_mtime = Path(config).stat().st_mtime if Path(config).is_file() else 0
     failures, warnings = [], []
     teardrop_counts = {}
 
     for pcb in routed:
-        name = os.path.splitext(os.path.basename(pcb))[0]
+        name = Path(pcb).stem
         out = f"dist/{version}/kicad/jlcpcb/{name}"
         zip_path = f"{out}/{name}-gerber.zip"
         print(f"  audit {pcb}: {out}/")
 
-        if not os.path.isdir(out):
+        if not Path(out).is_dir():
             failures.append(f"{name}: no fab output at {out}/ -- run `npm run fab` first")
             continue
 
@@ -301,7 +303,7 @@ def main():
             shown = f"{area:.0f}mm^2" if area is not None else "filled"
             print(f"    ok GND zone (master): {shown}")
 
-        if not os.path.isfile(zip_path):
+        if not Path(zip_path).is_file():
             failures.append(f"{name}: missing gerber zip {zip_path}")
         else:
             if gnd_flood_in_gerber(zip_path, board_w, board_h):
@@ -323,9 +325,9 @@ def main():
         if assembled_pkgs:
             bom, cpl = f"{out}/{name}-BOM.csv", f"{out}/{name}-CPL.csv"
             expected = assembled_refs_on_board(board, assembled_pkgs)
-            if not (os.path.isfile(bom) and os.path.getsize(bom) > 0):
+            if not (Path(bom).is_file() and Path(bom).stat().st_size > 0):
                 failures.append(f"{name}: BOM missing or empty ({bom})")
-            if not (os.path.isfile(cpl) and os.path.getsize(cpl) > 0):
+            if not (Path(cpl).is_file() and Path(cpl).stat().st_size > 0):
                 failures.append(f"{name}: CPL missing or empty ({cpl})")
             elif not expected:
                 failures.append(
@@ -354,10 +356,10 @@ def main():
             warnings.append(f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})")
 
         # 4. freshness ordering (gate).
-        pcb_mtime = os.path.getmtime(pcb)
+        pcb_mtime = Path(pcb).stat().st_mtime
         if config_mtime and pcb_mtime < config_mtime:
             failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
-        if os.path.isfile(zip_path) and os.path.getmtime(zip_path) < pcb_mtime:
+        if Path(zip_path).is_file() and Path(zip_path).stat().st_mtime < pcb_mtime:
             failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
 
     # 5. teardrop consistency (gate): the mirrored halves should carry comparable

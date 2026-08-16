@@ -26,6 +26,7 @@ import json
 import re
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 from lib.pipeline_log import note
 
@@ -45,9 +46,9 @@ def main():
     ap.add_argument("--cpl", required=True, help="output CPL CSV path")
     args = ap.parse_args()
 
-    with open(args.parts) as f:
+    with Path(args.parts).open() as f:
         parts = json.load(f).get("parts", {})
-    with open(args.pos, newline="") as f:
+    with Path(args.pos).open(newline="") as f:
         rows = list(csv.DictReader(f))
 
     placed = []  # (pos_row, spec) for footprints we place
@@ -74,7 +75,7 @@ def main():
         sys.exit(1)
 
     # CPL: one row per placed footprint, rotation corrected.
-    with open(args.cpl, "w", newline="") as f:
+    with Path(args.cpl).open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["Designator", "Mid X", "Mid Y", "Rotation", "Layer"])
         for r, spec in placed:
@@ -88,7 +89,7 @@ def main():
     for r, spec in placed:
         refs_by_lcsc[spec["lcsc"]].append(r["Ref"])
         spec_by_lcsc[spec["lcsc"]] = spec
-    with open(args.bom, "w", newline="") as f:
+    with Path(args.bom).open("w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["Comment", "Designator", "Footprint", "LCSC Part #"])
         for lcsc, refs in sorted(refs_by_lcsc.items()):

@@ -18,7 +18,6 @@ Usage: panelize.py <board.kicad_pcb> [more ...] --output panel.kicad_pcb [tuning
 """
 
 import argparse
-import os
 import sys
 
 # First, and marked so the import sort leaves it there: it silences pcbnew's
@@ -26,13 +25,15 @@ import sys
 # nothing has imported pcbnew yet. kikit below imports pcbnew itself.
 from lib.pcbnew_quiet import pcbnew  # isort: skip
 
+from pathlib import Path
+
 from kikit.panelize import Origin, Panel
 from kikit.units import mm
 from lib.provenance import read_stamp, write_stamp
 
 
 def stem(path):
-    return os.path.splitext(os.path.basename(path))[0]
+    return Path(path).stem
 
 
 def build(
@@ -153,7 +154,7 @@ def main():
     if len(args.board) < 2:
         sys.exit("ERROR: panelize needs at least 2 boards (left + right)")
     for f in args.board:
-        if not os.path.isfile(f):
+        if not Path(f).is_file():
             sys.exit(f"ERROR {f}: no such board")
 
     # KiCad internal units are integer nanometres; mm scales up, so round to int
@@ -161,7 +162,7 @@ def main():
     def nm(v):
         return round(v * mm)
 
-    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+    Path(args.output).resolve().parent.mkdir(parents=True, exist_ok=True)
     build(
         args.board,
         args.output,

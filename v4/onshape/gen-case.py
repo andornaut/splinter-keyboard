@@ -36,6 +36,7 @@ for _p in ("/usr/lib/freecad-python3/lib", "/usr/lib/freecad/lib"):
         sys.path.insert(0, _p)
 
 import contextlib
+from pathlib import Path
 
 import FreeCAD as App
 import Part
@@ -167,7 +168,7 @@ CUTOUT_RECESS_SPLIT = 230.0
 # ---- DXF, as real edges --------------------------------------------------
 def dxf_entities(path):
     """Group codes we care about, per LINE/ARC/CIRCLE entity."""
-    with open(path) as fh:
+    with Path(path).open() as fh:
         lines = fh.read().splitlines()
     out, kind, g = [], None, {}
     for i in range(0, len(lines) - 1, 2):
@@ -761,14 +762,15 @@ def main():
         )
     halves = ["left", "right"] if halves == "both" else [halves]
 
-    if not os.path.exists(dxf):
+    if not Path(dxf).exists():
         raise SystemExit(f"FAIL gen-case: {dxf}: no such file, run 'npm run ergogen' first")
-    os.makedirs(outdir, exist_ok=True)
+    Path(outdir).mkdir(parents=True, exist_ok=True)
 
     bad = 0
     for half in halves:
         suffix = "-exploded" if explode else ""
-        out = os.path.join(outdir, f"splinter-v4-{half}-case{suffix}.step")
+        # str(): FreeCAD's Import.export takes a file name, not a Path.
+        out = str(Path(outdir) / f"splinter-v4-{half}-case{suffix}.step")
         shell, plate, keys = build(dxf, half, explode)
         export(shell, plate, half, out)
         fails = check(out, half, explode, keys)
@@ -780,7 +782,7 @@ def main():
             print(
                 f"  wrote {out}: shell {len(shell.Faces)} faces, "
                 f"plate {len(plate.Faces)} faces, "
-                f"{os.path.getsize(out) / 1024.0:.0f} KB"
+                f"{Path(out).stat().st_size / 1024.0:.0f} KB"
             )
     sys.stdout.flush()
     if bad:

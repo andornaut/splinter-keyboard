@@ -12,6 +12,7 @@ Usage: recenter.py <board.kicad_pcb> [more.kicad_pcb ...]
 
 import re
 import sys
+from pathlib import Path
 
 from lib.pcbnew_quiet import pcbnew
 
@@ -31,7 +32,7 @@ PAGE_SIZES = {
 
 def page_center(path):
     """Read the (paper ...) line and return the page center (x, y) in mm."""
-    with open(path) as f:
+    with Path(path).open() as f:
         text = f.read()
     m = re.search(r'\(paper\s+"?([A-Za-z0-9]+)"?(.*?)\)', text)
     if not m:

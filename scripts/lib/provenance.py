@@ -23,6 +23,7 @@ import hashlib
 import re
 import subprocess
 from datetime import datetime, timezone
+from pathlib import Path
 
 STAMP_PREFIX = "splinter"
 STAMP_COMMENT_INDEX = 0  # title_block "comment 1" is index 0
@@ -44,7 +45,7 @@ def read_stamp(board):
 
 def config_hash(config_path):
     """Return sha256 of the config file's bytes, truncated to 12 hex chars."""
-    with open(config_path, "rb") as f:
+    with Path(config_path).open("rb") as f:
         return hashlib.sha256(f.read()).hexdigest()[:12]
 
 

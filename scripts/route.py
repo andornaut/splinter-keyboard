@@ -28,7 +28,6 @@ dist/${VERSION}/kicad/freerouting/. Pass explicit paths to route just those:
   pcb_path  working .kicad_pcb to route in place (default: all for the version)
 """
 
-import glob
 import json
 import os
 import shutil
@@ -40,6 +39,8 @@ import uuid
 # startup wxASSERT by swapping fd 2 across the import, which only works if
 # nothing has imported pcbnew yet.
 from lib.pcbnew_quiet import pcbnew  # isort: skip
+
+from pathlib import Path
 
 import wx
 
@@ -68,7 +69,7 @@ def write_freerouting_config(config_dir, max_passes, scoring):
     profile.id is required -- freerouting throws a startup NPE (and pops an error
     dialog) when it is missing.
     """
-    os.makedirs(config_dir, exist_ok=True)
+    Path(config_dir).mkdir(parents=True, exist_ok=True)
     config = {
         "profile": {
             "id": str(uuid.uuid4()),
@@ -85,7 +86,7 @@ def write_freerouting_config(config_dir, max_passes, scoring):
         "usage_and_diagnostic_data": {"disable_analytics": True},
         "version": FREEROUTING_CONFIG_VERSION,
     }
-    with open(os.path.join(config_dir, "freerouting.json"), "w") as f:
+    with (Path(config_dir) / "freerouting.json").open("w") as f:
         json.dump(config, f, indent=2)
 
 
@@ -98,12 +99,14 @@ def autoroute(pcb_path, work_dir, passes):
             "https://github.com/freerouting/freerouting"
         )
 
-    pcb_path = os.path.abspath(pcb_path)
-    name = os.path.splitext(os.path.basename(pcb_path))[0]
-    os.makedirs(work_dir, exist_ok=True)
-    dsn_path = os.path.join(work_dir, name + ".dsn")
-    ses_path = os.path.join(work_dir, name + ".ses")
-    config_dir = os.path.join(work_dir, "config")
+    # str() throughout: every one of these is handed to pcbnew or to the
+    # freerouting command line, neither of which takes a Path.
+    pcb_path = str(Path(pcb_path).resolve())
+    name = Path(pcb_path).stem
+    Path(work_dir).mkdir(parents=True, exist_ok=True)
+    dsn_path = str(Path(work_dir) / f"{name}.dsn")
+    ses_path = str(Path(work_dir) / f"{name}.ses")
+    config_dir = str(Path(work_dir) / "config")
 
     strategy = os.environ.get("FREEROUTING_STRATEGY", "greedy")
     selection = os.environ.get("FREEROUTING_SELECTION", "prioritized")
@@ -149,7 +152,7 @@ def autoroute(pcb_path, work_dir, passes):
             "FREEROUTING__LOGGING__FILE__LEVEL": LOG_LEVEL,
         },
     )
-    if not os.path.exists(ses_path):
+    if not Path(ses_path).exists():
         sys.exit(f"ERROR {pcb_path}: Freerouting produced no {ses_path}")
 
     # Import onto the board already in memory: ExportSpecctraDSN only serialized
@@ -168,7 +171,7 @@ if __name__ == "__main__":
     passes = os.environ.get("FREEROUTING_PASSES", "100")
     work_dir = f"dist/{version}/kicad/freerouting"
 
-    pcbs = sys.argv[1:] or sorted(glob.glob(f"{version}/kicad/unrouted/[!_]*.kicad_pcb"))
+    pcbs = sys.argv[1:] or [str(p) for p in sorted(Path(f"{version}/kicad/unrouted").glob("[!_]*.kicad_pcb"))]
     if not pcbs:
         sys.exit(f"No boards in {version}/kicad/unrouted/ -- nothing to do")
     for pcb in pcbs:

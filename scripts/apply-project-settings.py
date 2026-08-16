@@ -35,8 +35,8 @@ Usage: apply-project-settings.py <project.kicad_pro> [more.kicad_pro ...]
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 
 from lib.pipeline_log import note
 
@@ -162,18 +162,17 @@ def ensure_drc_rules(pro_path):
     return the path if it was (re)written, else None."""
     dru_path = pro_path[: -len(".kicad_pro")] + ".kicad_dru"
     existing = None
-    if os.path.isfile(dru_path):
-        with open(dru_path) as f:
+    if Path(dru_path).is_file():
+        with Path(dru_path).open() as f:
             existing = f.read()
     if existing == DRC_RULES:
         return None
-    with open(dru_path, "w") as f:
-        f.write(DRC_RULES)
+    Path(dru_path).write_text(DRC_RULES)
     return dru_path
 
 
 def apply(path):
-    with open(path) as f:
+    with Path(path).open() as f:
         project = json.load(f)
     net_settings = project.setdefault("net_settings", {})
     design_settings = project.setdefault("board", {}).setdefault("design_settings", {})
@@ -184,7 +183,7 @@ def apply(path):
     changed = ensure_drc_floors(rules) or changed
     changed = ensure_severity_overrides(severities) or changed
     if changed:
-        with open(path, "w") as f:
+        with Path(path).open("w") as f:
             json.dump(project, f, indent=2)
             f.write("\n")
         print(f"  updated {path}: project settings")
@@ -197,7 +196,7 @@ def apply(path):
 
 def main(paths):
     for path in paths:
-        if not os.path.isfile(path):
+        if not Path(path).is_file():
             continue  # tolerate globs that did not match
         apply(path)
 

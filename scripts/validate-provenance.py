@@ -29,10 +29,10 @@ unrouted/ drift):
 
 import argparse
 import collections
-import glob
 import os
 import re
 import sys
+from pathlib import Path
 
 from lib.pipeline_log import note
 from lib.provenance import config_hash, parse_config_field
@@ -45,7 +45,7 @@ def stamped_text(pcb_path):
     """Return a board's whole stamp string, or "" if it carries none. Read from the
     file text rather than through pcbnew: this runs as a gate on every fab, and
     loading a board costs seconds where a regex costs milliseconds."""
-    with open(pcb_path, encoding="utf-8") as f:
+    with Path(pcb_path).open(encoding="utf-8") as f:
         text = f.read()
     m = COMMENT1_RE.search(text)
     return m.group(1) if m else ""
@@ -68,11 +68,11 @@ def main():
         sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:provenance)")
 
     config = f"{version}/ergogen/config.yaml"
-    if not os.path.isfile(config):
+    if not Path(config).is_file():
         sys.exit(f"ERROR {config}: not found")
     expected = config_hash(config)
 
-    staged = {stage: sorted(glob.glob(f"{version}/kicad/{stage}/[!_]*.kicad_pcb")) for stage in stages}
+    staged = {stage: sorted(Path(f"{version}/kicad/{stage}").glob("[!_]*.kicad_pcb")) for stage in stages}
     boards = [pcb for stage in stages for pcb in staged[stage]]
     if not boards:
         sys.exit(f"No boards under {version}/kicad/{{{','.join(stages)}}}/ to validate")
@@ -117,7 +117,7 @@ def main():
     for stage in split:
         by_stamp = collections.defaultdict(list)
         for pcb in staged[stage]:
-            by_stamp[stamps[pcb]].append(os.path.basename(pcb))
+            by_stamp[stamps[pcb]].append(pcb.name)
         print(
             f"  SPLIT {version}/kicad/{stage}/: boards were not built in one run",
             file=sys.stderr,
