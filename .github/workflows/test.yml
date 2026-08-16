@@ -48,6 +48,12 @@ jobs:
         env:
           SHELLCHECK_OPTS: -x -P SCRIPTDIR
         with:
+          # Pinned rather than the action's `stable` default, which names a
+          # moving release the action downloads at run time: without this a
+          # ShellCheck release turns every one of these gates red on a commit
+          # that did not touch them. Dependabot does not read an action input,
+          # so this moves by hand.
+          version: v0.11.0
           ignore_paths: node_modules ergogen
           scandir: "."
 
