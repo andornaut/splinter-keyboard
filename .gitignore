@@ -8,3 +8,9 @@ __pycache__/
 */kicad/**/.history/
 node_modules/
 .venv/
+
+# AI agent instructions, local only. Named here as well as in the global
+# ignore, which a session working from a fresh clone does not have.
+AGENTS.md
+CLAUDE.md
+GEMINI.md
