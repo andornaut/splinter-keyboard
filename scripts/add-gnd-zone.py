@@ -34,7 +34,7 @@ Usage: add-gnd-zone.py <board.kicad_pcb> [more.kicad_pcb ...]
 """
 
 import sys
-from collections import namedtuple
+from typing import NamedTuple
 
 from lib.pcb_copper import copper_pads, dangling_tracks, ids, is_via, net_class
 from lib.pcbnew_quiet import pcbnew
@@ -52,8 +52,16 @@ CANDIDATE_LAYERS = (pcbnew.B_Cu, pcbnew.F_Cu)
 # does not reach the pour layer would need. Small: openness dominates the choice.
 UNREACHABLE_GND_PAD_COST_MM = 50.0
 
+
 # One candidate layer's score; `cost` drives the choice (lower wins).
-LayerScore = namedtuple("LayerScore", "layer name signal_mm reach cost")
+class LayerScore(NamedTuple):
+    """One candidate layer, scored."""
+
+    layer: int
+    name: str
+    signal_mm: float
+    reach: float
+    cost: float
 
 
 def _try_set(obj, name, *args):

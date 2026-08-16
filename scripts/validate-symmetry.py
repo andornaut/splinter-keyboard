@@ -150,15 +150,14 @@ def edge_segments(pcb_path):
     with open(pcb_path, encoding="utf-8") as f:
         text = f.read()
 
-    segs = []
-    for m in LINE_RE.finditer(text):
-        if m.group(6) == "Edge.Cuts":
-            segs.append(
-                (
-                    (float(m.group(1)), float(m.group(2))),
-                    (float(m.group(3)), float(m.group(4))),
-                )
-            )
+    segs = [
+        (
+            (float(m.group(1)), float(m.group(2))),
+            (float(m.group(3)), float(m.group(4))),
+        )
+        for m in LINE_RE.finditer(text)
+        if m.group(6) == "Edge.Cuts"
+    ]
     for m in ARC_RE.finditer(text):
         if m.group(8) == "Edge.Cuts":
             g = [float(m.group(i)) for i in range(1, 7)]
@@ -236,10 +235,10 @@ class SegmentIndex:
 
 def point_segment_distance(p, a, b):
     dx, dy = b[0] - a[0], b[1] - a[1]
-    L = dx * dx + dy * dy
-    if L == 0:
+    length_sq = dx * dx + dy * dy
+    if length_sq == 0:
         return math.dist(p, a)
-    t = max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L))
+    t = max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length_sq))
     return math.dist(p, (a[0] + t * dx, a[1] + t * dy))
 
 
@@ -247,8 +246,7 @@ def sample(segs):
     pts = []
     for a, b in segs:
         n = max(1, int(math.dist(a, b) / STEP))
-        for i in range(n + 1):
-            pts.append((a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n))
+        pts.extend((a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n) for i in range(n + 1))
     return pts
 
 
@@ -443,15 +441,15 @@ def check_components(a_path, b_path):
         stem = os.path.splitext(os.path.basename(half))[0]
         # Keys only: a non-key with no counterpart is already its own failure above,
         # and counting it here would report the same thing twice.
-        unpaired = [i for i in unpaired if i["lib"] in KEY_FOOTPRINTS]
+        key_unpaired = [i for i in unpaired if i["lib"] in KEY_FOOTPRINTS]
         expected = UNPAIRED_KEYS.get(stem)
         if expected is None:
             fails.append(
                 f"{os.path.basename(half)}: no expected unpaired-key count is recorded for this half in UNPAIRED_KEYS"
             )
-        elif len(unpaired) != expected:
+        elif len(key_unpaired) != expected:
             fails.append(
-                f"{os.path.basename(half)}: {len(unpaired)} unpaired key "
+                f"{os.path.basename(half)}: {len(key_unpaired)} unpaired key "
                 f"footprint(s), expected {expected} for the outer pinky columns"
             )
 

@@ -35,6 +35,8 @@ for _p in ("/usr/lib/freecad-python3/lib", "/usr/lib/freecad/lib"):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import contextlib
+
 import FreeCAD as App
 import Part
 from FreeCAD import Placement, Rotation, Vector
@@ -176,10 +178,8 @@ def dxf_entities(path):
             kind = val if val in ("LINE", "ARC", "CIRCLE") else None
             g = {}
         elif kind and code.isdigit() and int(code) in (10, 11, 20, 21, 40, 50, 51):
-            try:
+            with contextlib.suppress(ValueError):
                 g[int(code)] = float(val)
-            except ValueError:
-                pass
     if kind:
         out.append((kind, g.copy()))
     return out
@@ -376,14 +376,15 @@ def check_bores(recess, bosses, depths):
     cylindrical face without splitting it or changing its height, so both the face census
     and the depth check pass a shell that has one.
     """
-    for (bx, by), depth in zip(bosses, depths):
+    for (bx, by), depth in zip(bosses, depths, strict=False):
         if PCB_TOP + depth <= RECESS_Z:
             continue
         v = Part.Vertex(bx, by, 0.0)
         d = min(w.distToShape(v)[0] for w in recess)
         if d < BORE_R:
             raise SystemExit(
-                f"FAIL gen-case: the bore at ({bx:.3f}, {by:.3f}) reaches z {PCB_TOP + depth:.2f}, above the {RECESS_Z:.2f} "
+                f"FAIL gen-case: the bore at ({bx:.3f}, {by:.3f}) reaches z "
+                f"{PCB_TOP + depth:.2f}, above the {RECESS_Z:.2f} "
                 f"recess floor, and a recess wall is {d:.3f} from its axis against a {BORE_R:.2f} "
                 "bore radius: it breaks out. This boss needs BORE_SHALLOW"
             )
@@ -405,7 +406,8 @@ def check_bumpers(sign):
         if d < BUMPER_R:
             raise SystemExit(
                 f"FAIL gen-case: the bumper recess at ({x:.3f}, {by:.3f}) reaches {BUMPER_R - d:.3f} into the "
-                f"relief pocket, which cuts the other face: that leaves {PLATE - RELIEF_DEPTH - BUMPER_D:.2f}mm of plate "
+                f"relief pocket, which cuts the other face: that leaves "
+                f"{PLATE - RELIEF_DEPTH - BUMPER_D:.2f}mm of plate "
                 "under the parts the relief is there for. Move it clear of the pocket"
             )
 
@@ -482,7 +484,7 @@ def build(dxf, half, explode):
         body = body.fuse(cyl(BOSS_R, PCB_TOP, -TOP_THICK, bx, by))
     body = body.removeSplitter()
 
-    for (bx, by), depth in zip(bosses, depths):
+    for (bx, by), depth in zip(bosses, depths, strict=False):
         body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP + depth, bx, by))
     shell = bezel_top(body.removeSplitter(), TOP_BEZEL)
 
@@ -576,7 +578,8 @@ def export(shell, plate, half, out):
         o.Shape = shp
         o.Label = f"splinter_v4_{half}_{name}"
     doc.recompute()
-    import Import
+    # Imported here so the module loads without the Onshape client present.
+    import Import  # noqa: PLC0415
 
     Import.export(doc.Objects, out)
     App.closeDocument(doc.Name)

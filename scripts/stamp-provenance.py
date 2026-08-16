@@ -79,10 +79,7 @@ def _add_silk(board, text):
         t.SetVertJustify(pcbnew.GR_TEXT_V_ALIGN_CENTER)
         board.Add(t)
         half_width = t.GetBoundingBox().GetWidth() // 2  # rendered width, position-independent
-        if pinky_left:
-            x = bbox.GetLeft() + margin + half_width
-        else:
-            x = bbox.GetRight() - margin - half_width
+        x = bbox.GetLeft() + margin + half_width if pinky_left else bbox.GetRight() - margin - half_width
         y = bbox.GetTop() + margin + size.y // 2
         t.SetPosition(pcbnew.VECTOR2I(int(x), int(y)))
 

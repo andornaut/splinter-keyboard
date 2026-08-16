@@ -228,7 +228,7 @@ def _want_leg_y(start, end, leg_y):
 def _leg_shapes(chain, moves):
     """The staircase's segments where the snap would put them, for the clearance
     test, which has to ask before the board is changed."""
-    moved = {old: new for old, new in moves}
+    moved = dict(moves)
     out = []
     for s in chain:
         a, b = (
@@ -321,10 +321,7 @@ def _reshape_cost(have, want):
     switch. Symmetric, because a vertex the rewrite drops still has to collapse
     onto one it keeps."""
     a, b = _vertices(have), _vertices(want)
-    return max(
-        max(min(_dist(p, q) for q in b) for p in a),
-        max(min(_dist(q, p) for p in a) for q in b),
-    )
+    return max(*(min(_dist(p, q) for q in b) for p in a), *(min(_dist(q, p) for p in a) for q in b))
 
 
 def _profile(shape):

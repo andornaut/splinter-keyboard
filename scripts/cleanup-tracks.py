@@ -345,11 +345,13 @@ def cleanup_tracks(path):
         _fill_zones(board)
 
     totals = [0, 0, 0, 0]
-    for run in range(1, MAX_PASSES + 1):
+    # run is read after the loop to report how many passes it took, which B007
+    # does not see because it only looks inside the body.
+    for run in range(1, MAX_PASSES + 1):  # noqa: B007
         counts = _cleanup_pass(board)
         if not any(counts):
             break
-        totals = [total + count for total, count in zip(totals, counts)]
+        totals = [total + count for total, count in zip(totals, counts, strict=False)]
     else:
         raise SystemExit(
             f"ERROR {path}: still cleaning up after {MAX_PASSES} passes\n"

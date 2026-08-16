@@ -221,7 +221,8 @@ def load_firmware(source):
     """
     if re.match(r"^https?://", source, re.IGNORECASE):
         try:
-            with urllib.request.urlopen(source, timeout=FETCH_TIMEOUT_S) as resp:
+            # The source is the operator's own --firmware argument.
+            with urllib.request.urlopen(source, timeout=FETCH_TIMEOUT_S) as resp:  # noqa: S310
                 return json.loads(resp.read().decode("utf-8")), None
         except (urllib.error.URLError, OSError, TimeoutError) as exc:
             return None, f"could not fetch {source}: {exc}"

@@ -61,8 +61,8 @@ def build(
             f,
             pcbnew.VECTOR2I(x, 0),
             origin=Origin.TopLeft,
-            refRenamer=lambda n, r, pre=pre: f"{pre}_{r}",
-            netRenamer=lambda n, net, pre=pre: f"{pre}_{net}",
+            refRenamer=lambda _n, r, pre=pre: f"{pre}_{r}",
+            netRenamer=lambda _n, net, pre=pre: f"{pre}_{net}",
             inheritDrc=False,
         )
         x += bbox.GetWidth() + gap
