@@ -22,7 +22,7 @@ the hashing and parsing stay identical on both sides.
 import hashlib
 import re
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 STAMP_PREFIX = "splinter"
@@ -77,7 +77,7 @@ def build_stamp(config_path, version):
         commit, clean = "unknown", "unknown"
     else:
         clean = "yes" if status == "" else "no"
-    built = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    built = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     return f"{STAMP_PREFIX} v={version} built={built} config={config_hash(config_path)} commit={commit} clean={clean}"
 
 
