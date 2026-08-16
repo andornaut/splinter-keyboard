@@ -259,8 +259,7 @@ def main():
         sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:fab)")
 
     config = f"{version}/ergogen/config.yaml"
-    # str(): these are handed to pcbnew, which takes a file name.
-    routed = [str(p) for p in sorted(Path(f"{version}/kicad/routed").glob("[!_]*.kicad_pcb"))]
+    routed = sorted(Path(f"{version}/kicad/routed").glob("[!_]*.kicad_pcb"))
     if not routed:
         sys.exit(f"No routed boards under {version}/kicad/routed/ to validate")
 
@@ -275,7 +274,7 @@ def main():
     teardrop_counts = {}
 
     for pcb in routed:
-        name = Path(pcb).stem
+        name = pcb.stem
         out = f"dist/{version}/kicad/jlcpcb/{name}"
         zip_path = f"{out}/{name}-gerber.zip"
         print(f"  audit {pcb}: {out}/")

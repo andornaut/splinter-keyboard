@@ -163,8 +163,7 @@ def load_boards(version, stages):
             name = entry.name
             if not name.endswith(".kicad_pcb") or name.startswith("_"):
                 continue
-            # str(): pcbnew takes a file name, not a Path.
-            boards[f"{stage}/{name}"] = pcbnew.LoadBoard(str(entry))
+            boards[f"{stage}/{name}"] = pcbnew.LoadBoard(entry)
     return boards
 
 
