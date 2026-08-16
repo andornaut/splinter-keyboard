@@ -6,11 +6,11 @@ Case models live here. The case is modelled from the Ergogen outline
 
 Each file has one job:
 
-| File | Holds |
-| --- | --- |
-| [BUILD.md](./BUILD.md) | Every dimension, and the feature-by-feature recipe for Onshape |
-| [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified |
-| This file | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+| File                         | Holds                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| [BUILD.md](./BUILD.md)       | Every dimension, and the feature-by-feature recipe for Onshape             |
+| [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified                       |
+| This file                    | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
 
 **No STEP is committed here.** One was, and it went stale silently while the design moved
 on, which is the failure worth avoiding: a STEP in the repo reads as the thing to order
@@ -28,12 +28,12 @@ Writes both halves to `dist/v4/onshape/`, then reads each file back and checks i
 exiting. Options come from the environment, since `freecadcmd` treats trailing arguments as
 documents to open:
 
-| Variable | Default | Effect |
-| --- | --- | --- |
-| `FC_HALF` | `both` | `left`, `right` or `both` |
-| `FC_EXPLODE` | `0` | mm to drop the plate by, for viewing the cavity |
-| `FC_DXF` | the Ergogen hull | source outline |
-| `FC_OUTDIR` | `dist/v4/onshape` | destination |
+| Variable     | Default           | Effect                                          |
+| ------------ | ----------------- | ----------------------------------------------- |
+| `FC_HALF`    | `both`            | `left`, `right` or `both`                       |
+| `FC_EXPLODE` | `0`               | mm to drop the plate by, for viewing the cavity |
+| `FC_DXF`     | the Ergogen hull  | source outline                                  |
+| `FC_OUTDIR`  | `dist/v4/onshape` | destination                                     |
 
 Output is solid B-rep, not a mesh, so curved features measure their nominal size and the
 result can be sketched against. The self-check reads the exported file rather than the
@@ -116,7 +116,7 @@ A mill removes material with a round tool. Every feature has to be reachable by 
 cylindrical end mill from one of the setups.
 
 1. **Internal corners carry the tool radius**, so the cavity's corners are specified as a
-   *maximum* rather than a minimum: too large a tool leaves material where the board goes.
+   _maximum_ rather than a minimum: too large a tool leaves material where the board goes.
    Do not let a shop substitute a bigger end mill.
 2. **No true internal cavities and no undercuts.** Cutting from below, a feature may narrow
    going up but never widen. A chamfer or rebate at the rim is fine; a lip under the board

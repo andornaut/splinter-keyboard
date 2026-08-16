@@ -1,0 +1,19 @@
+.github/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+dist/
+package-lock.json
+
+# Local-only trees. Named here rather than left to this machine's global git
+# ignore, which a runner does not have: without them a local run passes and CI
+# walks an installed dependency.
+node_modules/
+.venv/
+
+# Vendored: the footprint libraries and the helper are upstream's, and
+# reformatting them would make every submodule bump a diff against our own
+# formatting rather than against theirs. eslint.config.mjs skips the same paths.
+ergogen/footprints/ceoloide/
+ergogen/footprints/infused-kim/
+ergogen/kb_ergogen_helper/

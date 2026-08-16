@@ -19,7 +19,8 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-sort-destructure-keys": "^3.0.0",
     "globals": "^17.6.0",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.6"
   },
   "scripts": {
     "clean": "rm -rf dist && echo 'OK: clean: removed dist/'",
@@ -28,7 +29,7 @@
     "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
     "ergogen": "./scripts/ergogen.sh",
     "fab": "./scripts/fab.sh",
-    "lint": "eslint --max-warnings 0 .",
+    "lint": "prettier --check . && eslint --max-warnings 0 .",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
     "route": "python3 ./scripts/route.py",

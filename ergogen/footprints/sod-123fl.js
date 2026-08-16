@@ -35,23 +35,23 @@
 //   trace_distance        pad-edge-to-via gap along the part's long axis (default 1.2)
 //   via_size / via_drill  routing-helper via dimensions (defaults 0.6 / 0.3)
 module.exports = {
-    params: {
-        designator: 'D',                       // reference prefix -> D<n>
-        side: 'B',                             // single-side placement: F or B
-        // Optional vias for both-side routing (pads stay single-side for assembly):
-        include_traces_vias: false,            // if true, add a via just outside each pad
-        via_in_pad: false,                     // if true, put the via in the pad (no stub); needs filled-and-capped vias for reflow
-        trace_width: 0.25,
-        trace_distance: 1.2,                   // pad-edge-to-via gap along the part's long axis
-        via_size: 0.6,
-        via_drill: 0.3,
-        from: { type: 'net', value: 'from' },    // anode  -> pad "A"
-        to: { type: 'net', value: 'to' }         // cathode (banded end) -> pad "K"
-    },
-    body: p => {
-        const s = p.side  // 'F' or 'B'
-        const other = s === 'F' ? 'B' : 'F'  // opposite copper layer the routing via reaches
-        const footprint = `
+  params: {
+    designator: "D", // reference prefix -> D<n>
+    side: "B", // single-side placement: F or B
+    // Optional vias for both-side routing (pads stay single-side for assembly):
+    include_traces_vias: false, // if true, add a via just outside each pad
+    via_in_pad: false, // if true, put the via in the pad (no stub); needs filled-and-capped vias for reflow
+    trace_width: 0.25,
+    trace_distance: 1.2, // pad-edge-to-via gap along the part's long axis
+    via_size: 0.6,
+    via_drill: 0.3,
+    from: { type: "net", value: "from" }, // anode  -> pad "A"
+    to: { type: "net", value: "to" }, // cathode (banded end) -> pad "K"
+  },
+  body: (p) => {
+    const s = p.side; // 'F' or 'B'
+    const other = s === "F" ? "B" : "F"; // opposite copper layer the routing via reaches
+    const footprint = `
         (footprint "splinter:D_SOD-123FL"
             (layer "${s}.Cu")
             ${p.at}
@@ -65,7 +65,7 @@ module.exports = {
                 (effects (font (size 0.8 0.8) (thickness 0.12)))
             )
 
-            ${''/* Body outline 3.0 x 1.85mm, cathode bar on the K side, courtyard */}
+            ${"" /* Body outline 3.0 x 1.85mm, cathode bar on the K side, courtyard */}
             (fp_line (start -1.5 -0.925) (end 1.5 -0.925) (stroke (width 0.1) (type solid)) (layer "${s}.Fab"))
             (fp_line (start 1.5 -0.925) (end 1.5 0.925) (stroke (width 0.1) (type solid)) (layer "${s}.Fab"))
             (fp_line (start 1.5 0.925) (end -1.5 0.925) (stroke (width 0.1) (type solid)) (layer "${s}.Fab"))
@@ -79,23 +79,27 @@ module.exports = {
             (fp_line (start 2.5 1.15) (end -2.5 1.15) (stroke (width 0.05) (type solid)) (layer "${s}.CrtYd"))
             (fp_line (start -2.5 1.15) (end -2.5 -1.15) (stroke (width 0.05) (type solid)) (layer "${s}.CrtYd"))
 
-            ${''/* Pad "K" = cathode (banded end) = 'to' net; pad "A" = anode = 'from' net. */}
+            ${"" /* Pad "K" = cathode (banded end) = 'to' net; pad "A" = anode = 'from' net. */}
             (pad "K" smd roundrect (at -1.5 0 ${p.r}) (size 1.2 1.2) (layers "${s}.Cu" "${s}.Paste" "${s}.Mask") (roundrect_rratio 0.1) (zone_connect 2) ${p.to.str})
             (pad "A" smd roundrect (at 1.5 0 ${p.r}) (size 1.2 1.2) (layers "${s}.Cu" "${s}.Paste" "${s}.Mask") (roundrect_rratio 0.1) (zone_connect 2) ${p.from.str})
         )
-        `
-        // Expose each pad's net on the opposite copper layer for routing. Either a
-        // via in the pad center (via_in_pad, no stub), or a via just outside each
-        // pad joined by a short stub (the safe-for-reflow default).
-        const traces_vias = !p.include_traces_vias ? '' : p.via_in_pad ? `
+        `;
+    // Expose each pad's net on the opposite copper layer for routing. Either a
+    // via in the pad center (via_in_pad, no stub), or a via just outside each
+    // pad joined by a short stub (the safe-for-reflow default).
+    const traces_vias = !p.include_traces_vias
+      ? ""
+      : p.via_in_pad
+        ? `
         (via (at ${p.eaxy(1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
         (via (at ${p.eaxy(-1.5, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
-        ` : `
+        `
+        : `
         (segment (start ${p.eaxy(1.5, 0)}) (end ${p.eaxy(1.5 + p.trace_distance, 0)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.from.index}))
         (via (at ${p.eaxy(1.5 + p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
         (segment (start ${p.eaxy(-1.5, 0)}) (end ${p.eaxy(-1.5 - p.trace_distance, 0)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.to.index}))
         (via (at ${p.eaxy(-1.5 - p.trace_distance, 0)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
-        `
-        return footprint + traces_vias
-    }
-}
+        `;
+    return footprint + traces_vias;
+  },
+};

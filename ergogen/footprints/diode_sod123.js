@@ -54,8 +54,8 @@
 //                         (defaults [0, 0, 0] / [0, 0, 0] / [1, 1, 1]).
 module.exports = {
   params: {
-    designator: 'D',
-    side: 'B',
+    designator: "D",
+    side: "B",
     reversible: false,
     include_traces_vias: false,
     trace_distance: 1.2,
@@ -64,14 +64,14 @@ module.exports = {
     via_drill: 0.3,
     include_tht: false,
     include_thru_hole_smd_pads: false,
-    diode_3dmodel_filename: '',
+    diode_3dmodel_filename: "",
     diode_3dmodel_xyz_offset: [0, 0, 0],
     diode_3dmodel_xyz_rotation: [0, 0, 0],
     diode_3dmodel_xyz_scale: [1, 1, 1],
-    from: { type: 'net', value: undefined },
-    to: { type: 'net', value: undefined }
+    from: { type: "net", value: undefined },
+    to: { type: "net", value: undefined },
   },
-  body: p => {
+  body: (p) => {
     const standard_opening = `
     (footprint "splinter:diode_sod123"
         (layer "${p.side}.Cu")
@@ -82,7 +82,7 @@ module.exports = {
             ${p.ref_hide}
             (effects (font (size 1 1) (thickness 0.15)))
         )
-        `
+        `;
     // This can be useful to avoid confusion from the fab, since via-in-pads are usually premium
     const thru_hole_smd_pads_description = `
       (property "Description" "Thru-hole SMD pads, *NOT* via-in-pad (do not plug or tent)."
@@ -96,7 +96,7 @@ module.exports = {
           )
         )
       )
-    `
+    `;
     const front_silk = `
       (fp_line (start 0.25 0) (end 0.75 0) (layer "F.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start 0.25 0.4) (end -0.35 0) (layer "F.SilkS") (stroke (width 0.1) (type solid)))
@@ -105,12 +105,12 @@ module.exports = {
       (fp_line (start -0.35 0) (end -0.35 0.55) (layer "F.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start -0.35 0) (end -0.35 -0.55) (layer "F.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start -0.75 0) (end -0.35 0) (layer "F.SilkS") (stroke (width 0.1) (type solid)))
-        `
+        `;
 
     const front_smd_pads = `
       (pad "1" smd rect (at -1.65 0 ${p.r}) (size 0.9 1.2) (layers "F.Cu" "F.Paste" "F.Mask") ${p.to.str})
       (pad "2" smd rect (at 1.65 0 ${p.r}) (size 0.9 1.2) (layers "F.Cu" "F.Paste" "F.Mask") ${p.from.str})
-        `
+        `;
     const back_silk = `
       (fp_line (start 0.25 0) (end 0.75 0) (layer "B.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start 0.25 0.4) (end -0.35 0) (layer "B.SilkS") (stroke (width 0.1) (type solid)))
@@ -119,31 +119,31 @@ module.exports = {
       (fp_line (start -0.35 0) (end -0.35 0.55) (layer "B.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start -0.35 0) (end -0.35 -0.55) (layer "B.SilkS") (stroke (width 0.1) (type solid)))
       (fp_line (start -0.75 0) (end -0.35 0) (layer "B.SilkS") (stroke (width 0.1) (type solid)))
-        `
+        `;
     const back_smd_pads = `
       (pad "1" smd rect (at -1.65 0 ${p.r}) (size 0.9 1.2) (layers "B.Cu" "B.Paste" "B.Mask") ${p.to.str})
       (pad "2" smd rect (at 1.65 0 ${p.r}) (size 0.9 1.2) (layers "B.Cu" "B.Paste" "B.Mask") ${p.from.str})
-        `
+        `;
 
     const reversible_tht_pads = `
       (pad "1" thru_hole rect (at -1.65 0 ${p.r}) (size 0.9 1.2) (drill 0.3) (layers "*.Cu" "*.Paste" "*.Mask") ${p.to.str})
       (pad "2" thru_hole rect (at 1.65 0 ${p.r}) (size 0.9 1.2) (drill 0.3) (layers "*.Cu" "*.Paste" "*.Mask") ${p.from.str})
-        `
+        `;
 
     const tht = `
       (pad "1" thru_hole rect (at -3.81 0 ${p.r}) (size 1.778 1.778) (drill 0.9906) (layers "*.Cu" "*.Mask") ${p.to.str})
       (pad "2" thru_hole circle (at 3.81 0 ${p.r}) (size 1.905 1.905) (drill 0.9906) (layers "*.Cu" "*.Mask") ${p.from.str})
-        `
+        `;
 
     const diode_3dmodel = `
       (model ${p.diode_3dmodel_filename}
           (offset (xyz ${p.diode_3dmodel_xyz_offset[0]} ${p.diode_3dmodel_xyz_offset[1]} ${p.diode_3dmodel_xyz_offset[2]}))
           (scale (xyz ${p.diode_3dmodel_xyz_scale[0]} ${p.diode_3dmodel_xyz_scale[1]} ${p.diode_3dmodel_xyz_scale[2]}))
           (rotate (xyz ${p.diode_3dmodel_xyz_rotation[0]} ${p.diode_3dmodel_xyz_rotation[1]} ${p.diode_3dmodel_xyz_rotation[2]})))
-        `
+        `;
     const standard_closing = `
     )
-        `
+        `;
     const tht_traces = `
     (segment
       (start ${p.eaxy(3.81, 0)})
@@ -173,7 +173,7 @@ module.exports = {
       (layer "B.Cu")
       (net ${p.to.index})
     )
-    `
+    `;
 
     const smd_pad_traces = `
     (segment
@@ -218,19 +218,19 @@ module.exports = {
       (layer "B.Cu")
       (net ${p.to.index})
     )
-    `
+    `;
 
     let final = standard_opening;
 
     if (p.side === "F" || p.reversible) {
       final += front_silk;
-      if(!p.include_thru_hole_smd_pads) {
+      if (!p.include_thru_hole_smd_pads) {
         final += front_smd_pads;
       }
     }
     if (p.side === "B" || p.reversible) {
       final += back_silk;
-      if(!p.include_thru_hole_smd_pads) {
+      if (!p.include_thru_hole_smd_pads) {
         final += back_smd_pads;
       }
     }
@@ -249,7 +249,7 @@ module.exports = {
     final += standard_closing;
 
     if (p.include_traces_vias) {
-      if(p.include_tht) {
+      if (p.include_tht) {
         final += tht_traces;
       } else if (!p.include_thru_hole_smd_pads) {
         final += smd_pad_traces;
@@ -257,5 +257,5 @@ module.exports = {
     }
 
     return final;
-  }
-}
+  },
+};

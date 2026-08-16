@@ -39,21 +39,21 @@
 //   via_size / via_drill  routing-helper via dimensions (defaults 0.6 / 0.3)
 module.exports = {
   params: {
-    designator: 'R',
-    side: 'B',
+    designator: "R",
+    side: "B",
     // Optional vias for both-side routing (pads stay single-side for assembly):
     include_traces_vias: false, // if true, add a via just outside each pad
-    via_in_pad: false,          // if true, put the via in the pad (no stub); needs filled-and-capped vias for reflow
+    via_in_pad: false, // if true, put the via in the pad (no stub); needs filled-and-capped vias for reflow
     trace_width: 0.25,
-    trace_distance: 1.2,        // pad-edge-to-via gap along the part's long axis
+    trace_distance: 1.2, // pad-edge-to-via gap along the part's long axis
     via_size: 0.6,
     via_drill: 0.3,
-    from: { type: 'net', value: 'from' },
-    to: { type: 'net', value: 'to' }
+    from: { type: "net", value: "from" },
+    to: { type: "net", value: "to" },
   },
-  body: p => {
-    const s = p.side  // 'F' or 'B'
-    const other = s === 'F' ? 'B' : 'F'  // opposite copper layer the routing via reaches
+  body: (p) => {
+    const s = p.side; // 'F' or 'B'
+    const other = s === "F" ? "B" : "F"; // opposite copper layer the routing via reaches
     const footprint = `
     (footprint "splinter:R_0805"
         (layer "${s}.Cu")
@@ -84,19 +84,23 @@ module.exports = {
         (pad "1" smd roundrect (at 0 0.95 ${p.r}) (size 1.4 1.025) (layers "${s}.Cu" "${s}.Paste" "${s}.Mask") (roundrect_rratio 0.243902) ${p.from.str})
         (pad "2" smd roundrect (at 0 -0.95 ${p.r}) (size 1.4 1.025) (layers "${s}.Cu" "${s}.Paste" "${s}.Mask") (roundrect_rratio 0.243902) ${p.to.str})
     )
-    `
+    `;
     // Expose each pad's net on the opposite copper layer for routing. Either a
     // via in the pad center (via_in_pad, no stub), or a via just outside each pad
     // joined by a short stub (the safe-for-reflow default).
-    const traces_vias = !p.include_traces_vias ? '' : p.via_in_pad ? `
+    const traces_vias = !p.include_traces_vias
+      ? ""
+      : p.via_in_pad
+        ? `
     (via (at ${p.eaxy(0, 0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
     (via (at ${p.eaxy(0, -0.95)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
-    ` : `
+    `
+        : `
     (segment (start ${p.eaxy(0, 0.95)}) (end ${p.eaxy(0, 0.95 + p.trace_distance)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.from.index}))
     (via (at ${p.eaxy(0, 0.95 + p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.from.index}))
     (segment (start ${p.eaxy(0, -0.95)}) (end ${p.eaxy(0, -0.95 - p.trace_distance)}) (width ${p.trace_width}) (layer "${s}.Cu") (net ${p.to.index}))
     (via (at ${p.eaxy(0, -0.95 - p.trace_distance)}) (size ${p.via_size}) (drill ${p.via_drill}) (layers "${s}.Cu" "${other}.Cu") (net ${p.to.index}))
-    `
-    return footprint + traces_vias
-  }
-}
+    `;
+    return footprint + traces_vias;
+  },
+};

@@ -18,12 +18,12 @@
 //   from / to   pad nets. Pad "1" = cathode (banded end) = `to`; pad "2" = anode
 //               = `from`.
 module.exports = {
-    params: {
-        designator: 'D',
-        from: {type: 'net', value: 'from'},
-        to: {type: 'net', value: 'to'}
-    },
-    body: p => `
+  params: {
+    designator: "D",
+    from: { type: "net", value: "from" },
+    to: { type: "net", value: "to" },
+  },
+  body: (p) => `
         (footprint "Diode_SMD:Nexperia_CFP3_SOD-123W"
             ${p.at}
             (descr "Nexperia CFP3 (SOD-123W), https://assets.nexperia.com/documents/outline-drawing/SOD123W.pdf")
@@ -70,9 +70,8 @@ module.exports = {
             (fp_line (start 0.75 0) (end 0.25 0) (stroke (width 0.1) (type solid)) (layer "B.Fab"))
             (fp_line (start 1.3 -0.85) (end 1.3 0.85) (stroke (width 0.1) (type solid)) (layer "B.Fab"))
             (fp_line (start 1.3 0.85) (end -1.3 0.85) (stroke (width 0.1) (type solid)) (layer "B.Fab"))
-            (pad "1" thru_hole rect (at -1.4 0 ${ p.rot}) (size 1.2 1.2) (drill 0.3) (layers *.Cu *.Mask) (zone_connect 2) ${p.to.str})
-            (pad "2" thru_hole rect (at 1.4 0 ${p.rot}) (size 1.2 1.2) (drill 0.3) (layers *.Cu *.Mask) (zone_connect 2) ${p.from.str })
+            (pad "1" thru_hole rect (at -1.4 0 ${p.rot}) (size 1.2 1.2) (drill 0.3) (layers *.Cu *.Mask) (zone_connect 2) ${p.to.str})
+            (pad "2" thru_hole rect (at 1.4 0 ${p.rot}) (size 1.2 1.2) (drill 0.3) (layers *.Cu *.Mask) (zone_connect 2) ${p.from.str})
         )
-    `
-}
-
+    `,
+};
