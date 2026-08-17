@@ -17,6 +17,10 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
+  # A standing Dependabot alert on makerjs cannot be closed from here: ergogen
+  # 4.2.1 requires makerjs ^0.18.1, and the patched 0.19.2 falls outside that
+  # range, so nothing can propose the bump until ergogen widens its
+  # requirement. makerjs runs locally to generate the board and serves nothing.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
