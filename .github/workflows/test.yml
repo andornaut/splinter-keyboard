@@ -50,6 +50,11 @@ jobs:
       # the vendored footprint libraries, and the one shell file under it is
       # upstream's. Scoping to scripts/ instead would leave a script added
       # anywhere else unchecked until someone remembered to widen this.
+      #
+      # .husky/_ is skipped for the same reason node_modules is: husky writes
+      # its hook stubs there from the prepare script npm ci runs, and husky.sh
+      # carries no shebang. This step runs before that install today, so the
+      # entry is what keeps the gate from depending on the order.
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
         env:
@@ -61,7 +66,7 @@ jobs:
           # that did not touch them. Dependabot does not read an action input,
           # so this moves by hand.
           version: v0.11.0
-          ignore_paths: node_modules ergogen
+          ignore_paths: node_modules ergogen .husky
           scandir: "."
 
       - name: Set up Node.js
