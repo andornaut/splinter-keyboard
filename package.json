@@ -19,6 +19,8 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-sort-destructure-keys": "^3.0.0",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6"
   },
@@ -33,6 +35,7 @@
     "lint": "prettier --check . && eslint --max-warnings 0 .",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
+    "prepare": "husky",
     "route": "python3 ./scripts/route.py",
     "validate:fab": "python3 ./scripts/validate-fab.py",
     "validate:firmware": "python3 ./scripts/validate-firmware.py",
