@@ -1,4 +1,4 @@
 {
-  "*.{json,md,yaml,yml}": "prettier --write",
-  "*.{js,mjs}": ["prettier --write", "eslint --fix --max-warnings 0"]
+  "*": "prettier --write --ignore-unknown",
+  "*.{js,mjs}": "eslint --fix --max-warnings 0"
 }
