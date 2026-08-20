@@ -26,11 +26,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  # Runs the one validator that works outside KiCad. The other three import
+  # pcbnew, which exists only inside KiCad's own interpreter, so CI can lint
+  # them and nothing more. This one reads the committed boards and config.yaml
+  # with the standard library, and catches a board generated from a config.yaml
+  # that has since moved, which no other check in this repository sees.
+  test:
+    name: Test
     runs-on: ubuntu-latest
     # Capped well under the six-hour default: nothing here runs longer than
     # six minutes, so a job still going at fifteen has hung rather than failed.
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          # Nothing in this job uses the token, so it is not left
+          # in .git/config for a later step to read.
+          persist-credentials: false
+
+      # The validator is invoked through npm, which is what puts the active
+      # version in npm_package_config_VERSION for it to read. It imports only
+      # the standard library, so no dependency install is needed either side.
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version-file: .python-version
+
+      - name: Check the boards match the config they were built from
+        run: npm run validate:provenance
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
@@ -102,14 +136,6 @@ jobs:
 
       - name: Run ruff format check
         run: ruff format --check .
-
-      # The one validator that runs here. The other three import pcbnew, which
-      # exists only inside KiCad's own interpreter, so CI can lint them and
-      # nothing more; this one reads the committed boards and config.yaml with
-      # the standard library. It catches a board generated from a config.yaml
-      # that has since moved, which no other check in this repository sees.
-      - name: Check the boards match the config they were built from
-        run: npm run validate:provenance
 
       # The action bundles markdownlint-cli2, so its own tag is the tool pin and
       # Dependabot proposes the bump through the github-actions ecosystem. It
