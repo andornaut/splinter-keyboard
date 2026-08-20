@@ -94,16 +94,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
-      # The pipeline scripts import pcbnew, which only exists inside KiCad's
-      # own interpreter, so this checks them without running them. The whole
-      # tree rather than a list of paths: ruff.toml excludes the vendored
-      # libraries, so a script added outside scripts/ is covered without an
-      # edit here.
+      # The whole tree rather than a list of paths: ruff.toml excludes the
+      # vendored libraries, so a script added outside scripts/ is covered
+      # without an edit here.
       - name: Run ruff check
         run: ruff check .
 
       - name: Run ruff format check
         run: ruff format --check .
+
+      # The one validator that runs here. The other three import pcbnew, which
+      # exists only inside KiCad's own interpreter, so CI can lint them and
+      # nothing more; this one reads the committed boards and config.yaml with
+      # the standard library. It catches a board generated from a config.yaml
+      # that has since moved, which no other check in this repository sees.
+      - name: Check the boards match the config they were built from
+        run: npm run validate:provenance
 
       # The action bundles markdownlint-cli2, so its own tag is the tool pin and
       # Dependabot proposes the bump through the github-actions ecosystem. It
