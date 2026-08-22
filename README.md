@@ -49,9 +49,9 @@ A `_` prefix on a PCB filename excludes it from every step.
 | Tool                                                      | Needed for                                                                                     |
 | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | [KiCad 10](https://www.kicad.org)                         | Routing, and `kicad-cli` for gerber export and headless DRC                                    |
-| [Node.js](https://nodejs.org)                             | Ergogen and the npm scripts                                                                    |
+| [Node.js](https://nodejs.org/en)                          | Ergogen and the npm scripts                                                                    |
 | [Python 3](https://www.python.org)                        | The build steps (stdlib only; `pcbnew` comes from KiCad)                                       |
-| [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)     | Slicing the printed case                                                                       |
+| [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)    | Slicing the printed case                                                                       |
 | [Freerouting](https://github.com/freerouting/freerouting) | Optional, for [autorouting](#autorouting-optional)                                             |
 | [KiKit](https://github.com/yaqwsx/KiKit)                  | Optional, for [panelization](#panelization-optional-for-pcba-cost); needs the git-master build |
 
@@ -197,7 +197,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export `*.step` files to `dist/${VERSION}/onshape/`. They are build output and are not committed, so a stale one cannot sit in the repo looking like the thing to order.
 1. For a cross-check, `freecadcmd v4/onshape/gen-case.py` builds the same design from the same sheet and writes verified STEPs to the same place.
 
-### Step 7. [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer)
+### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
 
 1. Open or create a project and import the `*.step` files from `dist/${VERSION}/onshape/`.
 1. Slice and print the case.
