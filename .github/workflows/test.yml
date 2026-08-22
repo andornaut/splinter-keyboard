@@ -90,7 +90,11 @@ jobs:
       # carries no shebang. This step runs before that install today, so the
       # entry is what keeps the gate from depending on the order.
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
+        # Followed at the commit rather than at the 2.0.0 tag, which is the newest
+        # the action has: it has had no release since 2023, so nothing upstream
+        # would notice the tag being moved. The tag is named beside the sha so a
+        # reader can tell which release this is.
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
         env:
           SHELLCHECK_OPTS: -x -P SCRIPTDIR
         with:
