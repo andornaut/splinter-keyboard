@@ -106,7 +106,7 @@ Run everything through `npm run` from the repo root: the scripts read the active
 
 Set `config.VERSION` in [`package.json`](./package.json) to `v1`, `v2`, `v3`, or `v4`, by editing the file or with `npm pkg set config.VERSION=v4`.
 
-### Step 2. [Keyboard Layout Editor](http://www.keyboard-layout-editor.com/)
+### Step 2. [Keyboard Layout Editor](https://www.keyboard-layout-editor.com/)
 
 ![Keyboard Layout preview](./v4/keyboard-layout-editor/keyboard-layout-editor.png)
 
