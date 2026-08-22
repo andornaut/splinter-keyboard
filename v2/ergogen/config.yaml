@@ -417,8 +417,6 @@ outlines:
     - name: left
     - name: right
 
-# Example:
-# https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
 pcbs:
   left:
     template: kicad8 # Required, since ceoloide footprints are KiCad 8 only

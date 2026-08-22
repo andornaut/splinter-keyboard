@@ -419,8 +419,6 @@ outlines:
     - name: right
       operation: stack
 
-# Example:
-# https://github.com/MrCarney/mrkeyboard/blob/main/mrkeyboard.yaml
 pcbs:
   left:
     outlines:
