@@ -8,21 +8,21 @@ A 61-key split columnar ergonomic keyboard with asymmetrical enclosures and a tr
 
 ## Bill of materials (BOM)
 
-| Description      | Quantity | Part                                                                                                                                                                 |
-| ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Diodes           | 61       | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)                                                          |
-| Hot swap sockets | 61       | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)      |
-| Keycap set       | 1        | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras)            |
-| Key switches     | 61       | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))     |
-| Microcontrollers | 2        | [SparkFun Pro Micro](https://www.sparkfun.com/products/15795) (ATmega32U4) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file))                      |
-| Reset buttons    | 2        | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller) |
-| Screws           | 4        | [M3x12mm screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)                                                                                                       |
-| Silicon bumpers  | 10       | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)                                                          |
-| Sockets (12-pin) | 4        | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000)                                                                            |
-| Socket pins      | 48       | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030)                                                                         |
-| Threaded inserts | 4        | [M3x3mm (short) threaded inserts](https://cnckitchen.store/products/heat-set-insert-m3-x-3-short-version-100-pieces)                                                 |
-| TRRS cables      | 1        | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)                                                                                            |
-| TRRS jacks       | 2        | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)                                             |
+| Description      | Quantity | Part                                                                                                                                                                            |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Diodes           | 61       | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)                                                                     |
+| Hot swap sockets | 61       | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)                 |
+| Keycap set       | 1        | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras)                       |
+| Key switches     | 61       | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))                |
+| Microcontrollers | 2        | [SparkFun Pro Micro](https://www.sparkfun.com/sparkfun-qwiic-pro-micro-usb-c-atmega32u4.html) (ATmega32U4) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file)) |
+| Reset buttons    | 2        | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller)            |
+| Screws           | 4        | [M3x12mm screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)                                                                                                                  |
+| Silicon bumpers  | 10       | [100Pcs Self Adhesive Round Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005003258243932.html)                                                                     |
+| Sockets (12-pin) | 4        | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000)                                                                                       |
+| Socket pins      | 48       | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030)                                                                                    |
+| Threaded inserts | 4        | [M3x3mm (short) threaded inserts](https://cnckitchen.store/products/heat-set-insert-m3-x-3-short-version-100-pieces)                                                            |
+| TRRS cables      | 1        | [Monoprice Onyx TRRS Cable](https://www.monoprice.com/product?p_id=18632)                                                                                                       |
+| TRRS jacks       | 2        | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)                                                        |
 
 ## Microcontroller
 
