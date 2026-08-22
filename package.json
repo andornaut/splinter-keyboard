@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=24.13.1"
+    "node": ">=24.19.0"
   },
   "config": {
     "VERSION": "v4",
