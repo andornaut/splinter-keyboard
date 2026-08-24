@@ -13,7 +13,7 @@ A 61-key split columnar ergonomic keyboard with asymmetrical enclosures and a tr
 | Diodes           | 61       | [Nexperia BAS16H,115](https://www.lcsc.com/product-detail/Switching-Diode_Nexperia-BAS16H-115_C130413.html)                                                                     |
 | Hot swap sockets | 61       | [Kailh CPG151101S11-16](https://www.lcsc.com/product-detail/Mechanical-Keyboard-Shaft_span-style-background-color-ff0-Kailh-span-CPG151101S11-16_C5156480.html)                 |
 | Keycap set       | 1        | [GMK Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ortho Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras)                       |
-| Key switches     | 61       | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear) ([developer information](https://www.cherrymx.de/en/dev.html))                |
+| Key switches     | 61       | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear)                                                                               |
 | Microcontrollers | 2        | [SparkFun Pro Micro](https://www.sparkfun.com/sparkfun-qwiic-pro-micro-usb-c-atmega32u4.html) (ATmega32U4) ([GitHub](https://github.com/sparkfun/Pro_Micro?tab=readme-ov-file)) |
 | Reset buttons    | 2        | [E-Switch TL3342F450QG](https://www.lcsc.com/product-detail/Tactile-Switches_E-Switch-TL3342F450QG_C2886897.html) (Not needed if using the SparkFun microcontroller)            |
 | Screws           | 4        | [M3x12mm screws](https://www.amazon.ca/gp/product/B01MZ3TWAF/)                                                                                                                  |
