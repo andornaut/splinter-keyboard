@@ -99,6 +99,7 @@ Run everything through `npm run` from the repo root: the scripts read the active
 | `route`                                                                            | Autoroute `unrouted/` via Freerouting (optional)                                           |
 | `validate:provenance` / `validate:symmetry` / `validate:firmware` / `validate:fab` | The four gates (see [Validation](#validation))                                             |
 | `clean`                                                                            | Remove `dist/`                                                                             |
+| `lint` / `format`                                                                  | Prettier and ESLint, checking or fixing. `lint` is a CI gate                               |
 
 ## Developing
 
@@ -259,7 +260,7 @@ A step reports what it changed and what wants reading; lines that only confirm n
 
 Three kinds of part are placed in the same orientation on both halves rather than mirrored, because the parts themselves cannot be: an MX switch and its Kailh socket have an asymmetric pin pattern, the matrix diode wires straight to a switch pin and follows it, and the MCU is a module that plugs in one way up. Their pads therefore land at mirrored positions carrying the opposite pin at each. Key _placements_ still mirror exactly, and so does every clearance measured from key geometry; only pad-to-edge distances within a key differ between the halves. Hand routing is not compared at all.
 
-`validate:firmware` reads the `keyboard.json` at `config.FIRMWARE` in [`package.json`](./package.json), which ships as a path to a sibling `qmk_firmware` checkout so the check covers what you are about to flash rather than what is pushed. Without that checkout the step fails and no gerbers are produced; pass `--firmware <URL>` or set `$SPLINTER_FIRMWARE_JSON` instead.
+`validate:firmware` reads the `keyboard.json` at `config.FIRMWARE` in [`package.json`](./package.json), which ships as a path to a sibling `qmk_firmware` checkout so the check covers what you are about to flash rather than what is pushed. Without that checkout the step fails and no gerbers are produced; pass `--firmware <url|path>` or set `$SPLINTER_FIRMWARE_JSON` instead.
 
 ### Provenance stamp
 
