@@ -6,9 +6,9 @@ The existing gates validate proxies, not the shipped artifact: validate-provenan
 checks the config hash, the DRC gate checks connectivity, the teardrop guard checks
 routing presence. None of them check that the design properties we actually care
 about made it into the files uploaded to the fab. This script closes that gap by
-inspecting the routed masters and the dist/ fab outputs directly. It is the reason
-a board with no ground plane could pass every other gate and still ship (a filled
-zone the guard skipped left GND "connected" by thin traces, so DRC stayed clean).
+inspecting the routed masters and the dist/ fab outputs directly. A board with no
+ground plane passes every other gate: GND stays "connected" through its traces,
+so DRC is clean.
 
 Run it standalone after fab, or as the validate:fab pipeline step:
   npm run validate:fab
@@ -22,7 +22,7 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      copper layer covering most of the board (catches an unfilled/missing pour at
      the source), AND the exported copper gerber contains a flood region spanning
      most of the board (catches the same thing in what actually shipped, immune to
-     any export-stage drop). This is the direct inverse of the add-gnd-zone guard bug.
+     any export-stage drop).
   2. Gerber-set completeness -- <name>-gerber.zip exists and contains every expected
      layer gerber (the lib/common.sh JLCPCB_LAYERS set) plus a drill file.
   3. Assembly placement sanity (only when jlcpcb-parts.json exists) -- BOM + CPL exist
@@ -44,6 +44,7 @@ Checks, per routed board + its dist/${VERSION}/kicad/jlcpcb/<name>/ output:
      hash match says nothing about it, so validate:provenance never flags it.
 """
 
+import collections
 import csv
 import json
 import os
@@ -56,13 +57,9 @@ import zipfile
 # nothing has imported pcbnew yet.
 from lib.pcbnew_quiet import pcbnew  # isort: skip
 
-# Drop wx's Debug-level chatter (e.g. "Adding duplicate image handler") that pcbnew
-# emits to stderr each time it re-inits image handlers on a board load.
 from pathlib import Path
 
-import wx
-
-wx.Log.SetLogLevel(wx.LOG_Warning)
+from lib.provenance import read_stamp
 
 COMMON_SH = Path(__file__).resolve().parent / "lib" / "common.sh"
 JLCPCB_LAYERS_RE = re.compile(r'^JLCPCB_LAYERS="([^"]*)"', re.MULTILINE)
@@ -117,22 +114,14 @@ COORD_Y_RE = re.compile(r"Y(-?\d+)")
 
 
 def _zone_filled_area_mm2(zone, layer):
-    """Filled area of a zone on a layer in mm^2, or None if the API is unavailable."""
-    try:
-        try:
-            polys = zone.GetFilledPolysList(layer)
-        except TypeError:
-            polys = zone.GetFilledPolysList()  # older API takes no layer arg
-        return polys.Area() / 1e12  # Area() is in nm^2; 1 mm^2 = (1e6 nm)^2
-    # Broad on purpose: this probes a pcbnew API that varies by version, and the
-    # docstring promises None rather than a raise when it is not there.
-    except Exception:  # noqa: BLE001
-        return None
+    """Filled area of a zone on a layer in mm^2."""
+    return zone.GetFilledPolysList(layer).Area() / 1e12  # Area() is in nm^2; 1 mm^2 = (1e6 nm)^2
 
 
 def gnd_zone_master(board):
-    """Return (present, filled, area_mm2_or_None) for the board's GND pour: is there
-    a non-teardrop GND zone on a copper layer, is it flagged filled, and its area."""
+    """Return (present, filled, area_mm2) for the board's GND pour: is there a
+    non-teardrop GND zone on a copper layer, is it flagged filled, and the largest
+    such zone's area (None when there is no zone)."""
     present = filled = False
     best_area = None
     for z in board.Zones():
@@ -145,7 +134,7 @@ def gnd_zone_master(board):
             if z.IsFilled():
                 filled = True
             area = _zone_filled_area_mm2(z, layer)
-            if area is not None and (best_area is None or area > best_area):
+            if best_area is None or area > best_area:
                 best_area = area
     return present, filled, best_area
 
@@ -293,14 +282,13 @@ def main():
             failures.append(f"{name}: routed master has no non-teardrop GND zone on a copper layer")
         elif not filled:
             failures.append(f"{name}: GND zone present but not filled in the routed master")
-        elif area is not None and area < ZONE_AREA_FRAC * board_w * board_h:
+        elif area < ZONE_AREA_FRAC * board_w * board_h:
             failures.append(
                 f"{name}: GND fill only {area:.0f}mm^2 of {board_w * board_h:.0f}mm^2 "
                 f"board (< {ZONE_AREA_FRAC:.0%}); looks like islands, not a plane"
             )
         else:
-            shown = f"{area:.0f}mm^2" if area is not None else "filled"
-            print(f"    ok GND zone (master): {shown}")
+            print(f"    ok GND zone (master): {area:.0f}mm^2")
 
         if not Path(zip_path).is_file():
             failures.append(f"{name}: missing gerber zip {zip_path}")
@@ -333,26 +321,19 @@ def main():
                     f"{name}: no assembled footprints found on the board (expected {', '.join(assembled_pkgs)})"
                 )
             else:
-                placed = set(csv_designators(cpl, "Designator"))
-                dropped = sorted(set(expected) - placed)
+                placed = collections.Counter(csv_designators(cpl, "Designator"))
+                dropped = sorted(set(expected) - set(placed))
+                doubled = sorted(ref for ref in expected if placed[ref] > 1)
                 if dropped:
                     failures.append(
                         f"{name}: {len(dropped)} assembled part(s) absent from the CPL: {', '.join(dropped)}"
                     )
-                else:
+                if doubled:
+                    failures.append(
+                        f"{name}: {len(doubled)} assembled part(s) duplicated in the CPL: {', '.join(doubled)}"
+                    )
+                if not dropped and not doubled:
                     print(f"    ok assembly: {len(expected)} placement(s) in CPL")
-
-        # 5. teardrop count: collect per board; the consistency gate runs after the loop.
-        teardrop_counts[name] = teardrop_count(board)
-        print(f"    ok teardrops: {teardrop_counts[name]}")
-
-        # 6. provenance clean flag (warning).
-        # Read the stamp off the already-loaded board (title_block comment 1 = index 0,
-        # per provenance.py) instead of re-reading the file.
-        stamp = board.GetTitleBlock().GetComment(0)
-        clean = re.search(r"\bclean=(\w+)", stamp) if stamp else None
-        if not clean or clean.group(1) != "yes":
-            warnings.append(f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})")
 
         # 4. freshness ordering (gate).
         pcb_mtime = Path(pcb).stat().st_mtime
@@ -360,6 +341,16 @@ def main():
             failures.append(f"{name}: routed master older than config.yaml -- rebuild (stale)")
         if Path(zip_path).is_file() and Path(zip_path).stat().st_mtime < pcb_mtime:
             failures.append(f"{name}: gerber zip older than the routed master -- re-run fab (stale)")
+
+        # 5. teardrop count: collect per board; the consistency gate runs after the loop.
+        teardrop_counts[name] = teardrop_count(board)
+        print(f"    ok teardrops: {teardrop_counts[name]}")
+
+        # 6. provenance clean flag (warning), read off the already-loaded board.
+        stamp = read_stamp(board)
+        clean = re.search(r"\bclean=(\w+)", stamp) if stamp else None
+        if not clean or clean.group(1) != "yes":
+            warnings.append(f"{name}: built from a non-clean tree (clean={clean.group(1) if clean else '?'})")
 
     # 5. teardrop consistency (gate): the mirrored halves should carry comparable
     # teardrop counts; a board far below the best-teardropped one lost them.

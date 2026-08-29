@@ -111,20 +111,17 @@ def main():
     # stage whose boards were built in different runs (see ONE RUN in the docstring).
     split = [stage for stage in stages if len(set(map(stamps.get, staged[stage]))) > 1]
     if split:
-        # The per-board lines above go to stdout, which is block-buffered under a
-        # pipe; flush so the report below lands after them and not among them.
-        sys.stdout.flush()
-    for stage in split:
-        by_stamp = collections.defaultdict(list)
-        for pcb in staged[stage]:
-            by_stamp[stamps[pcb]].append(pcb.name)
-        print(
-            f"  SPLIT {version}/kicad/{stage}/: boards were not built in one run",
-            file=sys.stderr,
-        )
-        for text, names in sorted(by_stamp.items()):
-            print(f"    {', '.join(names)}: {text}", file=sys.stderr)
-    if split:
+        sys.stdout.flush()  # keep the ok lines above this report under a pipe
+        for stage in split:
+            by_stamp = collections.defaultdict(list)
+            for pcb in staged[stage]:
+                by_stamp[stamps[pcb]].append(pcb.name)
+            print(
+                f"  SPLIT {version}/kicad/{stage}/: boards were not built in one run",
+                file=sys.stderr,
+            )
+            for text, names in sorted(by_stamp.items()):
+                print(f"    {', '.join(names)}: {text}", file=sys.stderr)
         print(
             f"validate:provenance: {len(split)} stage(s) mix boards from different builds. "
             "The config hash cannot see this, since identical config bytes hash the same "

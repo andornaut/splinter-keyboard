@@ -63,8 +63,12 @@ FETCH_TIMEOUT_S = 15
 # Nets on the MCU header that are power/programming rather than matrix lines.
 NON_MATRIX = {"GND", "VCC", "RAW", "RST", ""}
 # Socket rows on the Liatris header, 2 pads each. The extra bottom pins
-# (GP12-GP16) sit near x 0, so they never reach the +-7.62mm column filter.
+# (GP12-GP16) sit near x 0, so they never reach the column filter.
 HEADER_ROWS = 12
+# The header columns sit at +-HEADER_HALF_PITCH from the footprint origin; a pad
+# further than HEADER_PAD_TOL from that is not a header pad.
+HEADER_HALF_PITCH = pcbnew.FromMM(7.62)
+HEADER_PAD_TOL = pcbnew.FromMM(0.05)
 
 
 def pin_labels():
@@ -75,7 +79,14 @@ def pin_labels():
     """
     with Path(FOOTPRINT_JS).open() as fh:
         src = fh.read()
-    return dict(re.findall(r"(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*'(GP\d+)'", src, re.MULTILINE))
+    labels = dict(re.findall(r"""(?:^|[^A-Za-z0-9_])(P\d+)_label:\s*["'](GP\d+)["']""", src, re.MULTILINE))
+    if not labels:
+        raise SystemExit(
+            f"ERROR {FOOTPRINT_JS}: no Pxx_label entries found. The firmware check maps net\n"
+            "  names through this table, so an empty one would compare raw net names\n"
+            "  against GPIO labels and fail every board; fix the pattern rather than the boards"
+        )
+    return labels
 
 
 def mcu_pad_map(board):
@@ -97,14 +108,14 @@ def mcu_pad_map(board):
     rows = {}
     for pad in fp.Pads():
         x, y = pad.GetPosition().x, pad.GetPosition().y
-        if abs(abs(x - ox) - 7620000) > 50000:  # header columns sit at +-7.62mm
+        if abs(abs(x - ox) - HEADER_HALF_PITCH) > HEADER_PAD_TOL:
             continue
         rows.setdefault(round((y - oy) / 1e6, 2), {})["L" if x < ox else "R"] = pad.GetNetname()
     if len(rows) != HEADER_ROWS or any(len(r) != 2 for r in rows.values()):
         raise SystemExit(
             f"{name}: found {len(rows)} MCU header row(s), expected {HEADER_ROWS} of 2 pads.\n"
             "  The pad filter assumes an unrotated footprint with its columns at\n"
-            "  +-7.62mm; a rotate: on the MCU or a pitch change breaks it. Fix the\n"
+            f"  +-{pcbnew.ToMM(HEADER_HALF_PITCH):.2f}mm; a rotate: on the MCU or a pitch change breaks it. Fix the\n"
             "  filter rather than letting the check pass having measured nothing."
         )
     return [rows[k] for k in sorted(rows)]
@@ -156,14 +167,8 @@ def serial_net(board):
 def load_boards(version, stages):
     boards = {}
     for stage in stages:
-        d = f"{version}/kicad/{stage}"
-        if not Path(d).is_dir():
-            continue
-        for entry in sorted(Path(d).iterdir()):
-            name = entry.name
-            if not name.endswith(".kicad_pcb") or name.startswith("_"):
-                continue
-            boards[f"{stage}/{name}"] = pcbnew.LoadBoard(entry)
+        for entry in sorted(Path(f"{version}/kicad/{stage}").glob("[!_]*.kicad_pcb")):
+            boards[f"{stage}/{entry.name}"] = pcbnew.LoadBoard(entry)
     return boards
 
 
@@ -295,12 +300,12 @@ def main():
     stages = selected(args)
     version = os.environ.get("npm_package_config_VERSION")
     if not version:
-        raise SystemExit("set npm_package_config_VERSION via npm (npm run validate:firmware)")
+        sys.exit("npm_package_config_VERSION not set -- run via npm (npm run validate:firmware)")
 
     labels = pin_labels()
     boards = load_boards(version, stages)
     if not boards:
-        raise SystemExit(f"no PCBs found for {version} in {stages}")
+        sys.exit(f"No boards under {version}/kicad/{{{','.join(stages)}}}/ to validate")
 
     source = resolve_firmware_source(args.firmware)
 

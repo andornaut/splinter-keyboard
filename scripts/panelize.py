@@ -8,8 +8,8 @@ the board's file stem (e.g. left_D1, right_D1) so the two mirrored halves stay
 unique in the position file / CPL. The panel inherits its boards' provenance stamp
 (see provenance.py and `stamp` below).
 
-Unlike the other scripts/*.py helpers this one is NOT stdlib-only: it needs KiKit
-(kikit.panelize) plus the KiCad pcbnew bindings. KiCad 10 support is only in
+Unlike the other scripts/*.py helpers this one needs more than the standard library
+and pcbnew: KiKit (kikit.panelize). KiCad 10 support is only in
 KiKit/pcbnewTransition git master (no PyPI release yet), so panelize.sh runs this
 under a dedicated venv. inheritDrc=False is required: KiKit cannot merge the two
 boards' net-class/DRC rules and aborts on save otherwise.

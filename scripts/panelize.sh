@@ -17,7 +17,7 @@ shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run panelize)}"
-parts="./${VERSION}/kicad/jlcpcb-parts.json"
+parts="${VERSION}/kicad/jlcpcb-parts.json"
 out="dist/${VERSION}/kicad/jlcpcb/panel"
 panel="dist/${VERSION}/kicad/panelize/panel.kicad_pcb"
 

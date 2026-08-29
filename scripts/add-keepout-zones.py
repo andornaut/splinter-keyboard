@@ -52,7 +52,6 @@ from lib.pipeline_log import note
 PERIMETER_INSET = pcbnew.FromMM(2.0)
 NOTCH_BRIDGE = pcbnew.FromMM(6.0)  # bridge edge-open notches up to 2x this wide (USB cutout)
 BOSS_MARGIN = pcbnew.FromMM(1.0)  # keepout extends this far past the boss edge
-BOSS_FALLBACK_RADIUS = pcbnew.FromMM(2.75)  # if no Eco1 boss circle is found
 BOSS_FPID_KEY = "mounting_hole"  # footprint-id substring marking a screw boss
 CENTER_TOL = pcbnew.FromMM(0.05)  # boss-circle/mounting-hole coincidence tolerance
 ARC_ERROR = pcbnew.FromMM(0.01)  # inflate max error
@@ -226,14 +225,21 @@ def _disk(center, radius):
 
 
 def _boss_radius(board, center):
-    """Radius of the User.Eco1 boss circle coincident with `center`, or the
-    fallback if none is found."""
+    """Radius of the User.Eco1 boss circle coincident with `center`.
+
+    Missing is a hard error, not a stand-in radius: the disk is sized from the
+    case's own boss circle so it tracks a retuned screw, and a default would size
+    it from nothing while reporting success."""
     for d in board.GetDrawings():
         if d.GetClass() == "PCB_SHAPE" and d.GetLayerName() == "User.Eco1" and d.GetShape() == pcbnew.SHAPE_T_CIRCLE:
             c = d.GetCenter()
             if abs(c.x - center.x) <= CENTER_TOL and abs(c.y - center.y) <= CENTER_TOL:
                 return d.GetRadius()
-    return BOSS_FALLBACK_RADIUS
+    raise SystemExit(
+        f"{board.GetFileName()}: no User.Eco1 boss circle within {pcbnew.ToMM(CENTER_TOL)}mm of the "
+        f"mounting hole at ({pcbnew.ToMM(center.x):.3f}, {pcbnew.ToMM(center.y):.3f}); "
+        "the _screwbosses outline is what sizes the keepout disk"
+    )
 
 
 def _boss_centers(board):

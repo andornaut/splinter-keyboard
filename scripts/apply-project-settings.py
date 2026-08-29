@@ -2,14 +2,14 @@
 """Idempotently ensure custom KiCad project settings (net class + DRC floors)
 and the keepout DRC custom-rules file.
 
-These live only in the .kicad_pro project JSON (not in the .kicad_pcb or the
-ergogen config), so ergogen-generated and freshly-opened projects start without
-them, plus a sibling `<board>.kicad_dru` custom-rules file. This applies four
-things:
+The settings live only in the .kicad_pro project JSON (not in the .kicad_pcb or
+the ergogen config), so ergogen-generated and freshly-opened projects start
+without them; the rules live in a sibling `<board>.kicad_dru` file. This applies
+four things:
 
-  * A "VCC" net class (wider clearance/track for the power nets) plus a pattern
-    that assigns the "VCC" net to it, matching the manual Board Setup > Net
-    Classes steps that used to be documented in the README.
+  * A "VCC" net class (wider track for the power nets) plus a pattern that
+    assigns the "VCC" net to it, the same thing Board Setup > Net Classes does
+    by hand.
   * DRC floors (min track width / min clearance), which KiCad leaves disabled
     (0.0) by default. Setting them to the fab's recommended minimum makes DRC
     flag any accidental sub-fab feature without touching the intentional 0.20mm+

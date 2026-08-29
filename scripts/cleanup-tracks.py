@@ -351,7 +351,7 @@ def cleanup_tracks(path):
         counts = _cleanup_pass(board)
         if not any(counts):
             break
-        totals = [total + count for total, count in zip(totals, counts, strict=False)]
+        totals = [total + count for total, count in zip(totals, counts, strict=True)]
     else:
         raise SystemExit(
             f"ERROR {path}: still cleaning up after {MAX_PASSES} passes\n"

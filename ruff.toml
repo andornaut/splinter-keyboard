@@ -74,7 +74,7 @@ ignore = [
     "SIM112",
 ]
 "v4/onshape/*.py" = [
-    # sys.path is extended before the Onshape client is imported, so those
+    # sys.path is extended before the FreeCAD modules are imported, so those
     # imports cannot precede it.
     "E402",
 ]

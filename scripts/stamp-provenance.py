@@ -28,19 +28,23 @@ from lib.provenance import build_stamp, silk_from_stamp, write_stamp
 
 SILK_SIZE_MM = 0.8  # glyph height/width, matching the component labels
 SILK_THICKNESS_MM = 0.15
-SILK_MARGIN_MM = 2.2  # inset from the top and pinky-side board edges, clearing the 2mm perimeter keepout
+SILK_MARGIN_MM = 2.2  # inset from the top and pinky-side board edges, past the ring the case wall lip covers
 SILK_TAG = "built="  # leading text identifying a prior provenance silk stamp
 
 
 def _remove_prior_silk(board):
-    """Drop any earlier provenance silk text so a re-stamp does not stack copies."""
+    """Drop any earlier provenance silk text so a re-stamp does not stack copies.
+
+    RemoveNative, not Remove: Remove hands ownership to Python, which has no
+    destructor for a PCB_TEXT, and leaves pcbnew's SWIG type table unable to type
+    the board's bounding box afterwards."""
     for d in list(board.GetDrawings()):
         if (
             isinstance(d, pcbnew.PCB_TEXT)
             and d.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)
             and d.GetText().startswith(SILK_TAG)
         ):
-            board.Remove(d)
+            board.RemoveNative(d)
 
 
 def _pinky_is_left(board):
@@ -48,12 +52,13 @@ def _pinky_is_left(board):
 
     The TRRS jack marks the inner side (where the two halves meet), so the pinky
     side is opposite it: TRRS on the right -> pinky on the left, and vice versa.
-    Defaults to the right edge if no TRRS footprint is found."""
+    No TRRS is a hard error: a guessed side would stamp one half in the wrong
+    corner while reporting success."""
     center_x = board.GetBoardEdgesBoundingBox().GetCenter().x
     for fp in board.GetFootprints():
         if "trrs" in str(fp.GetFPID().GetLibItemName()).lower() or fp.GetReference().upper().startswith("TRRS"):
             return fp.GetPosition().x > center_x
-    return False
+    raise SystemExit(f"{board.GetFileName()}: no TRRS footprint to locate the pinky side from")
 
 
 def _add_silk(board, text):

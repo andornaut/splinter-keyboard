@@ -377,7 +377,7 @@ def check_bores(recess, bosses, depths):
     cylindrical face without splitting it or changing its height, so both the face census
     and the depth check pass a shell that has one.
     """
-    for (bx, by), depth in zip(bosses, depths, strict=False):
+    for (bx, by), depth in zip(bosses, depths, strict=True):
         if PCB_TOP + depth <= RECESS_Z:
             continue
         v = Part.Vertex(bx, by, 0.0)
@@ -485,7 +485,7 @@ def build(dxf, half, explode):
         body = body.fuse(cyl(BOSS_R, PCB_TOP, -TOP_THICK, bx, by))
     body = body.removeSplitter()
 
-    for (bx, by), depth in zip(bosses, depths, strict=False):
+    for (bx, by), depth in zip(bosses, depths, strict=True):
         body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP + depth, bx, by))
     shell = bezel_top(body.removeSplitter(), TOP_BEZEL)
 
@@ -579,7 +579,7 @@ def export(shell, plate, half, out):
         o.Shape = shp
         o.Label = f"splinter_v4_{half}_{name}"
     doc.recompute()
-    # Imported here so the module loads without the Onshape client present.
+    # FreeCAD's STEP module, imported at the point of use, the one place it is needed.
     import Import  # noqa: PLC0415
 
     Import.export(doc.Objects, out)
@@ -657,9 +657,9 @@ def check(out, half, explode, keys):
                 f"{2 * TOP_BEZEL:.3f}: bezel wrong or missing"
             )
 
-    # Prismatic features are invisible to a cylinder census, so test them by volume. Both
-    # of these have failed silently: a relief box that missed the plate entirely, and a
-    # perimeter wall built across both port openings.
+    # Prismatic features are invisible to a cylinder census, so test them by volume: a
+    # relief box that misses the plate, or a perimeter wall built across a port opening,
+    # leaves every count above unchanged.
     sign = 1 if half == "left" else -1
     dz = -explode
     relief_zone = Part.makeBox(

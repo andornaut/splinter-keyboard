@@ -20,8 +20,8 @@ copper that far is a routing decision and belongs to whoever is routing.
 
 Two geometry tests catch what the cap cannot, both asked of the moved copper
 before the board is changed. Moving one endpoint of a segment pivots the WHOLE
-segment about its far end, so copper swings along its entire length, metres from
-the sliver, by up to the same distance:
+segment about its far end, so copper swings along its entire length, millimetres
+from the sliver, by up to the same distance:
 
   - clearance (pcb_copper.clearance_blocker), against the copper of every other
     net. On a run already close to one, that swing is enough to break clearance:
@@ -249,7 +249,7 @@ def tidy_slivers(path):
     zones = list(board.Zones())
     refused = [(s, _refusal(tracks, pads, zones, s)) for s in _slivers(tracks)]
     if refused:
-        lines = [(f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied within {pcbnew.ToMM(MAX_MOVE):.2f}mm")]
+        lines = [f"ERROR {path}: {len(refused)} sliver(s) cannot be tidied"]
         for sliver, detail in refused:
             p = sliver.GetStart()
             lines.append(

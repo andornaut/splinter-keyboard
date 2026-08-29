@@ -12,9 +12,8 @@ Each file has one job:
 | [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified                       |
 | This file                    | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
 
-**No STEP is committed here.** One was, and it went stale silently while the design moved
-on, which is the failure worth avoiding: a STEP in the repo reads as the thing to order
-from, and nothing about the file says how far behind it is. Run `gen-case.py` for current
+**No STEP is committed here.** A STEP in the repo reads as the thing to order from, and
+nothing about the file says how far behind the design it is. Run `gen-case.py` for current
 geometry, and export from Onshape only when there is something to order.
 
 ## Generating a model

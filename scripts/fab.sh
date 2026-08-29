@@ -12,7 +12,7 @@ shopt -s nullglob
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 VERSION="${npm_package_config_VERSION:?set via npm (npm run fab)}"
-parts="./${VERSION}/kicad/jlcpcb-parts.json"
+parts="${VERSION}/kicad/jlcpcb-parts.json"
 
 require_cmds kicad-cli zip python3
 

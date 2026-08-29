@@ -20,7 +20,7 @@ does copper cleanup-tracks.py is about to strip); the second penalizes each GND
 pad that would need a stitching via to reach the plane.
 Neither side is inherently preferred: the pour lands on whichever gives the more
 continuous plane with fewer stitching vias. On a tie (e.g. an un-routed board
-with no signal copper yet) B.Cu wins, the historical default. The selected layer
+with no signal copper yet) B.Cu wins. The selected layer
 and the full per-layer breakdown are printed for every board.
 
 The zone outline is just the board bounding box (inflated slightly); KiCad clips
@@ -53,22 +53,14 @@ CANDIDATE_LAYERS = (pcbnew.B_Cu, pcbnew.F_Cu)
 UNREACHABLE_GND_PAD_COST_MM = 50.0
 
 
-# One candidate layer's score; `cost` drives the choice (lower wins).
 class LayerScore(NamedTuple):
-    """One candidate layer, scored."""
+    """One candidate layer, scored; `cost` drives the choice (lower wins)."""
 
     layer: int
     name: str
     signal_mm: float
     reach: float
     cost: float
-
-
-def _try_set(obj, name, *args):
-    """Call obj.<name>(*args) if it exists (API varies across KiCad versions)."""
-    fn = getattr(obj, name, None)
-    if fn is not None:
-        fn(*args)
 
 
 def _signal_track_len_mm(tracks, doomed_ids, layer):
@@ -165,10 +157,10 @@ def add_gnd_zone(path):
     zone.SetLayer(layer)
     zone.SetNet(gnd)
     zone.SetMinThickness(MIN_THICKNESS)
-    _try_set(zone, "SetLocalClearance", net_class(board, POUR_NET_CLASS).GetClearance())
-    _try_set(zone, "SetPadConnection", pcbnew.ZONE_CONNECTION_THERMAL)
-    _try_set(zone, "SetThermalReliefGap", THERMAL_GAP)
-    _try_set(zone, "SetThermalReliefSpokeWidth", THERMAL_SPOKE)
+    zone.SetLocalClearance(net_class(board, POUR_NET_CLASS).GetClearance())
+    zone.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+    zone.SetThermalReliefGap(THERMAL_GAP)
+    zone.SetThermalReliefSpokeWidth(THERMAL_SPOKE)
 
     outline = zone.Outline()
     outline.NewOutline()

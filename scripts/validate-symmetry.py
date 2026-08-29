@@ -516,7 +516,6 @@ def main():
     failed = set()
     checked = 0
     for stage in stages:
-        # str(): these are handed to pcbnew, which takes a file name.
         boards = sorted(Path(f"{version}/kicad/{stage}").glob("[!_]*.kicad_pcb"))
         if not boards:
             sys.exit(f"No boards under {version}/kicad/{stage}/ to validate")

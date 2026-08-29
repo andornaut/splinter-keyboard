@@ -474,8 +474,8 @@ def tidy_patterns(path):
 
     for _, chain, moves, _, _, _ in legs:
         _apply_row_leg(chain, moves)
-    for _, tracks, want, _ in motifs:
-        _apply_key_motif(board, tracks, want)
+    for _, run, want, _ in motifs:
+        _apply_key_motif(board, run, want)
 
     for net, points, why in leg_skips:
         a, b = points[0], points[-1]

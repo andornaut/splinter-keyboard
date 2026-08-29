@@ -39,7 +39,7 @@ done
 mute_pcbnew_noise python3 ./scripts/stamp-provenance.py \
   --version "${VERSION}" --config "${VERSION}/ergogen/config.yaml" "${files[@]}"
 
-# Add copper keepout rule areas (2mm perimeter ring + a disk around each screw
+# Add copper keepout rule areas (a perimeter ring + a disk around each screw
 # boss). Like the stamp, they ride the cp steps into unrouted/ (so routing and
 # DRC see them) and routed/ (where add-gnd-zone pours around them). See
 # add-keepout-zones.py.
