@@ -53,7 +53,7 @@ The Liatris also carries five extra bottom pins (GP12 to GP16) that the footprin
 
 GP19, the `USB_VBUS_PIN`, is the Liatris's internal VBUS-sense pin rather than a header net, so it is absent from the table. The `P19` row maps to GP27, a separate matrix pin.
 
-Which column is which is set by one parameter, `raw_pin_column` on the `mcu` footprint in [ergogen/config.yaml](./ergogen/config.yaml): `front_left` or `front_right`, named from the PCB front. From the back, where the MCU mounts, the columns read the other way round. The table above is `front_right`, the datasheet arrangement. Both halves must share the value, because the Liatris cannot be mirrored.
+Which column is which is set by one parameter, `raw_pin_column` on the [`mcu_liatris`](../ergogen/footprints/mcu_liatris.js) footprint: `front_left` or `front_right`, named from the PCB front. [ergogen/config.yaml](./ergogen/config.yaml) leaves it at the footprint's default. From the back, where the MCU mounts, the columns read the other way round. The table above is `front_right`, the datasheet arrangement. Both halves must share the value, because the Liatris cannot be mirrored.
 
 To check it on a physical board, seat the module and confirm its RAW pin lands on the pad silkscreened RAW. The board silk and the config net names cannot tell you: they move together when the parameter flips.
 

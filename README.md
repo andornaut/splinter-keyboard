@@ -72,7 +72,7 @@ sudo apt install kicad
 git submodule update --init --recursive
 ```
 
-OrcaSlicer, KiCad, Freerouting and KiKit also install from [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/main.yml) (tags `orcaslicer`, `kicad`, `freerouting`; KiKit comes with `kicad`).
+OrcaSlicer, KiCad, Freerouting and KiKit also install from [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/main.yml) (tags `orcaslicer` and `kicad`; Freerouting and KiKit come with `kicad`).
 
 **Updating footprint submodules.** `npm run ergogen` uses `ceoloide` and `infused-kim` at their pinned revision and never advances them, so builds stay reproducible. To re-pin:
 
