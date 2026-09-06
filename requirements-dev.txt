@@ -2,4 +2,4 @@
 # red without a commit here. Dependabot proposes the bump through the pip
 # ecosystem, which it only reads from a manifest: pinned in the workflow
 # instead, this pin would never be offered one.
-ruff==0.16.3
+ruff==0.16.4
