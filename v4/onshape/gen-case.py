@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Build the v4 case as solid geometry from BUILD.md's numbers and the un-filleted hull.
+"""Build the v4 case as solid geometry from BUILD.md's numbers and the un-filleted hull, and
+validate a hand-modelled case against it.
 
 BUILD.md is the specification; this is its executable form. Every dimension here appears
-there, and a change belongs in both.
+there, and a change belongs in both. The master is the Onshape document, modelled by hand
+from BUILD.md; FC_COMPARE checks an export of it against this reference.
 
 Output is real B-rep, not a mesh: cylinders are cylinders, the cavity's tool-radius
 corners are arcs, and the outer profile measures its nominal size rather than a polygon
@@ -21,12 +23,16 @@ to the script.
   FC_EXPLODE  mm to drop the plate by  (default 0; 25 separates it for viewing)
   FC_DXF      hull to build from       (default dist/v4/ergogen/outlines/...)
   FC_OUTDIR   where to write           (default dist/v4/onshape)
+  FC_COMPARE  comma-separated STEP file(s) of one hand-modelled half, shell and plate
+              assembled; needs FC_HALF left or right
+  FC_DIFFS    recorded intentional differences (default v4/onshape/differences.json)
 
 Frame matches the build sheet: outline centre at the origin, z=0 at the shell's top face,
 +z up, +x toward the inner (thick) edge. The right half is the exact mirror.
 """
 
 import collections
+import json
 import math
 import os
 import sys
@@ -44,6 +50,21 @@ from FreeCAD import Placement, Rotation, Vector
 
 DEFAULT_DXF = "dist/v4/ergogen/outlines/full_unfilleted.dxf"
 DEFAULT_OUTDIR = "dist/v4/onshape"
+DEFAULT_DIFFS = "v4/onshape/differences.json"
+
+# ---- comparison ----------------------------------------------------------
+# Fuzzy tolerance for the comparison Booleans. Two kernels place the same face nanometres
+# apart, and an exact Boolean turns that into sliver solids along every coincident face.
+COMPARE_FUZZ = 1e-3
+# A residual thinner than this (twice volume over area) or smaller than COMPARE_MIN_VOL is
+# kernel noise, not geometry, and needs no decision.
+COMPARE_MIN_THICK = 0.01
+COMPARE_MIN_VOL = 1e-3
+# A part whose bounding-box centre is this far from the reference's is in another frame,
+# and every face would report as a difference. Caught first so the report names the cause.
+FRAME_TOL = 1.0
+# Slack when testing a difference region against a recorded box.
+MATCH_TOL = 0.05
 
 # ---- BUILD.md parameters -------------------------------------------------
 WALL = 3.00
@@ -739,6 +760,140 @@ def check(out, half, explode, keys):
     return fails
 
 
+# ---- comparison against a hand-modelled case ------------------------------
+def load_diffs(path, half):
+    """The recorded intentional differences for one half.
+
+    Only intentional differences are recorded. A difference resolved by moving the model to
+    the reference, or fixed as an error, leaves nothing to record.
+    """
+    if not Path(path).exists():
+        raise SystemExit(f"FAIL gen-case: {path}: no such file")
+    entries = json.loads(Path(path).read_text()).get("differences")
+    if not isinstance(entries, list):
+        raise SystemExit(f'FAIL gen-case: {path}: expected {{"differences": [...]}}')
+    for i, e in enumerate(entries):
+        box = e.get("box")
+        ok = (
+            e.get("half") in ("left", "right")
+            and e.get("part") in ("shell", "plate")
+            and e.get("kind") in ("extra", "missing")
+            and isinstance(box, list)
+            and len(box) == 6
+            and all(isinstance(v, (int, float)) for v in box)
+            and all(box[k] < box[k + 3] for k in range(3))
+            and isinstance(e.get("reason"), str)
+            and e["reason"].strip()
+        )
+        if not ok:
+            raise SystemExit(
+                f"FAIL gen-case: {path}: entry {i} needs half (left|right), part "
+                "(shell|plate), kind (extra|missing), box [xmin, ymin, zmin, xmax, ymax, zmax] "
+                "and a non-empty reason"
+            )
+    return [e for e in entries if e["half"] == half]
+
+
+def read_parts(paths):
+    """Shell and plate from one or more STEP files, told apart by volume as check() does."""
+    solids = []
+    for p in paths:
+        if not Path(p).exists():
+            raise SystemExit(f"FAIL gen-case: {p}: no such file")
+        shp = Part.Shape()
+        shp.read(p)
+        solids += shp.Solids
+    if len(solids) != 2:
+        raise SystemExit(
+            f"FAIL gen-case: {', '.join(paths)} hold {len(solids)} solid(s), expected 2: one "
+            "half's shell and plate, assembled"
+        )
+    shell, plate = sorted(solids, key=lambda s: -s.Volume)
+    return {"shell": shell, "plate": plate}
+
+
+def regions(shape):
+    """The solids of a Boolean residual that are geometry rather than kernel noise."""
+    return [
+        s
+        for s in shape.Solids
+        if s.Volume >= COMPARE_MIN_VOL and s.Area > 0 and 2 * s.Volume / s.Area >= COMPARE_MIN_THICK
+    ]
+
+
+def inside(bb, box):
+    lo = (bb.XMin, bb.YMin, bb.ZMin)
+    hi = (bb.XMax, bb.YMax, bb.ZMax)
+    return all(lo[k] >= box[k] - MATCH_TOL and hi[k] <= box[k + 3] + MATCH_TOL for k in range(3))
+
+
+def compare(ref_path, model_paths, half, diffs_path):
+    """Report every region where the hand model and the reference differ.
+
+    "extra" is material in the model that the reference lacks, "missing" the reverse. Each
+    region is matched against the recorded intentional differences; an unrecorded region is
+    a decision still to make, and a record matching nothing is stale. Both fail.
+    """
+    entries = load_diffs(diffs_path, half)
+    ref = read_parts([ref_path])
+    model = read_parts(model_paths)
+    subject = ", ".join(model_paths)
+
+    for name in ("shell", "plate"):
+        rc, mc = ref[name].BoundBox.Center, model[name].BoundBox.Center
+        if max(abs(rc.x - mc.x), abs(rc.y - mc.y), abs(rc.z - mc.z)) > FRAME_TOL:
+            raise SystemExit(
+                f"FAIL gen-case: {subject}: {name} centred at ({mc.x:.2f}, {mc.y:.2f}, {mc.z:.2f}), "
+                f"the reference at ({rc.x:.2f}, {rc.y:.2f}, {rc.z:.2f}). Export in millimetres, "
+                "outline centre at the origin, z=0 at the top face, plate assembled"
+            )
+
+    used = set()
+    mismatches, intentional = 0, 0
+    for name in ("shell", "plate"):
+        for kind, residual in (
+            ("extra", model[name].cut(ref[name], COMPARE_FUZZ)),
+            ("missing", ref[name].cut(model[name], COMPARE_FUZZ)),
+        ):
+            for r in regions(residual):
+                bb = r.BoundBox
+                c = bb.Center
+                where = (
+                    f"{name}, {kind}: {r.Volume:.3f} mm3 at ({c.x:.2f}, {c.y:.2f}, {c.z:.2f}), "
+                    f"{bb.XLength:.2f} x {bb.YLength:.2f} x {bb.ZLength:.2f}"
+                )
+                hit = [
+                    i for i, e in enumerate(entries) if e["part"] == name and e["kind"] == kind and inside(bb, e["box"])
+                ]
+                if hit:
+                    used.update(hit)
+                    intentional += 1
+                    print(f"  intentional {subject}: {where}: {entries[hit[0]]['reason']}")
+                    continue
+                mismatches += 1
+                box = [
+                    math.floor(bb.XMin * 10) / 10,
+                    math.floor(bb.YMin * 10) / 10,
+                    math.floor(bb.ZMin * 10) / 10,
+                    math.ceil(bb.XMax * 10) / 10,
+                    math.ceil(bb.YMax * 10) / 10,
+                    math.ceil(bb.ZMax * 10) / 10,
+                ]
+                entry = {"half": half, "part": name, "kind": kind, "box": box, "reason": ""}
+                sys.stdout.flush()
+                print(f"  MISMATCH {subject}: {where}", file=sys.stderr)
+                print(f"    to accept as intentional: {json.dumps(entry)}", file=sys.stderr)
+
+    stale = [e for i, e in enumerate(entries) if i not in used]
+    for e in stale:
+        sys.stdout.flush()
+        print(
+            f"  FAIL {diffs_path}: {e['half']} {e['part']} {e['kind']} {e['box']} matches no difference: delete it",
+            file=sys.stderr,
+        )
+    return mismatches, len(stale), intentional
+
+
 def main():
     # USB_W is a stated width, so the invariant it has to satisfy is asserted rather than
     # guaranteed by construction. Nothing downstream would catch a violation: check() tests
@@ -760,7 +915,19 @@ def main():
             "would otherwise write the wrong half under the given name and "
             "still pass readback, the checks being mirror-symmetric"
         )
+    compare_to = [p.strip() for p in os.environ.get("FC_COMPARE", "").split(",") if p.strip()]
+    if compare_to and (halves == "both" or explode):
+        raise SystemExit(
+            "FAIL gen-case: FC_COMPARE takes one half's model, so it needs FC_HALF left or right and FC_EXPLODE unset"
+        )
     halves = ["left", "right"] if halves == "both" else [halves]
+    diffs = os.environ.get("FC_DIFFS", DEFAULT_DIFFS)
+    # Checked before the build, which takes a minute, rather than after it.
+    if compare_to:
+        for p in compare_to:
+            if not Path(p).exists():
+                raise SystemExit(f"FAIL gen-case: {p}: no such file")
+        load_diffs(diffs, halves[0])
 
     if not Path(dxf).exists():
         raise SystemExit(f"FAIL gen-case: {dxf}: no such file, run 'npm run ergogen' first")
@@ -787,7 +954,17 @@ def main():
     sys.stdout.flush()
     if bad:
         raise SystemExit(f"FAIL gen-case: {bad} of {len(halves)} file(s) failed readback")
-    print(f"OK: gen-case: {len(halves)} case(s) written to {outdir} and verified on readback")
+    if not compare_to:
+        print(f"OK: gen-case: {len(halves)} case(s) written to {outdir} and verified on readback")
+        return
+
+    mismatches, stale, intentional = compare(out, compare_to, halves[0], diffs)
+    sys.stdout.flush()
+    if mismatches or stale:
+        raise SystemExit(
+            f"FAIL gen-case: {halves[0]} half: {mismatches} undecided difference(s), {stale} stale record(s) in {diffs}"
+        )
+    print(f"OK: gen-case: {halves[0]} half matches the reference, {intentional} intentional difference(s)")
 
 
 # freecadcmd swallows an uncaught exception and still exits 0, so report and exit here.

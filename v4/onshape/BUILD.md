@@ -3,10 +3,24 @@
 Feature-by-feature recipe for modelling the case in Onshape. Design rationale is in
 [README.md](./README.md); this file is the numbers.
 
+**The Onshape document is the master, modelled by hand from this sheet.** `gen-case.py`
+builds the same design from the same numbers and is the validator: every difference between
+the two is decided, as set out in [Validating your model](#validating-your-model).
+
 Every position is a **dimension, not a reference**. A re-import replaces the imported
 entities, so anything projected off them loses its reference while a typed value does not.
 The exceptions are the switch cutouts and the boss circles, which are cut from the import
 itself so they track the board.
+
+## Target board
+
+The case is for the assembled board stamped `config=b05d803d9317 commit=51522ad clean=yes`.
+`main` carries the same `Edge.Cuts` and the same footprint placements on both halves: the
+later config changes only add the un-filleted DXF export, and the later board changes are
+copper. **Generate the DXF from `main`**, since 51522ad predates `full_unfilleted.dxf`.
+
+A config change that moves the outline, a switch, a screw or a port makes the case stop
+fitting this board. Re-check it against the board in hand before taking one.
 
 ## Terms
 
@@ -321,45 +335,163 @@ the pocket. Fill it in the hull before offsetting any of them. The result is a v
 the board is absent, which costs nothing and gives the plug more room rather than less: the
 top edge is straight and both ports are simply openings in the back wall.
 
+## Measure the built board first
+
+Several figures below the board come from memory or from the previous case. With the
+board in hand, measure these before modelling. Where a measurement differs, change the
+parameter here and in `gen-case.py`, then re-run it so its guards see the new value.
+
+| Measure, on the assembled board                                   | Sheet assumes | Decides                                                         |
+| ----------------------------------------------------------------- | ------------- | --------------------------------------------------------------- |
+| Board thickness                                                   | 1.60          | every z below the board; whether the plate sits flush           |
+| Board underside to the lowest point of the installed MCU          | 5.40          | the binding margin; see "MCU seating" under Open risks          |
+| Board underside to the bottom of a hotswap socket                 | 1.85          | where the standoff flare stops (z -9.75)                        |
+| Board underside to the bottom of the TRRS jack body               | 5.20          | jack margin                                                     |
+| Board underside to the USB-C receptacle centre                    | 2.65          | USB opening centre, z -10.25                                    |
+| Board underside to the TRRS bore centre                           | 2.90          | TRRS opening centre, z -10.50                                   |
+| Board top to the plate-bearing shoulder of a seated switch        | 4.50          | recess depth; see "Switch seating" under Open risks             |
+| Kailh socket body edge to the right half's inner-pinky screw hole | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
+| Switch top housing width                                          | 15.60         | the 16.00 recess fit                                            |
+| Plug shell width, and overmold size of the cables you will use    | 8.34          | USB opening width; whether the outer-face counterbore is needed |
+
+A port centre measured from the board underside sets the opening's z as -7.60 less that
+figure (on a 1.60 board). That is a measurement off this board, which is what "measured,
+never derived" asks for.
+
+## Modelling in Onshape
+
+**Put every Parameters row in a Variable feature** at the top of the tree and type
+`#name` into features, never the number. A number typed into a feature is a second copy,
+and the sheet changes.
+
+**Three Part Studios**: "Body" builds shell and plate up to, but not including, the switch
+features. "Left" and "Right" each bring in Body with a Derived feature, "Right" mirrors it
+about the Right plane, and each then cuts its own switch recesses and cutouts from its own
+half of the DXF. The body mirrors exactly; the key field does not (see Right half).
+
+Traps, each geometric rather than specific to `gen-case.py`, so they apply in Onshape too:
+
+- **Fill the USB notch in the hull before any offset.** Every loop below is offset from the
+  notch-filled hull. See Ports for why nothing follows the notch.
+- **Offset each loop from the hull, never from another offset loop.** The cavity loop's
+  corners are R2.00. Offsetting it inward 2.00 for the shelf collapses those arcs to zero
+  radius and the feature fails. The shelf's inner loop is the hull inset 1.50 and the plate
+  wall's is the hull inset 1.65, each with its own corners rounded at R2.00.
+- **The one exception is the plate outline**, which is the finished cavity loop inset 0.15,
+  so its R1.85 corners match the pocket it drops into.
+- **Round only the cavity's internal corners.** The hull has five convex corners and one
+  re-entrant one. A tool rounds the five at its radius and leaves the re-entrant corner
+  sharp, so fillet the five and leave the sixth alone.
+- **One construction plane for the slope**, through z -16.00 at the inner shell edge and
+  z -12.00 at the outer (x +83.50 and -83.50 on the left half). The shell's bottom cut,
+  both plate faces (that plane and a 1.50 offset) and every standoff's lower end reference
+  it.
+- **Sketch plate holes on a horizontal plane.** Onshape's Hole feature drills normal to its
+  sketch plane, so a hole sketched on the sloped plate face comes out tilted 1.37 deg and
+  its counterbore floor is no longer square to the screw. The relief pocket and bumper
+  recesses are the opposite: sketch them on the plate's own faces so their floors run
+  parallel to it.
+- **Extend port cuts past both wall faces.** A cut ending exactly on a face leaves
+  coincident faces and a non-manifold solid.
+- **Cut switch features straight from the imported curves**, not redrawn. They carry the
+  corner fillets the cutout width depends on.
+
+## Validating your model
+
+Export one half from Onshape as STEP, shell and plate assembled (plate in place, not
+exploded), in millimetres and in the sheet's [Frame](#frame). One file holding both parts
+or one file per part both work. Put exports under `dist/v4/onshape/`, which is not
+committed. Then:
+
+```bash
+FC_HALF=left FC_COMPARE=dist/v4/onshape/onshape-left.step \
+  freecadcmd v4/onshape/gen-case.py
+```
+
+It builds the reference half, Boolean-subtracts each way, and reports every region where
+the two disagree: `extra` is material in your model the reference lacks, `missing` the
+reverse, each with its volume, centre and size in the sheet's frame. It exits nonzero on
+any region not on record. A part whose centre is over 1mm from the reference's stops it
+before comparing, since every face would differ and the cause is the export frame.
+
+**Decide every region one of three ways.**
+
+| Decision               | When                                                                | Then                                                                 |
+| ---------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Move to the reference  | your model departs from the sheet, and the sheet's version is right | change your model; nothing is recorded                               |
+| Intentional difference | a deliberate departure in something the sheet does not model        | add the entry the report prints to `differences.json`, with a reason |
+| Error                  | either side is wrong against the sheet or the board                 | fix the side that is wrong; nothing is recorded                      |
+
+**A deliberate change to a sheet dimension is not an intentional difference.** Change it
+in this sheet and in `gen-case.py`, and the region goes away. Recording it instead leaves
+the sheet describing a case nobody is building. Intentional is for what the sheet does not
+model: a cosmetic feature, an extra fillet, a fit opened up on a printed coupon.
+
+**An intentional difference is outside the script's guards.** The bore-breakout,
+bumper-over-relief and relief-under-wall checks run on the reference only, so a recorded
+region that touches one of those features needs its [Verify](#verify) row checked by hand.
+
+An error on the script's side goes into `gen-case.py`, and into this sheet too if the
+number was wrong here.
+
+**`differences.json`** holds one entry per intentional difference:
+
+```json
+{ "half": "left", "part": "shell", "kind": "extra", "box": [x0, y0, z0, x1, y1, z1], "reason": "..." }
+```
+
+A region is accepted when its bounding box lies inside an entry's `box`. For each
+unrecorded region the report prints a ready entry, its box rounded outward to 0.1mm, with
+an empty `reason` to fill in. An entry that matches no region fails as stale: the
+difference is gone, so delete it. Each half is recorded separately, since the key fields
+differ.
+
 ## Part A: shell
 
 1. **Sketch "Outline (imported)"**, Top plane. Insert
-   `dist/v4/ergogen/outlines/full_unfilleted.dxf`. Constrain the left half's outline centre
-   to the origin. **Never draw in this sketch**; re-importing is the only edit it should
-   take.
-2. **Extrude "Shell body"**, the left-half outline region offset outward **3.50mm**
-   (clearance + wall), blind **16.00mm** at the inner edge, -Z, bottom face sloped down to
-   **12.00mm** at the outer edge.
-3. **Extrude cut "Cavity"**, the same region offset outward **0.50mm**, from **z -3.00**
-   down through the open bottom. Fillet its vertical corners at **2.0mm, 3.20mm maximum**.
-4. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
-   **z -1.50**.
-5. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
-   remaining 1.50mm. Cut both sets **as imported**: they carry the correct corner fillets,
-   and the two halves' patterns differ.
-6. **Bezel**, 1.00 x 45 deg on the top face's outer edge only. The recess openings stay
-   square: the nesting look depends on the switch meeting a crisp edge.
-7. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
+   `dist/v4/ergogen/outlines/full_unfilleted.dxf` in millimetres. Constrain the left half's
+   outline centre to the origin. **Never draw in this sketch**; re-importing is the only
+   edit it should take.
+2. **Sketch "Hull"**, the left-half outline with the USB notch closed by a straight line
+   along the top edge. Every offset below starts from this loop.
+3. **Extrude "Shell body"**, Hull offset outward **3.50mm** (clearance + wall), from z 0
+   down past z -16.00, then cut away everything below the slope plane. The bottom rim lands
+   at **-16.00 at the inner edge and -12.00 at the outer**.
+4. **Extrude cut "Cavity"**, Hull offset outward **0.50mm**, from **z -3.00** down through
+   the open bottom. Fillet its five internal vertical corners at **2.0mm, 3.20mm maximum**.
+5. **Extrude "Shelf"**, the ring between the cavity loop and Hull inset **1.50mm** (corners
+   R2.00), from **z -3.00 down to -6.00**. The board is pressed up against its underside.
+6. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
    extruded down **3.00mm** to the PCB top face.
-8. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
+7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
    **to the per-boss depth in the boss table**: 5.00 outer pinky, 4.00 the other two.
-9. **Port openings** cut straight through the side wall.
+8. **Port openings** cut straight through the side wall, overshooting both faces.
+9. **Bezel**, 1.00 x 45 deg on the top face's outer edge only.
 
-The USB notch needs no step; it is in the imported profile and (2) carries it through.
+In the Left and Right studios, after the Derived (and, on the right, the Mirror):
+
+1. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
+   **z -1.50**.
+2. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
+   remaining 1.50mm. Cut both sets **as imported**. The recess openings get no bezel:
+   the nesting look depends on the switch meeting a crisp edge.
 
 ## Part B: bottom plate
 
-1. **Extrude**, the left-half outline region offset outward **0.35mm** (cavity less a
-   0.15mm fit clearance), **1.50mm** thick, lying in the sloped bottom plane and flush
-   with the rim.
-2. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
-   z -7.60. Heights are in the boss table.
-3. **Screw holes**, 2.90 dia, each with a flat-bottomed 5.00 counterbore through the
-   plate's full 1.50mm. The floor is the standoff's base, so the standoff keeps its
-   height and nothing is cut into it.
-4. **Relief pocket**, on the inner face, **0.75mm deep**, one plain rectangle over
+1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.15mm**, **1.50mm**
+   thick, between the slope plane and its 1.50 offset, flush with the rim.
+2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.65mm**
+   (corners R2.00), from the plate's top face up to **z -7.60**. Remove it over
+   **x > +50.00 and y > +45.00**, the top-inner corner.
+3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
+   z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
+   the plate up to **z -9.75**.
+4. **Screw holes**, 2.90 dia, each with a flat-bottomed 5.00 counterbore through the
+   plate's full 1.50mm, sketched on a horizontal plane. The floor is the flare's base, so
+   the standoff keeps its height and nothing is cut into it.
+5. **Relief pocket**, on the inner face, **0.75mm deep**, one plain rectangle over
    x **+50.25 .. +77.60**, y **+23.35 .. +58.60**. Leaves 0.75mm of plate.
-5. **Bumper recesses**, 8.00 dia x 0.50 deep on the outer face at (-70, +50), (+45, +50),
+6. **Bumper recesses**, 8.00 dia x 0.50 deep on the outer face at (-70, +50), (+45, +50),
    (-70, -32), (+65, -50). Floor **parallel to the plate faces**, so the depth is 0.50 and
    the plate left is 1.00 right across every foot. All are well clear of the three screw
    heads.
@@ -534,7 +666,8 @@ floating clear; too shallow and the base hits the PCB before the shoulder reache
 recess floor, so the switch sits proud. 4.50 is therefore 0.25 to the safe side of a case
 that works, which is the reassuring direction to be wrong in. Whether Cherry's 5mm is to
 the plate's top or bottom face could not be established; the datasheet drawings are raster
-images. **To settle it**, pull a switch and measure plate top to PCB top.
+images. **The built board settles it**: measure the shoulder height on a seated switch (see
+Measure the built board first).
 
 **Switch seating and MCU clearance pull against each other.** Dropping the PCB to -6.50
 spends the entire MCU margin, since every millimetre the board goes down is a millimetre
@@ -545,11 +678,12 @@ PCB puts it into a board whose three screws all sit between y -3.65 and +22.18.
 
 **MCU seating.** The +0.77mm assumes the module's 4.75mm pin tail passes through the
 4.01mm of socket and board bore and stands proud above the main PCB. If it bottoms out the
-MCU seats 0.74mm lower and the margin is +0.03mm. **To settle it**, measure from the main
-PCB's underside to the lowest point of the installed MCU: 5.40 means it seated.
+MCU seats 0.74mm lower and the margin is +0.03mm. **The built board settles it**: 5.40 from
+the main board's underside to the lowest point of the MCU means it seated.
 
 **Hotswap socket height.** 1.85mm is from memory, not a datasheet. It has +1.22mm of
-margin, so it is unlikely to bite.
+margin to the plate, so it is unlikely to bite there, but it also sets where the standoff
+flare stops, which has only 0.30. Measure it on the built board.
 
 **The right half's outer-pinky boss has a 0.45mm band of wall.** A recess clips that boss
 on the right half only, over the bore's top 0.50mm. Machined, 0.45mm of aluminium beside a
@@ -570,7 +704,9 @@ MCU margin is the tightest number in the design. The lever, if the seam bothers 
 
 ## Verify
 
-Export the shell as STEP and check it against the outline rather than by eye:
+The `FC_COMPARE` run holds your model to the reference everywhere it has not been
+recorded as intentional, so these rows need checking by hand only where a recorded
+difference touches them:
 
 | Check                                   | Expected                                                        |
 | --------------------------------------- | --------------------------------------------------------------- |
@@ -582,7 +718,12 @@ Export the shell as STEP and check it against the outline rather than by eye:
 | Top edge in plan                        | straight across; no notch inherited from the board              |
 | Plate relief pocket                     | present, 0.75 deep, over the whole Liatris footprint            |
 | Plate under each bumper                 | 1.00; no bumper recess inside the relief pocket                 |
+| Relief pocket vs plate wall, in plan    | no overlap; the pocket stays inside the wall's relief           |
+| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                      |
+| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right     |
 
-A wide spread in that gap means the profile is not the outline. Then **print and assemble
-a half before ordering aluminium**: the printed part settles switch seating, MCU
+A wide spread in that gap means the profile is not the outline. The bore, bumper and
+relief rows are the three defects a closed, correctly sized solid can still carry, so check
+them with the Measure tool rather than by eye. Then **print and assemble a half before
+ordering aluminium**: the printed part settles switch seating, MCU
 clearance and the port openings for a few hours of filament.

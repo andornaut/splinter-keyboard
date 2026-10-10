@@ -6,15 +6,16 @@ Case models live here. The case is modelled from the Ergogen outline
 
 Each file has one job:
 
-| File                         | Holds                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| [BUILD.md](./BUILD.md)       | Every dimension, and the feature-by-feature recipe for Onshape             |
-| [gen-case.py](./gen-case.py) | The same design as geometry, built and self-verified                       |
-| This file                    | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+| File                                   | Holds                                                                      |
+| -------------------------------------- | -------------------------------------------------------------------------- |
+| [BUILD.md](./BUILD.md)                 | Every dimension, and the feature-by-feature recipe for Onshape             |
+| [gen-case.py](./gen-case.py)           | The same design as geometry, and the validator for the hand-built model    |
+| [differences.json](./differences.json) | The hand-built model's intentional departures from that geometry           |
+| This file                              | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
 
 **No STEP is committed here.** A STEP in the repo reads as the thing to order from, and
-nothing about the file says how far behind the design it is. Run `gen-case.py` for current
-geometry, and export from Onshape only when there is something to order.
+nothing about the file says how far behind the design it is. Onshape exports go to
+`dist/v4/onshape/`, to be validated and ordered from.
 
 ## Generating a model
 
@@ -27,20 +28,29 @@ Writes both halves to `dist/v4/onshape/`, then reads each file back and checks i
 exiting. Options come from the environment, since `freecadcmd` treats trailing arguments as
 documents to open:
 
-| Variable     | Default           | Effect                                          |
-| ------------ | ----------------- | ----------------------------------------------- |
-| `FC_HALF`    | `both`            | `left`, `right` or `both`                       |
-| `FC_EXPLODE` | `0`               | mm to drop the plate by, for viewing the cavity |
-| `FC_DXF`     | the Ergogen hull  | source outline                                  |
-| `FC_OUTDIR`  | `dist/v4/onshape` | destination                                     |
+| Variable     | Default            | Effect                                          |
+| ------------ | ------------------ | ----------------------------------------------- |
+| `FC_HALF`    | `both`             | `left`, `right` or `both`                       |
+| `FC_EXPLODE` | `0`                | mm to drop the plate by, for viewing the cavity |
+| `FC_DXF`     | the Ergogen hull   | source outline                                  |
+| `FC_OUTDIR`  | `dist/v4/onshape`  | destination                                     |
+| `FC_COMPARE` | unset              | your Onshape export(s) of one half, to validate |
+| `FC_DIFFS`   | `differences.json` | recorded intentional differences                |
 
 Output is solid B-rep, not a mesh, so curved features measure their nominal size and the
 result can be sketched against. The self-check reads the exported file rather than the
 shape in memory, because **a STEP can carry valid geometry and still import as nothing**
 if its product structure is missing, which is the failure it exists to catch.
 
-This is a check model and a cross-reference, not the master. The master is the Onshape
-document, built by hand from BUILD.md.
+This is the reference and the validator, not the master. The master is the Onshape
+document, built by hand from BUILD.md. With `FC_COMPARE` set, the script compares an export
+of it against the reference and fails on every difference not recorded in
+`differences.json`. Each difference is decided one of three ways: move the model to the
+reference, record it as intentional, or fix it as an error. The procedure is in
+[BUILD.md](./BUILD.md#validating-your-model).
+
+The script's guards catch the defects a closed, correctly sized solid can still carry, so
+the comparison extends them to the hand-built model everywhere it matches the reference.
 
 ## What the case takes from the board, and what it does not
 

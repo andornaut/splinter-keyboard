@@ -52,6 +52,7 @@ A `_` prefix on a PCB filename excludes it from every step.
 | [Node.js](https://nodejs.org/en)                          | Ergogen and the npm scripts                                                                    |
 | [Python 3](https://www.python.org)                        | The build steps (stdlib only; `pcbnew` comes from KiCad)                                       |
 | [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)    | Slicing the printed case                                                                       |
+| [FreeCAD](https://www.freecad.org)                        | `freecadcmd`, for [validating the case export](#step-6-onshape)                                |
 | [Freerouting](https://github.com/freerouting/freerouting) | Optional, for [autorouting](#autorouting-optional)                                             |
 | [KiKit](https://github.com/yaqwsx/KiKit)                  | Optional, for [panelization](#panelization-optional-for-pcba-cost); needs the git-master build |
 
@@ -72,7 +73,7 @@ sudo apt install kicad
 git submodule update --init --recursive
 ```
 
-OrcaSlicer, KiCad, Freerouting and KiKit also install from [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/main.yml) (tags `orcaslicer` and `kicad`; Freerouting and KiKit come with `kicad`).
+OrcaSlicer, FreeCAD, KiCad, Freerouting and KiKit also install from [these Ansible tasks](https://github.com/andornaut/ansible-ctrl/blob/main/roles/hobbies/tasks/main.yml) (tags `orcaslicer`, `freecad` and `kicad`; Freerouting and KiKit come with `kicad`).
 
 **Updating footprint submodules.** `npm run ergogen` uses `ceoloide` and `infused-kim` at their pinned revision and never advances them, so builds stay reproducible. To re-pin:
 
@@ -196,7 +197,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 1. Create a document and start a sketch.
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export `*.step` files to `dist/${VERSION}/onshape/`. They are build output and are not committed, so a stale one cannot sit in the repo looking like the thing to order.
-1. For a cross-check, `freecadcmd v4/onshape/gen-case.py` builds the same design from the same sheet and writes verified STEPs to the same place.
+1. Validate each half's export against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
 
 ### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
 
