@@ -1,5 +1,7 @@
 FROM node:26-alpine
-RUN apk add --no-cache bash git
+# Node 26 images ship no Yarn and no Corepack. ergogen-gui needs Yarn 1: it ships only a
+# yarn.lock, and its own lifecycle scripts call yarn.
+RUN apk add --no-cache bash git && npm install -g yarn@1.22.22
 WORKDIR /app
 RUN chown node:node /app
 USER node
