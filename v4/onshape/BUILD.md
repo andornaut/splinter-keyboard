@@ -27,7 +27,7 @@ fitting this board. Re-check it against the board in hand before taking one.
 | Term         | Means                                                                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | **Boss**     | A cylindrical pillar that takes a fastener. Three per half, hanging from the top underside down to the PCB                             |
-| **Standoff** | The matching pillar rising from the bottom plate to the PCB underside                                                                  |
+| **Standoff** | The matching pillar rising from the bottom plate to the PCB underside, bored through for the screw                                     |
 | **Hull**     | The un-filleted board outline, 160.000 x 119.000mm, in `full_unfilleted.dxf`. The case is modelled to this, not to the fabricated edge |
 | **Recess**   | The 16mm opening at the top face each switch nests into, so the surrounding wall covers its lower body                                 |
 | **Plate**    | The bottom plate, always. The shell's top face is what the switches clip into, but it is never called a plate here                     |
@@ -37,13 +37,15 @@ fitting this board. Re-check it against the board in hand before taking one.
 
 ```text
    top face   ------------------------------   z   0.00
-                    | |            <- boss, 5.50 dia
-   recess floor ----| |------------------      z  -1.50   switch flange bears here
-   top underside ---+-+---------------+##+     z  -3.00
-   PCB top    ------+-+---------------+##+     z  -6.00   boss ends; SHELF underside
-   PCB        #######o#################|  |    <- 3.00mm NPTH
-                    | |               |##|     z  -7.60   PLATE WALL top
-   plate      -------#----------------+##+     M2.5 flat head, up from below
+                    |:|            <- insert bore, top of the screw path
+   recess floor ----|:|------------------      z  -1.50   switch flange bears here
+   top underside ---+:+---------------+##+     z  -3.00
+                    |:|            <- boss, 5.50 dia
+   PCB top    ------+:+---------------+##+     z  -6.00   boss ends; SHELF underside
+   PCB        #######:#################|  |    <- 3.00mm NPTH
+                    |:|               |##|     z  -7.60   PLATE WALL top
+                    |:|            <- standoff, 5.50 dia, 2.90 clearance hole
+   plate      -----[===]--------------+##+     M2.5 flat head in its counterbore, up from below
 ```
 
 The board is clamped all the way round, not only at the three screws: a **shelf** hangs
@@ -196,7 +198,7 @@ one screw length. Recorded so the trade is visible, not as a proposal.
 | Insert hole, printed             | 3.60 dia                                | M2.5 melt diameter; depth is per boss, see below                                        |
 | Tapped hole, machined            | 2.05 tap drill, M2.5x0.45               | same per-boss depths                                                                    |
 | Screw                            | M2.5 button head, ISO 7380              | head 4.70 dia x 1.50, **flat underside**; two lengths, see below                        |
-| Screw clearance in the plate     | 2.90 dia                                |                                                                                         |
+| Screw clearance hole             | 2.90 dia                                | through the plate and the standoff                                                      |
 | Counterbore in the plate         | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base                                                 |
 | Perimeter shelf, on the shell    | 2.00 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.50, inside its 2.00 keepout ring |
 | Perimeter wall, on the plate     | 2.00 wide, top at -7.60                 | meets the shelf through the board, lapping it by 1.65                                   |
@@ -486,9 +488,11 @@ In the Left and Right studios, after the Derived (and, on the right, the Mirror)
 3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
    the plate up to **z -9.75**.
-4. **Screw holes**, 2.90 dia, each with a flat-bottomed 5.00 counterbore through the
-   plate's full 1.50mm, sketched on a horizontal plane. The floor is the flare's base, so
-   the standoff keeps its height and nothing is cut into it.
+4. **Screw holes**, 2.90 dia, through the plate and up the full height of each standoff
+   to z -7.60, so the screw passes through the standoff and the PCB into the boss's
+   insert. Each has a flat-bottomed 5.00 counterbore through the plate's full 1.50mm,
+   sketched on a horizontal plane. The counterbore's floor is the flare's base, so the
+   standoff keeps its height.
 5. **Relief pocket**, on the inner face, **0.75mm deep**, one plain rectangle over
    x **+50.25 .. +77.60**, y **+23.35 .. +58.60**. Leaves 0.75mm of plate.
 6. **Bumper recesses**, 8.00 dia x 0.50 deep on the outer face at (-70, +50), (+45, +50),
