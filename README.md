@@ -217,7 +217,7 @@ Upload [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step)
 | Tolerance      | Default (ISO 2768 medium)                                                                              |
 | Threaded holes | Tap the M2.5 holes directly; the heat-set inserts are for the printed case only                        |
 
-A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Every hole shares the thread spec, but not the depth: the two bosses a switch recess overlaps take a shallower hole, so call the depths out per boss from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). In Onshape, a Drawing with a hole callout (right-click the hole edge > Callout) emits it.
+A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Every hole shares the thread spec and the depth, so one callout covers all three; take both from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). In Onshape, a Drawing with a hole callout (right-click the hole edge > Callout) emits it.
 
 ### Step 8. [QMK firmware](https://qmk.fm/)
 

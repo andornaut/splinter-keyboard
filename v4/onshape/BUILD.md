@@ -443,9 +443,9 @@ in this sheet and in `gen-case.py`, and the region goes away. Recording it inste
 the sheet describing a case nobody is building. Intentional is for what the sheet does not
 model: a cosmetic feature, an extra fillet, a fit opened up on a printed coupon.
 
-**An intentional difference is outside the script's guards.** The bore-breakout check
-runs on the reference only, so a recorded region that touches a bore needs its
-[Verify](#verify) row checked by hand.
+**An intentional difference is outside the script's guards.** The bore-breakout and
+bumper-floor checks run on the reference only, so a recorded region that touches a bore or
+a bumper recess needs its [Verify](#verify) row checked by hand.
 
 An error on the script's side goes into `gen-case.py`, and into this sheet too if the
 number was wrong here.
