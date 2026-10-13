@@ -770,8 +770,12 @@ def load_diffs(path, half):
     return [e for e in entries if e["half"] == half]
 
 
-def read_parts(paths):
-    """Shell and plate from one or more STEP files, told apart by volume as check() does."""
+def read_parts(paths, centre_x=0.0):
+    """Shell and plate from one or more STEP files, told apart by volume as check() does.
+
+    Two solids are one half. Four are both halves side by side, as one Part Studio built
+    from the whole DXF holds them; the pair whose centre is nearest centre_x is returned.
+    """
     solids = []
     for p in paths:
         if not Path(p).exists():
@@ -779,13 +783,23 @@ def read_parts(paths):
         shp = Part.Shape()
         shp.read(p)
         solids += shp.Solids
-    if len(solids) != 2:
+    if len(solids) == 4:
+        by_x = sorted(solids, key=lambda s: s.BoundBox.Center.x)
+        pairs = [by_x[:2], by_x[2:]]
+        solids = min(pairs, key=lambda pair: abs(pair[0].BoundBox.Center.x - centre_x))
+    elif len(solids) != 2:
         raise SystemExit(
-            f"FAIL gen-case: {', '.join(paths)} hold {len(solids)} solid(s), expected 2: one "
-            "half's shell and plate, assembled"
+            f"FAIL gen-case: {', '.join(paths)} hold {len(solids)} solid(s), expected 2 (one "
+            "half's shell and plate, assembled) or 4 (both halves)"
         )
     shell, plate = sorted(solids, key=lambda s: -s.Volume)
     return {"shell": shell, "plate": plate}
+
+
+def half_spacing(dxf):
+    """How far the right half's outline centre sits from the left's in the DXF."""
+    (lx, ly), (rx, ry) = (centre_xy(classify(dxf, h)[0]) for h in ("left", "right"))
+    return rx - lx, ry - ly
 
 
 def regions(shape):
@@ -819,17 +833,27 @@ def residuals(model, ref):
     raise SystemExit(f"FAIL gen-case: the comparison Boolean failed at every fuzz in {COMPARE_FUZZES}")
 
 
-def compare(ref_path, model_paths, half, diffs_path):
+def compare(ref_path, model_paths, half, diffs_path, spacing):
     """Report every region where the hand model and the reference differ.
 
     "extra" is material in the model that the reference lacks, "missing" the reverse. Each
     region is matched against the recorded intentional differences; an unrecorded region is
     a decision still to make, and a record matching nothing is stale. Both fail.
+
+    A right half may sit at its own outline centre or where the DXF places it beside the
+    left half, `spacing` away; the second is moved back onto the first before comparing.
     """
     entries = load_diffs(diffs_path, half)
     ref = read_parts([ref_path])
-    model = read_parts(model_paths)
+    model = read_parts(model_paths, spacing[0] if half == "right" else 0.0)
     subject = ", ".join(model_paths)
+    if half == "right":
+        c = model["shell"].BoundBox.Center
+        if abs(c.x - spacing[0]) < FRAME_TOL and abs(c.y - spacing[1]) < FRAME_TOL:
+            for name in ("shell", "plate"):
+                model[name] = model[name].copy()
+                model[name].translate(Vector(-spacing[0], -spacing[1], 0))
+            print(f"  note {subject}: right half at the DXF's placement, moved ({-spacing[0]:.4f}, {-spacing[1]:.4f})")
 
     for name in ("shell", "plate"):
         rc, mc = ref[name].BoundBox.Center, model[name].BoundBox.Center
@@ -948,7 +972,7 @@ def main():
         print(f"OK: gen-case: {len(halves)} case(s) written to {outdir} and verified on readback")
         return
 
-    mismatches, stale, intentional = compare(out, compare_to, halves[0], diffs)
+    mismatches, stale, intentional = compare(out, compare_to, halves[0], diffs, half_spacing(dxf))
     sys.stdout.flush()
     if mismatches or stale:
         raise SystemExit(

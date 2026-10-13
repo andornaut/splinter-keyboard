@@ -373,10 +373,12 @@ figure (on a 1.60 board).
 `#name` into features, never the number. A number typed into a feature is a second copy,
 and the sheet changes.
 
-**Three Part Studios**: "Body" builds shell and plate up to, but not including, the switch
-features. "Left" and "Right" each bring in Body with a Derived feature, "Right" mirrors it
-about the Right plane, and each then cuts its own switch recesses and cutouts from its own
-half of the DXF. The body mirrors exactly; the key field does not (see Right half).
+**One Part Studio holds both halves.** Build the left half's shell and plate up to, but not
+including, the switch features, with its outline centre at the origin. Mirror both parts,
+keeping the originals, about a plane midway between the DXF's two halves: x +91.4497, half
+the 182.8994 between their outline centres. The right half then lands on the DXF's own
+right-half curves, and each half cuts its switch recesses and cutouts from its own half
+of the DXF. The body mirrors exactly; the key field does not (see Right half).
 
 Traps:
 
@@ -402,8 +404,8 @@ Traps:
   Hole feature drills normal to its sketch plane, so a hole sketched on the sloped plate
   face comes out tilted 1.39 deg and its projected centre shifts. Started from the part,
   the counterbore is measured from the plate's underside and its floor lands on the
-  plate's top face. The bumper recesses are
-  sketched on the plate's outer face so their floors run parallel to it.
+  plate's top face. The bumper recesses are sketched on a horizontal plane too and end on
+  a plane parallel to the plate, so their floors run parallel to it.
 - **Extend port cuts past both wall faces.** A cut ending exactly on a face leaves
   coincident faces and a non-manifold solid.
 - **Cut switch features straight from the imported curves**, not redrawn. They carry the
@@ -411,10 +413,11 @@ Traps:
 
 ## Validating your model
 
-Export one half from Onshape as STEP, shell and plate assembled (plate in place, not
-exploded), in millimetres and in the sheet's [Frame](#frame). One file holding both parts
-or one file per part both work. Put exports under `dist/v4/onshape/`, which is not
-committed. Then:
+Export from Onshape as STEP, shell and plate assembled (plate in place, not exploded), in
+millimetres. Each half is either in the sheet's [Frame](#frame) or, for the right half,
+where the DXF places it beside the left, which the script detects and moves back. One
+file holding both halves (four solids), one per half, or one per part all work. Put exports
+under `dist/v4/onshape/`, which is not committed. Then, once per half:
 
 ```bash
 FC_HALF=left FC_COMPARE=dist/v4/onshape/onshape-left.step \
@@ -481,7 +484,7 @@ differ.
 8. **Port openings** cut straight through the side wall, overshooting both faces.
 9. **Top edge fillet**, R1.00 on the top face's outer edge only.
 
-In the Left and Right studios, after the Derived (and, on the right, the Mirror):
+On each half, after the mirror, from that half's own curves:
 
 1. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
    **z -1.50**.
@@ -508,9 +511,10 @@ In the Left and Right studios, after the Derived (and, on the right, the Mirror)
    floor is the flare's base, so the standoff keeps its height.
 5. **Bumper recesses**, 12.00 dia x 0.50 deep on the outer face at (-72.75, +52.25),
    (+72.75, +52.25), (-72.75, -34.50), (+69.36, -50.27), each tangent to the wall's inner
-   loop in its corner. Dimension them from the origin: wall edges projected onto the sloped
-   sketch plane land up to 0.2 sideways. Floor **parallel to the plate faces**, so the depth
-   is 0.50 and the plate left is 1.00 right across every foot. All are well clear of the
+   loop in its corner. Sketch them on a horizontal plane, where the loop projects straight
+   down, and extrude up to a plane 0.50 above the plate's underside: on the sloped plane the
+   wall's edges project up to 0.2 sideways. Floor **parallel to the plate faces**, so the
+   depth is 0.50 and the plate left is 1.00 right across every foot. All are well clear of the
    three screw heads.
 
 **Every feature cut into the plate is parallel to its faces.** The plate is a
@@ -529,8 +533,8 @@ the PCB. The plate is unloaded.
 
 ## Right half
 
-Mirror both parts: the outline mirrors exactly and the only half-specific geometry is the
-switch cutouts. Cut those from the **right half of the DXF**, not from a mirrored copy of
+Mirror both parts about the plane midway between the DXF's halves: the outline mirrors
+exactly and the only half-specific geometry is the switch cutouts. Cut those from the **right half of the DXF**, not from a mirrored copy of
 the left's. The halves carry 30 and 32 switch cutouts and 14 positions have no mirrored
 counterpart, so a mirrored key field is the wrong key field.
 
