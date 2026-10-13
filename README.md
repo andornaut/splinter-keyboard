@@ -112,7 +112,7 @@ Set `config.VERSION` in [`package.json`](./package.json) to `v1`, `v2`, `v3`, or
 
 ![Keyboard Layout preview](./v4/keyboard-layout-editor/keyboard-layout-editor.png)
 
-Prototype a layout, export it to [`keyboard-layout-editor.json`](./v4/keyboard-layout-editor/keyboard-layout-editor.json) so you can re-import and iterate, then use it as the basis for the Ergogen design.
+Prototype a layout, export it to [`keyboard-layout-editor.json`](./v4/keyboard-layout-editor/keyboard-layout-editor.json) so you can re-import and iterate, then use it as the basis for the Ergogen design. To load it into the **Raw data** tab, paste it without its outer `[` and `]`: the tab takes the layout's rows directly, while the downloaded JSON wraps them in an array.
 
 ### Step 3. [Ergogen](https://github.com/ergogen/ergogen)
 
