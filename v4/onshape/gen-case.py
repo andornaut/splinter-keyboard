@@ -53,9 +53,11 @@ DEFAULT_OUTDIR = "dist/v4/onshape"
 DEFAULT_DIFFS = "v4/onshape/differences.json"
 
 # ---- comparison ----------------------------------------------------------
-# Fuzzy tolerance for the comparison Booleans. Two kernels place the same face nanometres
-# apart, and an exact Boolean turns that into sliver solids along every coincident face.
-COMPARE_FUZZ = 1e-3
+# Fuzzy tolerances for the comparison Booleans, tried in order until one computes sanely
+# (see residuals()). Two kernels place the same face nanometres apart, and an exact Boolean
+# turns that into sliver solids along every coincident face, so a fuzzy one comes first;
+# the exact one is last, its slivers filtered out by COMPARE_MIN_THICK.
+COMPARE_FUZZES = (1e-3, 5e-3, 1e-5, 0.0)
 # A residual thinner than this (twice volume over area) or smaller than COMPARE_MIN_VOL is
 # kernel noise, not geometry, and needs no decision.
 COMPARE_MIN_THICK = 0.01
@@ -77,15 +79,13 @@ TOP_THICK = 3.00
 RECESS_Z = -1.50
 PCB_TOP = -6.00
 PCB_BOT = -7.60
-H_INNER = 16.00
-H_OUTER = 12.00
+H_INNER = 17.00
+H_OUTER = 13.00
 PLATE = 1.50
 CAVITY_FILLET = 2.00  # tool radius
 TOP_FILLET = 1.00  # where the top face meets the outer wall
 # Hull vertices closer than this are one vertex the DXF happened to write twice.
 HULL_WELD = 1e-3
-# Features closer than this are touching, not overlapping.
-TOUCH = 0.01
 BOSS_R = 2.75
 BORE_R = 1.80  # 3.60 dia heat-set insert
 # Every boss. It stops the bore below RECESS_Z, so no switch recess reaches it on either half.
@@ -136,34 +136,16 @@ USB_W = 9.50
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
-# One rectangular relief over everything tall on side B: the Liatris and the TRRS jack.
-# Rectangular and continuous so a strip of tape can line it, rather than two pockets with
-# an island between them.
-#
-# Its floor is HORIZONTAL, parallel to the Liatris rather than to the plate, so the module
-# has the same clearance along its whole length. The floor is level with the plate's top
-# face at RELIEF_X1 and deepest at RELIEF_X0, where the plate is highest. Outward the
-# pocket runs to the inner perimeter wall's face, where its depth has run out, so it cannot
-# undercut the wall's foot; +y keeps a rim at the plate edge.
-RELIEF_X0, RELIEF_X1 = 51.75, 78.75
-RELIEF_Y0, RELIEF_Y1 = 24.80, 58.25
-# Inside corners at the cavity's tool radius, so one end mill cuts both.
-RELIEF_R = CAVITY_FILLET
-# The plate wall's top band ends where the pocket starts; past it are the USB plug's path
-# and the jack. The two never share a footprint: RELIEF_Y1 is the band's inner face, so
-# they meet only along the band's end corner, which RELIEF_R then pulls the pocket off.
-# The inner wall runs the full height: it clears the jack. The cut that ends the band
-# starts below it at WALL_RELIEF_Y and stops at the inner wall's inner face.
-WALL_RELIEF_X = RELIEF_X0
+# The plate wall's top band ends here, short of the USB plug's path and the jack. The
+# inner wall runs the full height: it clears the jack. The cut that ends the band starts
+# below it at WALL_RELIEF_Y and stops at the inner wall's inner face.
+WALL_RELIEF_X = 51.75
 WALL_RELIEF_Y = 45.00
 
-# Bumper recesses cut the plate's OUTER face, so they never change the clearance above it.
-# What they must not do is land inside the relief pocket, which cuts the inner face: the
-# two together leave a membrane where the plate is thinnest, directly under the parts the
-# relief exists for. Nothing fits between the relief and the plate edge in the top-inner
-# corner, so the top-edge bumper sits inboard of the relief instead.
-BUMPERS = [(-70.0, 50.0), (45.0, 50.0), (-70.0, -32.0), (65.0, -50.0)]
-BUMPER_R, BUMPER_D = 4.00, 0.50
+# Bumper recesses on the plate's outer face, each tangent to the plate wall's inner loop in
+# its corner, so the feet sit as far out as the plate allows.
+BUMPERS = [(-72.75, 52.25), (72.75, 52.25), (-72.75, -34.50), (69.36, -50.27)]
+BUMPER_R, BUMPER_D = 6.00, 0.50
 
 BIG = 500.0
 EPS = 1e-6
@@ -198,7 +180,6 @@ EXPECT_CYL = {
         # The plate wall's inner corners and its kink. Five, not six: one corner falls
         # inside the top-inner relief.
         (CAVITY_FILLET, 5),
-        (RELIEF_R, 2),  # the relief pocket's -x corners; its +x ones are slivers
         (CBORE_R, 3),
         (STANDOFF_R, 3),  # above their flares
         (FLARE_R, 3),
@@ -466,33 +447,6 @@ def check_bores(recess, bosses):
             )
 
 
-def relief_depth():
-    """The relief pocket's depth at RELIEF_X0, its deepest: the plate's rise over its width."""
-    return (H_INNER - H_OUTER) / shell_width() * (RELIEF_X1 - RELIEF_X0)
-
-
-def check_bumpers(sign):
-    """Refuse a bumper recess that lands inside the relief pocket.
-
-    The two cut opposite faces of the plate, so an overlap leaves a membrane, and leaves
-    it directly under the parts the relief exists to clear. Readback cannot see it: both
-    features are present, the right size and at the right depth, and the plate is still
-    one closed solid.
-    """
-    rx0 = min(sign * RELIEF_X0, sign * RELIEF_X1)
-    rx1 = max(sign * RELIEF_X0, sign * RELIEF_X1)
-    for bx, by in BUMPERS:
-        x = sign * bx
-        d = math.hypot(max(rx0 - x, 0.0, x - rx1), max(RELIEF_Y0 - by, 0.0, by - RELIEF_Y1))
-        if d < BUMPER_R:
-            raise SystemExit(
-                f"FAIL gen-case: the bumper recess at ({x:.3f}, {by:.3f}) reaches {BUMPER_R - d:.3f} into the "
-                f"relief pocket, which cuts the other face: that leaves "
-                f"as little as {PLATE - relief_depth() - BUMPER_D:.2f}mm of plate "
-                "under the parts the relief is there for. Move it clear of the pocket"
-            )
-
-
 def fillet_top(body, r):
     """Fillet where the top face meets the outer wall.
 
@@ -542,7 +496,6 @@ def build(dxf, half, explode):
     plate_wall_w = shelf_w
 
     check_bores(recess, bosses)
-    check_bumpers(sign)
 
     # --- shell
     body = prism(outer_w, -BIG, 0.0).cut(half_space(sign, ang, 0.0))
@@ -594,46 +547,6 @@ def build(dxf, half, explode):
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
         plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - FLARE_GAP, bx, by).cut(half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
-
-    # Relief over the Liatris and the jack. Without it an aluminium plate sits 0.77mm from
-    # the module's pin tails, or 0.03mm if it bottoms out in its sockets.
-    x0 = sign * RELIEF_X0 if sign > 0 else sign * RELIEF_X1
-    floor_z = rim_z(sign, sign * RELIEF_X1) + plate_rise
-    x1 = x0 + RELIEF_X1 - RELIEF_X0
-    outline = Part.makePolygon(
-        [
-            Vector(x0, RELIEF_Y0, 0),
-            Vector(x1, RELIEF_Y0, 0),
-            Vector(x1, RELIEF_Y1, 0),
-            Vector(x0, RELIEF_Y1, 0),
-            Vector(x0, RELIEF_Y0, 0),
-        ]
-    )
-    # Clipped to below the plate's top face: the pocket runs out at the inner wall's face,
-    # and a tool reaching up past the plate would graze the wall.
-    relief = prism(opened(outline, RELIEF_R), floor_z, PCB_BOT).common(half_space(sign, ang, plate_rise))
-    if relief.Volume < 1.0:
-        raise SystemExit("FAIL gen-case: MCU relief tool is empty, it would cut nothing")
-    # The pocket must not reach under the perimeter wall. The wall is half the board's
-    # clamp and it stands on the plate's full thickness, so a pocket at its foot thins the
-    # root. Tested as a footprint overlap, not a solid one: the wall rises FROM the plate's
-    # top face and the pocket cuts down from it, so the two touch without ever sharing
-    # volume, and an intersection test would read clean while the undercut is real.
-    # Inset by TOUCH: the pocket may meet the wall's face, and the DXF's sub-micron
-    # coordinates would otherwise read that as an overlap.
-    column = Part.makeBox(
-        RELIEF_X1 - RELIEF_X0 - 2 * TOUCH,
-        RELIEF_Y1 - RELIEF_Y0 - 2 * TOUCH,
-        2 * BIG,
-        Vector(x0 + TOUCH, RELIEF_Y0 + TOUCH, -BIG),
-    )
-    undercut = ring.common(column).Volume
-    if undercut > EPS:
-        raise SystemExit(
-            "FAIL gen-case: the relief pocket reaches under the plate's perimeter wall, "
-            f"undercutting {undercut:.3f} mm3 of it. Pull the pocket back inside the wall relief"
-        )
-    plate = plate.cut(relief)
 
     # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside. It
     # runs the plate's full thickness and bears on the flare's base, so the standoff keeps
@@ -727,13 +640,7 @@ def check(out, half, explode, keys):
         fails.append(f"shelf plus boss ends only {sum(f.Area for f in shelf):.0f} mm2, expected a perimeter shelf")
 
     for name, s in (("shell", shell), ("plate", plate)):
-        # A cylinder under 0.1mm along its axis is a sliver, not a feature: the relief
-        # pocket's +x corners, where its level floor has almost met the sloped plate.
-        got = collections.Counter(
-            round(f.Surface.Radius, 2)
-            for f in s.Faces
-            if isinstance(f.Surface, Part.Cylinder) and f.ParameterRange[3] - f.ParameterRange[2] > 0.1
-        )
+        got = collections.Counter(round(f.Surface.Radius, 2) for f in s.Faces if isinstance(f.Surface, Part.Cylinder))
         want = dict(EXPECT_CYL[name])
         if name == "shell":
             want[CNC_FILLET_R] = 4 * keys  # each cutout and each recess
@@ -775,27 +682,9 @@ def check(out, half, explode, keys):
             )
 
     # Prismatic features are invisible to a cylinder census, so test them by volume: a
-    # relief box that misses the plate, or a perimeter wall built across a port opening,
-    # leaves every count above unchanged.
+    # perimeter wall built across a port opening leaves every count above unchanged.
     sign = 1 if half == "left" else -1
     dz = -explode
-    relief_zone = Part.makeBox(
-        RELIEF_X1 - RELIEF_X0,
-        RELIEF_Y1 - RELIEF_Y0,
-        0.75,
-        Vector(
-            sign * RELIEF_X0 if sign > 0 else sign * RELIEF_X1,
-            RELIEF_Y0,
-            plate.BoundBox.ZMin,
-        ),
-    )
-    swept = 0.0
-    for i in range(60):
-        probe = relief_zone.copy()
-        probe.translate(Vector(0, 0, i * 0.15))
-        swept += plate.common(probe).Volume
-    if swept > 0.999 * relief_zone.Volume * 60:
-        fails.append("relief pocket absent: plate is solid through its footprint")
 
     for name, tool in (
         ("USB opening", usb_slot(sign, dz)),
@@ -914,6 +803,22 @@ def inside(bb, box):
     return all(lo[k] >= box[k] - MATCH_TOL and hi[k] <= box[k + 3] + MATCH_TOL for k in range(3))
 
 
+def residuals(model, ref):
+    """model - ref and ref - model, at the first fuzz OCC computes them sanely with.
+
+    A fuzzy Boolean between two nearly coincident solids can fail outright and hand back
+    the whole operand, or a negative volume, with no error raised; which fuzz it fails at
+    depends on the geometry. A residual can be neither negative nor most of a part whose
+    frame already matches, so either marks a failed Boolean, and the next fuzz is tried.
+    """
+    for fuzz in COMPARE_FUZZES:
+        extra = model.cut(ref, fuzz) if fuzz else model.cut(ref)
+        missing = ref.cut(model, fuzz) if fuzz else ref.cut(model)
+        if all(0 <= r.Volume <= 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref))):
+            return extra, missing
+    raise SystemExit(f"FAIL gen-case: the comparison Boolean failed at every fuzz in {COMPARE_FUZZES}")
+
+
 def compare(ref_path, model_paths, half, diffs_path):
     """Report every region where the hand model and the reference differ.
 
@@ -938,10 +843,8 @@ def compare(ref_path, model_paths, half, diffs_path):
     used = set()
     mismatches, intentional = 0, 0
     for name in ("shell", "plate"):
-        for kind, residual in (
-            ("extra", model[name].cut(ref[name], COMPARE_FUZZ)),
-            ("missing", ref[name].cut(model[name], COMPARE_FUZZ)),
-        ):
+        extra, missing = residuals(model[name], ref[name])
+        for kind, residual in (("extra", extra), ("missing", missing)):
             for r in regions(residual):
                 bb = r.BoundBox
                 c = bb.Center
