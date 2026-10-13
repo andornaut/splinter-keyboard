@@ -390,7 +390,8 @@ Traps:
   wall's, each with its own corners rounded at R2.00.
 - **The one exception is the plate outline**, which is the finished cavity loop inset 0.20,
   so it matches the pocket it drops into. The inset leaves its five convex corners at
-  R1.80: fillet them back to R2.00, the design's minimum corner radius.
+  R1.80 and its kink at R2.20: fillet all six to R2.00, the design's minimum corner
+  radius.
 - **Round all six corners of every loop, each at its loop's own radius.** The hull has
   five convex corners and one re-entrant one, the kink where the thumb cluster meets the
   main field. The kink is rounded for looks, R2.50 outside and R2.00 inside, so the wall
@@ -494,8 +495,8 @@ On each half, after the mirror, from that half's own curves:
 
 ## Part B: bottom plate
 
-1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.20mm**, its five convex
-   corners filleted back to **R2.00**, **1.50mm** thick, between the slope plane and its
+1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.20mm**, all six corners
+   filleted to **R2.00**, the kink included, **1.50mm** thick, between the slope plane and its
    1.50 offset, flush with the rim.
 2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.25mm**
    (corners R2.00), from the plate's top face up to **z -7.60**. Remove the top band

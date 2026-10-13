@@ -86,6 +86,9 @@ CAVITY_FILLET = 2.00  # tool radius
 TOP_FILLET = 1.00  # where the top face meets the outer wall
 # Hull vertices closer than this are one vertex the DXF happened to write twice.
 HULL_WELD = 1e-3
+# Hull vertices snap to this grid. The DXF writes the board's straight edges a few tenths of
+# a micron off true, so a vertical edge leans and a cut squared to it leaves a step.
+HULL_GRID = 1e-3
 BOSS_R = 2.75
 BORE_R = 1.80  # 3.60 dia heat-set insert
 # Every boss. It stops the bore below RECESS_Z, so no switch recess reaches it on either half.
@@ -176,7 +179,7 @@ EXPECT_CYL = {
     "plate": _census(
         (SCREW_R, 3),
         (CAVITY_FILLET, 5),  # the outline's corners, opened back to the cavity's radius
-        (CAVITY_FILLET + LID_CLR, 1),  # the outline's kink, the cavity's grown by the fit clearance
+        (CAVITY_FILLET, 1),  # the outline's kink
         # The plate wall's inner corners and its kink. Five, not six: one corner falls
         # inside the top-inner relief.
         (CAVITY_FILLET, 5),
@@ -417,8 +420,9 @@ def unnotched_hull(wall, sign):
         raise SystemExit("FAIL gen-case: the hull has a curved edge; it is expected to be straight lines only")
     pts = []
     for v in outline.OrderedVertexes:
-        if not pts or (v.Point - pts[-1]).Length > HULL_WELD:
-            pts.append(v.Point)
+        p = Vector(round(v.Point.x / HULL_GRID) * HULL_GRID, round(v.Point.y / HULL_GRID) * HULL_GRID, 0)
+        if not pts or (p - pts[-1]).Length > HULL_WELD:
+            pts.append(p)
     if (pts[0] - pts[-1]).Length <= HULL_WELD:
         pts.pop()
     return Part.makePolygon([*pts, pts[0]])
@@ -483,11 +487,11 @@ def build(dxf, half, explode):
     # what would be a sharp point of wall.
     outer_w = closed(offset(hull, POCKET_CLR + WALL), POCKET_CLR + WALL)
     cavity_w = closed(opened(offset(hull, POCKET_CLR), CAVITY_FILLET), CAVITY_FILLET)
-    # The plate follows the cavity, so its corners match the pocket it drops into rather
-    # than carrying the hull's own tight radii. The inset would leave them at
-    # CAVITY_FILLET - LID_CLR; opening them back to CAVITY_FILLET keeps every corner in the
-    # design at R2.00 or more, and only widens the gap to the pocket at the corners.
-    plate_w = opened(offset(cavity_w, -LID_CLR), CAVITY_FILLET)
+    # The plate follows the cavity, LID_CLR inside it, so it drops into the pocket. Every
+    # corner is then rounded at CAVITY_FILLET, the design's minimum, the kink included:
+    # concentric with the cavity it would be CAVITY_FILLET + LID_CLR, which narrows the fit
+    # gap there by only 0.003.
+    plate_w = closed(opened(offset(hull, POCKET_CLR - LID_CLR), CAVITY_FILLET), CAVITY_FILLET)
     # The shelf's inner loop, shared by the plate wall, is an inset of the HULL opened in
     # its own right.
     # Chaining them off cavity_w would shrink its corner arcs by the inset, leaving 0.25
@@ -820,15 +824,26 @@ def inside(bb, box):
 def residuals(model, ref):
     """model - ref and ref - model, at the first fuzz OCC computes them sanely with.
 
-    A fuzzy Boolean between two nearly coincident solids can fail outright and hand back
-    the whole operand, or a negative volume, with no error raised; which fuzz it fails at
-    depends on the geometry. A residual can be neither negative nor most of a part whose
-    frame already matches, so either marks a failed Boolean, and the next fuzz is tried.
+    A fuzzy Boolean between two nearly coincident solids can fail without raising: it
+    hands back the whole operand, a negative volume, an invalid shape, or plausible-looking
+    debris; which fuzz it fails at depends on the geometry. A sound pair is valid, neither
+    residual is negative or most of a part whose frame already matches, and the two account
+    for the volume difference exactly: extra - missing = model - ref. Anything else is a
+    failed Boolean, and the next fuzz is tried.
     """
     for fuzz in COMPARE_FUZZES:
-        extra = model.cut(ref, fuzz) if fuzz else model.cut(ref)
-        missing = ref.cut(model, fuzz) if fuzz else ref.cut(model)
-        if all(0 <= r.Volume <= 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref))):
+        try:
+            extra = model.cut(ref, fuzz) if fuzz else model.cut(ref)
+            missing = ref.cut(model, fuzz) if fuzz else ref.cut(model)
+            sound = (
+                extra.isValid()
+                and missing.isValid()
+                and all(0 <= r.Volume <= 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref)))
+            )
+            balance = abs((extra.Volume - missing.Volume) - (model.Volume - ref.Volume))
+        except Part.OCCError:
+            continue
+        if sound and balance <= max(COMPARE_MIN_VOL * 100, 0.01 * (extra.Volume + missing.Volume)):
             return extra, missing
     raise SystemExit(f"FAIL gen-case: the comparison Boolean failed at every fuzz in {COMPARE_FUZZES}")
 
