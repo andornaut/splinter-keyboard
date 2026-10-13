@@ -637,17 +637,15 @@ def build(dxf, half, explode):
 
     # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside. It
     # runs the plate's full thickness and bears on the flare's base, so the standoff keeps
-    # its full height and the flare still joins the plate over a 1.00mm annulus.
+    # its full height and the flare still joins the plate over a 1.50mm annulus.
     #
-    # Its floor is HORIZONTAL, alone among the features cut into this plate. The screw axis
-    # is vertical and a flat head seats square to its own axis, so the seat has to be
-    # perpendicular to the screw rather than parallel to the tilted plate. The price is a
-    # counterbore whose depth below the outer face varies across its width, which is the
-    # right trade here and the wrong one for the bumpers below.
+    # Its floor is the plate's top face, so it lies PARALLEL to the plate, as a hole tool
+    # started from the plate's underside cuts it. Across the 5.00 counterbore that is 0.06
+    # off level each side of the vertical screw axis, which a printed plate takes up under
+    # the head.
     for bx, by in bosses:
         plate = plate.cut(cyl(SCREW_R, -BIG, BIG, bx, by))
-        z = rim_z(sign, bx)
-        plate = plate.cut(cyl(CBORE_R, z - 0.5, z + plate_rise, bx, by))
+        plate = plate.cut(cyl(CBORE_R, -BIG, BIG, bx, by).common(half_space(sign, ang, plate_rise)))
     # A bumper recess is a fixed removal, so its floor is PARALLEL to the plate faces and
     # every foot leaves the same material behind. A horizontal floor would be a constant z
     # in a plate that is not, making the recess shallower at one edge than the other and

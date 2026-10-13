@@ -393,11 +393,12 @@ Traps:
   z -12.00 at the outer (x +82.50 and -82.50 on the left half). The shell's bottom cut,
   both plate faces (that plane and a 1.50 offset) and every standoff's lower end reference
   it.
-- **Sketch plate holes on a horizontal plane.** Onshape's Hole feature drills normal to its
-  sketch plane, so a hole sketched on the sloped plate face comes out tilted 1.39 deg and
-  its counterbore floor is no longer square to the screw. The relief pocket's floor is
-  horizontal too. The bumper recesses are the opposite: sketch them on the plate's outer
-  face so their floors run parallel to it.
+- **Sketch plate holes on a horizontal plane, and start them from the part.** Onshape's
+  Hole feature drills normal to its sketch plane, so a hole sketched on the sloped plate
+  face comes out tilted 1.39 deg and its projected centre shifts. Started from the part,
+  the counterbore is measured from the plate's underside and its floor lands on the
+  plate's top face. The relief pocket's floor is horizontal. The bumper recesses are
+  sketched on the plate's outer face so their floors run parallel to it.
 - **Extend port cuts past both wall faces.** A cut ending exactly on a face leaves
   coincident faces and a non-manifold solid.
 - **Cut switch features straight from the imported curves**, not redrawn. They carry the
@@ -497,9 +498,9 @@ In the Left and Right studios, after the Derived (and, on the right, the Mirror)
    the plate up to **z -10.35**, 2.75 below the board underside.
 4. **Screw holes**, 2.90 dia, through the plate and up the full height of each standoff
    to z -7.60, so the screw passes through the standoff and the PCB into the boss's
-   insert. Each has a flat-bottomed 5.00 counterbore through the plate's full 1.50mm,
-   sketched on a horizontal plane. The counterbore's floor is the flare's base, so the
-   standoff keeps its height.
+   insert. Each has a flat-bottomed 5.00 counterbore through the plate's full 1.50mm:
+   sketch the hole on a horizontal plane and start it from the part. The counterbore's
+   floor is the flare's base, so the standoff keeps its height.
 5. **Relief pocket**, on the inner face, one rectangle with **R2.00** corners over
    x **+51.75 .. +78.75**, y **+24.80 .. +58.25**. Its floor is **horizontal**, level with
    the plate's top face at x +78.75 (z -14.41), so it is 0.65 deep at x +51.75 and leaves
@@ -509,16 +510,16 @@ In the Left and Right studios, after the Derived (and, on the right, the Mirror)
    the plate left is 1.00 right across every foot. All are well clear of the three screw
    heads.
 
-**Two features have horizontal floors: the screw counterbore and the relief pocket.** The
-plate is a parallel-sided slab lying at 1.3887 deg, so "flat" and "level" are different
-instructions here and each feature has to say which it means. The counterbore means level:
-the screw axis is vertical and a flat head seats square to its own axis, so its floor is
-horizontal and its depth below the outer face therefore varies 1.439 to 1.561 across its
-width. The relief pocket means level so its floor runs parallel to the Liatris, giving the
-module the same clearance along its whole length. On a mill that floor is inclined to the
-plate's faces, so it takes a surfacing pass or a 1.39 deg tilt rather than a plain pocket.
-Every other feature means parallel to the faces. A bumper recess cut level instead would run 0.403 to 0.597 deep and
-leave 1.097 to 0.903 of plate, different at each edge of every foot.
+**One feature has a horizontal floor: the relief pocket.** The plate is a parallel-sided
+slab lying at 1.3887 deg, so "flat" and "level" are different instructions here and each
+feature has to say which it means. The relief pocket means level so its floor runs
+parallel to the Liatris, giving the module the same clearance along its whole length. On a
+mill that floor is inclined to the plate's faces, so it takes a surfacing pass or a 1.39
+deg tilt rather than a plain pocket. Every other feature means parallel to the faces, the
+counterbore included: its floor is the plate's top face, 0.06 off level each side of the
+vertical screw across its 5.00 width, which a printed plate takes up under the head. A
+bumper recess cut level instead would run 0.403 to 0.597 deep and leave 1.097 to 0.903 of
+plate, different at each edge of every foot.
 
 **Keep every bumper out of the relief pocket.** The two cut opposite faces, so an overlap
 leaves 0.25mm of plate, and leaves it directly under the parts the relief is there for.
