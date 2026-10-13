@@ -13,6 +13,7 @@ Each file has one job:
 | [differences.json](./differences.json) | The hand-built model's intentional departures from that geometry           |
 | This file                              | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
 | `Splinter keyboard v4.step`            | The Onshape model's export, both halves, as last validated                 |
+| [onshape.png](./onshape.png)           | A render of that export                                                    |
 
 **`Splinter keyboard v4.step` is a snapshot.** It holds both halves, four solids, exported
 from the Onshape document and validated against `gen-case.py` with no differences. After
@@ -36,7 +37,7 @@ documents to open:
 | `FC_EXPLODE` | `0`                | mm to drop the plate by, for viewing the cavity |
 | `FC_DXF`     | the Ergogen hull   | source outline                                  |
 | `FC_OUTDIR`  | `dist/v4/onshape`  | destination                                     |
-| `FC_COMPARE` | unset              | your Onshape export(s) of one half, to validate |
+| `FC_COMPARE` | unset              | Onshape export(s) holding the half to validate  |
 | `FC_DIFFS`   | `differences.json` | recorded intentional differences                |
 
 Output is solid B-rep, not a mesh, so curved features measure their nominal size and the
