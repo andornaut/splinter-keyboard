@@ -156,7 +156,7 @@ def _ends(sliver):
 
 def _moved(ends, target, mover):
     """Where `mover` would sit after the collapse, as a shape. Not applied: the
-    clearance test has to ask before the board is changed, not after."""
+    clearance test has to ask before the board is changed."""
     points = [
         target if any(dist(p, end) <= TOUCH_TOL for end in ends) else p for p in (mover.GetStart(), mover.GetEnd())
     ]

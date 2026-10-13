@@ -5,7 +5,7 @@
 # The pour is applied here, after manual routing, rather than at build time so
 # routing happens on a clean board; the cp overwrites each master with the
 # pour-free working copy first, so the pour is always freshly flowed around the
-# current traces. The cleanup runs after the pour, never before: it treats a
+# current traces. The cleanup runs after the pour: it treats a
 # filled pour as copper, which is what keeps a GND stitching via. The three steps
 # after it are a cycle, not a sequence, and repeat until they settle. Run via:
 # npm run copy:unrouted-to-routed
@@ -34,7 +34,7 @@ mkdir -p "$dst_dir"
 
 # Apply project settings to the routed/ projects (this copy step owns the routed
 # tier, the fab source whose DRC floors fab's DRC gate reads). See
-# apply_project_settings in lib/common.sh. Before the boards, not after: the two steps that
+# apply_project_settings in lib/common.sh. Before the boards: the two steps that
 # move copper read this project's net classes to test what they lay down against
 # the clearance every other net asks for, so a settings change has to land first or
 # the run that introduces it measures against the clearances it replaced. It reads

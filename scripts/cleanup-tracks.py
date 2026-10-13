@@ -32,7 +32,7 @@ the merge runs after them.
 
 A pour counts as copper, which is what keeps a GND stitching via sitting in the
 plane: it is connected on the pour layer. Run this AFTER the pour is added (see
-copy-unrouted-to-routed.sh), never before, or every stitching via looks orphaned
+copy-unrouted-to-routed.sh), or every stitching via looks orphaned
 and is deleted. A teardrop does NOT count (see pcb_copper.fill_zones): it is a
 flare on the very copper under test, so counting it would let a dangling stub
 hold itself up. Teardrops left with nothing to decorate are deleted with the

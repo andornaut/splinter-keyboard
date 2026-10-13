@@ -214,7 +214,7 @@ def resolve_firmware_source(override):
             return os.environ[env]
     raise SystemExit(
         "validate:firmware: no firmware source configured. A board cannot be fabbed\n"
-        "  without firmware proven to match it, so this is required, not optional.\n"
+        "  without firmware proven to match it, so this is required.\n"
         "  Set one of: --firmware <url|path>, $SPLINTER_FIRMWARE_JSON, or\n"
         "  package.json config.FIRMWARE."
     )
