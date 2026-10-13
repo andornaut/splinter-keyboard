@@ -12,10 +12,12 @@ Each file has one job:
 | [gen-case.py](./gen-case.py)           | The same design as geometry, and the validator for the hand-built model    |
 | [differences.json](./differences.json) | The hand-built model's intentional departures from that geometry           |
 | This file                              | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+| `Splinter keyboard v4.step`            | The Onshape model's export, both halves, as last validated                 |
 
-**No STEP is committed here.** A STEP in the repo reads as the thing to order from, and
-nothing about the file says how far behind the design it is. Onshape exports go to
-`dist/v4/onshape/`, to be validated and ordered from.
+**`Splinter keyboard v4.step` is a snapshot.** It holds both halves, four solids, exported
+from the Onshape document and validated against `gen-case.py` with no differences. After
+any change to the design, export again to `dist/v4/onshape/`, validate both halves, and
+only then replace it.
 
 ## Generating a model
 

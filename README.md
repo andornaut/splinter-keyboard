@@ -22,17 +22,17 @@ Related notes: [3D printing](https://github.com/andornaut/til/blob/main/docs/3d-
 
 Every version directory (`v1/` .. `v4/`) follows the same shape, though not every version has every part:
 
-| Path                      | Contents                                                                                                                                                                                            |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ergogen/config.yaml`     | Keyboard definition. The source of truth for everything downstream.                                                                                                                                 |
-| `ergogen/footprints/`     | Symlink to the shared footprints below, so every version builds against one pinned set. Do not edit.                                                                                                |
-| `keyboard-layout-editor/` | Layout prototypes.                                                                                                                                                                                  |
-| `kicad/unrouted/`         | Working boards. Ergogen generates into these; you route here.                                                                                                                                       |
-| `kicad/routed/`           | Routed masters. The fab source.                                                                                                                                                                     |
-| `kicad/unrouted-backups/` | Timestamped copies of the `unrouted/` boards, taken each time fresh ones overwrite them. Gitignored, and only the last few per board are kept.                                                      |
-| `kicad/jlcpcb-parts.json` | LCSC part numbers, kept outside the `.kicad_pcb` so they survive regeneration. v4 only, and what makes assembly files appear.                                                                       |
-| `onshape/`                | Case design. v1 to v3 keep their exported STEP here. v4 commits none, carrying the build sheet, the rationale, and a script that builds the same design as geometry; generate or export to `dist/`. |
-| `orcaslicer/`             | Slicer projects. v2 and v3 only.                                                                                                                                                                    |
+| Path                      | Contents                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ergogen/config.yaml`     | Keyboard definition. The source of truth for everything downstream.                                                                                                  |
+| `ergogen/footprints/`     | Symlink to the shared footprints below, so every version builds against one pinned set. Do not edit.                                                                 |
+| `keyboard-layout-editor/` | Layout prototypes.                                                                                                                                                   |
+| `kicad/unrouted/`         | Working boards. Ergogen generates into these; you route here.                                                                                                        |
+| `kicad/routed/`           | Routed masters. The fab source.                                                                                                                                      |
+| `kicad/unrouted-backups/` | Timestamped copies of the `unrouted/` boards, taken each time fresh ones overwrite them. Gitignored, and only the last few per board are kept.                       |
+| `kicad/jlcpcb-parts.json` | LCSC part numbers, kept outside the `.kicad_pcb` so they survive regeneration. v4 only, and what makes assembly files appear.                                        |
+| `onshape/`                | Case design and its exported STEP. v4 adds the build sheet, the rationale, and a script that builds the same design as geometry and validates the export against it. |
+| `orcaslicer/`             | Slicer projects. v2 and v3 only.                                                                                                                                     |
 
 Shared across versions:
 
@@ -196,18 +196,19 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 
 1. Create a document and start a sketch.
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
-1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export `*.step` files to `dist/${VERSION}/onshape/`. They are build output and are not committed, so a stale one cannot sit in the repo looking like the thing to order.
-1. Validate each half's export against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
+1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export it to `dist/${VERSION}/onshape/`.
+1. Validate both halves against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py` and again with `FC_HALF=right`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
+1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4.step`.
 
 ### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
 
-1. Open or create a project and import the `*.step` files from `dist/${VERSION}/onshape/`.
+1. Open or create a project and import [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step).
 1. Slice and print the case.
 1. Install an [M2.5 heat-set insert](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) into each mounting boss with a soldering iron, then clamp the PCB with the [M2.5 screws](./v4/README.md#bill-of-materials-bom).
 
 #### Alternative: machined aluminium case (JLCCNC)
 
-Upload each half's `*.step` to [JLCCNC](https://jlccnc.com) (left and right are separate mirrored parts, so set quantity per file):
+Upload [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step) to [JLCCNC](https://jlccnc.com). It holds both halves' shells and plates, four parts, so check that each part is quoted once:
 
 | Setting        | Value                                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
