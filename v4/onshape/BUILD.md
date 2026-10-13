@@ -30,7 +30,7 @@ fitting this board. Re-check it against the board in hand before taking one.
 | **Standoff** | The matching pillar rising from the bottom plate to the PCB underside, bored through for the screw                                     |
 | **Hull**     | The un-filleted board outline, 160.000 x 119.000mm, in `full_unfilleted.dxf`. The case is modelled to this, not to the fabricated edge |
 | **Recess**   | The 16mm opening at the top face each switch nests into, so the surrounding wall covers its lower body                                 |
-| **Plate**    | The bottom plate, always. The shell's top face is what the switches clip into, but it is never called a plate here                     |
+| **Plate**    | The bottom plate                                                                                                                       |
 | **Setup**    | One fixturing of the part in the mill. Every flip is another setup and another fixed fee                                               |
 
 ## How it goes together
@@ -59,7 +59,7 @@ standoffs are the same sandwich at the three screw points.
 | **Shell**        | Top face and side walls, one piece. Switch cutouts in the top, shelf inside the walls |
 | **Bottom plate** | Inset closing plate with a perimeter wall, the screw heads and the standoffs          |
 
-**The shelf goes above the board, never below it.** Which side it sits on decides whether
+**The shelf goes above the board.** Which side it sits on decides whether
 it can be made at all. A shelf the board is pressed UP against narrows the opening going
 up, which a mill reaches from below without trouble. A lip the board RESTS DOWN on would
 put the full-width board pocket above a narrower lip, which is an undercut no setup
@@ -72,15 +72,12 @@ It consumes 1.50mm of cavity depth. No rebate is needed: the cavity is a straigh
 and the screws hold the plate against the stack above it. A rebate would be legal, being
 wider at the open face, but it would thin the wall at the rim for nothing.
 
-**Undercut, precisely.** Cutting from below, a feature may narrow going up but never
-widen. So a chamfer or rebate at the rim is fine, and a lip under the board pocket is not.
-
 ## Machining setups
 
 | Part  | Setup | From                   | Features                                       |
 | ----- | ----- | ---------------------- | ---------------------------------------------- |
 | Shell | 1     | below                  | Outer profile, cavity, bosses, boss holes      |
-| Shell | 2     | above                  | The 16mm switch recesses, the top edge bezel   |
+| Shell | 2     | above                  | The 16mm switch recesses, the top edge fillet  |
 | Shell | 3     | the top edge (+y face) | TRRS and USB openings                          |
 | Plate | 1     | inner face             | Profile, standoffs, screw holes, relief pocket |
 | Plate | 2     | outer face             | Counterbores, bumper recesses                  |
@@ -89,8 +86,6 @@ widen. So a chamfer or rebate at the rim is fine, and a lip under the board pock
 mill reaches those from neither above nor below. A right-angle head folds it back into
 setup 1 if the shop has one; otherwise it is a third fixturing. Both ports sit on the same
 face, so one setup covers both.
-
-The plate's two setups are inherent to it having features on both faces.
 
 The nested switch cutout is inherently wider at the top, so nothing reaches it from below.
 The 14.5mm holes are through-features and can be cut in setup 1 or 2. Flattening the top
@@ -108,9 +103,9 @@ large, flatten the top for the aluminium variant only and keep the nesting on th
 | ---------------------- | ------------------------------------------------------------------------------- |
 | Process                | Print first, then aluminium; the printed half confirms fitment                  |
 | Print orientation      | Shell top-face-down; walls and bosses rise from a flat first layer, no supports |
-| Wall thickness         | 3.0mm                                                                           |
+| Wall thickness         | 2.0mm                                                                           |
 | Top thickness          | 3.0mm, recessed to 1.5mm at each switch                                         |
-| Cavity internal fillet | 2.0mm nominal, **3.20mm absolute maximum**                                      |
+| Cavity internal fillet | 2.0mm                                                                           |
 | Board pocket clearance | 0.50mm per side on the hull                                                     |
 
 **The pocket clearance is a print number, not a machining fit.** An FDM part loses 0.2 to
@@ -119,21 +114,11 @@ over-extrusion, which closes a tenth-millimetre pocket outright and leaves a boa
 will not go in. 0.50 survives that and costs the milled variant nothing, because the board
 is located by its screws rather than by the pocket either way.
 
-**The cavity fillet is a maximum, not a minimum.** It is an internal corner, so the tool
-leaves material _inside_ the pocket, and that material has to miss the board's own 1.5mm
-exterior fillet. Do not let a shop substitute a larger end mill.
-
-| Cavity fillet | Clearance to the fabricated board at a 90 deg pocket corner |
-| ------------- | ----------------------------------------------------------- |
-| 1.50          | +0.707                                                      |
-| 2.00          | +0.500                                                      |
-| 2.35          | +0.355                                                      |
-| 3.20          | +0.003                                                      |
-| 3.50          | -0.121                                                      |
-
-At 2.00 the pocket's corner arc comes out **concentric** with the board's own 1.5mm fillet,
-both centred 1.50 in from the sharp hull corner, so at a 90 deg corner the clearance is the
-tool radius less the board fillet uniformly around the arc rather than only at its tightest
+**The cavity fillet is concentric with the board's.** It is an internal corner, so the
+tool leaves material _inside_ the pocket, and that material has to miss the board's own
+1.5mm exterior fillet. At 2.00 the pocket's corner arc and the board's fillet are both
+centred 1.50 in from the sharp hull corner, so at a 90 deg corner the clearance is the tool
+radius less the board fillet uniformly around the arc rather than only at its tightest
 point. That is 0.500, the same as the straight edges, and no corner is tighter than an edge.
 
 ## Frame
@@ -153,7 +138,7 @@ that. Every value here is already converted.
 | Side edges                 | x +-80.000          |
 
 The 1.5mm wall fillet rounds the corners, so the fabricated height drops while the width
-holds at the straight side edges. The case is modelled to the hull, never to that edge.
+holds at the straight side edges.
 
 ## Z stack
 
@@ -168,60 +153,68 @@ holds at the straight side edges. The case is modelled to the hull, never to tha
 | Shell bottom rim / plate underside, inner edge | -16.00 |
 
 **Specify the two edge heights, not the angle: 16.00mm inner, 12.00mm outer.** Over the
-167.00mm shell that is 1.3721 deg, but the angle is derived. If the wall thickness
+165.00mm shell that is 1.3887 deg, but the angle is derived. If the wall thickness
 changes, the case width changes with it and the angle follows while the heights stay put.
 
 The bottom slopes, so the last two rows are at the inner edge; at the outer edge the rim
-is at -12.00. Usable cavity below the PCB runs **6.82mm at the inner edge to 2.98mm at the
+is at -12.00. Usable cavity below the PCB runs **6.84mm at the inner edge to 2.96mm at the
 outer**, measured at the board edges rather than the shell's.
 
-**What the taper costs.** 1.3721 deg is not a working tent angle, so the slope is there for
+**What the taper costs.** 1.3887 deg is not a working tent angle, so the slope is there for
 the look, and it buys that at the price of three standoff heights, two screw lengths, and
 putting the tightest clearance in the design on the shallow side. A flat 15.50mm case would
 give the Liatris +1.00, the jack +1.20 and the socket +4.55 with one standoff height and
-one screw length. Recorded so the trade is visible, not as a proposal.
+one screw length.
 
 ## Parameters
 
 | Parameter                        | Value                                   | Source                                                                                  |
 | -------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
-| Wall thickness                   | 3.00                                    | decision                                                                                |
+| Wall thickness                   | 2.00                                    | decision; see below                                                                     |
 | Top thickness                    | 3.00                                    | decision                                                                                |
 | Switch recess depth              | 1.50                                    | nesting                                                                                 |
 | Plate at a switch cutout         | 1.50                                    | MX standard, 1.5mm +-0.1mm                                                              |
 | Bottom plate                     | 1.50                                    | takes the flat head's full height                                                       |
 | Board pocket                     | 161.00 x 120.00                         | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
-| Shell outer profile              | 167.00 x 126.00                         | pocket + wall                                                                           |
+| Shell outer profile              | 165.00 x 124.00                         | pocket + wall                                                                           |
 | Boss and standoff diameter       | 5.50                                    | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
 | Boss height                      | 3.00                                    | top underside to PCB                                                                    |
 | Material above the PCB at a boss | 6.00                                    | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
-| Insert hole, printed             | 3.60 dia                                | M2.5 melt diameter; depth is per boss, see below                                        |
-| Tapped hole, machined            | 2.05 tap drill, M2.5x0.45               | same per-boss depths                                                                    |
+| Insert hole, printed             | 3.60 dia                                | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
+| Tapped hole, machined            | 2.05 tap drill, M2.5x0.45               | same 4.00 depth                                                                         |
 | Screw                            | M2.5 button head, ISO 7380              | head 4.70 dia x 1.50, **flat underside**; two lengths, see below                        |
 | Screw clearance hole             | 2.90 dia                                | through the plate and the standoff                                                      |
 | Counterbore in the plate         | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base                                                 |
-| Perimeter shelf, on the shell    | 2.00 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.50, inside its 2.00 keepout ring |
-| Perimeter wall, on the plate     | 2.00 wide, top at -7.60                 | meets the shelf through the board, lapping it by 1.65                                   |
-| Wall relief                      | none inward of x +-50.00 above y +45.00 | the MCU, the jack and both ports are there                                              |
-| Flared standoff base             | 8.00 dia, up to -9.75                   | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
+| Perimeter shelf, on the shell    | 1.75 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
+| Perimeter wall, on the plate     | 1.55 wide, top at -7.60                 | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
+| Wall relief                      | top band ends at x +-51.75              | the USB plug's path and the jack are past it; the inner wall runs the full height       |
+| Flared standoff base             | 8.00 dia, up to -10.35                  | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
 | Switch cutout / recess           | 14.50 / 16.00, R1.00 corners            | see below                                                                               |
-| Top outer edge bezel             | 1.00 x 45 deg                           | one chamfer pass; the switch recesses stay square                                       |
+| Top outer edge fillet            | R1.00                                   | one corner-rounding pass; the switch recesses stay square                               |
+| Kink, the re-entrant corner      | R2.50 outside, R2.00 inside             | each loop's own corner radius; for looks                                                |
 
-**The wall stops short of the top-inner corner.** Everything hanging below the board is
-there, the MCU and the jack, and so are both ports. A wall running the full perimeter sits
-on the jack's body and blocks both plugs.
+**The wall is 2.00 so a TRRS plug seats.** The jack's barrel stands 2.00 past the board
+edge, 1.50 into the wall, which leaves its mouth 0.50 behind the case face; a 3.00 wall
+leaves it 1.50 behind. A cable whose overmold is wider than the 5.50 opening stops at the
+face, so that distance comes straight off the plug's travel into the jack. Stiffness does
+not need more: 2.00 is five perimeters printed, and the top face and the clamped board
+carry the shell.
+
+**The wall's top band stops short of the top-inner corner.** Past x 51.75 the top edge
+carries the USB plug's path and the jack's body, so a band running on would block the USB
+plug and sit on the jack. The inner wall runs the full height to the corner, 1.00 clear of
+the jack's body in plan.
 
 **The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
 without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
 mm2 per boss: the head bears on the standoff and the plate hangs off that ring, which on an
 FDM part is under one extrusion width. Flaring the base to 8.00 makes it 1.50mm and 30.63
-mm2, seven times the area. The built v4 lid uses 8.00 as well.
+mm2, seven times the area.
 
 **Height is what constrains a flare, not diameter.** It stops under the hotswap sockets
 hanging 1.85 below the board, and every pad it would otherwise have to dodge is above it,
-so the 2.04mm inner-pinky pad clearance that caps the standoff does not cap this. Stopping
-at -9.75 leaves 0.30 to the sockets. Do not let it reach them: that clearance is the only
-thing between the flare and a part.
+so the 2.04mm inner-boss pad clearance that caps the standoff does not cap this. It stops
+2.75 below the board underside, at -10.35, which leaves 0.90 to the sockets.
 
 **The 14.50 cutout is not slack.** An internal corner rounds _into_ the void, so an R1.00
 corner cut into a 14.00 hole would bind a switch by 0.207mm. At 14.50 it clears by 0.146mm
@@ -230,13 +223,15 @@ not by this hole.
 
 ### Screw bosses
 
-Left half, from the outline centre. The right half is the exact mirror (negate x).
+Left half, from the outline centre. The right half is the exact mirror (negate x). Outer
+and inner name the board edge each boss is nearer, as in the config's `screw_left_outer`,
+`screw_left_inner` and `screw_left_center` zones.
 
-| Boss        | Position          | Standoff height | Standoff + PCB | Bore depth | Screw   | Engagement |
-| ----------- | ----------------- | --------------- | -------------- | ---------- | ------- | ---------- |
-| Outer pinky | (-42.375, -3.650) | 3.88            | 5.48           | 5.00       | M2.5x10 | 4.52       |
-| Inner pinky | (33.825, 0.050)   | 5.71            | 7.31           | **4.00**   | M2.5x11 | 3.69       |
-| Centre      | (-3.325, 22.175)  | 4.82            | 6.42           | **4.00**   | M2.5x10 | 3.58       |
+| Boss   | Position          | Standoff height | Standoff + PCB | Bore depth | Screw   | Engagement |
+| ------ | ----------------- | --------------- | -------------- | ---------- | ------- | ---------- |
+| Outer  | (-42.375, -3.650) | 3.87            | 5.47           | 4.00       | M2.5x8  | 2.53       |
+| Inner  | (33.825, 0.050)   | 5.72            | 7.32           | 4.00       | M2.5x10 | 2.68       |
+| Centre | (-3.325, 22.175)  | 4.82            | 6.42           | 4.00       | M2.5x10 | 3.58       |
 
 **The plate is not in the stack.** A flat-underside head bears on the counterbore floor,
 which is the standoff's base, and its length is measured from there. A countersunk head
@@ -249,28 +244,29 @@ on the standoff, so grow the standoff if you go that way. Head height decides fl
 only: 1.50 finishes level with the plate, 1.70 stands 0.20 proud, and neither affects the
 screw length, since that is measured under the head.
 
-The outer pair sits 3.70mm apart in y. That is forced: the pinky columns are asymmetric,
-so the two screws cannot share a y while clearing both switch holes and pads. Do not level
-them.
+The outer and inner bosses sit 3.70mm apart in y. That is forced: the pinky columns are
+asymmetric, so the two screws cannot share a y while clearing both switch holes and pads.
+Do not level them.
 
-**Two bosses take a 4.00 bore, not 5.00.** A 16.00 switch recess overlaps the inner-pinky
-and centre bosses, so the material above them is 1.50 (top left over the recess) + 3.00
-(boss) = 4.50, not 6.00. A 5.00 bore breaks out into the recess floor:
+**Every bore is 4.00 deep.** A 16.00 switch recess overlaps the inner and centre bosses,
+so the material above them is 1.50 (top left over the recess) + 3.00 (boss) = 4.50, not
+6.00, and a 5.00 bore breaks out into the recess floor. A 4.00 bore stops at z -2.00, 0.50
+below the recess floor, so no recess reaches it on any boss of either half:
 
-| Boss        | Recess edge from the boss axis | 1.80 bore radius | Breakout      |
-| ----------- | ------------------------------ | ---------------- | ------------- |
-| Inner pinky | 1.745                          | 1.80             | 0.88 x 0.06mm |
-| Centre      | 1.695                          | 1.80             | 1.21 x 0.11mm |
+| Boss   | Recess edge from the boss axis | 1.80 bore radius | Breakout      |
+| ------ | ------------------------------ | ---------------- | ------------- |
+| Inner  | 1.745                          | 1.80             | 0.88 x 0.06mm |
+| Centre | 1.695                          | 1.80             | 1.21 x 0.11mm |
 
 The placement rule holds the boss clear of the 14.50 **hole** (tangent on both halves at
 these two), which is what stops the boss fouling the switch body. It says nothing about the
 16.00 **recess** above, which is what the bore has to miss.
 
 **The bosses mirror; the key field they sit in does not.** On the right half a recess also
-clips the outer-pinky boss, putting its recess edge 2.25mm from the bore axis against a
-1.80 bore radius. That is 0.45mm of wall over the bore's top 0.50mm, where the left half
-has 1.12mm. No breakout either way, so the 5.00 bore stands, but do not read the table's
-"exact mirror" as covering what surrounds them, and see the printed-insert risk below.
+clips the outer boss, putting its recess edge 2.25mm from the bore axis against a 1.80
+bore radius. The left half's outer boss has no recess over it and could take a deeper
+bore, but on the right half that would leave 0.45mm of wall beside the recess. Do not read
+the table's "exact mirror" as covering what surrounds them.
 
 `gen-case.py` hard-errors on a bore that reaches the recess band without clearing the
 recess wall, so this table cannot go stale against the key field. Readback cannot cover
@@ -278,30 +274,37 @@ it: a breakout trims the bore's face without splitting it or changing its height
 depth check and the face census both pass a shell that has one.
 
 **The standoffs are three different heights** because the plate is sloped, so the three
-screws see stacks from 5.48 to 7.31mm. Two lengths cover it, as tabulated: every screw
-takes at least 3.00mm of thread and none bottoms in its bore. Do not try to absorb the
+screws see stacks from 5.47 to 7.32mm. Two lengths cover it, as tabulated: every screw
+takes at least 2.50mm of thread, one screw diameter, and none bottoms in its bore. Do not try to absorb the
 spread in the counterbore: it is 1.50 deep and the head is 1.50 tall, so there is no depth
 to give.
 
-**Clearance to the nearest side-B pad**: 3.54mm outer pinky, **2.04mm inner pinky**,
+**Clearance to the nearest side-B pad**: 3.54mm outer, **2.04mm inner**,
 3.98mm centre. Those are measured to the pads, and the Kailh socket body is larger than
-its lands, so the real gap at the inner pinky is smaller by an unknown amount. That is why
+its lands, so the real gap at the inner boss is smaller by an unknown amount. That is why
 the standoff is 5.50 and not larger.
 
 ### Ports, on the top edge
 
-| Feature                             | Position                                              |
-| ----------------------------------- | ----------------------------------------------------- |
-| USB-C notch, already in the outline | x +56.663 .. +66.663, cut 7.271mm down from y +59.500 |
-| TRRS jack centre                    | (74.650, 59.500)                                      |
+| Feature                             | Position                                              | Relative to                                    |
+| ----------------------------------- | ----------------------------------------------------- | ---------------------------------------------- |
+| USB-C notch, already in the outline | x +56.663 .. +66.663, cut 7.271mm down from y +59.500 | centred on the Liatris, x +61.663              |
+| TRRS jack centre                    | (74.650, 59.500)                                      | 12.987 toward the inner edge from notch centre |
 
-**Both parts mount on side B, so both openings sit entirely below the PCB.** Neither is
-anywhere near the z=-6.00 board plane, which is the mistake to avoid.
+**Model both openings from the notch, not from the frame.** The config places the notch at
+`mcu_reset_x - 0.127` and the jack at `mcu_reset_x + 12.860`, so the 12.987 between them
+holds wherever the MCU column moves.
 
-| Opening                 | Size            | Centre z   | Source                                                                |
-| ----------------------- | --------------- | ---------- | --------------------------------------------------------------------- |
-| TRRS, round             | 5.50 dia        | **-10.50** | measured off the built v4 case                                        |
-| USB-C, through the wall | 9.50 w x 4.00 h | **-10.25** | measured on a printed part of this design; width is stated, see below |
+**Both parts mount on side B, so both openings sit entirely below the PCB.**
+
+| Opening     | Size            | Centre z   | Below the board underside | Source                                                                |
+| ----------- | --------------- | ---------- | ------------------------- | --------------------------------------------------------------------- |
+| TRRS, round | 5.50 dia        | **-10.50** | 2.90                      | measured off the built v4 case                                        |
+| USB-C, slot | 9.50 w x 4.00 h | **-10.25** | 2.65                      | measured on a printed part of this design; width is stated, see below |
+
+**The USB opening is a slot, R2.00 at both ends.** A USB-C plug shell is rounded the same
+way, and an end mill cutting through the wall from the side cannot make a rectangle's
+internal corners.
 
 **The heights are measured, never derived.** The built v4 case shares this z stack exactly
 (top face 0, top underside -3.00, PCB -6.00 to -7.60), so its port centres transfer
@@ -326,7 +329,7 @@ which is the screws and not the pocket: a 2.5mm screw in a 3.00mm hole is 0.25 p
 whatever the pocket fit is. Deriving the width from the pocket clearance would shrink the
 port every time the pocket was loosened, which is the wrong direction.
 
-Wall left below each opening: 2.54mm at the TRRS, 3.23mm at the USB. The TRRS is thin
+Wall left below each opening: 2.56mm at the TRRS, 3.25mm at the USB. The TRRS is thin
 enough that a printed shell wants an extra perimeter there.
 
 **Nothing in the case follows the board's USB notch.** Not the outer profile, not the
@@ -343,22 +346,21 @@ Several figures below the board come from memory or from the previous case. With
 board in hand, measure these before modelling. Where a measurement differs, change the
 parameter here and in `gen-case.py`, then re-run it so its guards see the new value.
 
-| Measure, on the assembled board                                   | Sheet assumes | Decides                                                         |
-| ----------------------------------------------------------------- | ------------- | --------------------------------------------------------------- |
-| Board thickness                                                   | 1.60          | every z below the board; whether the plate sits flush           |
-| Board underside to the lowest point of the installed MCU          | 5.40          | the binding margin; see "MCU seating" under Open risks          |
-| Board underside to the bottom of a hotswap socket                 | 1.85          | where the standoff flare stops (z -9.75)                        |
-| Board underside to the bottom of the TRRS jack body               | 5.20          | jack margin                                                     |
-| Board underside to the USB-C receptacle centre                    | 2.65          | USB opening centre, z -10.25                                    |
-| Board underside to the TRRS bore centre                           | 2.90          | TRRS opening centre, z -10.50                                   |
-| Board top to the plate-bearing shoulder of a seated switch        | 4.50          | recess depth; see "Switch seating" under Open risks             |
-| Kailh socket body edge to the right half's inner-pinky screw hole | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
-| Switch top housing width                                          | 15.60         | the 16.00 recess fit                                            |
-| Plug shell width, and overmold size of the cables you will use    | 8.34          | USB opening width; whether the outer-face counterbore is needed |
+| Measure, on the assembled board                                | Sheet assumes | Decides                                                         |
+| -------------------------------------------------------------- | ------------- | --------------------------------------------------------------- |
+| Board thickness                                                | 1.60          | every z below the board; whether the plate sits flush           |
+| Board underside to the lowest point of the installed MCU       | 5.40          | the binding margin; see "MCU seating" under Open risks          |
+| Board underside to the bottom of a hotswap socket              | 1.85          | the 0.90 between the sockets and the standoff flares            |
+| Board underside to the bottom of the TRRS jack body            | 5.20          | jack margin                                                     |
+| Board underside to the USB-C receptacle centre                 | 2.65          | USB opening centre, z -10.25                                    |
+| Board underside to the TRRS bore centre                        | 2.90          | TRRS opening centre, z -10.50                                   |
+| Board top to the plate-bearing shoulder of a seated switch     | 4.50          | recess depth; see "Switch seating" under Open risks             |
+| Kailh socket body edge to the right half's inner screw hole    | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
+| Switch top housing width                                       | 15.60         | the 16.00 recess fit                                            |
+| Plug shell width, and overmold size of the cables you will use | 8.34          | USB opening width; whether the outer-face counterbore is needed |
 
 A port centre measured from the board underside sets the opening's z as -7.60 less that
-figure (on a 1.60 board). That is a measurement off this board, which is what "measured,
-never derived" asks for.
+figure (on a 1.60 board).
 
 ## Modelling in Onshape
 
@@ -371,28 +373,31 @@ features. "Left" and "Right" each bring in Body with a Derived feature, "Right" 
 about the Right plane, and each then cuts its own switch recesses and cutouts from its own
 half of the DXF. The body mirrors exactly; the key field does not (see Right half).
 
-Traps, each geometric rather than specific to `gen-case.py`, so they apply in Onshape too:
+Traps:
 
 - **Fill the USB notch in the hull before any offset.** Every loop below is offset from the
   notch-filled hull. See Ports for why nothing follows the notch.
 - **Offset each loop from the hull, never from another offset loop.** The cavity loop's
-  corners are R2.00. Offsetting it inward 2.00 for the shelf collapses those arcs to zero
-  radius and the feature fails. The shelf's inner loop is the hull inset 1.50 and the plate
-  wall's is the hull inset 1.65, each with its own corners rounded at R2.00.
-- **The one exception is the plate outline**, which is the finished cavity loop inset 0.15,
-  so its R1.85 corners match the pocket it drops into.
-- **Round only the cavity's internal corners.** The hull has five convex corners and one
-  re-entrant one. A tool rounds the five at its radius and leaves the re-entrant corner
-  sharp, so fillet the five and leave the sixth alone.
+  corners are R2.00. Offsetting it inward 1.75 for either ring leaves R0.25 corners where
+  R2.00 is meant. The shelf's inner loop is the hull inset 1.25 and so is the plate
+  wall's, each with its own corners rounded at R2.00.
+- **The one exception is the plate outline**, which is the finished cavity loop inset 0.20,
+  so it matches the pocket it drops into. The inset leaves its five convex corners at
+  R1.80: fillet them back to R2.00, the design's minimum corner radius.
+- **Round all six corners of every loop, each at its loop's own radius.** The hull has
+  five convex corners and one re-entrant one, the kink where the thumb cluster meets the
+  main field. The kink is rounded for looks, R2.50 outside and R2.00 inside, so the wall
+  stays about 2.00 thick through it. Outside the arc adds wall and inside it trims a point of wall, so
+  neither reaches the board.
 - **One construction plane for the slope**, through z -16.00 at the inner shell edge and
-  z -12.00 at the outer (x +83.50 and -83.50 on the left half). The shell's bottom cut,
+  z -12.00 at the outer (x +82.50 and -82.50 on the left half). The shell's bottom cut,
   both plate faces (that plane and a 1.50 offset) and every standoff's lower end reference
   it.
 - **Sketch plate holes on a horizontal plane.** Onshape's Hole feature drills normal to its
-  sketch plane, so a hole sketched on the sloped plate face comes out tilted 1.37 deg and
-  its counterbore floor is no longer square to the screw. The relief pocket and bumper
-  recesses are the opposite: sketch them on the plate's own faces so their floors run
-  parallel to it.
+  sketch plane, so a hole sketched on the sloped plate face comes out tilted 1.39 deg and
+  its counterbore floor is no longer square to the screw. The relief pocket's floor is
+  horizontal too. The bumper recesses are the opposite: sketch them on the plate's outer
+  face so their floors run parallel to it.
 - **Extend port cuts past both wall faces.** A cut ending exactly on a face leaves
   coincident faces and a non-manifold solid.
 - **Cut switch features straight from the imported curves**, not redrawn. They carry the
@@ -456,57 +461,64 @@ differ.
    edit it should take.
 2. **Sketch "Hull"**, the left-half outline with the USB notch closed by a straight line
    along the top edge. Every offset below starts from this loop.
-3. **Extrude "Shell body"**, Hull offset outward **3.50mm** (clearance + wall), from z 0
+3. **Extrude "Shell body"**, Hull offset outward **2.50mm** (clearance + wall), from z 0
    down past z -16.00, then cut away everything below the slope plane. The bottom rim lands
    at **-16.00 at the inner edge and -12.00 at the outer**.
 4. **Extrude cut "Cavity"**, Hull offset outward **0.50mm**, from **z -3.00** down through
-   the open bottom. Fillet its five internal vertical corners at **2.0mm, 3.20mm maximum**.
-5. **Extrude "Shelf"**, the ring between the cavity loop and Hull inset **1.50mm** (corners
+   the open bottom. Fillet its five internal vertical corners at **2.0mm**.
+5. **Extrude "Shelf"**, the ring between the cavity loop and Hull inset **1.25mm** (corners
    R2.00), from **z -3.00 down to -6.00**. The board is pressed up against its underside.
 6. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
    extruded down **3.00mm** to the PCB top face.
 7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
-   **to the per-boss depth in the boss table**: 5.00 outer pinky, 4.00 the other two.
+   **4.00 deep** at every boss.
 8. **Port openings** cut straight through the side wall, overshooting both faces.
-9. **Bezel**, 1.00 x 45 deg on the top face's outer edge only.
+9. **Top edge fillet**, R1.00 on the top face's outer edge only.
 
 In the Left and Right studios, after the Derived (and, on the right, the Mirror):
 
 1. **Extrude cut "Switch recesses"**, the 16.0mm curves from the import, top face down to
    **z -1.50**.
 2. **Extrude cut "Switch cutouts"**, the 14.5mm curves from the import, through the
-   remaining 1.50mm. Cut both sets **as imported**. The recess openings get no bezel:
+   remaining 1.50mm. Cut both sets **as imported**. The recess openings get no fillet:
    the nesting look depends on the switch meeting a crisp edge.
 
 ## Part B: bottom plate
 
-1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.15mm**, **1.50mm**
-   thick, between the slope plane and its 1.50 offset, flush with the rim.
-2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.65mm**
-   (corners R2.00), from the plate's top face up to **z -7.60**. Remove it over
-   **x > +50.00 and y > +45.00**, the top-inner corner.
+1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.20mm**, its five convex
+   corners filleted back to **R2.00**, **1.50mm** thick, between the slope plane and its
+   1.50 offset, flush with the rim.
+2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.25mm**
+   (corners R2.00), from the plate's top face up to **z -7.60**. Remove the top band
+   over **x > +51.75**, out to the inner wall's inner face; the inner wall stays full
+   height to the corner.
 3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
-   the plate up to **z -9.75**.
+   the plate up to **z -10.35**, 2.75 below the board underside.
 4. **Screw holes**, 2.90 dia, through the plate and up the full height of each standoff
    to z -7.60, so the screw passes through the standoff and the PCB into the boss's
    insert. Each has a flat-bottomed 5.00 counterbore through the plate's full 1.50mm,
    sketched on a horizontal plane. The counterbore's floor is the flare's base, so the
    standoff keeps its height.
-5. **Relief pocket**, on the inner face, **0.75mm deep**, one plain rectangle over
-   x **+50.25 .. +77.60**, y **+23.35 .. +58.60**. Leaves 0.75mm of plate.
+5. **Relief pocket**, on the inner face, one rectangle with **R2.00** corners over
+   x **+51.75 .. +78.75**, y **+24.80 .. +58.25**. Its floor is **horizontal**, level with
+   the plate's top face at x +78.75 (z -14.41), so it is 0.65 deep at x +51.75 and leaves
+   0.85mm of plate there.
 6. **Bumper recesses**, 8.00 dia x 0.50 deep on the outer face at (-70, +50), (+45, +50),
    (-70, -32), (+65, -50). Floor **parallel to the plate faces**, so the depth is 0.50 and
    the plate left is 1.00 right across every foot. All are well clear of the three screw
    heads.
 
-**Only the screw counterbore has a horizontal floor.** The plate is a parallel-sided slab
-lying at 1.3721 deg, so "flat" and "level" are different instructions here and each feature
-has to say which it means. The counterbore means level: the screw axis is vertical and a
-flat head seats square to its own axis, so its floor is horizontal and its depth below the
-outer face therefore varies 1.447 to 1.553 across its width. Every other feature means
-parallel to the faces. A bumper recess cut level instead would run 0.417 to 0.585 deep and
-leave 1.084 to 0.916 of plate, different at each edge of every foot.
+**Two features have horizontal floors: the screw counterbore and the relief pocket.** The
+plate is a parallel-sided slab lying at 1.3887 deg, so "flat" and "level" are different
+instructions here and each feature has to say which it means. The counterbore means level:
+the screw axis is vertical and a flat head seats square to its own axis, so its floor is
+horizontal and its depth below the outer face therefore varies 1.439 to 1.561 across its
+width. The relief pocket means level so its floor runs parallel to the Liatris, giving the
+module the same clearance along its whole length. On a mill that floor is inclined to the
+plate's faces, so it takes a surfacing pass or a 1.39 deg tilt rather than a plain pocket.
+Every other feature means parallel to the faces. A bumper recess cut level instead would run 0.403 to 0.597 deep and
+leave 1.097 to 0.903 of plate, different at each edge of every foot.
 
 **Keep every bumper out of the relief pocket.** The two cut opposite faces, so an overlap
 leaves 0.25mm of plate, and leaves it directly under the parts the relief is there for.
@@ -515,40 +527,39 @@ the top-edge bumper sits at x +45.00 rather than out at +70.00 with its opposite
 `gen-case.py` hard-errors on an overlap; readback cannot see one, since both features are
 present, the right size, at the right depth, and the plate is still one closed solid.
 
-**The relief pocket is not optional on an aluminium plate.** The MCU stack has +0.77mm of
-nominal clearance and +0.03mm if the module bottoms out in its sockets, and the plate would
-be a conductor that close to exposed pin tails. The pocket takes the worst case to +1.52mm
-and costs nothing to machine in the same setup.
+**The relief pocket is not optional on an aluminium plate.** The MCU stack has +0.78mm of
+nominal clearance and +0.04mm if the module bottoms out in its sockets, and the plate would
+be a conductor that close to exposed pin tails. The pocket takes those to +1.40mm and
++0.66mm.
 
 **One rectangle, covering the Liatris and the jack together**, rather than a pocket each
 with an island between them: it is meant to be lined with tape, and a plain rectangle takes
 a strip.
 
 **The margin around the parts is one-sided, and has to be.** Inward the pocket runs over
-bare board and carries 2.58 in x and 3.00 in y, comfortably past the 0.71 the pocket allows
-in y, which is the widest the board can sit off centre at any point in assembly, so a part
-cannot end up standing over full-thickness plate. Outward there is nowhere to buffer into,
-because both parts run out to the board's own top edge and the plate ends 0.35 past it.
-Every limit here is set by the plate, not by the parts:
+bare board and carries 1.03 in x and 1.48 in y, past the 0.71 the pocket allows in y,
+which is the widest the board can sit off centre at any point in assembly, so a part cannot
+end up standing over full-thickness plate. Outward there is nowhere to buffer into,
+because both parts run out to the board's own top edge and the plate ends 0.30 past it.
+Every outward limit is set by the plate, not by the parts:
 
-| Edge     | Limit                        | Set by                                                                                          |
-| -------- | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| x +50.25 | 2.58 clear of the Liatris    | the top perimeter wall survives inboard of x +50.00, and a pocket at its foot would undercut it |
-| y +23.35 | 3.00 clear of the Liatris    | free; nothing is near                                                                           |
-| x +77.60 | 0.18 short of the jack body  | the perimeter wall runs at 78.35 below y 45, same undercut                                      |
-| y +58.60 | 0.90 short of the board edge | a 1.25 rim at the plate edge                                                                    |
+| Edge     | Limit                        | Set by                                                                                  |
+| -------- | ---------------------------- | --------------------------------------------------------------------------------------- |
+| x +51.75 | 1.03 clear of the Liatris    | where the wall's top band ends; the pocket's R2.00 corner pulls it off the band's end   |
+| y +24.80 | 1.48 clear of the Liatris    | free; nothing below it needs the pocket                                                 |
+| x +78.75 | 1.00 past the jack body      | the inner wall's face, where the floor meets the plate's top face: no depth at its foot |
+| y +58.25 | 1.42 short of the jack's end | the band's inner face; a 1.55 rim at the plate edge                                     |
 
-**The wall is what bounds the pocket on three sides.** It is half the board's clamp and it
+**The pocket must stay off the wall's foot.** The wall is half the board's clamp and it
 stands on the plate's full thickness, so a pocket reaching its foot thins the root. That
 undercut is invisible to a solid intersection test, since the wall rises from the plate's
 top face while the pocket cuts down from it and the two touch without sharing volume;
 `gen-case.py` tests the footprints instead, and hard-errors.
 
-**Neither shortfall is a clearance problem.** Under the uncovered sliver of jack body the
-plate is still 1.42 away, and under the uncovered top strip the Liatris is 3.76 away, its
-pin tails having ended well below at y 56.54. Both are larger than the 0.75 the pocket
-would add. Widening either means thinning the rim or stepping the pocket, which buys
-fractions of a millimetre where there are already millimetres.
+**The uncovered end of the jack is not a clearance problem.** From y 58.25 to its end at
+59.67 the jack stands over full-thickness plate at +1.43, its figure in the Clearances
+table. Widening the pocket means thinning the 1.55 rim, which buys fractions of a
+millimetre where there is already more than one.
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate;
 access is by removing it, so no holes are needed.
@@ -567,7 +578,7 @@ counterpart, so a mirrored key field is the wrong key field.
 ## Assembly
 
 **Switches go into the shell first, then the board goes on.** A 15.6mm top housing cannot
-pass a 14.5mm hole from below, so there is no other order: clip all 30 (or 32) switches
+pass a 14.5mm hole from below. Clip all 30 (or 32) switches
 into the shell's top face from the outside, then bring the board up into the cavity onto
 every socket at once.
 
@@ -613,10 +624,14 @@ Top face down. The first layer is the top face with its 16mm openings; at 1.50mm
 opening steps in to 14.5mm, a 0.75mm inward overhang per side that bridges without
 support. Walls, bosses and standoffs rise from there, so nothing else overhangs.
 
+**The top edge fillet is the first layers' outer edge.** Its overhang starts almost flat at
+the bed and steepens over the first 1.00mm, so those layers droop slightly at the very
+edge. Slow the first layers and run full cooling from layer two.
+
 **Expect the printed recesses to need opening up.** 16.00 on a 15.60 switch is 0.20 per
 side and FDM holes come out 0.1-0.3mm under, so plan on 16.2-16.4 for the print while the
 machined part keeps 16.00. Print a three-switch coupon and settle it before committing a
-whole shell. The same goes for the plate's 0.15mm fit clearance.
+whole shell. The same goes for the plate's 0.20mm fit clearance.
 
 The port openings are holes in a vertical wall, so their top edges bridge. Chamfer or
 teardrop them if they sag.
@@ -625,9 +640,9 @@ teardrop them if they sag.
 
 | Item                       | Available                         | Needs | Margin                           |
 | -------------------------- | --------------------------------- | ----- | -------------------------------- |
-| **Liatris**                | 6.17, 6.92 over the relief pocket | 5.40  | +0.77, **+1.52** with the pocket |
-| Hotswap socket, right half | 3.07                              | 1.85  | +1.22                            |
-| TRRS jack                  | 6.62                              | 5.20  | +1.42                            |
+| **Liatris**                | 6.18, 6.80 over the relief pocket | 5.40  | +0.78, **+1.40** with the pocket |
+| Hotswap socket, right half | 3.05                              | 1.85  | +1.20                            |
+| TRRS jack                  | 6.63                              | 5.20  | +1.43                            |
 
 Everything tall mounts on side B, so the 3.00mm above the PCB only has to clear the
 switches and the whole height question is below the board.
@@ -646,7 +661,7 @@ inner column puts a socket land 3.68mm from the outer board edge against the lef
 16.73mm, so the outer edge height bites there first.
 
 **Span costs more than height on a sloped floor.** Read a part's clearance at its
-outermost extent, not its innermost: that is where the floor has risen furthest. The MCU
+outermost extent: that is where the floor has risen furthest. The MCU
 is shorter than the jack but reaches 27.22mm in from the inner edge against the jack's
 8.45mm, so it loses three times as much depth to the slope and is the binding part.
 
@@ -668,7 +683,7 @@ The 1.50 recess is a deliberate choice for a 1.50mm switch plate, not a carry-ov
 **Deeper is the safe direction**: too deep and the switch seats on the plate with its base
 floating clear; too shallow and the base hits the PCB before the shoulder reaches the
 recess floor, so the switch sits proud. 4.50 is therefore 0.25 to the safe side of a case
-that works, which is the reassuring direction to be wrong in. Whether Cherry's 5mm is to
+that works. Whether Cherry's 5mm is to
 the plate's top or bottom face could not be established; the datasheet drawings are raster
 images. **The built board settles it**: measure the shoulder height on a seated switch (see
 Measure the built board first).
@@ -680,24 +695,18 @@ case height rather than moving the board. Seating also decides where typing load
 switch that seats on the recess floor puts it into the shell, and one that bottoms on the
 PCB puts it into a board whose three screws all sit between y -3.65 and +22.18.
 
-**MCU seating.** The +0.77mm assumes the module's 4.75mm pin tail passes through the
+**MCU seating.** The +0.78mm assumes the module's 4.75mm pin tail passes through the
 4.01mm of socket and board bore and stands proud above the main PCB. If it bottoms out the
-MCU seats 0.74mm lower and the margin is +0.03mm. **The built board settles it**: 5.40 from
+MCU seats 0.74mm lower and the margin is +0.04mm. **The built board settles it**: 5.40 from
 the main board's underside to the lowest point of the MCU means it seated.
 
-**Hotswap socket height.** 1.85mm is from memory, not a datasheet. It has +1.22mm of
-margin to the plate, so it is unlikely to bite there, but it also sets where the standoff
-flare stops, which has only 0.30. Measure it on the built board.
+**Hotswap socket height.** 1.85mm is from memory, not a datasheet. It has +1.20mm of
+margin to the plate and +0.90 to the standoff flares, so it is unlikely to bite. Measure
+it on the built board.
 
-**The right half's outer-pinky boss has a 0.45mm band of wall.** A recess clips that boss
-on the right half only, over the bore's top 0.50mm. Machined, 0.45mm of aluminium beside a
-tapped hole is fine. Printed, it is about one perimeter, thin enough that a slicer may drop
-it and leave the bore open to the recess, which is cosmetic rather than structural.
-
-**Seat every insert flush with the boss's lower face, not deeper.** A 4.00mm insert in the
-5.00 bore then ends 0.50 short of the band, so nothing is pressed against the thin wall.
-Driving one past flush is the way to blow it out. **Check it** on the right half's outer
-pinky first, before doing the other five.
+**Seat every insert flush with the boss's lower face.** A 4.00mm insert fills its 4.00
+bore, so one driven past flush bottoms against the top of the bore and pushes into what is
+above it: 0.50 of top face where a recess overlaps the boss.
 
 **The plate finishes flush by tolerance stack, not by a datum.** Its z is set by boss, PCB
 and standoff, so JLCPCB's +-10% on a 1.6mm board moves it +-0.16 against the rim and it can
@@ -712,19 +721,19 @@ The `FC_COMPARE` run holds your model to the reference everywhere it has not bee
 recorded as intentional, so these rows need checking by hand only where a recorded
 difference touches them:
 
-| Check                                   | Expected                                                        |
-| --------------------------------------- | --------------------------------------------------------------- |
-| Cavity loop size                        | 161.00 x 120.00                                                 |
-| Gap from cavity to board outline        | near-constant around the perimeter                              |
-| Board outline points outside the cavity | none                                                            |
-| Boss bore depths                        | 5.00 outer pinky, 4.00 the other two; none breaks into a recess |
-| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board                 |
-| Top edge in plan                        | straight across; no notch inherited from the board              |
-| Plate relief pocket                     | present, 0.75 deep, over the whole Liatris footprint            |
-| Plate under each bumper                 | 1.00; no bumper recess inside the relief pocket                 |
-| Relief pocket vs plate wall, in plan    | no overlap; the pocket stays inside the wall's relief           |
-| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                      |
-| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right     |
+| Check                                   | Expected                                                    |
+| --------------------------------------- | ----------------------------------------------------------- |
+| Cavity loop size                        | 161.00 x 120.00                                             |
+| Gap from cavity to board outline        | near-constant around the perimeter                          |
+| Board outline points outside the cavity | none                                                        |
+| Boss bore depths                        | 4.00 at every boss; none breaks into a recess               |
+| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board             |
+| Top edge in plan                        | straight across; no notch inherited from the board          |
+| Plate relief pocket                     | horizontal floor at z -14.41, over the whole Liatris        |
+| Plate under each bumper                 | 1.00; no bumper recess inside the relief pocket             |
+| Relief pocket vs plate wall, in plan    | no overlap with the wall's footprint                        |
+| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                  |
+| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right |
 
 A wide spread in that gap means the profile is not the outline. The bore, bumper and
 relief rows are the three defects a closed, correctly sized solid can still carry, so check

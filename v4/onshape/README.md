@@ -91,9 +91,10 @@ exactly this, so neither bears on a ground plane. Tracks are a different matter:
 ring is deliberately carved open over the TRRS so the jack's through-holes are not flagged,
 so the shelf can cross copper there, under soldermask.
 
-**The plate's wall stops short of the top-inner corner.** Everything that hangs below the
-board is there, the MCU and the jack, and so are both ports. A wall running the full
-perimeter would sit on the jack's body and block both plugs.
+**The plate wall's top band stops short of the top-inner corner.** The top edge there
+carries the USB plug's path and the jack's body, so a band running on would block the plug
+and sit on the jack. The inner wall runs the full height, beside the jack rather than
+under it.
 
 **Which side the shelf sits on decides whether it can be made.** Above the board, pressed up
 against, it narrows the opening going up and a mill reaches it from below without trouble.
@@ -104,11 +105,11 @@ goes in from below.
 ## Printed case (OrcaSlicer)
 
 - Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
-  layer and nothing needs support. The outer edge bezel is the one place the part flares
-  outward, shallowly enough to print unsupported. It does not move elephant's foot, since
-  the first layer IS the top face and its perimeter IS the visible top edge; what it does
-  is set that perimeter inboard of the widest section, so first-layer squish can no longer
-  stand proud of the outer profile.
+  layer and nothing needs support. The top edge fillet is the one place the part flares
+  outward; its first layers overhang almost flat and droop slightly at the very edge. It
+  does not move elephant's foot, since the first layer IS the top face and its perimeter
+  IS the visible top edge; what it does is set that perimeter inboard of the widest
+  section, so first-layer squish can no longer stand proud of the outer profile.
 - Mounting holes take heat-set inserts, so size them for the insert's melt diameter, not a
   tap.
 - **Expect the switch recesses to come out tight.** FDM holes shrink, and the recess locates
@@ -124,9 +125,9 @@ goes in from below.
 A mill removes material with a round tool. Every feature has to be reachable by a
 cylindrical end mill from one of the setups.
 
-1. **Internal corners carry the tool radius**, so the cavity's corners are specified as a
-   _maximum_ rather than a minimum: too large a tool leaves material where the board goes.
-   Do not let a shop substitute a bigger end mill.
+1. **Internal corners carry the tool radius**, so the cavity's corners are rounded to
+   match the board's own exterior fillet, leaving the same clearance at a corner as along
+   an edge.
 2. **No true internal cavities and no undercuts.** Cutting from below, a feature may narrow
    going up but never widen. A chamfer or rebate at the rim is fine; a lip under the board
    pocket is not.
@@ -134,14 +135,13 @@ cylindrical end mill from one of the setups.
    mill reaches from neither above nor below. A right-angle head folds it back into the
    first setup if the shop has one.
 4. **Model tapped holes at the tap drill**, without modelled threads, and put the thread
-   callout on a 2D PDF for JLCCNC. Every hole shares the thread spec, but the depths differ
-   where a switch recess overlaps a boss, so the callout has to give them per boss.
+   callout on a 2D PDF for JLCCNC. Every hole shares the thread spec and the depth, so one
+   callout covers all three.
 5. **Add clearance at the port openings.** CNC tolerance is tight, so a slip-fit modelled
    opening can come out too snug.
-6. **Chamfers over fillets on top edges**: a chamfer is one pass with a chamfer mill,
-   while a top-edge fillet needs a separate ball or profiling operation. The outer edge
-   bezel rides along in the setup that cuts the switch recesses, so it costs almost
-   nothing.
+6. **Round the top edge with a corner-rounding end mill**: one pass, where a ball end
+   mill would need a 3D contouring operation. It rides along in the setup that cuts the
+   switch recesses, so it costs almost nothing.
 7. **Prefer through holes to blind**, and keep pocket depth modest relative to tool
    diameter.
 
