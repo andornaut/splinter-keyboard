@@ -50,7 +50,7 @@ jobs:
       # version in npm_package_config_VERSION for it to read. It imports only
       # the standard library, so no dependency install is needed either side.
       - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .nvmrc
 
@@ -108,7 +108,7 @@ jobs:
           scandir: "."
 
       - name: Set up Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
