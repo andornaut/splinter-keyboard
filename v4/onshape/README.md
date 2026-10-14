@@ -109,7 +109,8 @@ goes in from below.
 
 - Print the shell top-face-down. Walls, bosses and standoffs then rise from a flat first
   layer and nothing needs support. The top edge fillet is the one place the part flares
-  outward; its first layers overhang almost flat and droop slightly at the very edge. It
+  outward; its first layers overhang almost flat and droop slightly at the very edge. The
+  bottom edge fillet is the last layers' outer edge and needs no care. It
   does not move elephant's foot, since the first layer IS the top face and its perimeter
   IS the visible top edge; what it does is set that perimeter inboard of the widest
   section, so first-layer squish can no longer stand proud of the outer profile.
@@ -142,9 +143,10 @@ cylindrical end mill from one of the setups.
    callout covers all three.
 5. **Add clearance at the port openings.** CNC tolerance is tight, so a slip-fit modelled
    opening can come out too snug.
-6. **Round the top edge with a corner-rounding end mill**: one pass, where a ball end
-   mill would need a 3D contouring operation. It rides along in the setup that cuts the
-   switch recesses, so it costs almost nothing.
+6. **Round the outer edges with a corner-rounding end mill**: one pass each, where a ball
+   end mill would need a 3D contouring operation. The top edge rides along in the setup
+   that cuts the switch recesses and the bottom edge in the one that cuts the cavity, so
+   they cost almost nothing.
 7. **Prefer through holes to blind**, and keep pocket depth modest relative to tool
    diameter.
 

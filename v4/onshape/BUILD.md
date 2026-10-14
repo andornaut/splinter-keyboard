@@ -74,13 +74,13 @@ wider at the open face, but it would thin the wall at the rim for nothing.
 
 ## Machining setups
 
-| Part  | Setup | From                   | Features                                      |
-| ----- | ----- | ---------------------- | --------------------------------------------- |
-| Shell | 1     | below                  | Outer profile, cavity, bosses, boss holes     |
-| Shell | 2     | above                  | The 16mm switch recesses, the top edge fillet |
-| Shell | 3     | the top edge (+y face) | TRRS and USB openings                         |
-| Plate | 1     | inner face             | Profile, standoffs, screw holes               |
-| Plate | 2     | outer face             | Counterbores, bumper recesses                 |
+| Part  | Setup | From                   | Features                                                          |
+| ----- | ----- | ---------------------- | ----------------------------------------------------------------- |
+| Shell | 1     | below                  | Outer profile, cavity, bosses, boss holes, the bottom edge fillet |
+| Shell | 2     | above                  | The 16mm switch recesses, the top edge fillet                     |
+| Shell | 3     | the top edge (+y face) | TRRS and USB openings                                             |
+| Plate | 1     | inner face             | Profile, standoffs, screw holes                                   |
+| Plate | 2     | outer face             | Counterbores, bumper recesses                                     |
 
 **Setup 3 is not optional.** Both ports are holes through a vertical wall, and a 3-axis
 mill reaches those from neither above nor below. A right-angle head folds it back into
@@ -173,30 +173,30 @@ one screw length.
 
 ## Parameters
 
-| Parameter                        | Value                                   | Source                                                                                  |
-| -------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
-| Wall thickness                   | 2.00                                    | decision; see below                                                                     |
-| Top thickness                    | 3.00                                    | decision                                                                                |
-| Switch recess depth              | 1.50                                    | nesting                                                                                 |
-| Plate at a switch cutout         | 1.50                                    | MX standard, 1.5mm +-0.1mm                                                              |
-| Bottom plate                     | 1.50                                    | takes the flat head's full height                                                       |
-| Board pocket                     | 161.00 x 120.00                         | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
-| Shell outer profile              | 165.00 x 124.00                         | pocket + wall                                                                           |
-| Boss and standoff diameter       | 5.50                                    | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
-| Boss height                      | 3.00                                    | top underside to PCB                                                                    |
-| Material above the PCB at a boss | 6.00                                    | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
-| Insert hole, printed             | 3.60 dia                                | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
-| Tapped hole, machined            | 2.05 tap drill, M2.5x0.45               | same 4.00 depth                                                                         |
-| Screw                            | M2.5 button head, ISO 7380              | head 4.70 dia x 1.50, **flat underside**; two lengths, see below                        |
-| Screw clearance hole             | 2.90 dia                                | through the plate and the standoff                                                      |
-| Counterbore in the plate         | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base                                                 |
-| Perimeter shelf, on the shell    | 1.75 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
-| Perimeter wall, on the plate     | 1.55 wide, top at -7.60                 | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
-| Wall relief                      | top band ends at x +-51.75              | the USB plug's path and the jack are past it; the inner wall runs the full height       |
-| Flared standoff base             | 8.00 dia, up to -10.35                  | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
-| Switch cutout / recess           | 14.50 / 16.00, R1.00 corners            | see below                                                                               |
-| Top outer edge fillet            | R1.00                                   | one corner-rounding pass; the switch recesses stay square                               |
-| Kink, the re-entrant corner      | R2.50 outside, R2.00 inside             | each loop's own corner radius; for looks                                                |
+| Parameter                          | Value                                   | Source                                                                                  |
+| ---------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
+| Wall thickness                     | 2.00                                    | decision; see below                                                                     |
+| Top thickness                      | 3.00                                    | decision                                                                                |
+| Switch recess depth                | 1.50                                    | nesting                                                                                 |
+| Plate at a switch cutout           | 1.50                                    | MX standard, 1.5mm +-0.1mm                                                              |
+| Bottom plate                       | 1.50                                    | takes the flat head's full height                                                       |
+| Board pocket                       | 161.00 x 120.00                         | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
+| Shell outer profile                | 165.00 x 124.00                         | pocket + wall                                                                           |
+| Boss and standoff diameter         | 5.50                                    | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
+| Boss height                        | 3.00                                    | top underside to PCB                                                                    |
+| Material above the PCB at a boss   | 6.00                                    | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
+| Insert hole, printed               | 3.60 dia                                | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
+| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45               | same 4.00 depth                                                                         |
+| Screw                              | M2.5 button head, ISO 7380              | head 4.70 dia x 1.50, **flat underside**; two lengths, see below                        |
+| Screw clearance hole               | 2.90 dia                                | through the plate and the standoff                                                      |
+| Counterbore in the plate           | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base                                                 |
+| Perimeter shelf, on the shell      | 1.75 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
+| Perimeter wall, on the plate       | 1.55 wide, top at -7.60                 | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
+| Wall relief                        | top band ends at x +-51.75              | the USB plug's path and the jack are past it; the inner wall runs the full height       |
+| Flared standoff base               | 8.00 dia, up to -10.35                  | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
+| Switch cutout / recess             | 14.50 / 16.00, R1.00 corners            | see below                                                                               |
+| Outer edge fillets, top and bottom | R1.00, one radius                       | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
+| Kink, the re-entrant corner        | R2.50 outside, R2.00 inside             | each loop's own corner radius; for looks                                                |
 
 **The wall is 2.00 so a TRRS plug seats.** The jack's barrel stands 2.00 past the board
 edge, 1.50 into the wall, which leaves its mouth 0.50 behind the case face; a 3.00 wall
@@ -483,7 +483,8 @@ differ.
 7. **Boss holes**, from each boss's lower face upward, 3.60 dia (or the 2.05 tap drill),
    **4.00 deep** at every boss.
 8. **Port openings** cut straight through the side wall, overshooting both faces.
-9. **Top edge fillet**, R1.00 on the top face's outer edge only.
+9. **Edge fillets**, R1.00 (one variable) on the top face's outer edge and on the bottom
+   rim's outer edge only.
 
 On each half, after the mirror, from that half's own curves:
 
@@ -590,7 +591,8 @@ support. Walls, bosses and standoffs rise from there, so nothing else overhangs.
 
 **The top edge fillet is the first layers' outer edge.** Its overhang starts almost flat at
 the bed and steepens over the first 1.00mm, so those layers droop slightly at the very
-edge. Slow the first layers and run full cooling from layer two.
+edge. Slow the first layers and run full cooling from layer two. The bottom edge fillet is
+the last layers' outer edge and prints as an ordinary sloping surface.
 
 **Expect the printed recesses to need opening up.** 16.00 on a 15.60 switch is 0.20 per
 side and FDM holes come out 0.1-0.3mm under, so plan on 16.2-16.4 for the print while the

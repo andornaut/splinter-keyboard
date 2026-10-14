@@ -83,7 +83,7 @@ H_INNER = 17.00
 H_OUTER = 13.00
 PLATE = 1.50
 CAVITY_FILLET = 2.00  # tool radius
-TOP_FILLET = 1.00  # where the top face meets the outer wall
+EDGE_FILLET = 1.00  # where the outer wall meets the top face, and where it meets the bottom rim
 # Hull vertices closer than this are one vertex the DXF happened to write twice.
 HULL_WELD = 1e-3
 # Hull vertices snap to this grid. The DXF writes the board's straight edges a few tenths of
@@ -451,20 +451,36 @@ def check_bores(recess, bosses):
             )
 
 
-def fillet_top(body, r):
-    """Fillet where the top face meets the outer wall.
-
-    Only the top face's OUTER wire: its inner wires are the switch recesses, which are
-    meant to stay square.
-    """
+def top_face(shell):
+    """The top face, at z=0."""
     tops = [
         f
-        for f in body.Faces
+        for f in shell.Faces
         if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.999 and abs(f.CenterOfMass.z) < 1e-6
     ]
-    if not tops:
-        raise SystemExit("FAIL gen-case: no top face to fillet")
-    return body.makeFillet(r, max(tops, key=lambda f: f.Area).OuterWire.Edges)
+    return max(tops, key=lambda f: f.Area, default=None)
+
+
+def rim_face(shell):
+    """The sloped bottom rim: the lowest flat ring, its inner wire the cavity's mouth."""
+    rims = [
+        f
+        for f in shell.Faces
+        if isinstance(f.Surface, Part.Plane) and abs(f.Surface.Axis.z) > 0.99 and len(f.Wires) > 1
+    ]
+    return min(rims, key=lambda f: f.CenterOfMass.z, default=None)
+
+
+def fillet_edges(body, r):
+    """Fillet the outer wall's top and bottom edges.
+
+    Only each face's OUTER wire: the top face's inner wires are the switch recesses, which
+    stay square, and the rim's inner wire is the cavity's mouth.
+    """
+    top, rim = top_face(body), rim_face(body)
+    if top is None or rim is None:
+        raise SystemExit("FAIL gen-case: no top face or bottom rim to fillet")
+    return body.makeFillet(r, top.OuterWire.Edges + rim.OuterWire.Edges)
 
 
 # ---- build ---------------------------------------------------------------
@@ -525,7 +541,7 @@ def build(dxf, half, explode):
 
     for bx, by in bosses:
         body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP + BORE_DEPTH, bx, by))
-    shell = fillet_top(body.removeSplitter(), TOP_FILLET)
+    shell = fillet_edges(body.removeSplitter(), EDGE_FILLET)
 
     # --- plate
     # Thicknesses on the sloped plate are square to its faces, as an offset plane measures
@@ -622,7 +638,9 @@ def check(out, half, explode, keys):
     for lbl, got, want in (
         ("width", bb.XLength, 160.0 + 2 * (POCKET_CLR + WALL)),
         ("depth", bb.YLength, 119.0 + 2 * (POCKET_CLR + WALL)),
-        ("height", bb.ZLength, H_INNER),
+        # The bottom edge fillet rounds off the lowest corner, so the lowest point is where
+        # it meets the sloped rim, EDGE_FILLET inboard and that much of the slope higher.
+        ("height", bb.ZLength, H_INNER - EDGE_FILLET * (H_INNER - H_OUTER) / shell_width()),
     ):
         if abs(got - want) > 0.01:
             fails.append(f"shell {lbl} {got:.3f}, expected {want:.3f}")
@@ -649,21 +667,12 @@ def check(out, half, explode, keys):
         if name == "shell":
             want[CNC_FILLET_R] = 4 * keys  # each cutout and each recess
             want[round(USB_H / 2, 2)] = want.get(round(USB_H / 2, 2), 0) + 2  # the USB slot's ends
-            # The top fillet is a cylinder along each straight run of the top face's outer
-            # edge, and a torus round each arc.
-            top = max(
-                (
-                    f
-                    for f in s.Faces
-                    if isinstance(f.Surface, Part.Plane)
-                    and abs(f.Surface.Axis.z) > 0.999
-                    and abs(f.CenterOfMass.z) < 1e-6
-                ),
-                key=lambda f: f.Area,
-                default=None,
+            # Each edge fillet is a cylinder along every straight run of its face's outer
+            # wire, and a torus round each arc.
+            runs = sum(
+                isinstance(e.Curve, Part.Line) for f in (top_face(s), rim_face(s)) if f for e in f.OuterWire.Edges
             )
-            runs = sum(isinstance(e.Curve, Part.Line) for e in top.OuterWire.Edges) if top else 0
-            want[round(TOP_FILLET, 2)] = want.get(round(TOP_FILLET, 2), 0) + runs
+            want[round(EDGE_FILLET, 2)] = want.get(round(EDGE_FILLET, 2), 0) + runs
         for r, n in sorted(want.items()):
             if got.get(r, 0) != n:
                 fails.append(f"{name} r={r:.2f} cylinders: {got.get(r, 0)}, expected {n}")
@@ -679,10 +688,10 @@ def check(out, half, explode, keys):
         fails.append("no top face at z=0")
     else:
         tb = max(tops, key=lambda f: f.Area).BoundBox
-        if abs((bb.XLength - tb.XLength) - 2 * TOP_FILLET) > 0.01:
+        if abs((bb.XLength - tb.XLength) - 2 * EDGE_FILLET) > 0.01:
             fails.append(
                 f"top face is {bb.XLength - tb.XLength:.3f} narrower than the widest section, expected "
-                f"{2 * TOP_FILLET:.3f}: top fillet wrong or missing"
+                f"{2 * EDGE_FILLET:.3f}: top edge fillet wrong or missing"
             )
 
     # Prismatic features are invisible to a cylinder census, so test them by volume: a
@@ -828,8 +837,9 @@ def residuals(model, ref):
     hands back the whole operand, a negative volume, an invalid shape, or plausible-looking
     debris; which fuzz it fails at depends on the geometry. A sound pair is valid, neither
     residual is negative or most of a part whose frame already matches, and the two account
-    for the volume difference exactly: extra - missing = model - ref. Anything else is a
-    failed Boolean, and the next fuzz is tried.
+    for the volume difference: extra - missing = model - ref, give or take what the fuzz
+    absorbs, at most its width over the part's whole surface. Anything else is a failed
+    Boolean, and the next fuzz is tried.
     """
     for fuzz in COMPARE_FUZZES:
         try:
@@ -843,7 +853,7 @@ def residuals(model, ref):
             balance = abs((extra.Volume - missing.Volume) - (model.Volume - ref.Volume))
         except Part.OCCError:
             continue
-        if sound and balance <= max(COMPARE_MIN_VOL * 100, 0.01 * (extra.Volume + missing.Volume)):
+        if sound and balance <= max(COMPARE_MIN_VOL * 100, fuzz * max(model.Area, ref.Area)):
             return extra, missing
     raise SystemExit(f"FAIL gen-case: the comparison Boolean failed at every fuzz in {COMPARE_FUZZES}")
 
