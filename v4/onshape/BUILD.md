@@ -166,37 +166,37 @@ its sockets, at full thickness. On an aluminium plate, a conductor beside expose
 tails, that margin is the point.
 
 **What the taper costs.** 1.3887 deg is not a working tent angle, so the slope is there for
-the look, and it buys that at the price of three standoff heights, two screw lengths, and
+the look, and it buys that at the price of three standoff heights, recessed screw heads, and
 putting the tightest clearance in the design on the shallow side. A flat 16.50mm case would
 give the Liatris +2.00, the jack +2.20 and the socket +5.55 with one standoff height and
-one screw length.
+every head flush.
 
 ## Parameters
 
-| Parameter                          | Value                                   | Source                                                                                  |
-| ---------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------- |
-| Wall thickness                     | 2.00                                    | decision; see below                                                                     |
-| Top thickness                      | 3.00                                    | decision                                                                                |
-| Switch recess depth                | 1.50                                    | nesting                                                                                 |
-| Plate at a switch cutout           | 1.50                                    | MX standard, 1.5mm +-0.1mm                                                              |
-| Bottom plate                       | 1.50                                    | takes the flat head's full height                                                       |
-| Board pocket                       | 161.00 x 120.00                         | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
-| Shell outer profile                | 165.00 x 124.00                         | pocket + wall                                                                           |
-| Boss and standoff diameter         | 5.50                                    | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
-| Boss height                        | 3.00                                    | top underside to PCB                                                                    |
-| Material above the PCB at a boss   | 6.00                                    | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
-| Insert hole, printed               | 3.60 dia                                | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
-| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45               | same 4.00 depth                                                                         |
-| Screw                              | M2.5 button head, ISO 7380              | head 4.70 dia x 1.50, **flat underside**; two lengths, see below                        |
-| Screw clearance hole               | 2.90 dia                                | through the plate and the standoff                                                      |
-| Counterbore in the plate           | 5.00 dia x 1.50 deep, **flat bottomed** | head + 0.30; floor is the standoff base                                                 |
-| Perimeter shelf, on the shell      | 1.75 wide, underside at -6.00           | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
-| Perimeter wall, on the plate       | 1.55 wide, top at -7.60                 | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
-| Wall relief                        | top band ends at x +-51.75              | the USB plug's path and the jack are past it; the inner wall runs the full height       |
-| Flared standoff base               | 8.00 dia, up to -10.35                  | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
-| Switch cutout / recess             | 14.50 / 16.00, R1.00 corners            | see below                                                                               |
-| Outer edge fillets, top and bottom | R1.00, one radius                       | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
-| Kink, the re-entrant corner        | R2.50 outside, R2.00 inside             | each loop's own corner radius; for looks                                                |
+| Parameter                          | Value                         | Source                                                                                  |
+| ---------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| Wall thickness                     | 2.00                          | decision; see below                                                                     |
+| Top thickness                      | 3.00                          | decision                                                                                |
+| Switch recess depth                | 1.50                          | nesting                                                                                 |
+| Plate at a switch cutout           | 1.50                          | MX standard, 1.5mm +-0.1mm                                                              |
+| Bottom plate                       | 1.50                          | takes the flat head's full height                                                       |
+| Board pocket                       | 161.00 x 120.00               | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
+| Shell outer profile                | 165.00 x 124.00               | pocket + wall                                                                           |
+| Boss and standoff diameter         | 5.50                          | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
+| Boss height                        | 3.00                          | top underside to PCB                                                                    |
+| Material above the PCB at a boss   | 6.00                          | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
+| Insert hole, printed               | 3.60 dia                      | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
+| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45     | same 4.00 depth                                                                         |
+| Screw                              | M2.5 button head, ISO 7380    | head 4.70 dia x 1.50, **flat underside**; one length, M2.5x10                           |
+| Screw clearance hole               | 2.90 dia                      | through the plate and the standoff                                                      |
+| Counterbore in the plate           | 5.00 dia, **flat bottomed**   | head + 0.30; every floor on one level plane                                             |
+| Perimeter shelf, on the shell      | 1.75 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
+| Perimeter wall, on the plate       | 1.55 wide, top at -7.60       | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
+| Wall relief                        | top band ends at x +-51.75    | the USB plug's path and the jack are past it; the inner wall runs the full height       |
+| Flared standoff base               | 8.00 dia, up to -10.35        | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
+| Switch cutout / recess             | 14.50 / 16.00, R1.00 corners  | see below                                                                               |
+| Outer edge fillets, top and bottom | R1.00, one radius             | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
+| Kink, the re-entrant corner        | R2.50 outside, R2.00 inside   | each loop's own corner radius; for looks                                                |
 
 **The wall is 2.00 so a TRRS plug seats.** The jack's barrel stands 2.00 past the board
 edge, 1.50 into the wall, which leaves its mouth 0.50 behind the case face; a 3.00 wall
@@ -232,22 +232,26 @@ Left half, from the outline centre. The right half is the exact mirror (negate x
 and inner name the board edge each boss is nearer, as in the config's `screw_left_outer`,
 `screw_left_inner` and `screw_left_center` zones.
 
-| Boss   | Position          | Standoff height | Standoff + PCB | Bore depth | Screw   | Engagement |
-| ------ | ----------------- | --------------- | -------------- | ---------- | ------- | ---------- |
-| Outer  | (-42.375, -3.650) | 4.87            | 6.47           | 4.00       | M2.5x10 | 3.53       |
-| Inner  | (33.825, 0.050)   | 6.72            | 8.32           | 4.00       | M2.5x11 | 2.68       |
-| Centre | (-3.325, 22.175)  | 5.82            | 7.42           | 4.00       | M2.5x10 | 2.58       |
+| Boss   | Position          | Standoff height | Head recessed | Stack | Bore depth | Screw   | Engagement |
+| ------ | ----------------- | --------------- | ------------- | ----- | ---------- | ------- | ---------- |
+| Outer  | (-42.375, -3.650) | 4.87            | 0.00          | 6.47  | 4.00       | M2.5x10 | 3.53       |
+| Inner  | (33.825, 0.050)   | 6.72            | 1.85          | 6.47  | 4.00       | M2.5x10 | 3.53       |
+| Centre | (-3.325, 22.175)  | 5.82            | 0.95          | 6.47  | 4.00       | M2.5x10 | 3.53       |
 
-**The plate is not in the stack.** A flat-underside head bears on the counterbore floor,
-which is the standoff's base, and its length is measured from there. A countersunk head
-would have added the plate's 1.50 to every row and needed a longer screw.
+**Every counterbore floor lies on one level plane, z -12.47**: the plate's top face over
+the outer boss, the highest of the three. A flat-underside head bears on that floor, inside
+the flare, and its length is measured from there to the board's top face, so the stack is
+6.47 at every boss and one screw length, M2.5x10, serves all three with 3.53mm of thread,
+0.47 short of the bore's bottom. The plane can go no lower: the outer head sits flush, and
+the others are recessed by however far the slope drops the plate under them. Derive it
+from the slope, not as a typed z.
 
 **Any flat-underside head works; the counterbore diameter is what follows from the choice.**
 5.00 suits a 4.70 head (button ISO 7380, socket cap DIN 912) with 0.30 to spare, and leaves
 0.25 of standoff outside it. A 5.00 pan head needs 5.30, which leaves 0.10 and a knife edge
 on the standoff, so grow the standoff if you go that way. Head height decides flushness
-only: 1.50 finishes level with the plate, 1.70 stands 0.20 proud, and neither affects the
-screw length, since that is measured under the head.
+only: 1.50 finishes level with the plate at the outer boss, 1.70 stands 0.20 proud there,
+and neither affects the screw length, since that is measured under the head.
 
 The outer and inner bosses sit 3.70mm apart in y. That is forced: the pinky columns are
 asymmetric, so the two screws cannot share a y while clearing both switch holes and pads.
@@ -278,11 +282,9 @@ recess wall, so this table cannot go stale against the key field. Readback canno
 it: a breakout trims the bore's face without splitting it or changing its height, so the
 depth check and the face census both pass a shell that has one.
 
-**The standoffs are three different heights** because the plate is sloped, so the three
-screws see stacks from 6.47 to 8.32mm. Two lengths cover it, as tabulated: every screw
-takes at least 2.50mm of thread, one screw diameter, and none bottoms in its bore. Do not try to absorb the
-spread in the counterbore: it is 1.50 deep and the head is 1.50 tall, so there is no depth
-to give.
+**The standoffs are three different heights** because the plate is sloped. The
+counterbores absorb the difference, reaching up into the flare under the lower bosses, so
+the screws need not.
 
 **Clearance to the nearest side-B pad**: 3.54mm outer, **2.04mm inner**,
 3.98mm centre. Those are measured to the pads, and the Kailh socket body is larger than
@@ -401,11 +403,10 @@ Traps:
   z -13.00 at the outer (x +82.50 and -82.50 on the left half). The shell's bottom cut,
   both plate faces (that plane and a 1.50 offset) and every standoff's lower end reference
   it.
-- **Sketch plate holes on a horizontal plane, and start them from the part.** Onshape's
-  Hole feature drills normal to its sketch plane, so a hole sketched on the sloped plate
-  face comes out tilted 1.39 deg and its projected centre shifts. Started from the part,
-  the counterbore is measured from the plate's underside and its floor lands on the
-  plate's top face. The bumper recesses are sketched on a horizontal plane too and end on
+- **Sketch plate holes on a horizontal plane.** Onshape's Hole feature drills normal to
+  its sketch plane, so a hole sketched on the sloped plate face comes out tilted 1.39 deg
+  and its projected centre shifts. The counterbores end on one level plane rather than a
+  depth from the plate, so cut them with an extrude up to that plane. The bumper recesses are sketched on a horizontal plane too and end on
   a plane parallel to the plate, so their floors run parallel to it.
 - **Extend port cuts past both wall faces.** A cut ending exactly on a face leaves
   coincident faces and a non-manifold solid.
@@ -508,9 +509,9 @@ On each half, after the mirror, from that half's own curves:
    the plate up to **z -10.35**, 2.75 below the board underside.
 4. **Screw holes**, 2.90 dia, through the plate and up the full height of each standoff
    to z -7.60, so the screw passes through the standoff and the PCB into the boss's
-   insert. Each has a flat-bottomed 5.00 counterbore through the plate's full 1.50mm:
-   sketch the hole on a horizontal plane and start it from the part. The counterbore's
-   floor is the flare's base, so the standoff keeps its height.
+   insert. Each has a flat-bottomed 5.00 counterbore, cut from below up to one level
+   plane: the plate's top face over the outer boss, z -12.47. Sketch the circles on a
+   horizontal plane, concentric with the screw circles.
 5. **Bumper recesses**, 12.00 dia x 0.50 deep on the outer face at (-72.75, +52.25),
    (+72.75, +52.25), (-72.75, -34.50), (+69.36, -50.27), each tangent to the wall's inner
    loop in its corner. Sketch them on a horizontal plane, where the loop projects straight
@@ -519,11 +520,10 @@ On each half, after the mirror, from that half's own curves:
    depth is 0.50 and the plate left is 1.00 right across every foot. All are well clear of the
    three screw heads.
 
-**Every feature cut into the plate is parallel to its faces.** The plate is a
-parallel-sided slab lying at 1.3887 deg, so "flat" and "level" are different instructions
-here. The counterbore's floor is the plate's top face, 0.06 off level each side of the
-vertical screw across its 5.00 width, which a printed plate takes up under the head. A
-bumper recess cut level instead would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of
+**Only the counterbores have level floors.** The plate is a parallel-sided slab lying at
+1.3887 deg, so "flat" and "level" are different instructions here. The counterbores mean
+level: a flat head seats square to its vertical screw, and one plane gives one screw
+length. Every other feature means parallel to the faces. A bumper recess cut level instead would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of
 plate, different at each edge of every foot.
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate;

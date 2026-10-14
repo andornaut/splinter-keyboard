@@ -568,17 +568,17 @@ def build(dxf, half, explode):
         plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - FLARE_GAP, bx, by).cut(half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
 
-    # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside. It
-    # runs the plate's full thickness and bears on the flare's base, so the standoff keeps
-    # its full height and the flare still joins the plate over a 1.50mm annulus.
+    # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside, and
+    # it bears on the flare's base over a 1.50mm annulus.
     #
-    # Its floor is the plate's top face, so it lies PARALLEL to the plate, as a hole tool
-    # started from the plate's underside cuts it. Across the 5.00 counterbore that is 0.06
-    # off level each side of the vertical screw axis, which a printed plate takes up under
-    # the head.
+    # Every floor lies on ONE horizontal plane, the plate's top face where it is highest
+    # among the bosses. The stack each screw spans then runs from that plane to the board's
+    # top face, the same at every boss, so one screw length serves all three. That plane is
+    # the highest it can go: the shallowest boss's head sits flush, and the others recessed.
+    floor_z = max(rim_z(sign, bx) for bx, _ in bosses) + plate_rise
     for bx, by in bosses:
         plate = plate.cut(cyl(SCREW_R, -BIG, BIG, bx, by))
-        plate = plate.cut(cyl(CBORE_R, -BIG, BIG, bx, by).common(half_space(sign, ang, plate_rise)))
+        plate = plate.cut(cyl(CBORE_R, -BIG, floor_z, bx, by))
     # A bumper recess is a fixed removal, so its floor is PARALLEL to the plate faces and
     # every foot leaves the same material behind. A horizontal floor would be a constant z
     # in a plate that is not, making the recess shallower at one edge than the other and
