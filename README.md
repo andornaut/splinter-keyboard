@@ -200,17 +200,17 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export it to `dist/${VERSION}/onshape/`.
 1. Validate both halves against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py` and again with `FC_HALF=right`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
-1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4.step`.
+1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4 - Filament.step`, and the aluminium configuration's over `Splinter keyboard v4 - Aluminium.step`.
 
 ### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
 
-1. Open or create a project and import [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step).
+1. Open or create a project and import [`Splinter keyboard v4 - Filament.step`](./v4/onshape/Splinter%20keyboard%20v4%20-%20Filament.step).
 1. Slice and print the case.
 1. Install an [M2.5 heat-set insert](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) into each mounting boss with a soldering iron, then clamp the PCB with the [M2.5 screws](./v4/README.md#bill-of-materials-bom).
 
 #### Alternative: machined aluminium case (JLCCNC)
 
-Upload [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step) to [JLCCNC](https://jlccnc.com). It holds both halves' shells and plates, four parts, so check that each part is quoted once:
+Upload [`Splinter keyboard v4 - Aluminium.step`](./v4/onshape/Splinter%20keyboard%20v4%20-%20Aluminium.step), the model's aluminium configuration (tapped holes, see [Aluminium variant](./v4/onshape/BUILD.md#aluminium-variant)), to [JLCCNC](https://jlccnc.com). It holds both halves' shells and plates, four parts, so check that each part is quoted once:
 
 | Setting        | Value                                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
@@ -219,7 +219,7 @@ Upload [`Splinter keyboard v4.step`](./v4/onshape/Splinter%20keyboard%20v4.step)
 | Tolerance      | Default (ISO 2768 medium)                                                                              |
 | Threaded holes | Tap the M2.5 holes directly; the heat-set inserts are for the printed case only                        |
 
-A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout and depth. Every hole shares the thread spec and the depth, so one callout covers all three; take both from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). In Onshape, a Drawing with a hole callout (right-click the hole edge > Callout) emits it.
+A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout, 4.00 drill and full thread to 3.60. Every hole shares the thread spec and the depth, so one callout covers all three; take both from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). [`Splinter v4 left shell.pdf`](./v4/onshape/Splinter%20v4%20left%20shell.pdf) and [`Splinter v4 right shell.pdf`](./v4/onshape/Splinter%20v4%20right%20shell.pdf) are those drawings. To redraw one, make an Onshape Drawing of the Aluminium configuration and use its **Hole callout** tool on a tapped hole's edge; it reads the spec from the Hole feature.
 
 ### Step 8. [QMK firmware](https://qmk.fm/)
 

@@ -26,6 +26,7 @@ to the script.
   FC_COMPARE  comma-separated STEP file(s) of one hand-modelled half, shell and plate
               assembled; needs FC_HALF left or right
   FC_DIFFS    recorded intentional differences (default v4/onshape/differences.json)
+  FC_VARIANT  filament | aluminium     (default filament)
 
 Frame matches the build sheet: outline centre at the origin, z=0 at the shell's top face,
 +z up, +x toward the inner (thick) edge. The right half is the exact mirror.
@@ -62,6 +63,10 @@ COMPARE_FUZZES = (1e-3, 5e-3, 1e-5, 0.0)
 # kernel noise, not geometry, and needs no decision.
 COMPARE_MIN_THICK = 0.01
 COMPARE_MIN_VOL = 1e-3
+# A part no fuzz computes is halved and each half compared, down to cells this wide. Two
+# faces crossing at a shallow angle can defeat every fuzz, and that is local: it should
+# cost the comparison that spot, not the whole part.
+COMPARE_MIN_CELL = 4.0
 # A part whose bounding-box centre is this far from the reference's is in another frame,
 # and every face would report as a difference. Caught first so the report names the cause.
 FRAME_TOL = 1.0
@@ -90,7 +95,17 @@ HULL_WELD = 1e-3
 # a micron off true, so a vertical edge leans and a cut squared to it leaves a step.
 HULL_GRID = 1e-3
 BOSS_R = 2.75
-BORE_R = 1.80  # 3.60 dia heat-set insert
+# The two variants differ only at the shell's screw holes: a filament case takes a heat-set
+# insert in a 3.60 bore, an aluminium case is tapped M2.5 from a 2.05 drill. The plate is the
+# same in both. The tapped hole is drilled blind, so it ends in the drill's own point (deg);
+# the insert bore is flat. The point narrows inside the hole, rising above BORE_DEPTH only
+# near the axis, far inside the recess edges check_bores guards.
+VARIANTS = {
+    "filament": {"bore_r": 1.80, "drill_point": None},
+    "aluminium": {"bore_r": 1.025, "drill_point": 118.0},
+}
+VARIANT = os.environ.get("FC_VARIANT", "filament")
+BORE_R = VARIANTS.get(VARIANT, VARIANTS["filament"])["bore_r"]
 # Every boss. It stops the bore below RECESS_Z, so no switch recess reaches it on either half.
 BORE_DEPTH = 4.00
 STANDOFF_R = 2.75
@@ -139,11 +154,10 @@ USB_W = 9.50
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
-# The plate wall's top band ends here, short of the USB plug's path and the jack. The
-# inner wall runs the full height: it clears the jack. The cut that ends the band starts
-# below it at WALL_RELIEF_Y and stops at the inner wall's inner face.
-WALL_RELIEF_X = 51.75
-WALL_RELIEF_Y = 45.00
+# The plate wall is cut away over the top-inner corner, where the USB plug's path, the jack
+# and the MCU's corner are: across WALL_RELIEF_W in from the plate's inner edge, down to
+# where the wall's inner loop turns its corner arc, so the inner wall ends flat there.
+WALL_RELIEF_W = 30.00
 
 # Bumper recesses on the plate's outer face, each tangent to the plate wall's inner loop in
 # its corner, so the feet sit as far out as the plate allows.
@@ -169,7 +183,7 @@ def _census(*pairs):
 
 EXPECT_CYL = {
     "shell": _census(
-        (BORE_R, 3),  # the insert bores
+        (BORE_R, 3),  # the insert bores, or the tap drill
         (CAVITY_FILLET, 6),  # the cavity's tool-radius corners and its kink
         (CAVITY_FILLET, 6),  # the shelf's inner corners, its kink closed at the same radius
         (BOSS_R, 3),
@@ -541,6 +555,10 @@ def build(dxf, half, explode):
 
     for bx, by in bosses:
         body = body.cut(cyl(BORE_R, PCB_TOP, PCB_TOP + BORE_DEPTH, bx, by))
+        point = VARIANTS[VARIANT]["drill_point"]
+        if point:
+            tip = BORE_R / math.tan(math.radians(point / 2))
+            body = body.cut(Part.makeCone(BORE_R, 0.0, tip, Vector(bx, by, PCB_TOP + BORE_DEPTH), Vector(0, 0, 1)))
     shell = fillet_edges(body.removeSplitter(), EDGE_FILLET)
 
     # --- plate
@@ -551,17 +569,16 @@ def build(dxf, half, explode):
     plate = prism(plate_w, -BIG, BIG).common(slab)
     # Perimeter wall, rising to the board's underside so the board is sandwiched between it
     # and the shelf above. Built from the plate's top face up, so relieving it cannot bite
-    # into the plate itself. Its top band stops short of the top-inner corner, where the
-    # tall parts and both ports are; the inner wall runs on to the corner.
+    # into the plate itself. It is cut away over the top-inner corner (see WALL_RELIEF_W).
     ring = (
         prism(plate_w, -BIG, PCB_BOT)
         .cut(prism(plate_wall_w, -BIG - 1.0, PCB_BOT + 1.0))
         .cut(half_space(sign, ang, plate_rise))
     )
-    inner_face = sign * (abs(hull.BoundBox.XMax if sign > 0 else hull.BoundBox.XMin) - (SHELF_W - POCKET_CLR))
-    rx0 = min(sign * WALL_RELIEF_X, inner_face)
-    rx1 = max(sign * WALL_RELIEF_X, inner_face)
-    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, WALL_RELIEF_Y, -BIG)))
+    edge = plate_w.BoundBox.XMax if sign > 0 else -plate_w.BoundBox.XMin
+    ry = plate_wall_w.BoundBox.YMax - CAVITY_FILLET
+    rx0, rx1 = sorted((sign * (edge - WALL_RELIEF_W), sign * (edge + 1.0)))
+    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, ry, -BIG)))
     plate = plate.fuse(ring)
     for bx, by in bosses:
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
@@ -575,6 +592,9 @@ def build(dxf, half, explode):
     # among the bosses. The stack each screw spans then runs from that plane to the board's
     # top face, the same at every boss, so one screw length serves all three. That plane is
     # the highest it can go: the shallowest boss's head sits flush, and the others recessed.
+    # Level, not parallel to the plate, in both variants: the screw hole must be vertical,
+    # so a mill cuts it with the plate tilted, and in that setup a level floor is a plain
+    # counterbore on the hole's own axis.
     floor_z = max(rim_z(sign, bx) for bx, _ in bosses) + plate_rise
     for bx, by in bosses:
         plate = plate.cut(cyl(SCREW_R, -BIG, BIG, bx, by))
@@ -830,32 +850,105 @@ def inside(bb, box):
     return all(lo[k] >= box[k] - MATCH_TOL and hi[k] <= box[k + 3] + MATCH_TOL for k in range(3))
 
 
-def residuals(model, ref):
-    """model - ref and ref - model, at the first fuzz OCC computes them sanely with.
+def sound_residuals(model, ref, cell):
+    """model - ref and ref - model, at the first fuzz OCC computes them sanely with, or None.
 
     A fuzzy Boolean between two nearly coincident solids can fail without raising: it
     hands back the whole operand, a negative volume, an invalid shape, or plausible-looking
     debris; which fuzz it fails at depends on the geometry. A sound pair is valid, neither
-    residual is negative or most of a part whose frame already matches, and the two account
-    for the volume difference: extra - missing = model - ref, give or take what the fuzz
-    absorbs, at most its width over the part's whole surface. Anything else is a failed
-    Boolean, and the next fuzz is tried.
+    residual is negative, and the two account for the volume difference: extra - missing =
+    model - ref, give or take what the fuzz absorbs, at most its width over the whole
+    surface. Nor is either residual most of a whole part whose frame already matches; in a
+    cell, where a real difference can fill one side, only both at once (each operand handed
+    back whole, which balances exactly) is a failure.
     """
     for fuzz in COMPARE_FUZZES:
         try:
             extra = model.cut(ref, fuzz) if fuzz else model.cut(ref)
             missing = ref.cut(model, fuzz) if fuzz else ref.cut(model)
+            over = [r.Volume > 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref))]
             sound = (
                 extra.isValid()
                 and missing.isValid()
-                and all(0 <= r.Volume <= 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref)))
+                and extra.Volume >= 0
+                and missing.Volume >= 0
+                and not (all(over) if cell else any(over))
             )
             balance = abs((extra.Volume - missing.Volume) - (model.Volume - ref.Volume))
         except Part.OCCError:
             continue
         if sound and balance <= max(COMPARE_MIN_VOL * 100, fuzz * max(model.Area, ref.Area)):
             return extra, missing
-    raise SystemExit(f"FAIL gen-case: the comparison Boolean failed at every fuzz in {COMPARE_FUZZES}")
+    return None
+
+
+def residuals(model, ref):
+    """model - ref and ref - model, and the boxes no fuzz could compare.
+
+    Tried whole first. Failing that, the part is halved along its longest side, each half
+    of both solids compared on its own, and a half that fails is halved again down to
+    COMPARE_MIN_CELL. Pieces from neighbouring cells are fused back so a region reads as one.
+    """
+    got = sound_residuals(model, ref, cell=False)
+    if got:
+        return got[0], got[1], []
+    extras, missings, failed = [], [], []
+    bb = App.BoundBox(model.BoundBox)
+    bb.add(ref.BoundBox)
+    bb.enlarge(1.0)
+    stack = [bb]
+    while stack:
+        b = stack.pop()
+        box = Part.makeBox(b.XLength, b.YLength, b.ZLength, Vector(b.XMin, b.YMin, b.ZMin))
+        m, r = model.common(box), ref.common(box)
+        if m.Volume < COMPARE_MIN_VOL and r.Volume < COMPARE_MIN_VOL:
+            continue
+        got = sound_residuals(m, r, cell=True)
+        if got:
+            extras.append(got[0])
+            missings.append(got[1])
+            continue
+        sizes = (b.XLength, b.YLength, b.ZLength)
+        if max(sizes) <= COMPARE_MIN_CELL:
+            failed.append(b)
+            continue
+        axis = sizes.index(max(sizes))
+        lo, hi = [b.XMin, b.YMin, b.ZMin], [b.XMax, b.YMax, b.ZMax]
+        mid = (lo[axis] + hi[axis]) / 2
+        stack.append(App.BoundBox(*lo, *[mid if k == axis else hi[k] for k in range(3)]))
+        stack.append(App.BoundBox(*[mid if k == axis else lo[k] for k in range(3)], *hi))
+    return fused(extras), fused(missings), merged(failed)
+
+
+def fused(pieces):
+    """The cells' residuals as one shape, a region split across cells rejoined."""
+    solids = [s for p in pieces for s in p.Solids]
+    if len(solids) < 2:
+        return Part.makeCompound(solids)
+    try:
+        return solids[0].multiFuse(solids[1:]).removeSplitter()
+    except Part.OCCError:
+        return Part.makeCompound(solids)
+
+
+def merged(boxes):
+    """Touching boxes joined into one, so a failed spot reports once."""
+    out = []
+    for box in boxes:
+        b = App.BoundBox(box)
+        joined = True
+        while joined:
+            joined = False
+            for o in out:
+                g = App.BoundBox(o)
+                g.enlarge(1e-6)
+                if g.intersect(b):
+                    out.remove(o)
+                    b.add(o)
+                    joined = True
+                    break
+        out.append(b)
+    return out
 
 
 def compare(ref_path, model_paths, half, diffs_path, spacing):
@@ -892,7 +985,15 @@ def compare(ref_path, model_paths, half, diffs_path, spacing):
     used = set()
     mismatches, intentional = 0, 0
     for name in ("shell", "plate"):
-        extra, missing = residuals(model[name], ref[name])
+        extra, missing, failed = residuals(model[name], ref[name])
+        for b in failed:
+            mismatches += 1
+            sys.stdout.flush()
+            print(
+                f"  FAIL {subject}: {name}: no fuzz in {COMPARE_FUZZES} computes x {b.XMin:.2f}..{b.XMax:.2f}, "
+                f"y {b.YMin:.2f}..{b.YMax:.2f}, z {b.ZMin:.2f}..{b.ZMax:.2f}; compare it by hand",
+                file=sys.stderr,
+            )
         for kind, residual in (("extra", extra), ("missing", missing)):
             for r in regions(residual):
                 bb = r.BoundBox
@@ -947,6 +1048,8 @@ def main():
     dxf = os.environ.get("FC_DXF", DEFAULT_DXF)
     outdir = os.environ.get("FC_OUTDIR", DEFAULT_OUTDIR)
     explode = float(os.environ.get("FC_EXPLODE", "0"))
+    if VARIANT not in VARIANTS:
+        raise SystemExit(f"FAIL gen-case: FC_VARIANT={VARIANT!r}, expected one of {', '.join(VARIANTS)}")
     halves = os.environ.get("FC_HALF", "both")
     if halves not in ("left", "right", "both"):
         raise SystemExit(
@@ -974,7 +1077,7 @@ def main():
 
     bad = 0
     for half in halves:
-        suffix = "-exploded" if explode else ""
+        suffix = ("" if VARIANT == "filament" else f"-{VARIANT}") + ("-exploded" if explode else "")
         # str(): FreeCAD's Import.export takes a file name, not a Path.
         out = str(Path(outdir) / f"splinter-v4-{half}-case{suffix}.step")
         shell, plate, keys = build(dxf, half, explode)

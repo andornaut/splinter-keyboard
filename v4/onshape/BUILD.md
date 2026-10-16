@@ -185,14 +185,14 @@ every head flush.
 | Boss and standoff diameter         | 5.50                          | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
 | Boss height                        | 3.00                          | top underside to PCB                                                                    |
 | Material above the PCB at a boss   | 6.00                          | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
-| Insert hole, printed               | 3.60 dia                      | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
-| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45     | same 4.00 depth                                                                         |
+| Insert hole, filament              | 3.60 dia                      | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
+| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45     | same 4.00 drill; full thread to 3.60, see Aluminium variant                             |
 | Screw                              | M2.5 button head, ISO 7380    | head 4.70 dia x 1.50, **flat underside**; one length, M2.5x10                           |
 | Screw clearance hole               | 2.90 dia                      | through the plate and the standoff                                                      |
 | Counterbore in the plate           | 5.00 dia, **flat bottomed**   | head + 0.30; every floor on one level plane                                             |
 | Perimeter shelf, on the shell      | 1.75 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
 | Perimeter wall, on the plate       | 1.55 wide, top at -7.60       | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
-| Wall relief                        | top band ends at x +-51.75    | the USB plug's path and the jack are past it; the inner wall runs the full height       |
+| Wall relief                        | 30.00 in from the plate edge  | x +-50.30 on, down to y 56.25; clears the USB plug's path, the jack and the MCU         |
 | Flared standoff base               | 8.00 dia, up to -10.35        | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
 | Switch cutout / recess             | 14.50 / 16.00, R1.00 corners  | see below                                                                               |
 | Outer edge fillets, top and bottom | R1.00, one radius             | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
@@ -205,10 +205,11 @@ face, so that distance comes straight off the plug's travel into the jack. Stiff
 not need more: 2.00 is five perimeters printed, and the top face and the clamped board
 carry the shell.
 
-**The wall's top band stops short of the top-inner corner.** Past x 51.75 the top edge
-carries the USB plug's path and the jack's body, so a band running on would block the USB
-plug and sit on the jack. The inner wall runs the full height to the corner, 1.00 clear of
-the jack's body in plan.
+**The wall is cut away over the top-inner corner.** There the top edge carries the USB
+plug's path and the jack's body, so a band running on would block the USB plug and sit on
+the jack. The cut starts 30.00 in from the plate's inner edge, 2.60 clear of the Liatris
+body (its edge at x 52.90) in plan, and takes the inner wall down to where its corner arc
+begins.
 
 **The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
 without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
@@ -430,7 +431,10 @@ It builds the reference half, Boolean-subtracts each way, and reports every regi
 the two disagree: `extra` is material in your model the reference lacks, `missing` the
 reverse, each with its volume, centre and size in the sheet's frame. It exits nonzero on
 any region not on record. A part whose centre is over 1mm from the reference's stops it
-before comparing, since every face would differ and the cause is the export frame.
+before comparing, since every face would differ and the cause is the export frame. Where no
+Boolean computes, as where two faces cross at a shallow angle, it compares the part in
+smaller cells; a cell that still fails is reported with its box, to check by hand, and also
+fails the run.
 
 **Decide every region one of three ways.**
 
@@ -501,9 +505,10 @@ On each half, after the mirror, from that half's own curves:
    filleted to **R2.00**, the kink included, **1.50mm** thick, between the slope plane and its
    1.50 offset, flush with the rim.
 2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.25mm**
-   (corners R2.00), from the plate's top face up to **z -7.60**. Remove the top band
-   over **x > +51.75**, out to the inner wall's inner face; the inner wall stays full
-   height to the corner.
+   (corners R2.00), from the plate's top face up to **z -7.60**. Remove the wall over
+   the top-inner corner: **30.00** in from the plate's inner edge (x > +50.30), down to
+   **y 56.25**, where the inner loop's corner arc begins, so the inner wall ends flat
+   there.
 3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
    the plate up to **z -10.35**, 2.75 below the board underside.
@@ -523,8 +528,9 @@ On each half, after the mirror, from that half's own curves:
 **Only the counterbores have level floors.** The plate is a parallel-sided slab lying at
 1.3887 deg, so "flat" and "level" are different instructions here. The counterbores mean
 level: a flat head seats square to its vertical screw, and one plane gives one screw
-length. Every other feature means parallel to the faces. A bumper recess cut level instead would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of
-plate, different at each edge of every foot.
+length. Every other feature means parallel to the faces. A bumper recess cut level instead
+would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of plate, different at each edge of
+every foot.
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate;
 access is by removing it, so no holes are needed.
@@ -582,6 +588,31 @@ enough that a printed shell accepts the board at all.
 pocket clearance is what splits them. A printed pocket comes out undersize, which is the
 whole reason the clearance is 0.50, so its effective play lands near half those numbers. A
 milled pocket is 0.50 true. The screw-seated figure is the same for both.
+
+## Aluminium variant
+
+`FC_VARIANT=aluminium` builds it, written beside the filament reference with an `-aluminium`
+suffix. In Onshape, a configuration on the shell's screw holes keeps both variants in one
+document. Everything else, the whole plate included, is shared.
+
+| Feature                 | Filament                                           | Aluminium                                                                                       |
+| ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Screw hole in each boss | 3.60 bore, 4.00 deep, for a 4.00mm heat-set insert | 2.05 tap drill, 4.00 deep plus its 118 deg point, M2.5x0.45 full thread to 3.60 (bottoming tap) |
+
+**The counterbores stay level in aluminium.** The 2.90 screw hole runs up to 9.3 tall
+through the plate and standoff, and drilled square to the plate its top would land 0.22 off
+the screw, more than the 0.20 radial clearance. So a mill drills it with the plate tilted
+1.39 deg, and in that setup a level floor is a plain counterbore on the hole's own axis,
+concentric with it and seating the head square.
+
+**The full thread runs to 3.60** because the screw engages 3.53 and a standard tap leaves
+its last threads incomplete at the bottom of a blind hole. State it on the drawing.
+The drill's 118 deg point reaches 0.62 past the 4.00, narrowing inside the hole, so it stays
+far inside the switch recesses' edges.
+
+**The taper is this variant's cost.** The sloped rim and its fillet, and the plate's wall,
+standoff and flare tops, are each tilted to the part that carries them, so each takes a 3D
+pass or a wedge fixture. Quote it against a flat-bottomed case before ordering.
 
 ## Printing
 
