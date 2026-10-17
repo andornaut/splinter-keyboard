@@ -219,6 +219,7 @@ Upload the model's aluminium configuration (tapped holes, see [Aluminium variant
 | Surface finish | Bead blasting + matte anodizing; drop the bead blasting for a glossier sheen. Black is the safe color. |
 | Tolerance      | Default (ISO 2768 medium)                                                                              |
 | Threaded holes | Tap the M2.5 holes directly; the heat-set inserts are for the printed case only                        |
+| Order remarks  | Each half's shell and plate mate: the plate sits in the shell's cavity                                 |
 
 A STEP file cannot carry threads, so model each hole at the ~2.05mm tap-drill diameter and upload a PDF with an `M2.5x0.45` callout, 4.00 drill and full thread to 3.60. Every hole shares the thread spec and the depth, so one callout covers all three; take both from the [build sheet](./v4/onshape/BUILD.md#screw-bosses). [`Splinter v4 left shell.pdf`](./v4/onshape/Splinter%20v4%20left%20shell.pdf) and [`Splinter v4 right shell.pdf`](./v4/onshape/Splinter%20v4%20right%20shell.pdf) are those drawings. To redraw one, make an Onshape Drawing of the Aluminium configuration and use its **Hole callout** tool on a tapped hole's edge; it reads the spec from the Hole feature.
 
