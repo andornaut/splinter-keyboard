@@ -113,15 +113,17 @@ SCREW_R = 1.45  # 2.90 dia clearance
 CBORE_R = 2.50  # 5.00 dia, flat-bottomed, for a flat-underside head
 LID_CLR = 0.20  # plate outline in from the cavity, per side; a print fit
 # The board is clamped around its whole perimeter, not only at the three bosses: a shelf
-# hangs from the case's top and the plate carries a matching wall up to meet it. The two
-# share one inner loop, so they lap the board by the same SHELF_W - POCKET_CLR; the plate
-# wall is LID_CLR narrower because the plate edge sits that far in from the cavity. The lap
-# is what has to stay inside the board's own perimeter keepout (add-keepout-zones.py
-# PERIMETER_INSET) so neither lands on a ground plane, and it shrinks 1:1 with any
-# loosening of POCKET_CLR.
+# hangs from the case's top and the plate carries a wall up to meet it. The shelf laps the
+# board by SHELF_W - POCKET_CLR. The wall is what the board rests on, so it laps further:
+# PLATE_WALL_W wide from the plate edge, which sits LID_CLR in from the cavity. Each lap has
+# to stay inside the board's own perimeter keepout (add-keepout-zones.py PERIMETER_INSET)
+# so neither lands on a ground plane, and shrinks 1:1 with any loosening of POCKET_CLR. The
+# wall's lap is also held clear of the underside lands nearest the edge, the hotswap pads,
+# with the board moved BOARD_PLAY toward them.
 # Tracks are a different matter: the ROUTE ring is carved open over the TRRS, so copper
 # under soldermask is legal there and the shelf can cross it.
-SHELF_W = 1.75
+SHELF_W = 1.50
+PLATE_WALL_W = 1.50
 # Flared standoff base. Without it the counterbore runs the plate's full thickness inside a
 # 5.50 standoff, leaving the two joined by a 0.25mm annulus: the screw head would bear on
 # the standoff and the plate would hang off 4.12 mm2 per boss. 8.00 matches the built v4
@@ -145,15 +147,17 @@ USB_X0, USB_X1 = 56.663, 66.663
 USB_Z, USB_H = -10.25, 4.00
 USB_DX = 0.537
 # Stated, NOT derived from POCKET_CLR. The plug has to clear the opening wherever the board
-# sits, and how far the board can move is set by the screws and not the pocket: a 2.5mm
-# screw in a 3.00mm hole is BOARD_PLAY per side whatever the pocket fit is. Deriving it
-# would shrink the port every time the pocket is loosened, which is the wrong direction.
+# sits, and how far the board can move is set by the screws and not the pocket: a screw in
+# the board's mounting hole (config.yaml's hole_drill) moves BOARD_PLAY per side whatever
+# the pocket fit is. Deriving it would shrink the port every time the pocket is loosened,
+# which is the wrong direction.
 USB_W = 9.50
 USB_PLUG_W = 8.34
-BOARD_PLAY = 0.25
+SCREW_NOMINAL_D, BOARD_HOLE_D = 2.50, 3.00
+BOARD_PLAY = (BOARD_HOLE_D - SCREW_NOMINAL_D) / 2.0
 # Both ports are plain cutouts straight through the wall. No counterbore and no recess: a
 # pocket on the outer face reads as the port being sunk into the case rather than opened
-# through it. The USB clears the plug shell by 0.58 per side. It is a slot with
+# through it. The USB clears the plug shell by (USB_W - USB_PLUG_W) / 2 per side. It is a slot with
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
@@ -164,7 +168,7 @@ WALL_RELIEF_W = 30.00
 
 # Bumper recesses on the plate's outer face, each tangent to the plate wall's inner loop in
 # its corner, so the feet sit as far out as the plate allows.
-BUMPERS = [(-72.75, 52.25), (72.75, 52.25), (-72.75, -34.50), (69.36, -50.27)]
+BUMPERS = [(-72.80, 52.30), (72.80, 52.30), (-72.80, -34.55), (69.39, -50.33)]
 BUMPER_R, BUMPER_D = 6.00, 0.50
 
 BIG = 500.0
@@ -401,8 +405,9 @@ def unnotched_hull(wall, sign):
     """The hull with the board's USB notch filled in.
 
     NOTHING in the case follows that notch: not the outer profile, not the cavity, not the
-    plate. It exists to clear the plug's overmold, which sits below the board entirely, so
-    to the case it is only a bite out of an edge that should run straight. Inheriting it
+    plate. Nothing the case passes reaches it: the plug shell runs below the board and the
+    overmold stays outside the wall, so to the case it is only a bite out of an edge that
+    should run straight. Inheriting it
     puts a jog in all three outlines and leaves a pointless tongue of material in the
     pocket. Filling it leaves a void where the board is absent, which gives the plug more
     room rather than less.
@@ -525,12 +530,12 @@ def build(dxf, half, explode):
     # concentric with the cavity it would be CAVITY_FILLET + LID_CLR, which narrows the fit
     # gap there by only 0.003.
     plate_w = closed(opened(offset(hull, POCKET_CLR - LID_CLR), CAVITY_FILLET), CAVITY_FILLET)
-    # The shelf's inner loop, shared by the plate wall, is an inset of the HULL opened in
+    # The shelf's and the plate wall's inner loops are each an inset of the HULL opened in
     # its own right.
     # Chaining them off cavity_w would shrink its corner arcs by the inset, leaving 0.25
     # where CAVITY_FILLET is meant, and collapsing them outright at an inset of 2.00.
     shelf_w = closed(opened(offset(hull, POCKET_CLR - SHELF_W), CAVITY_FILLET), CAVITY_FILLET)
-    plate_wall_w = shelf_w
+    plate_wall_w = closed(opened(offset(hull, POCKET_CLR - LID_CLR - PLATE_WALL_W), CAVITY_FILLET), CAVITY_FILLET)
 
     check_bores(recess, bosses)
 
@@ -1038,21 +1043,15 @@ def compare(ref_path, model_paths, half, diffs_path, spacing):
 
 
 def main():
-    # USB_W and USB_DX are stated, so the invariants they have to satisfy are asserted
-    # rather than guaranteed by construction. Nothing downstream would catch a violation:
-    # check() tests the opening against the PLATE, never against the plug. The plug rides in
-    # the receptacle, so it moves with the board: the opening has to clear it with the board
-    # moved BOARD_PLAY either way, and the board's own notch has to clear it outright.
+    # USB_W is stated, so the invariant it has to satisfy is asserted rather than guaranteed
+    # by construction. Nothing downstream would catch a violation: check() tests the opening
+    # against the PLATE, never against the plug. The plug rides in the receptacle, so it
+    # moves with the board, and the opening has to clear it with the board moved BOARD_PLAY
+    # either way.
     if USB_W < USB_PLUG_W + 2 * BOARD_PLAY:
         raise SystemExit(
             f"FAIL gen-case: the {USB_W:.2f} USB opening does not clear a {USB_PLUG_W:.2f} plug once the "
             f"board moves {BOARD_PLAY:.2f} on its screws. Widen USB_W"
-        )
-    if abs(USB_DX) + USB_PLUG_W / 2.0 > (USB_X1 - USB_X0) / 2.0:
-        raise SystemExit(
-            f"FAIL gen-case: a {USB_PLUG_W:.2f} plug {USB_DX:+.3f} off the centre of the board's "
-            f"{USB_X1 - USB_X0:.2f} USB notch fouls the notch edge. Re-measure USB_DX, or widen the "
-            "notch in config.yaml and move USB_X0/USB_X1 with it"
         )
 
     dxf = os.environ.get("FC_DXF", DEFAULT_DXF)

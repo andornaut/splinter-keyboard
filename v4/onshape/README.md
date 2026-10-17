@@ -67,8 +67,8 @@ the comparison extends them to the hand-built model everywhere it matches the re
 - **Measure the cut line**, KiCad's board outline polygon, not the board bounding box. The
   box is inflated by the `Edge.Cuts` stroke on every side.
 - **Nothing follows the board's USB notch.** Not the outer profile, not the cavity, not the
-  plate. That notch clears the plug's overmold, which sits below the board entirely, so to
-  the case it is only a bite out of an edge that should run straight. The top edge is
+  plate. Nothing the case passes reaches it: the plug shell runs below the board and the
+  overmold stays outside the wall, so to the case it is only a bite out of an edge that should run straight. The top edge is
   straight and both ports are simply openings in the back wall.
 - **The outline mirrors; the switch cutouts do not.** Both halves' outer edges come from the
   same mirrored anchors, so the shell can be modelled once and mirrored. The key field

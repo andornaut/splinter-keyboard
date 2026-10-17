@@ -190,9 +190,9 @@ every head flush.
 | Screw                              | M2.5 button head, ISO 7380    | head 4.70 dia x 1.50, **flat underside**; one length, M2.5x10                           |
 | Screw clearance hole               | 2.90 dia                      | through the plate and the standoff                                                      |
 | Counterbore in the plate           | 5.00 dia, **flat bottomed**   | head + 0.30; every floor on one level plane                                             |
-| Perimeter shelf, on the shell      | 1.75 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.25, inside its 2.00 keepout ring |
-| Perimeter wall, on the plate       | 1.55 wide, top at -7.60       | out to the shelf's inner loop, so it laps the board by the same 1.25                    |
-| Wall relief                        | 30.00 in from the plate edge  | x +-50.30 on, down to y 56.25; clears the USB plug's path, the jack and the MCU         |
+| Perimeter shelf, on the shell      | 1.50 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.00, inside its 2.00 keepout ring |
+| Perimeter wall, on the plate       | 1.50 wide, top at -7.60       | from the plate edge, so it laps the board by 1.20, clear of the nearest hotswap pads    |
+| Wall relief                        | 30.00 in from the plate edge  | x +-50.30 on, down to y 56.30; clears the USB plug's path, the jack and the MCU         |
 | Flared standoff base               | 8.00 dia, up to -10.35        | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
 | Switch cutout / recess             | 14.50 / 16.00, R1.00 corners  | see below                                                                               |
 | Outer edge fillets, top and bottom | R1.00, one radius             | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
@@ -296,7 +296,7 @@ the standoff is 5.50 and not larger.
 
 | Feature                             | Position                                              | Relative to                                    |
 | ----------------------------------- | ----------------------------------------------------- | ---------------------------------------------- |
-| USB-C notch, already in the outline | x +56.663 .. +66.663, cut 7.271mm down from y +59.500 | centred on the Liatris, x +61.663              |
+| USB-C notch, already in the outline | x +56.663 .. +66.663, cut 7.271mm down from y +59.500 | centre x +61.663                               |
 | USB-C opening centre                | x +62.200                                             | 0.537 toward the inner edge from notch centre  |
 | TRRS jack centre                    | (74.650, 59.500)                                      | 12.987 toward the inner edge from notch centre |
 
@@ -333,19 +333,18 @@ is only about 6.5mm long, so a cable with a fat overmold may bottom on the outer
 before it seats. Settle it on the printed half with the cables you actually own; a
 13.00 x 7.00 x 1.50 counterbore on the outer face is the fix if one of them will not go.
 
-**Why 9.50 wide, and why it is stated rather than derived.** It clears an 8.34mm plug shell
-by 0.58 per side, which has to cover the board moving on its screws: a 2.5mm screw in a
-3.00mm hole is 0.25 per side, whatever the pocket fit is. The plug rides in the receptacle,
-so it moves with the board, and the board's own 10.00 notch clears it by 0.29 at the near
-edge. Deriving the width from the pocket clearance would shrink the port every time the
+**Why 9.50 wide, and why it is stated rather than derived.** Its margin over the 8.34mm
+plug shell has to cover the board moving on its screws: a 2.50 screw in the board's 3.00
+hole moves half the difference either way, whatever the pocket fit is. The plug rides in
+the receptacle, so it moves with the board. Deriving the width from the pocket clearance would shrink the port every time the
 pocket was loosened, which is the wrong direction.
 
 Wall left below each opening: 3.56mm at the TRRS, 4.25mm at the USB. The TRRS is thin
 enough that a printed shell wants an extra perimeter there.
 
 **Nothing in the case follows the board's USB notch.** Not the outer profile, not the
-cavity, not the plate. That notch clears the plug's overmold, which sits below the board
-entirely, so to the case it is only a bite out of an edge that should run straight.
+cavity, not the plate. Nothing the case passes reaches it: the plug shell runs below the
+board and the overmold stays outside the wall, so to the case it is only a bite out of an edge that should run straight.
 Inheriting it puts a jog in all three outlines and leaves a pointless tongue of material in
 the pocket. Fill it in the hull before offsetting any of them. The result is a void where
 the board is absent, which costs nothing and gives the plug more room rather than less: the
@@ -365,6 +364,7 @@ parameter here and in `gen-case.py`, then re-run it so its guards see the new va
 | Board underside to the bottom of the TRRS jack body            | 5.20          | jack margin                                                     |
 | Board underside to the USB-C receptacle centre                 | 2.65          | USB opening centre, z -10.25                                    |
 | Board underside to the TRRS bore centre                        | 2.90          | TRRS opening centre, z -10.50                                   |
+| USB-C receptacle centre from the notch centre, each half       | 0.537 inward  | USB opening centre, x                                           |
 | Board top to the plate-bearing shoulder of a seated switch     | 4.50          | recess depth; see "Switch seating" under Open risks             |
 | Kailh socket body edge to the right half's inner screw hole    | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
 | Switch top housing width                                       | 15.60         | the 16.00 recess fit                                            |
@@ -391,9 +391,9 @@ Traps:
 - **Fill the USB notch in the hull before any offset.** Every loop below is offset from the
   notch-filled hull. See Ports for why nothing follows the notch.
 - **Offset each loop from the hull, never from another offset loop.** The cavity loop's
-  corners are R2.00. Offsetting it inward 1.75 for either ring leaves R0.25 corners where
-  R2.00 is meant. The shelf's inner loop is the hull inset 1.25 and so is the plate
-  wall's, each with its own corners rounded at R2.00.
+  corners are R2.00. Offsetting it inward 1.50 for the shelf leaves R0.50 corners where
+  R2.00 is meant. The shelf's inner loop is the hull inset 1.00 and the plate wall's the
+  hull inset 1.20, each with its own corners rounded at R2.00.
 - **The one exception is the plate outline**, which is the finished cavity loop inset 0.20,
   so it matches the pocket it drops into. The inset leaves its five convex corners at
   R1.80 and its kink at R2.20: fillet all six to R2.00, the design's minimum corner
@@ -484,7 +484,7 @@ differ.
    at **-17.00 at the inner edge and -13.00 at the outer**.
 4. **Extrude cut "Cavity"**, Hull offset outward **0.50mm**, from **z -3.00** down through
    the open bottom. Fillet its five internal vertical corners at **2.0mm**.
-5. **Extrude "Shelf"**, the ring between the cavity loop and Hull inset **1.25mm** (corners
+5. **Extrude "Shelf"**, the ring between the cavity loop and Hull inset **1.00mm** (corners
    R2.00), from **z -3.00 down to -6.00**. The board is pressed up against its underside.
 6. **Bosses**, on the top underside: three circles r **2.75** at the positions above,
    extruded down **3.00mm** to the PCB top face.
@@ -507,10 +507,10 @@ On each half, after the mirror, from that half's own curves:
 1. **Extrude**, the cavity loop (with its R2.00 corners) inset **0.20mm**, all six corners
    filleted to **R2.00**, the kink included, **1.50mm** thick, between the slope plane and its
    1.50 offset, flush with the rim.
-2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.25mm**
+2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.20mm**
    (corners R2.00), from the plate's top face up to **z -7.60**. Remove the wall over
    the top-inner corner: **30.00** in from the plate's inner edge (x > +50.30), down to
-   **y 56.25**, where the inner loop's corner arc begins, so the inner wall ends flat
+   **y 56.30**, where the inner loop's corner arc begins, so the inner wall ends flat
    there.
 3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
@@ -520,8 +520,8 @@ On each half, after the mirror, from that half's own curves:
    insert. Each has a flat-bottomed 5.00 counterbore, cut from below up to one level
    plane: the plate's top face over the outer boss, z -12.47. Sketch the circles on a
    horizontal plane, concentric with the screw circles.
-5. **Bumper recesses**, 12.00 dia x 0.50 deep on the outer face at (-72.75, +52.25),
-   (+72.75, +52.25), (-72.75, -34.50), (+69.36, -50.27), each tangent to the wall's inner
+5. **Bumper recesses**, 12.00 dia x 0.50 deep on the outer face at (-72.80, +52.30),
+   (+72.80, +52.30), (-72.80, -34.55), (+69.39, -50.33), each tangent to the wall's inner
    loop in its corner. Sketch them on a horizontal plane, where the loop projects straight
    down, and extrude up to a plane 0.50 above the plate's underside: on the sloped plane the
    wall's edges project up to 0.2 sideways. Floor **parallel to the plate faces**, so the
@@ -721,17 +721,17 @@ The `FC_COMPARE` run holds your model to the reference everywhere it has not bee
 recorded as intentional, so these rows need checking by hand only where a recorded
 difference touches them:
 
-| Check                                   | Expected                                                    |
-| --------------------------------------- | ----------------------------------------------------------- |
-| Cavity loop size                        | 161.00 x 120.00                                             |
-| Gap from cavity to board outline        | near-constant around the perimeter                          |
-| Board outline points outside the cavity | none                                                        |
-| Boss bore depths                        | 4.00 at every boss; none breaks into a recess               |
-| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board             |
-| Top edge in plan                        | straight across; no notch inherited from the board          |
-| Plate under each bumper                 | 1.00                                                        |
-| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                  |
-| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right |
+| Check                                   | Expected                                                                                |
+| --------------------------------------- | --------------------------------------------------------------------------------------- |
+| Cavity loop size                        | 161.00 x 120.00                                                                         |
+| Gap from cavity to board outline        | near-constant around the perimeter                                                      |
+| Board outline points outside the cavity | none                                                                                    |
+| Boss bore depths                        | 4.00 at every boss; none breaks into a recess                                           |
+| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board; USB x 0.537 inward of the notch centre |
+| Top edge in plan                        | straight across; no notch inherited from the board                                      |
+| Plate under each bumper                 | 1.00                                                                                    |
+| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                              |
+| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                             |
 
 A wide spread in that gap means the profile is not the outline. The bore and bumper
 rows are the defects a closed, correctly sized solid can still carry, so check
