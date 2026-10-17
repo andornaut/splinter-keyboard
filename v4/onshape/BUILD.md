@@ -192,7 +192,7 @@ every head flush.
 | Counterbore in the plate           | 5.00 dia, **flat bottomed**   | head + 0.30; every floor on one level plane                                             |
 | Perimeter shelf, on the shell      | 1.50 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.00, inside its 2.00 keepout ring |
 | Perimeter wall, on the plate       | 1.50 wide, top at -7.60       | from the plate edge, so it laps the board by 1.20, clear of the nearest hotswap pads    |
-| Wall relief                        | 30.00 in from the plate edge  | x +-50.30 on, down to y 56.30; clears the USB plug's path, the jack and the MCU         |
+| Wall relief                        | 30.00 in from the plate edge  | x +-50.30 to +-78.80, from y 56.30, down to z -13.10, 0.10 under the jack's barrel      |
 | Flared standoff base               | 8.00 dia, up to -10.35        | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
 | Switch cutout / recess             | 14.50 / 16.00, R1.00 corners  | see below                                                                               |
 | Outer edge fillets, top and bottom | R1.00, one radius             | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
@@ -205,11 +205,18 @@ face, so that distance comes straight off the plug's travel into the jack. Stiff
 not need more: 2.00 is five perimeters printed, and the top face and the clamped board
 carry the shell.
 
-**The wall is cut away over the top-inner corner.** There the top edge carries the USB
+**The wall is cut down over the top-inner corner.** There the top edge carries the USB
 plug's path and the jack's body, so a band running on would block the USB plug and sit on
 the jack. The cut starts 30.00 in from the plate's inner edge, 2.60 clear of the Liatris
-body (its edge at x 52.90) in plan, and takes the inner wall down to where its corner arc
-begins.
+body (its edge at x 52.90) in plan, and runs to the inner wall's inner face from where the
+corner arc begins, so the inner wall runs straight and full height to the top edge, 1.03
+clear of the jack body.
+
+**The cut stops 0.10 under the jack's barrel**, the jack's lowest point, rather than at the
+plate. The band left below it catches a jack pushed down by a plug, which would otherwise
+load only its solder joints, without pressing on it, so it cannot preload those joints or
+bow the board. Nothing else in the relief reaches that low: the Liatris ends 1.30 short of the
+band in plan, and its USB receptacle's underside sits about 1.25 above the floor.
 
 **The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
 without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
@@ -362,6 +369,7 @@ parameter here and in `gen-case.py`, then re-run it so its guards see the new va
 | Board underside to the lowest point of the installed MCU       | 5.40          | the binding margin; see "MCU seating" under Open risks          |
 | Board underside to the bottom of a hotswap socket              | 1.85          | the 0.90 between the sockets and the standoff flares            |
 | Board underside to the bottom of the TRRS jack body            | 5.20          | jack margin                                                     |
+| Board underside to the bottom of the TRRS barrel, at the edge  | 5.40          | wall relief floor, z -13.10                                     |
 | Board underside to the USB-C receptacle centre                 | 2.65          | USB opening centre, z -10.25                                    |
 | Board underside to the TRRS bore centre                        | 2.90          | TRRS opening centre, z -10.50                                   |
 | USB-C receptacle centre from the notch centre, each half       | 0.537 inward  | USB opening centre, x                                           |
@@ -509,9 +517,10 @@ On each half, after the mirror, from that half's own curves:
    1.50 offset, flush with the rim.
 2. **Perimeter wall**, the ring between the plate outline and Hull inset **1.20mm**
    (corners R2.00), from the plate's top face up to **z -7.60**. Remove the wall over
-   the top-inner corner: **30.00** in from the plate's inner edge (x > +50.30), down to
-   **y 56.30**, where the inner loop's corner arc begins, so the inner wall ends flat
-   there.
+   the top-inner corner: from **30.00** in from the plate's inner edge (x +50.30) to the
+   inner wall's inner face (x +78.80), from **y 56.30**, where the inner loop's corner arc
+   begins, out, cut from the wall top down **5.50** to **z -13.10**. The inner wall stays
+   full height to the top edge.
 3. **Standoffs**, r **2.75** at the three boss positions, rising to the PCB underside at
    z -7.60. Heights are in the boss table. Each sits on a flared base, r **4.00**, from
    the plate up to **z -10.35**, 2.75 below the board underside.
@@ -643,6 +652,7 @@ teardrop them if they sag.
 | **Liatris**                | 7.18      | 5.40  | **+1.78** |
 | Hotswap socket, right half | 4.05      | 1.85  | +2.20     |
 | TRRS jack                  | 7.63      | 5.20  | +2.43     |
+| TRRS barrel, over the wall | 5.50      | 5.40  | +0.10     |
 
 Everything tall mounts on side B, so the 3.00mm above the PCB only has to clear the
 switches and the whole height question is below the board.
@@ -731,6 +741,8 @@ difference touches them:
 | Top edge in plan                        | straight across; no notch inherited from the board                                      |
 | Plate under each bumper                 | 1.00                                                                                    |
 | Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                              |
+| Wall relief floor                       | z -13.10, 0.10 under the jack's barrel                                                  |
+| Liatris in plan                         | ends short of the relief floor's band (its inner face at y 58.30), about 1.30 clear     |
 | Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                             |
 
 A wide spread in that gap means the profile is not the outline. The bore and bumper

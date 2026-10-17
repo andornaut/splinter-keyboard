@@ -67,6 +67,10 @@ COMPARE_MIN_VOL = 1e-3
 # faces crossing at a shallow angle can defeat every fuzz, and that is local: it should
 # cost the comparison that spot, not the whole part.
 COMPARE_MIN_CELL = 4.0
+# How far extra - missing may stray from model - ref before a Boolean is taken as broken.
+# Fixed, not scaled by fuzz and surface area: that scale admits tens of mm3, enough for a
+# broken result to lose a real hole and still balance. A sound one strays by hundredths.
+COMPARE_MAX_IMBALANCE = 0.5
 # A part whose bounding-box centre is this far from the reference's is in another frame,
 # and every face would report as a difference. Caught first so the report names the cause.
 FRAME_TOL = 1.0
@@ -161,10 +165,16 @@ BOARD_PLAY = (BOARD_HOLE_D - SCREW_NOMINAL_D) / 2.0
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
-# The plate wall is cut away over the top-inner corner, where the USB plug's path, the jack
-# and the MCU's corner are: across WALL_RELIEF_W in from the plate's inner edge, down to
-# where the wall's inner loop turns its corner arc, so the inner wall ends flat there.
+# The plate wall's top band is cut down over the top-inner corner, where the USB plug's path,
+# the jack and the MCU's corner are: from WALL_RELIEF_W in from the plate's inner edge out to
+# the wall's inner face, and from where the inner loop turns its corner arc, so the inner
+# wall runs straight and full height to the top edge, clear of the jack. The cut stops
+# RELIEF_GAP under the jack's barrel, its lowest point, so the band left below catches a jack
+# pushed down by a plug without pressing on it. The Liatris ends short of the band in plan
+# and its receptacle sits above that floor.
 WALL_RELIEF_W = 30.00
+TRRS_BARREL_R = 2.50  # PJ-320A barrel
+RELIEF_GAP = 0.10
 
 # Bumper recesses on the plate's outer face, each tangent to the plate wall's inner loop in
 # its corner, so the feet sit as far out as the plate allows.
@@ -201,9 +211,9 @@ EXPECT_CYL = {
         (SCREW_R, 3),
         (CAVITY_FILLET, 5),  # the outline's corners, opened back to the cavity's radius
         (CAVITY_FILLET, 1),  # the outline's kink
-        # The plate wall's inner corners and its kink. Five, not six: one corner falls
-        # inside the top-inner relief.
-        (CAVITY_FILLET, 5),
+        # The plate wall's inner corners and its kink, the top-inner one kept below the
+        # relief floor.
+        (CAVITY_FILLET, 6),
         (CBORE_R, 3),
         (STANDOFF_R, 3),  # above their flares
         (FLARE_R, 3),
@@ -361,6 +371,10 @@ def closed(wire, r):
 
 def prism(wire, z0, z1):
     return Part.Face(wire).extrude(Vector(0, 0, z1 - z0)).translated(Vector(0, 0, z0))
+
+
+def relief_floor():
+    return TRRS_Z - TRRS_BARREL_R - RELIEF_GAP
 
 
 def moved(shape, vec):
@@ -585,8 +599,9 @@ def build(dxf, half, explode):
     )
     edge = plate_w.BoundBox.XMax if sign > 0 else -plate_w.BoundBox.XMin
     ry = plate_wall_w.BoundBox.YMax - CAVITY_FILLET
-    rx0, rx1 = sorted((sign * (edge - WALL_RELIEF_W), sign * (edge + 1.0)))
-    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, ry, -BIG)))
+    inner = plate_wall_w.BoundBox.XMax if sign > 0 else -plate_wall_w.BoundBox.XMin
+    rx0, rx1 = sorted((sign * (edge - WALL_RELIEF_W), sign * inner))
+    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, BIG, Vector(rx0, ry, relief_floor())))
     plate = plate.fuse(ring)
     for bx, by in bosses:
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
@@ -675,6 +690,15 @@ def check(out, half, explode, keys):
 
     if not explode and abs(plate.BoundBox.ZMax - PCB_BOT) > 0.01:
         fails.append(f"plate wall top {plate.BoundBox.ZMax:.3f}, expected the board underside {PCB_BOT:.3f}")
+    if not explode and not any(
+        isinstance(f.Surface, Part.Plane)
+        and abs(f.Surface.Axis.z) > 0.999
+        and abs(f.CenterOfMass.z - relief_floor()) < 0.01
+        and min(abs(f.BoundBox.XMin), abs(f.BoundBox.XMax)) <= TRRS_X - TRRS_BARREL_R
+        and max(abs(f.BoundBox.XMin), abs(f.BoundBox.XMax)) >= TRRS_X + TRRS_BARREL_R
+        for f in plate.Faces
+    ):
+        fails.append(f"no relief floor under the jack at z {relief_floor():.2f}")
     # The shelf's underside is what the board is clamped against, so it must be a real
     # horizontal face at the board's top, not merely somewhere in the right region.
     shelf = [
@@ -723,16 +747,18 @@ def check(out, half, explode, keys):
             )
 
     # Prismatic features are invisible to a cylinder census, so test them by volume: a
-    # perimeter wall built across a port opening leaves every count above unchanged.
+    # perimeter wall built across a port opening leaves every count above unchanged. The
+    # TRRS is held to its jack's barrel rather than its opening, since the relief floor sits
+    # inside the opening's radius on purpose, RELIEF_GAP under the barrel.
     sign = 1 if half == "left" else -1
     dz = -explode
 
     for name, tool in (
         ("USB opening", usb_slot(sign, dz)),
         (
-            "TRRS bore",
+            "TRRS barrel",
             Part.makeCylinder(
-                TRRS_R,
+                TRRS_BARREL_R + RELIEF_GAP / 2.0,
                 40.0,
                 Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z + dz),
                 Vector(0, 1, 0),
@@ -858,34 +884,75 @@ def inside(bb, box):
     return all(lo[k] >= box[k] - MATCH_TOL and hi[k] <= box[k + 3] + MATCH_TOL for k in range(3))
 
 
-def sound_residuals(model, ref, cell):
+def interior_point(solid):
+    """A point inside the solid, clear of its boundary, or None if none is found."""
+    p = solid.CenterOfMass
+    if solid.isInside(p, 1e-6, False):
+        return p
+    # Half the thickness of a slab this size, then finer for a wedge that thins below it.
+    steps = [solid.Volume / solid.Area / k for k in (1.0, 4.0, 16.0)]
+    for f in sorted(solid.Faces, key=lambda f: -f.Area):
+        # Triangle centroids lie on the face, where the middle of its parameter range need
+        # not: a crescent's is outside it.
+        pts, tris = f.tessellate(0.05)
+        for a, b, c in tris:
+            q = (pts[a] + pts[b] + pts[c]) * (1.0 / 3.0)
+            n = f.normalAt(*f.Surface.parameter(q))
+            for step in steps:
+                for sgn in (-1.0, 1.0):
+                    cand = q + n * (sgn * step)
+                    if solid.isInside(cand, 1e-6, False):
+                        return cand
+    return None
+
+
+def verified(regions_, inside, outside):
+    """Whether every region has an interior point in `inside` and not in `outside`.
+
+    Point classification does not go through a Boolean, so it holds a broken one to
+    account: debris it hands back as a difference lies where both solids agree.
+    """
+    try:
+        for r in regions_:
+            p = interior_point(r)
+            if p is None or not inside.isInside(p, 1e-6, True) or outside.isInside(p, 1e-6, True):
+                return False
+    except (Part.OCCError, RuntimeError):  # a region too broken to classify is debris
+        return False
+    return True
+
+
+def sound_residuals(model, ref, cell, whole):
     """model - ref and ref - model, at the first fuzz OCC computes them sanely with, or None.
 
     A fuzzy Boolean between two nearly coincident solids can fail without raising: it
-    hands back the whole operand, a negative volume, an invalid shape, or plausible-looking
-    debris; which fuzz it fails at depends on the geometry. A sound pair is valid, neither
-    residual is negative, and the two account for the volume difference: extra - missing =
-    model - ref, give or take what the fuzz absorbs, at most its width over the whole
-    surface. Nor is either residual most of a whole part whose frame already matches; in a
-    cell, where a real difference can fill one side, only both at once (each operand handed
-    back whole, which balances exactly) is a failure.
+    hands back the whole operand, a negative volume, or plausible-looking debris; which fuzz
+    it fails at depends on the geometry, and it can differ run to run. Validity is no test:
+    a correct residual often reports itself invalid. In a sound pair neither residual is
+    negative, and the two account for the volume difference: extra - missing = model - ref
+    within COMPARE_MAX_IMBALANCE. Nor is either residual most of a whole part whose frame
+    already matches; in a cell, where a real difference can fill one side, only both at once
+    (each operand handed back whole, which balances exactly) is a failure. Last, every region
+    it would report is confirmed by point classification against `whole`, the uncut
+    (model, ref) pair.
     """
     for fuzz in COMPARE_FUZZES:
         try:
             extra = model.cut(ref, fuzz) if fuzz else model.cut(ref)
             missing = ref.cut(model, fuzz) if fuzz else ref.cut(model)
-            over = [r.Volume > 0.5 * whole.Volume for r, whole in ((extra, model), (missing, ref))]
-            sound = (
-                extra.isValid()
-                and missing.isValid()
-                and extra.Volume >= 0
-                and missing.Volume >= 0
-                and not (all(over) if cell else any(over))
-            )
+            over = [r.Volume > 0.5 * part.Volume for r, part in ((extra, model), (missing, ref))]
+            sound = extra.Volume >= 0 and missing.Volume >= 0 and not (all(over) if cell else any(over))
             balance = abs((extra.Volume - missing.Volume) - (model.Volume - ref.Volume))
-        except Part.OCCError:
+        # OCC failures arrive as Part.OCCError, FreeCAD's own ("Multi cut failed") as a
+        # plain RuntimeError; either is this fuzz failing, not the comparison.
+        except (Part.OCCError, RuntimeError):
             continue
-        if sound and balance <= max(COMPARE_MIN_VOL * 100, fuzz * max(model.Area, ref.Area)):
+        if (
+            sound
+            and balance <= COMPARE_MAX_IMBALANCE
+            and verified(regions(extra), whole[0], whole[1])
+            and verified(regions(missing), whole[1], whole[0])
+        ):
             return extra, missing
     return None
 
@@ -896,36 +963,67 @@ def residuals(model, ref):
     Tried whole first. Failing that, the part is halved along its longest side, each half
     of both solids compared on its own, and a half that fails is halved again down to
     COMPARE_MIN_CELL. Pieces from neighbouring cells are fused back so a region reads as one.
+    Returns the residuals and two box lists: cells no fuzz computes, and cells no cut
+    conserves.
+
+    Cutting a part into cells is a Boolean too, and can drop a feature without raising: a
+    hole lost from the model's piece leaves two pieces that match. So every split must
+    conserve volume, each pair of halves adding up to its parent within
+    COMPARE_MAX_IMBALANCE, from the root, whose volume is the part's own. A split that does
+    not is retried off centre, and a cell no split conserves is reported as uncomputed.
     """
-    got = sound_residuals(model, ref, cell=False)
+    got = sound_residuals(model, ref, cell=False, whole=(model, ref))
     if got:
-        return got[0], got[1], []
-    extras, missings, failed = [], [], []
+        return got[0], got[1], [], []
+    extras, missings, no_fuzz, no_cut = [], [], [], []
     bb = App.BoundBox(model.BoundBox)
     bb.add(ref.BoundBox)
     bb.enlarge(1.0)
-    stack = [bb]
+    stack = [(bb, model, ref)]
     while stack:
-        b = stack.pop()
-        box = Part.makeBox(b.XLength, b.YLength, b.ZLength, Vector(b.XMin, b.YMin, b.ZMin))
-        m, r = model.common(box), ref.common(box)
+        b, m, r = stack.pop()
         if m.Volume < COMPARE_MIN_VOL and r.Volume < COMPARE_MIN_VOL:
             continue
-        got = sound_residuals(m, r, cell=True)
+        got = None if m is model else sound_residuals(m, r, cell=True, whole=(model, ref))
         if got:
             extras.append(got[0])
             missings.append(got[1])
             continue
-        sizes = (b.XLength, b.YLength, b.ZLength)
-        if max(sizes) <= COMPARE_MIN_CELL:
-            failed.append(b)
+        if max(b.XLength, b.YLength, b.ZLength) <= COMPARE_MIN_CELL:
+            no_fuzz.append(b)
             continue
-        axis = sizes.index(max(sizes))
-        lo, hi = [b.XMin, b.YMin, b.ZMin], [b.XMax, b.YMax, b.ZMax]
-        mid = (lo[axis] + hi[axis]) / 2
-        stack.append(App.BoundBox(*lo, *[mid if k == axis else hi[k] for k in range(3)]))
-        stack.append(App.BoundBox(*[mid if k == axis else lo[k] for k in range(3)], *hi))
-    return fused(extras), fused(missings), merged(failed)
+        halves = split(m, r, b)
+        if halves is None:
+            no_cut.append(b)
+            continue
+        stack.extend(halves)
+    return fused(extras), fused(missings), merged(no_fuzz), merged(no_cut)
+
+
+def split(m, r, b):
+    """The two halves of cell b with its pieces m and r cut to each, or None if no cut conserves."""
+    sizes = (b.XLength, b.YLength, b.ZLength)
+    axis = sizes.index(max(sizes))
+    lo, hi = [b.XMin, b.YMin, b.ZMin], [b.XMax, b.YMax, b.ZMax]
+    for frac in (0.5, 0.43, 0.57, 0.37, 0.63):
+        mid = lo[axis] + frac * (hi[axis] - lo[axis])
+        boxes = [
+            App.BoundBox(*lo, *[mid if k == axis else hi[k] for k in range(3)]),
+            App.BoundBox(*[mid if k == axis else lo[k] for k in range(3)], *hi),
+        ]
+        try:
+            cut = []
+            for c in boxes:
+                tool = Part.makeBox(c.XLength, c.YLength, c.ZLength, Vector(c.XMin, c.YMin, c.ZMin))
+                cut.append((c, m.common(tool), r.common(tool)))
+            if (
+                abs(sum(x[1].Volume for x in cut) - m.Volume) <= COMPARE_MAX_IMBALANCE
+                and abs(sum(x[2].Volume for x in cut) - r.Volume) <= COMPARE_MAX_IMBALANCE
+            ):
+                return cut
+        except (Part.OCCError, RuntimeError):  # the cut can fail as the Booleans do
+            continue
+    return None
 
 
 def fused(pieces):
@@ -934,9 +1032,14 @@ def fused(pieces):
     if len(solids) < 2:
         return Part.makeCompound(solids)
     try:
-        return solids[0].multiFuse(solids[1:]).removeSplitter()
-    except Part.OCCError:
-        return Part.makeCompound(solids)
+        out = solids[0].multiFuse(solids[1:]).removeSplitter()
+        # The pieces come from disjoint cells, so their union keeps their volume. A fuse
+        # that does not has dropped a piece, and reporting it unfused is better than not.
+        if abs(out.Volume - sum(s.Volume for s in solids)) <= COMPARE_MAX_IMBALANCE:
+            return out
+    except (Part.OCCError, RuntimeError):
+        pass
+    return Part.makeCompound(solids)
 
 
 def merged(boxes):
@@ -993,15 +1096,19 @@ def compare(ref_path, model_paths, half, diffs_path, spacing):
     used = set()
     mismatches, intentional = 0, 0
     for name in ("shell", "plate"):
-        extra, missing, failed = residuals(model[name], ref[name])
-        for b in failed:
-            mismatches += 1
-            sys.stdout.flush()
-            print(
-                f"  FAIL {subject}: {name}: no fuzz in {COMPARE_FUZZES} computes x {b.XMin:.2f}..{b.XMax:.2f}, "
-                f"y {b.YMin:.2f}..{b.YMax:.2f}, z {b.ZMin:.2f}..{b.ZMax:.2f}; compare it by hand",
-                file=sys.stderr,
-            )
+        extra, missing, no_fuzz, no_cut = residuals(model[name], ref[name])
+        for why, boxes in (
+            (f"no fuzz in {COMPARE_FUZZES} computes", no_fuzz),
+            ("no cut into cells conserves the volume of", no_cut),
+        ):
+            for b in boxes:
+                mismatches += 1
+                sys.stdout.flush()
+                print(
+                    f"  FAIL {subject}: {name}: {why} x {b.XMin:.2f}..{b.XMax:.2f}, "
+                    f"y {b.YMin:.2f}..{b.YMax:.2f}, z {b.ZMin:.2f}..{b.ZMax:.2f}; compare it by hand",
+                    file=sys.stderr,
+                )
         for kind, residual in (("extra", extra), ("missing", missing)):
             for r in regions(residual):
                 bb = r.BoundBox

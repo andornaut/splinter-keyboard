@@ -97,10 +97,11 @@ exactly this, so neither bears on a ground plane. Tracks are a different matter:
 ring is deliberately carved open over the TRRS so the jack's through-holes are not flagged,
 so the shelf can cross copper there, under soldermask.
 
-**The plate wall's top band stops short of the top-inner corner.** The top edge there
-carries the USB plug's path and the jack's body, so a band running on would block the plug
-and sit on the jack. The inner wall runs the full height, beside the jack rather than
-under it.
+**The plate wall's top band is cut down over the top-inner corner.** The top edge there
+carries the USB plug's path and the jack's body, so a band at full height would block the
+plug and sit on the jack. The cut stops just short of the jack's barrel, so a plug pushed
+down bears on the plate rather than on the jack's solder joints. The inner wall runs the
+full height, beside the jack rather than under it.
 
 **Which side the shelf sits on decides whether it can be made.** Above the board, pressed up
 against, it narrows the opening going up and a mill reaches it from below without trouble.
