@@ -14,14 +14,17 @@ Each file has one job:
 | This file                                                   | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
 | `Splinter keyboard v4 - Filament.step`                      | The Onshape model's filament export, both halves, as last validated        |
 | `Splinter keyboard v4 - Aluminium.step`                     | The same for the aluminium configuration                                   |
+| `Splinter v4 left shell.step` and the other three parts     | The aluminium configuration one part per file, for JLCCNC                  |
 | `Splinter v4 left shell.pdf`, `Splinter v4 right shell.pdf` | The aluminium shells' thread drawings, for JLCCNC                          |
 | [onshape.png](./onshape.png)                                | A render of the filament export                                            |
 
 **The STEP files are snapshots**, one per configuration. Each holds both halves, four
 solids, exported from the Onshape document and validated against `gen-case.py` (the
-aluminium one with `FC_VARIANT=aluminium`) with no differences. After any change to the
-design, export both configurations again to `dist/v4/onshape/`, validate both halves of
-each, and only then replace them and the drawings.
+aluminium one with `FC_VARIANT=aluminium`) with no differences. The aluminium
+configuration is also kept one part per file, the form JLCCNC quotes, each half's shell
+and plate validated together. After any change to the design, export both configurations
+and the four parts again to `dist/v4/onshape/`, validate both halves of each, and only
+then replace them and the drawings.
 
 ## Generating a model
 

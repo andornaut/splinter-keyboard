@@ -201,6 +201,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export it to `dist/${VERSION}/onshape/`.
 1. Validate both halves against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py` and again with `FC_HALF=right`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
 1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4 - Filament.step`, and the aluminium configuration's over `Splinter keyboard v4 - Aluminium.step`.
+1. Export the aluminium configuration again one part per file, validate each half's pair with `FC_VARIANT=aluminium FC_COMPARE=<shell>.step,<plate>.step`, and copy them over `v4/onshape/Splinter v4 {left,right} {shell,plate}.step`.
 
 ### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
 
@@ -210,7 +211,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 
 #### Alternative: machined aluminium case (JLCCNC)
 
-Upload [`Splinter keyboard v4 - Aluminium.step`](./v4/onshape/Splinter%20keyboard%20v4%20-%20Aluminium.step), the model's aluminium configuration (tapped holes, see [Aluminium variant](./v4/onshape/BUILD.md#aluminium-variant)), to [JLCCNC](https://jlccnc.com). It holds both halves' shells and plates, four parts, so check that each part is quoted once:
+Upload the model's aluminium configuration (tapped holes, see [Aluminium variant](./v4/onshape/BUILD.md#aluminium-variant)) to [JLCCNC](https://jlccnc.com) as four files, one part each, since JLCCNC quotes per file: [`Splinter v4 left shell.step`](./v4/onshape/Splinter%20v4%20left%20shell.step), [`Splinter v4 left plate.step`](./v4/onshape/Splinter%20v4%20left%20plate.step), [`Splinter v4 right shell.step`](./v4/onshape/Splinter%20v4%20right%20shell.step) and [`Splinter v4 right plate.step`](./v4/onshape/Splinter%20v4%20right%20plate.step). Attach each shell's thread drawing to that shell, and quote each part once:
 
 | Setting        | Value                                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
