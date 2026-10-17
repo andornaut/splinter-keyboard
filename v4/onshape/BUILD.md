@@ -297,6 +297,7 @@ the standoff is 5.50 and not larger.
 | Feature                             | Position                                              | Relative to                                    |
 | ----------------------------------- | ----------------------------------------------------- | ---------------------------------------------- |
 | USB-C notch, already in the outline | x +56.663 .. +66.663, cut 7.271mm down from y +59.500 | centred on the Liatris, x +61.663              |
+| USB-C opening centre                | x +62.200                                             | 0.537 toward the inner edge from notch centre  |
 | TRRS jack centre                    | (74.650, 59.500)                                      | 12.987 toward the inner edge from notch centre |
 
 **Model both openings from the notch, not from the frame.** The config places the notch at
@@ -308,7 +309,7 @@ holds wherever the MCU column moves.
 | Opening     | Size            | Centre z   | Below the board underside | Source                                                                |
 | ----------- | --------------- | ---------- | ------------------------- | --------------------------------------------------------------------- |
 | TRRS, round | 5.50 dia        | **-10.50** | 2.90                      | measured off the built v4 case                                        |
-| USB-C, slot | 9.50 w x 4.00 h | **-10.25** | 2.65                      | measured on a printed part of this design; width is stated, see below |
+| USB-C, slot | 9.50 w x 4.00 h | **-10.25** | 2.65                      | measured on printed halves of this design; width is stated, see below |
 
 **The USB opening is a slot, R2.00 at both ends.** A USB-C plug shell is rounded the same
 way, and an end mill cutting through the wall from the side cannot make a rectangle's
@@ -319,7 +320,9 @@ internal corners.
 directly, and the TRRS is taken straight from it. The USB sits 0.50 higher than that case
 carries: the inherited height printed low on this design. Re-measure on hardware before
 changing either, and treat the TRRS as due for the same check, since it comes from the same
-source as the height that moved.
+source as the height that moved. The USB's x is measured the same way: on the printed
+halves the receptacle sits 0.537 off the notch centre, toward the inner edge, so the
+opening is centred there rather than on the notch.
 
 Add 0.3-0.4mm printed, 0.2-0.3mm machined. **Both are plain cutouts straight through the
 wall.** No counterbore and no recess: a pocket on the outer face reads as the port being
@@ -330,12 +333,12 @@ is only about 6.5mm long, so a cable with a fat overmold may bottom on the outer
 before it seats. Settle it on the printed half with the cables you actually own; a
 13.00 x 7.00 x 1.50 counterbore on the outer face is the fix if one of them will not go.
 
-**Why 9.50 wide, and why it is stated rather than derived.** It sits inside the board's own
-10.00 notch, so the plug clears the board edge, and it clears an 8.34mm plug shell by 0.58
-per side. How far inside the notch it has to sit is set by how far the board can move,
-which is the screws and not the pocket: a 2.5mm screw in a 3.00mm hole is 0.25 per side
-whatever the pocket fit is. Deriving the width from the pocket clearance would shrink the
-port every time the pocket was loosened, which is the wrong direction.
+**Why 9.50 wide, and why it is stated rather than derived.** It clears an 8.34mm plug shell
+by 0.58 per side, which has to cover the board moving on its screws: a 2.5mm screw in a
+3.00mm hole is 0.25 per side, whatever the pocket fit is. The plug rides in the receptacle,
+so it moves with the board, and the board's own 10.00 notch clears it by 0.29 at the near
+edge. Deriving the width from the pocket clearance would shrink the port every time the
+pocket was loosened, which is the wrong direction.
 
 Wall left below each opening: 3.56mm at the TRRS, 4.25mm at the USB. The TRRS is thin
 enough that a printed shell wants an extra perimeter there.

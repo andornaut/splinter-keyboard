@@ -137,20 +137,23 @@ SOCKET_H = 1.85
 # built v4 case, which shares this z stack exactly (top face 0, top underside -3.00, PCB
 # -6.00 to -7.60), so its port centres transfer directly. The USB is 0.50 higher than that
 # case carries, set on a printed part of THIS design where the inherited height sat low.
-# Re-measure on hardware before changing either.
+# Re-measure on hardware before changing either. The USB's x is measured the same way: on
+# the printed halves the receptacle sits USB_DX off the notch centre, toward the inner edge.
 TRRS_X, TRRS_Y = 74.650, 59.500
 TRRS_Z, TRRS_R = -10.50, 2.75
 USB_X0, USB_X1 = 56.663, 66.663
 USB_Z, USB_H = -10.25, 4.00
-# Stated, NOT derived from POCKET_CLR. The opening has to stay inside the board's own 10.00
-# notch so the plug clears the board edge, and how far inside is set by how far the board
-# can move, which is the screws and not the pocket: a 2.5mm screw in a 3.00mm hole is 0.25
-# per side whatever the pocket fit is. Deriving it would shrink the port every time the
-# pocket is loosened, which is the wrong direction.
+USB_DX = 0.537
+# Stated, NOT derived from POCKET_CLR. The plug has to clear the opening wherever the board
+# sits, and how far the board can move is set by the screws and not the pocket: a 2.5mm
+# screw in a 3.00mm hole is BOARD_PLAY per side whatever the pocket fit is. Deriving it
+# would shrink the port every time the pocket is loosened, which is the wrong direction.
 USB_W = 9.50
+USB_PLUG_W = 8.34
+BOARD_PLAY = 0.25
 # Both ports are plain cutouts straight through the wall. No counterbore and no recess: a
 # pocket on the outer face reads as the port being sunk into the case rather than opened
-# through it. The USB clears an 8.34mm plug shell by 0.58 per side. It is a slot with
+# through it. The USB clears the plug shell by 0.58 per side. It is a slot with
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
@@ -375,7 +378,7 @@ def cyl(r, z0, z1, x=0.0, y=0.0):
 
 def usb_slot(sign, dz=0.0):
     """The USB opening, run 20mm either side of the top edge so it overshoots both wall faces."""
-    ux = sign * (USB_X0 + USB_X1) / 2.0
+    ux = sign * ((USB_X0 + USB_X1) / 2.0 + USB_DX)
     r = USB_H / 2.0
     half = USB_W / 2.0 - r
     y0, z = TRRS_Y - 20.0, USB_Z + dz
@@ -1035,14 +1038,21 @@ def compare(ref_path, model_paths, half, diffs_path, spacing):
 
 
 def main():
-    # USB_W is a stated width, so the invariant it has to satisfy is asserted rather than
-    # guaranteed by construction. Nothing downstream would catch a violation: check() tests
-    # the opening against the PLATE, never against the notch it has to sit inside.
-    if USB_W > USB_X1 - USB_X0:
+    # USB_W and USB_DX are stated, so the invariants they have to satisfy are asserted
+    # rather than guaranteed by construction. Nothing downstream would catch a violation:
+    # check() tests the opening against the PLATE, never against the plug. The plug rides in
+    # the receptacle, so it moves with the board: the opening has to clear it with the board
+    # moved BOARD_PLAY either way, and the board's own notch has to clear it outright.
+    if USB_W < USB_PLUG_W + 2 * BOARD_PLAY:
         raise SystemExit(
-            f"FAIL gen-case: the {USB_W:.2f} USB opening is wider than the board's {USB_X1 - USB_X0:.2f} notch, so "
-            "a plug would foul the board edge. Narrow USB_W, or widen the notch in "
-            "config.yaml and move USB_X0/USB_X1 with it"
+            f"FAIL gen-case: the {USB_W:.2f} USB opening does not clear a {USB_PLUG_W:.2f} plug once the "
+            f"board moves {BOARD_PLAY:.2f} on its screws. Widen USB_W"
+        )
+    if abs(USB_DX) + USB_PLUG_W / 2.0 > (USB_X1 - USB_X0) / 2.0:
+        raise SystemExit(
+            f"FAIL gen-case: a {USB_PLUG_W:.2f} plug {USB_DX:+.3f} off the centre of the board's "
+            f"{USB_X1 - USB_X0:.2f} USB notch fouls the notch edge. Re-measure USB_DX, or widen the "
+            "notch in config.yaml and move USB_X0/USB_X1 with it"
         )
 
     dxf = os.environ.get("FC_DXF", DEFAULT_DXF)
