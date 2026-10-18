@@ -16,8 +16,8 @@ the GND plane is still excluded there:
   - perimeter route ring (PERIMETER_ROUTE_NAME): the same ring with the TRRS
     corner carved out (see _trrs_carve), disallowing tracks and vias, so DRC
     flags any stray routing into the border EXCEPT at the TRRS connector corner,
-    which has no case wall above/below it and whose through-holes and protection
-    traces legitimately reach the edge.
+    where the case's top wall has the port opening and whose through-holes and
+    protection traces legitimately reach the edge.
   - screw bosses (BOSS_NAME): a disk of (boss radius + BOSS_MARGIN) centered on
     each mounting hole, disallowing pour, tracks, and vias, so nothing lands
     within BOSS_MARGIN of a boss. One zone per boss (a single zone with disjoint

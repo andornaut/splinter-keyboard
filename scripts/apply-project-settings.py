@@ -9,7 +9,9 @@ four things:
 
   * A "VCC" net class (wider track for the power nets) plus a pattern that
     assigns the "VCC" net to it, the same thing Board Setup > Net Classes does
-    by hand.
+    by hand. VCC's clearance, track width and priority, and the Default class's
+    clearance, are enforced on every run, so a value hand-edited in KiCad is
+    reset.
   * DRC floors (min track width / min clearance), which KiCad leaves disabled
     (0.0) by default. Setting them to the fab's recommended minimum makes DRC
     flag any accidental sub-fab feature without touching the intentional 0.20mm+
@@ -27,8 +29,9 @@ four things:
     tell a copper pad from a bare hole, so that policy lives here; tracks/vias/
     pour are handled by the rule areas.
 
-Re-running is a no-op: each piece is only added when absent/disabled, and a file
-is rewritten only when it actually changed. Missing files are skipped quietly,
+Re-running is a no-op once the settings match: the DRC floors and severity
+overrides are only filled when absent/disabled, the net class values are
+enforced, and a file is rewritten only when it actually changed. Missing files are skipped quietly,
 so a manually-passed glob that matches nothing is harmless.
 
 Usage: apply-project-settings.py <project.kicad_pro> [more.kicad_pro ...]
