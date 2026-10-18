@@ -11,9 +11,10 @@
 // License: CC-BY-NC-SA-4.0 (inherited from the adapted ceoloide code).
 //
 // Geometry: SOD-123FL land for the Littelfuse SMF5.0CA. Body outline 3.0 x
-// 1.85mm matches that datasheet's package (body length 2.70-3.10mm, width
-// 1.70-2.00mm, lead-to-lead span 3.50-3.90mm). 1.2 x 1.2mm SMD pads at 3.0mm
-// center-to-center: an oversized hand-solder land that still reflows fine.
+// 1.85mm sits within the SMF5.0CA datasheet's package (body length 2.90-3.10mm,
+// width 1.50-2.00mm, lead-to-lead span 3.40-3.90mm). 1.2 x 1.2mm SMD pads at 3.0mm
+// center-to-center, against Littelfuse's 1.3 x 1.4mm at 2.9mm: the same 4.2mm outer
+// extent with slightly smaller pads, which reflows fine.
 //
 // Params:
 //   side                  F or B, the side to place the footprint and designator on

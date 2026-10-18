@@ -14,10 +14,12 @@ itself so they track the board.
 
 ## Target board
 
-The case is for the assembled board stamped `config=b05d803d9317 commit=51522ad clean=yes`.
-`main` carries the same `Edge.Cuts` and the same footprint placements on both halves: the
-later config changes only add the un-filleted DXF export, and the later board changes are
-copper. **Generate the DXF from `main`**, since 51522ad predates `full_unfilleted.dxf`.
+The case fits two board builds that share one `Edge.Cuts` and one placement of everything
+the case touches (switches, screws, MCU, TRRS jack body, reset switch): the assembled board
+stamped `config=b05d803d9317 commit=51522ad`, and the revision stamped
+`config=6df33837a71a commit=a1c05eb`, which changes the jack's pads, removes the data
+resistor and moves no part. **Generate the DXF from `main`**, since 51522ad predates
+`full_unfilleted.dxf`.
 
 A config change that moves the outline, a switch, a screw or a port makes the case stop
 fitting this board. Re-check it against the board in hand before taking one.
@@ -180,7 +182,7 @@ every head flush.
 | Switch recess depth                | 1.50                          | nesting                                                                                 |
 | Plate at a switch cutout           | 1.50                          | MX standard, 1.5mm +-0.1mm                                                              |
 | Bottom plate                       | 1.50                          | takes the button head's full height                                                     |
-| Board pocket                       | 161.00 x 120.00               | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
+| Board pocket                       | 161.00 x 120.00               | hull + 0.50/side, so the board is 0.50/side loose in x and y                            |
 | Shell outer profile                | 165.00 x 124.00               | pocket + wall                                                                           |
 | Boss and standoff diameter         | 5.50                          | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
 | Boss height                        | 3.00                          | top underside to PCB                                                                    |
@@ -593,12 +595,12 @@ hole itself. Until the screws are in, only the pocket holds it; once they are, t
 to 0.25, which is tighter. Since the switches go in last, their pins always meet a board
 held by its screws.
 
-| Constraint                 | Play, per side                                                                     | In force                    |
-| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------- |
-| Pocket in x                | 0.50                                                                               | whenever the screws are not |
-| Pocket in y                | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) | whenever the screws are not |
-| Screw in its 3.00 hole     | 0.25                                                                               | once the plate is on        |
-| Switch in its 16.00 recess | 0.20                                                                               | always                      |
+| Constraint                 | Play, per side | In force                    |
+| -------------------------- | -------------- | --------------------------- |
+| Pocket in x                | 0.50           | whenever the screws are not |
+| Pocket in y                | 0.50           | whenever the screws are not |
+| Screw in its 3.00 hole     | 0.25           | once the plate is on        |
+| Switch in its 16.00 recess | 0.20           | always                      |
 
 So a socket sits at most **0.32mm** off its switch pins, root sum square of the screw play
 against the switch's own play, and 0.45 worst case, whatever the pocket is cut to. The
@@ -735,19 +737,19 @@ The `FC_COMPARE` run holds your model to the reference everywhere it has not bee
 recorded as intentional, so these rows need checking by hand only where a recorded
 difference touches them:
 
-| Check                                   | Expected                                                                                |
-| --------------------------------------- | --------------------------------------------------------------------------------------- |
-| Cavity loop size                        | 161.00 x 120.00                                                                         |
-| Gap from cavity to board outline        | near-constant around the perimeter                                                      |
-| Board outline points outside the cavity | none                                                                                    |
-| Boss bore depths                        | 4.00 at every boss; none breaks into a recess                                           |
-| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board; USB x 0.537 inward of the notch centre |
-| Top edge in plan                        | straight across; no notch inherited from the board                                      |
-| Plate under each bumper                 | 1.00                                                                                    |
-| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                              |
-| Wall relief                             | down to the plate; nothing under the jack rises above the plate's top face              |
-| Liatris over the relief                 | clears the plate by the full MCU margin                                                 |
-| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                             |
+| Check                                   | Expected                                                                                            |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Cavity loop size                        | 161.00 x 119.59 overall: 120.00 on the hull offset, less the corner arc at the thumb's lowest point |
+| Gap from cavity to board outline        | near-constant around the perimeter                                                                  |
+| Board outline points outside the cavity | none                                                                                                |
+| Boss bore depths                        | 4.00 at every boss; none breaks into a recess                                                       |
+| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board; USB x 0.537 inward of the notch centre             |
+| Top edge in plan                        | straight across; no notch inherited from the board                                                  |
+| Plate under each bumper                 | 1.00                                                                                                |
+| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                                          |
+| Wall relief                             | down to the plate; nothing under the jack rises above the plate's top face                          |
+| Liatris over the relief                 | clears the plate by the full MCU margin                                                             |
+| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                                         |
 
 A wide spread in that gap means the profile is not the outline. The bore and bumper
 rows are the defects a closed, correctly sized solid can still carry, so check

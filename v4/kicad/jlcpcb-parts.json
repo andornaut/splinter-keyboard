@@ -6,7 +6,7 @@
       "comment": "1N4148W",
       "package": "SOD-123",
       "rotation": 180,
-      "note": "1N4148W (C81598). 180 corrects JLC's C81598 0-deg orientation (cathode opposite end) vs this footprint, so the band lands on pad 1 (cathode/row net). Verify in DFM. Tier/alternates: see v4/README.md BOM."
+      "note": "1N4148W (C81598). JLCPCB's footprint for C81598 puts pad 1 (cathode) on the same side as this footprint's pad 1; the 180 is the bottom-side placement correction for a footprint reported at 0 degrees, so the band lands on pad 1 (cathode/row net). Verify in DFM. Tier/alternates: see v4/README.md BOM."
     },
     "D_SOD-123FL": {
       "lcsc": "C1851363",

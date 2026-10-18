@@ -11,7 +11,9 @@
 // Upstream divergence:
 //  - Pad positions follow HCTL's recommended PCB layout for this part (datasheet on the
 //    LCSC C5372851 page): pins at 3.2, 6.3, 10.4 and 11.5 from the body front, rows
-//    4.5 apart, locating pegs at 1.6 and 8.6.
+//    4.5 apart, locating pegs at 1.6 and 8.6. Hole sizes stay upstream's (0.9 x 1.5
+//    slots, 1.5 peg holes; HCTL draws 0.5 x 1.5 and 1.0), so the jack can shift a few
+//    tenths before soldering: solder it pressed flat against the board.
 //  - Pad names. ceoloide labels the 3-pin row SL, R2, TP and the lone pin R1. On this
 //    jack the 3-pin row is R2, R1, T (mouth to back) and the lone pin is the sleeve,
 //    confirmed on hardware by continuity from a plug.
