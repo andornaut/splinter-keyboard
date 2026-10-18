@@ -1,6 +1,6 @@
 # Version 3 of the Splinter keyboard
 
-- [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-3.0/keyboards/splinter)
+- [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter-v3.0/keyboards/splinter)
 
 A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-traditional backspace and backslash placement.
 
