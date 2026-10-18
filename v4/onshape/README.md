@@ -142,7 +142,7 @@ goes in from below.
 - The silicone bumpers mount on the plate's outer face; leave a shallow recess for each,
   clear of the screw heads.
 
-## CNC case (JLCCNC, 6061/6063 aluminium)
+## CNC case (JLCCNC, 6061 aluminium)
 
 A mill removes material with a round tool. Every feature has to be reachable by a
 cylindrical end mill from one of the setups.

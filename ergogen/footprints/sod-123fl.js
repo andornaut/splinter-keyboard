@@ -57,7 +57,7 @@ module.exports = {
             (layer "${s}.Cu")
             ${p.at}
             (attr smd)
-            (descr "SOD-123FL flat-lead TVS/diode, SMD single-side (pin 1 = cathode / 'to' net). Custom footprint, not a KiCad stock part. Body 3.0x1.85mm, 1.2mm pads at 3.0mm pitch, sized for the Littelfuse SMF5.0CA (SOD-123FL).")
+            (descr "SOD-123FL flat-lead TVS/diode, SMD single-side (pad K = cathode / 'to' net). Custom footprint, not a KiCad stock part. Body 3.0x1.85mm, 1.2mm pads at 3.0mm pitch, sized for the Littelfuse SMF5.0CA (SOD-123FL).")
             (tags "SOD-123FL SOD-123F TVS ESD SMD")
             (property "Reference" "${p.ref}" (at 0 -1.6 ${p.r}) (layer "${s}.SilkS") ${p.ref_hide}
                 (effects (font (size 0.8 0.8) (thickness 0.12)))

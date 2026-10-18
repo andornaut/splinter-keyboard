@@ -25,7 +25,7 @@ The fillet rounds the corners off the height; the straight side edges hold the w
 
 The [splitkb Liatris](https://splitkb.com/products/liatris) wires its USB VBUS line to GP19, so QMK senses USB presence via `USB_VBUS_PIN` instead of the `SPLIT_USB_DETECT` polling loop. That removes the roughly two-second unresponsive window at boot and makes the board more reliable after KVM switches.
 
-The MCU is socketed rather than soldered: each one sits in a pair of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused. It mounts on the bottom of the board, the same side as the diodes, hotswap sockets and the rest of the SMD parts, with its own components facing away from the board so the reset and boot buttons stay reachable. That seating determines which header column each matrix net lands on, so it is not interchangeable with the opposite orientation.
+The MCU is socketed rather than soldered: each one sits in a pair of Mill-Max 12-pin sockets (see the [BOM](#bill-of-materials-bom)) so it can be removed and reused. It mounts on the bottom of the board, the same side as the diodes, hotswap sockets and the rest of the SMD parts, with its own components facing away from the board so its Boot button stays reachable. That seating determines which header column each matrix net lands on, so it is not interchangeable with the opposite orientation.
 
 The matching firmware config (the `USB_VBUS_PIN` define and the `development_board` and split settings) lives in the [firmware repo](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter).
 
@@ -154,7 +154,7 @@ See the root README's [fabrication step](../README.md#step-5-fabrication-jlcpcb)
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Matrix diodes, TVS, reset switch | Placed by JLCPCB, Economic PCBA, bottom side. The TVS and the reset switch are Extended parts, so each adds a feeder-loading fee per order                                 |
 | Hotswap sockets                  | Do-Not-Place. Keeping them off the assembly BOM is what holds the order on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly. |
-| MCU (Liatris), TRRS jack         | Do-Not-Place, hand-soldered                                                                                                                                                |
+| MCU (Liatris), TRRS jack         | Do-Not-Place. The jack and the MCU's sockets are hand-soldered; the MCU plugs into the sockets                                                                             |
 
 The LCSC and vendor links in the [BOM](#bill-of-materials-bom) for Do-Not-Place parts are for sourcing only.
 
@@ -162,13 +162,13 @@ The diode footprint (`diode_sod123`) carries `rotation: 180` in [jlcpcb-parts.js
 
 Order each half separately, with these settings:
 
-| Setting       | Value                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------- |
-| Files         | `<half>-gerber.zip`, then `<half>-BOM.csv` and `<half>-CPL.csv` from `dist/v4/kicad/jlcpcb/<half>/` |
-| PCB           | 2 layers, 1.6mm, Mark on PCB: Remove Mark, Confirm Production File: Yes                             |
-| PCBA          | Economic, Assembly Side: Bottom, at least 2 assembled boards                                        |
-| Tooling holes | Added by JLCPCB; check where they land when confirming the production file                          |
-| Parts check   | three BOM lines: C81598 (30 left, 32 right), C1851363 x1, C115351 x1                                |
-| DFM viewer    | each diode band on its row-trace end, the TVS on its pads, B1's four terminals on their pads        |
+| Setting       | Value                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| Files         | `<half>-gerber.zip`, then `<half>-BOM.csv` and `<half>-CPL.csv` from `dist/v4/kicad/jlcpcb/<half>/`    |
+| PCB           | 2 layers, 1.6mm, Surface Finish: LeadFree HASL, Mark on PCB: Remove Mark, Confirm Production File: Yes |
+| PCBA          | Economic, Assembly Side: Bottom, at least 2 assembled boards                                           |
+| Tooling holes | Added by JLCPCB; check where they land when confirming the production file                             |
+| Parts check   | three BOM lines: C81598 (30 left, 32 right), C1851363 x1, C115351 x1                                   |
+| DFM viewer    | each diode band on its row-trace end, the TVS on its pads, B1's four terminals on their pads           |
 
-The plated slots for the jack are 0.9 x 1.5mm, under JLCPCB's 2:1 slot ratio, so expect a DFM note;
+The plated slots for the jack are 0.9 x 1.5mm, under JLCPCB's 2:1 slot ratio, so expect a DFM note; JLCPCB has fabricated the same slots before.

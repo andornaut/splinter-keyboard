@@ -17,7 +17,7 @@ itself so they track the board.
 The case fits two board builds that share one `Edge.Cuts` and one placement of everything
 the case touches (switches, screws, MCU, TRRS jack body, reset switch): the assembled board
 stamped `config=b05d803d9317 commit=51522ad`, and the revision stamped
-`config=6df33837a71a commit=a1c05eb`, which changes the jack's pads, removes the data
+`config=6df33837a71a`, which changes the jack's pads, removes the data
 resistor and moves no part. **Generate the DXF from `main`**, since 51522ad predates
 `full_unfilleted.dxf`.
 
@@ -555,7 +555,7 @@ screw length. Every other feature means parallel to the faces. A bumper recess c
 instead would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of plate, different at each
 edge of every foot.
 
-The MCU's reset and boot buttons and the board's own reset switch all face the plate;
+The MCU's Boot button and the board's own reset switch both face the plate;
 access is by removing it, so no holes are needed.
 
 **No support posts.** A post short enough not to lift the board off its bosses is too short

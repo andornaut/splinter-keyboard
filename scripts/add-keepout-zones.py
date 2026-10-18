@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Add copper keepout rule areas to a KiCad PCB: two perimeter rings just inside
-the board edge, a disk around each screw boss, and the copper-free area under the
-reset switch.
+the board edge, a disk around each screw boss, the copper-free area under the
+reset switch, and a pour clearing around that switch.
 
-Four kinds of zone, all rule areas (keepouts), the first three on F.Cu + B.Cu. Pads and
+Five kinds of zone, all rule areas (keepouts), the first three on F.Cu + B.Cu. Pads and
 footprints stay allowed at the rule-area level (the rule-area pad keepout cannot
 tell plated copper from a bare hole; conductive pads are caught by a separate
 .kicad_dru rule -- see apply-project-settings.py). The perimeter is split into
