@@ -215,8 +215,10 @@ clear of the jack body.
 **The cut stops 0.10 under the jack's barrel**, the jack's lowest point, rather than at the
 plate. The band left below it catches a jack pushed down by a plug, which would otherwise
 load only its solder joints, without pressing on it, so it cannot preload those joints or
-bow the board. Nothing else in the relief reaches that low: the Liatris ends 1.30 short of the
-band in plan, and its USB receptacle's underside sits about 1.25 above the floor.
+bow the board. Nothing else in the relief reaches that low. The Liatris overlaps the band in
+plan, its end at y 59.50 against the band's inner face at 58.30, but its pin stubs, its
+lowest point, stop at y 56.54, and its USB receptacle's underside sits about 1.25 above the
+floor.
 
 **The standoff needs a flared base.** The counterbore runs the plate's full thickness, so
 without a flare a 5.00 bore inside a 5.50 standoff joins the two by a 0.25mm annulus, 4.12
@@ -226,8 +228,8 @@ mm2, seven times the area.
 
 **Height is what constrains a flare, not diameter.** It stops under the hotswap sockets
 hanging 1.85 below the board, and every pad it would otherwise have to dodge is above it,
-so the 2.04mm inner-boss pad clearance that caps the standoff does not cap this. It stops
-2.75 below the board underside, at -10.35, which leaves 0.90 to the sockets.
+so the pad clearances that cap the standoff do not cap this. It stops 2.75 below the board
+underside, at -10.35, which leaves 0.90 to the sockets.
 
 **The 14.50 cutout is not slack.** An internal corner rounds _into_ the void, so an R1.00
 corner cut into a 14.00 hole would bind a switch by 0.207mm. At 14.50 it clears by 0.146mm
@@ -294,10 +296,17 @@ depth check and the face census both pass a shell that has one.
 counterbores absorb the difference, reaching up into the flare under the lower bosses, so
 the screws need not.
 
-**Clearance to the nearest side-B pad**: 3.54mm outer, **2.04mm inner**,
-3.98mm centre. Those are measured to the pads, and the Kailh socket body is larger than
-its lands, so the real gap at the inner boss is smaller by an unknown amount. That is why
-the standoff is 5.50 and not larger.
+**Clearance from the 5.50 standoff to the nearest side-B pad:**
+
+| Boss   | Left     | Right    |
+| ------ | -------- | -------- |
+| Outer  | 3.22     | **1.55** |
+| Inner  | **1.60** | 3.72     |
+| Centre | 3.80     | **1.67** |
+
+The key fields differ, so the mirrored bosses do not share a figure. Those are measured to
+the pads, and the Kailh socket body is larger than its lands, so the real gap at the tight
+three is smaller by an unknown amount. That is why the standoff is 5.50 and not larger.
 
 ### Ports, on the top edge
 
@@ -374,8 +383,10 @@ parameter here and in `gen-case.py`, then re-run it so its guards see the new va
 | Board underside to the TRRS bore centre                        | 2.90          | TRRS opening centre, z -10.50                                   |
 | USB-C receptacle centre from the notch centre, each half       | 0.537 inward  | USB opening centre, x                                           |
 | Board top to the plate-bearing shoulder of a seated switch     | 4.50          | recess depth; see "Switch seating" under Open risks             |
-| Kailh socket body edge to the right half's inner screw hole    | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
+| Kailh socket body edge to the three tightest screw holes       | lands only    | whether the 5.50 standoff and 8.00 flare clear the body         |
 | Switch top housing width                                       | 15.60         | the 16.00 recess fit                                            |
+| Switch top housing corner radius                               | 0.32 or more  | whether the housing clears the recess's R1.00 corners           |
+| Kailh socket body edge to the plate wall, right half S32       | 0.49          | whether the bottom outer socket clears the wall on screw play   |
 | Plug shell width, and overmold size of the cables you will use | 8.34          | USB opening width; whether the outer-face counterbore is needed |
 
 A port centre measured from the board underside sets the opening's z as -7.60 less that
@@ -560,46 +571,41 @@ counterpart, so a mirrored key field is the wrong key field.
 
 ## Assembly
 
-**Switches go into the shell first, then the board goes on.** A 15.6mm top housing cannot
-pass a 14.5mm hole from below. Clip all 30 (or 32) switches
-into the shell's top face from the outside, then bring the board up into the cavity onto
-every socket at once.
+**The board goes in first and the switches last.** The TRRS barrel reaches 1.50 into its
+round opening, which is closed above and below, so once the barrel is in its hole the board
+can move only 0.25 up or down: too little to raise it onto the pins of switches already in
+the shell. With the barrel short of the wall, board and barrel together are longer than the
+pocket. The USB receptacle reaches into its slot the same way.
 
-The cavity is a straight bore, so the board cannot be rocked in the way a bare
-plate-and-switch assembly usually is. Seat it evenly, thumb cluster last, until it meets
-the shelf all the way round. Then the plate goes on and its wall closes the sandwich.
+1. Tilt the board, jack edge high, until the far edge hangs below the shell's rim, and feed
+   the barrel and the USB receptacle into their openings from inside.
+2. Swing the far edge up into the pocket until the board meets the shelf all the way round.
+3. Fit the plate and draw the three screws evenly, a turn at a time, so the plate's wall and
+   standoffs press the board flat against the shelf.
+4. Clip all 30 (or 32) switches into the top face from outside, pressing each into its
+   socket. A 15.6mm top housing cannot pass a 14.5mm hole from below, and the plate backs the
+   board while they go in.
 
-**If the sockets fight the pins, fit the plate first and let the screws press the board
-home.** The plate's perimeter wall and its three standoffs all top out at -7.60, the board's
-underside, and the screws draw the plate up toward the shell, so the wall bears on the
-board right around its edge and pushes it onto every pin at once while the screws hold it
-to 0.25 per side. That is tighter than the pocket and it spreads the seating load over the
-whole perimeter rather than through the three bosses. Draw the three evenly, a turn at a
-time, so the board goes up flat.
+**To replace a switch**, take the plate off and push the switch out from below on its plastic
+pegs where they come through the board. The board stays in.
 
 **Nothing datums the board.** The 5.50 boss butts its top face and never enters the 3.00mm
 hole, and a boss cannot pilot into that hole because the 3.60 insert bore is wider than the
-hole itself. **Which constraint registers it depends on whether the screws are in.** Press
-the board on by hand and only the pocket is holding it; fit the plate and draw the screws
-and they take over at 0.25, which is tighter.
+hole itself. Until the screws are in, only the pocket holds it; once they are, they hold it
+to 0.25, which is tighter. Since the switches go in last, their pins always meet a board
+held by its screws.
 
-| Constraint                 | Play, per side                                                                     | In force                                                        |
-| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Pocket in x                | 0.50                                                                               | whenever the screws are not                                     |
-| Pocket in y                | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) | whenever the screws are not                                     |
-| Screw in its 3.00 hole     | 0.25                                                                               | once the plate is on, including while it presses the board home |
-| Switch in its 16.00 recess | 0.20                                                                               | always                                                          |
+| Constraint                 | Play, per side                                                                     | In force                    |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------- |
+| Pocket in x                | 0.50                                                                               | whenever the screws are not |
+| Pocket in y                | 0.705 (the fillet takes 0.410 off the board height, the pocket is cut to the hull) | whenever the screws are not |
+| Screw in its 3.00 hole     | 0.25                                                                               | once the plate is on        |
+| Switch in its 16.00 recess | 0.20                                                                               | always                      |
 
-So a socket seated by hand can sit **0.54mm** off its switch pins in x and **0.73mm** in y,
-root sum square against the switch's own play, and 0.70 / 0.91 worst case. Seated on the
-screws it is **0.32mm**, whatever the pocket is cut to. That is the reason to reach for the
-plate rather than for a tighter pocket if the sockets fight: the pocket has to stay loose
-enough that a printed shell accepts the board at all.
-
-**A printed shell and a milled one part company on the hand-seated figures**, and the
-pocket clearance is what splits them. A printed pocket comes out undersize, which is the
-whole reason the clearance is 0.50, so its effective play lands near half those numbers. A
-milled pocket is 0.50 true. The screw-seated figure is the same for both.
+So a socket sits at most **0.32mm** off its switch pins, root sum square of the screw play
+against the switch's own play, and 0.45 worst case, whatever the pocket is cut to. The
+pocket can therefore stay loose enough that a printed shell accepts the board at all, which
+is the whole reason its clearance is 0.50.
 
 ## Aluminium variant
 
@@ -731,19 +737,19 @@ The `FC_COMPARE` run holds your model to the reference everywhere it has not bee
 recorded as intentional, so these rows need checking by hand only where a recorded
 difference touches them:
 
-| Check                                   | Expected                                                                                |
-| --------------------------------------- | --------------------------------------------------------------------------------------- |
-| Cavity loop size                        | 161.00 x 120.00                                                                         |
-| Gap from cavity to board outline        | near-constant around the perimeter                                                      |
-| Board outline points outside the cavity | none                                                                                    |
-| Boss bore depths                        | 4.00 at every boss; none breaks into a recess                                           |
-| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board; USB x 0.537 inward of the notch centre |
-| Top edge in plan                        | straight across; no notch inherited from the board                                      |
-| Plate under each bumper                 | 1.00                                                                                    |
-| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                              |
-| Wall relief floor                       | z -13.10, 0.10 under the jack's barrel                                                  |
-| Liatris in plan                         | ends short of the relief floor's band (its inner face at y 58.30), about 1.30 clear     |
-| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                             |
+| Check                                   | Expected                                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Cavity loop size                        | 161.00 x 120.00                                                                          |
+| Gap from cavity to board outline        | near-constant around the perimeter                                                       |
+| Board outline points outside the cavity | none                                                                                     |
+| Boss bore depths                        | 4.00 at every boss; none breaks into a recess                                            |
+| Port opening centres                    | z -10.50 TRRS, -10.25 USB, both below the board; USB x 0.537 inward of the notch centre  |
+| Top edge in plan                        | straight across; no notch inherited from the board                                       |
+| Plate under each bumper                 | 1.00                                                                                     |
+| Shelf underside / plate wall top        | z -6.00 / -7.60, meeting through the board                                               |
+| Wall relief floor                       | z -13.10, 0.10 under the jack's barrel                                                   |
+| Liatris over the relief floor           | pin stubs end at y 56.54, short of the band's inner face at 58.30; receptacle 1.25 above |
+| Both halves' switch cutouts             | each cut from its own half of the DXF, 30 left and 32 right                              |
 
 A wide spread in that gap means the profile is not the outline. The bore and bumper
 rows are the defects a closed, correctly sized solid can still carry, so check

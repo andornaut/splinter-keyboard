@@ -106,7 +106,8 @@ top and a matching wall rising from the plate, with the bosses and standoffs doi
 at the three screw points. Both land on the board's outer keepout ring, which exists for
 exactly this, so neither bears on a ground plane. Tracks are a different matter: the route
 ring is deliberately carved open over the TRRS so the jack's through-holes are not flagged,
-so the shelf can cross copper there, under soldermask.
+so DRC does not stop a track running under the shelf there. Keep routing in that corner
+clear of it.
 
 **The plate wall's top band is cut down over the top-inner corner.** The top edge there
 carries the USB plug's path and the jack's body, so a band at full height would block the
