@@ -45,7 +45,7 @@ fitting this board. Re-check it against the board in hand before taking one.
    PCB        #######:#################|  |    <- 3.00mm NPTH
                     |:|               |##|     z  -7.60   PLATE WALL top
                     |:|            <- standoff, 5.50 dia, 2.90 clearance hole
-   plate      -----[===]--------------+##+     M2.5 flat head in its counterbore, up from below
+   plate      -----[===]--------------+##+     M2.5 button head in its counterbore, up from below
 ```
 
 The board is clamped all the way round, not only at the three screws: a **shelf** hangs
@@ -179,7 +179,7 @@ every head flush.
 | Top thickness                      | 3.00                          | decision                                                                                |
 | Switch recess depth                | 1.50                          | nesting                                                                                 |
 | Plate at a switch cutout           | 1.50                          | MX standard, 1.5mm +-0.1mm                                                              |
-| Bottom plate                       | 1.50                          | takes the flat head's full height                                                       |
+| Bottom plate                       | 1.50                          | takes the button head's full height                                                     |
 | Board pocket                       | 161.00 x 120.00               | hull + 0.50/side; the board itself is 0.705/side loose in y                             |
 | Shell outer profile                | 165.00 x 124.00               | pocket + wall                                                                           |
 | Boss and standoff diameter         | 5.50                          | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
@@ -539,10 +539,10 @@ On each half, after the mirror, from that half's own curves:
 
 **Only the counterbores have level floors.** The plate is a parallel-sided slab lying at
 1.3887 deg, so "flat" and "level" are different instructions here. The counterbores mean
-level: a flat head seats square to its vertical screw, and one plane gives one screw
-length. Every other feature means parallel to the faces. A bumper recess cut level instead
-would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of plate, different at each edge of
-every foot.
+level: a flat-underside head seats square to its vertical screw, and one plane gives one
+screw length. Every other feature means parallel to the faces. A bumper recess cut level
+instead would run 0.355 to 0.645 deep and leave 1.145 to 0.855 of plate, different at each
+edge of every foot.
 
 The MCU's reset and boot buttons and the board's own reset switch all face the plate;
 access is by removing it, so no holes are needed.

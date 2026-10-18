@@ -6,17 +6,24 @@ Case models live here. The case is modelled from the Ergogen outline
 
 Each file has one job:
 
-| File                                                        | Holds                                                                      |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [BUILD.md](./BUILD.md)                                      | Every dimension, and the feature-by-feature recipe for Onshape             |
-| [gen-case.py](./gen-case.py)                                | The same design as geometry, and the validator for the hand-built model    |
-| [differences.json](./differences.json)                      | The hand-built model's intentional departures from that geometry           |
-| This file                                                   | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
-| `Splinter keyboard v4 - Filament.step`                      | The Onshape model's filament export, both halves, as last validated        |
-| `Splinter keyboard v4 - Aluminium.step`                     | The same for the aluminium configuration                                   |
-| `Splinter v4 left shell.step` and the other three parts     | The aluminium configuration one part per file, for JLCCNC                  |
-| `Splinter v4 left shell.pdf`, `Splinter v4 right shell.pdf` | The aluminium shells' thread drawings, for JLCCNC                          |
-| [onshape.png](./onshape.png)                                | A render of the filament export                                            |
+| File                                                                                     | Holds                                                                      |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [BUILD.md](./BUILD.md)                                                                   | Every dimension, and the feature-by-feature recipe for Onshape             |
+| [gen-case.py](./gen-case.py)                                                             | The same design as geometry, and the validator for the hand-built model    |
+| [differences.json](./differences.json)                                                   | The hand-built model's intentional departures from that geometry           |
+| This file                                                                                | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+| [Splinter keyboard v4 - Filament.step](./Splinter%20keyboard%20v4%20-%20Filament.step)   | The Onshape model's filament export, both halves, as last validated        |
+| [Splinter keyboard v4 - Aluminium.step](./Splinter%20keyboard%20v4%20-%20Aluminium.step) | The same for the aluminium configuration                                   |
+| [Splinter v4 left shell.step](./Splinter%20v4%20left%20shell.step)                       | The aluminium configuration one part per file, for JLCCNC                  |
+| [Splinter v4 left plate.step](./Splinter%20v4%20left%20plate.step)                       |                                                                            |
+| [Splinter v4 right shell.step](./Splinter%20v4%20right%20shell.step)                     |                                                                            |
+| [Splinter v4 right plate.step](./Splinter%20v4%20right%20plate.step)                     |                                                                            |
+| [Splinter v4 left shell.pdf](./Splinter%20v4%20left%20shell.pdf)                         | The aluminium shells' thread drawings, for JLCCNC                          |
+| [Splinter v4 right shell.pdf](./Splinter%20v4%20right%20shell.pdf)                       |                                                                            |
+| [onshape.png](./onshape.png)                                                             | A render of the filament export                                            |
+
+**These STEP files are the ones to fabricate.** The models `gen-case.py` writes to
+`dist/v4/onshape/` exist only to validate them and are never ordered.
 
 **The STEP files are snapshots**, one per configuration. Each holds both halves, four
 solids, exported from the Onshape document and validated against `gen-case.py` (the
@@ -45,6 +52,7 @@ documents to open:
 | `FC_OUTDIR`  | `dist/v4/onshape`  | destination                                     |
 | `FC_COMPARE` | unset              | Onshape export(s) holding the half to validate  |
 | `FC_DIFFS`   | `differences.json` | recorded intentional differences                |
+| `FC_VARIANT` | `filament`         | `filament` or `aluminium`                       |
 
 Output is solid B-rep, not a mesh, so curved features measure their nominal size and the
 result can be sketched against. The self-check reads the exported file rather than the

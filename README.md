@@ -154,7 +154,7 @@ The last three stages feed each other: a collapsed sliver can leave a run the ne
 
 The working boards keep the stripped copper, mainly the footprints' unused `include_traces_vias` stubs, since a later reroute may pick it up.
 
-Pattern snap and sliver tidy move copper rather than only removing it, so both are capped and both stop the build rather than guess:
+Pattern snap and sliver tidy move copper rather than only removing it, so both are capped and neither guesses: pattern snap reports a stray it may not move and leaves it, while sliver tidy stops the build:
 
 - **Pattern snap.** The matrix is a grid, so most of the routing is one motif repeated, and hand-drawn copies land a fraction of a millimetre apart. DRC never sees it, because each copy is individually legal. Anything beyond the cap is a routing decision rather than a stray, so it is reported and left alone.
 - **Sliver tidy.** Moving one end of a run pivots the whole run, so a collapse is refused if it exceeds the cap or would swing copper into another net's clearance or a keepout. The refusal names the sliver and the reason; close it in KiCad by dragging the two runs together, or by re-routing clear of the named area.
@@ -200,7 +200,7 @@ Which parts JLCPCB places and which you hand-solder is version-specific; see the
 1. Select "Insert a DXF or DWG file" > "Import ..." (bottom of the dialog) > `dist/${VERSION}/ergogen/outlines/full_unfilleted.dxf`. That is the nominal hull rather than the fabricated edge: the fillet only removes material, so a pocket cut to the hull can never come out undersized.
 1. Design the case to [`onshape/BUILD.md`](./v4/onshape/BUILD.md), which carries every dimension and the feature-by-feature recipe, then export it to `dist/${VERSION}/onshape/`.
 1. Validate both halves against the reference, `FC_HALF=left FC_COMPARE=dist/${VERSION}/onshape/<export>.step freecadcmd v4/onshape/gen-case.py` and again with `FC_HALF=right`, and decide every difference it reports: move the model to the reference, record it in `v4/onshape/differences.json` as intentional, or fix it as an error. See [Validating your model](./v4/onshape/BUILD.md#validating-your-model).
-1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4 - Filament.step`, and the aluminium configuration's over `Splinter keyboard v4 - Aluminium.step`.
+1. Once both halves validate, copy the export over `v4/onshape/Splinter keyboard v4 - Filament.step`. Validate the aluminium configuration's export the same way with `FC_VARIANT=aluminium` added, then copy it over `Splinter keyboard v4 - Aluminium.step`.
 1. Export the aluminium configuration again one part per file, validate each half's pair with `FC_VARIANT=aluminium FC_COMPARE=<shell>.step,<plate>.step`, and copy them over `v4/onshape/Splinter v4 {left,right} {shell,plate}.step`.
 
 ### Step 7. [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer)
