@@ -18,7 +18,11 @@ fails only when a human plugs an MCU in, which is after the boards are paid for.
      each row's left/right pad, and the silk label follows the net). So this
      catches config.yaml drifting from keyboard.json (a renamed net, a
      reordered column, a moved serial pin) but is invariant under a
-     raw_pin_column flip.
+     raw_pin_column flip. The TRRS jack's contacts must also carry their
+     intended nets: VCC on the tip, nothing on ring 1, the serial net on
+     ring 2, GND on the sleeve. The pads are named for the plug contact they
+     reach, so a swapped tip and sleeve, or data on the wrong ring, fails here
+     even though the halves would still link.
 
 Neither check can prove the boards match physical reality. Both mirrorings of
 the header are electrically valid and nothing on the board distinguishes them,
@@ -62,6 +66,10 @@ FOOTPRINT_JS = "ergogen/footprints/mcu_liatris.js"
 FETCH_TIMEOUT_S = 15
 # Nets on the MCU header that are power/programming rather than matrix lines.
 NON_MATRIX = {"GND", "VCC", "RAW", "RST", ""}
+# The TRRS jack's contact-to-net assignment, by pad name (trrs_hc_pj320a.js names
+# each pad for the plug contact it reaches). R2 carries the serial net, which is
+# checked against the firmware separately; "" is an unconnected contact.
+JACK_NETS = {"T": "VCC", "R1": "", "S": "GND"}
 # Socket rows on the Liatris header, 2 pads each. The extra bottom pins
 # (GP12-GP16) sit near x 0, so they never reach the column filter.
 HEADER_ROWS = 12
@@ -151,16 +159,20 @@ def matrix_order(board):
     return ordered_cols, ordered_rows
 
 
+def jack_pads(board):
+    """{pad name: net} for the board's one TRRS jack; empty if it has none."""
+    jacks = [fp for fp in board.GetFootprints() if "trrs" in fp.GetFPIDAsString().lower()]
+    if len(jacks) != 1:
+        return {}
+    return {pad.GetPadName(): pad.GetNetname() for pad in jacks[0].Pads() if pad.GetPadName()}
+
+
 def serial_net(board):
-    """The post-protection data net: the resistor net that also lands on the MCU."""
+    """The TRRS data net: the jack net that also lands on the MCU."""
     mcu_nets = {n for row in mcu_pad_map(board) for n in row.values()}
-    for fp in board.GetFootprints():
-        if "R_0805" not in fp.GetFPIDAsString():
-            continue
-        for pad in fp.Pads():
-            net = pad.GetNetname()
-            if net in mcu_nets and net not in NON_MATRIX:
-                return net
+    for net in jack_pads(board).values():
+        if net in mcu_nets and net not in NON_MATRIX:
+            return net
     return None
 
 
@@ -282,8 +294,14 @@ def check_firmware(boards, fw, labels):
                 f"  FAIL {key}: serial pin, board {got_serial}, firmware {fw['split']['serial']['pin']}",
                 file=sys.stderr,
             )
+        got_jack = jack_pads(board)
+        want_jack = dict(JACK_NETS, R2=net)
+        if got_jack != want_jack:
+            failures.append(key)
+            sys.stdout.flush()  # keep the ok lines above this under a pipe
+            print(f"  FAIL {key}: TRRS jack contacts, board {got_jack}, expected {want_jack}", file=sys.stderr)
         if key not in failures:
-            note(f"  ok {key}: matrix pins and serial pin match the firmware")
+            note(f"  ok {key}: matrix pins, serial pin and TRRS contacts match the firmware")
     return failures
 
 

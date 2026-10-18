@@ -14,7 +14,7 @@
 //      `${p.reversible ? 'F' : p.side}`). A reversible `side: B` diode was
 //      therefore reported on the Top side by the position file, splitting JLCPCB
 //      single-side (Economic) assembly across both sides (diodes on Top, the
-//      TVS/resistor on Bottom). Pads and silk are still drawn on both copper
+//      TVS on Bottom). Pads and silk are still drawn on both copper
 //      sides when `reversible` is true; only the module/designator side tracks
 //      `side`.
 //   2. `include_traces_vias` is independent of `reversible`: the routing

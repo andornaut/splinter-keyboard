@@ -165,16 +165,14 @@ BOARD_PLAY = (BOARD_HOLE_D - SCREW_NOMINAL_D) / 2.0
 # USB_H/2 ends rather than a rectangle: a USB-C shell is rounded the same way, and an end
 # mill cutting from the side cannot make a rectangle's internal corners.
 
-# The plate wall's top band is cut down over the top-inner corner, where the USB plug's path,
-# the jack and the MCU's corner are: from WALL_RELIEF_W in from the plate's inner edge out to
-# the wall's inner face, and from where the inner loop turns its corner arc, so the inner
-# wall runs straight and full height to the top edge, clear of the jack. The cut stops
-# RELIEF_GAP under the jack's barrel, its lowest point, so the band left below catches a jack
-# pushed down by a plug without pressing on it. The Liatris ends short of the band in plan
-# and its receptacle sits above that floor.
-WALL_RELIEF_W = 30.00
+# The plate wall is removed over the top-inner corner, where the USB plug's path, the jack
+# and the MCU's corner are: from WALL_RELIEF_W in from the plate's inner edge out to the
+# wall's inner face, and from where the inner loop turns its corner arc, so the inner wall
+# runs straight and full height to the top edge, clear of the jack. It is removed down to the
+# plate, not cut to a floor under the jack: the jack's underside carries exposed spring
+# contacts, and a metal case touching one would put that contact on the case.
+WALL_RELIEF_W = 29.00
 TRRS_BARREL_R = 2.50  # PJ-320A barrel
-RELIEF_GAP = 0.10
 
 # Bumper recesses on the plate's outer face, each tangent to the plate wall's inner loop in
 # its corner, so the feet sit as far out as the plate allows.
@@ -211,9 +209,9 @@ EXPECT_CYL = {
         (SCREW_R, 3),
         (CAVITY_FILLET, 5),  # the outline's corners, opened back to the cavity's radius
         (CAVITY_FILLET, 1),  # the outline's kink
-        # The plate wall's inner corners and its kink, the top-inner one kept below the
-        # relief floor.
-        (CAVITY_FILLET, 6),
+        # The plate wall's inner corners and its kink, less the top-inner one, which the
+        # relief removes with the wall.
+        (CAVITY_FILLET, 5),
         (CBORE_R, 3),
         (STANDOFF_R, 3),  # above their flares
         (FLARE_R, 3),
@@ -371,10 +369,6 @@ def closed(wire, r):
 
 def prism(wire, z0, z1):
     return Part.Face(wire).extrude(Vector(0, 0, z1 - z0)).translated(Vector(0, 0, z0))
-
-
-def relief_floor():
-    return TRRS_Z - TRRS_BARREL_R - RELIEF_GAP
 
 
 def moved(shape, vec):
@@ -601,7 +595,7 @@ def build(dxf, half, explode):
     ry = plate_wall_w.BoundBox.YMax - CAVITY_FILLET
     inner = plate_wall_w.BoundBox.XMax if sign > 0 else -plate_wall_w.BoundBox.XMin
     rx0, rx1 = sorted((sign * (edge - WALL_RELIEF_W), sign * inner))
-    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, BIG, Vector(rx0, ry, relief_floor())))
+    ring = ring.cut(Part.makeBox(rx1 - rx0, BIG, 2 * BIG, Vector(rx0, ry, -BIG)))
     plate = plate.fuse(ring)
     for bx, by in bosses:
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
@@ -690,15 +684,18 @@ def check(out, half, explode, keys):
 
     if not explode and abs(plate.BoundBox.ZMax - PCB_BOT) > 0.01:
         fails.append(f"plate wall top {plate.BoundBox.ZMax:.3f}, expected the board underside {PCB_BOT:.3f}")
-    if not explode and not any(
-        isinstance(f.Surface, Part.Plane)
-        and abs(f.Surface.Axis.z) > 0.999
-        and abs(f.CenterOfMass.z - relief_floor()) < 0.01
-        and min(abs(f.BoundBox.XMin), abs(f.BoundBox.XMax)) <= TRRS_X - TRRS_BARREL_R
-        and max(abs(f.BoundBox.XMin), abs(f.BoundBox.XMax)) >= TRRS_X + TRRS_BARREL_R
-        for f in plate.Faces
-    ):
-        fails.append(f"no relief floor under the jack at z {relief_floor():.2f}")
+    # Nothing of the plate may rise under the jack: the relief takes the wall down to the
+    # plate, so the plate's highest point under the jack's footprint is its top face, well
+    # below the jack's exposed underside.
+    zone_z0 = TRRS_Z - TRRS_BARREL_R - 2.0  # 2.00 under the barrel, still above the plate's top face
+    jack_zone = Part.makeBox(
+        2 * TRRS_BARREL_R + 2.0,  # the jack body's width, short of the inner wall kept beside it
+        14.0,
+        PCB_BOT - zone_z0,
+        Vector((1 if half == "left" else -1) * TRRS_X - TRRS_BARREL_R - 1.0, TRRS_Y - 14.0, zone_z0),
+    )
+    if not explode and plate.common(jack_zone).Volume > 1e-6:
+        fails.append("plate material under the TRRS jack: the wall relief must reach the plate")
     # The shelf's underside is what the board is clamped against, so it must be a real
     # horizontal face at the board's top, not merely somewhere in the right region.
     shelf = [
@@ -748,8 +745,7 @@ def check(out, half, explode, keys):
 
     # Prismatic features are invisible to a cylinder census, so test them by volume: a
     # perimeter wall built across a port opening leaves every count above unchanged. The
-    # TRRS is held to its jack's barrel rather than its opening, since the relief floor sits
-    # inside the opening's radius on purpose, RELIEF_GAP under the barrel.
+    # TRRS is held to its jack's barrel rather than its opening.
     sign = 1 if half == "left" else -1
     dz = -explode
 
@@ -758,7 +754,7 @@ def check(out, half, explode, keys):
         (
             "TRRS barrel",
             Part.makeCylinder(
-                TRRS_BARREL_R + RELIEF_GAP / 2.0,
+                TRRS_BARREL_R,
                 40.0,
                 Vector(sign * TRRS_X, TRRS_Y - 20.0, TRRS_Z + dz),
                 Vector(0, 1, 0),

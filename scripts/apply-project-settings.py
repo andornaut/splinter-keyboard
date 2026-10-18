@@ -75,7 +75,7 @@ SEVERITY_OVERRIDES = {"lib_footprint_issues": "ignore"}
 # The discriminator is the pad TYPE, not plating: flag everything except
 # 'NPTH, mechanical'. (A.isPlated() is wrong here -- it is true only for a plated
 # HOLE, so it misses SMD copper pads, which is most of this board: the hotswap
-# socket lands, SMD diodes, resistor, TVS. NPTH holes report onCu, so a copper-
+# socket lands, SMD diodes, TVS. NPTH holes report onCu, so a copper-
 # layer test cannot tell them from real pads either.) NPTH stays allowed so the
 # mounting holes (which sit dead-center in their own boss keepouts) and the TRRS
 # locating holes pass. The pour-only ring (keepout_perimeter_pour) is omitted on

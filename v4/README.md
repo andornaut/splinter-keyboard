@@ -16,10 +16,10 @@ The fillet rounds the corners off the height; the straight side edges hold the w
 
 ## Changes from v3
 
-| Change                                                                                                                                         | Details                                                 |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) MCU | [Microcontroller](#microcontroller)                     |
-| A TVS diode and series resistor protect the TRRS serial line from hot-unplug transients                                                        | [TRRS data-line protection](#trrs-data-line-protection) |
+| Change                                                                                                                                         | Details                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| The [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040) replaces the [Adafruit KB2040](https://www.adafruit.com/product/5302) MCU | [Microcontroller](#microcontroller)        |
+| A TVS diode protects the TRRS serial line from ESD, and each jack contact has its own pad                                                      | [Split connection](#split-connection-trrs) |
 
 ## Microcontroller
 
@@ -68,26 +68,51 @@ What the checks guarantee is that the two halves agree and that the config's net
 
 Only hardware settles that, and it is settled: the current value, `front_right`, is confirmed on an assembled and working board. Treat it as fixed. Changing it, or changing how the MCU seats, invalidates that confirmation and needs a fresh check on hardware.
 
-## TRRS data-line protection
+## Split connection (TRRS)
 
-v4 adds a TVS diode and series resistor on the TRRS data line to protect the MCU's serial GPIO when the cable is hot-unplugged. Each half:
+A TRRS cable joins two HCTL HC-PJ-320A-4P-D jacks. The half with USB is the primary; it powers the other half over the cable and talks to it on one half-duplex serial line.
+
+**Never plug or unplug the TRRS cable while either half has USB.** Unplug USB first; connect the TRRS cable before USB.
+
+### Pinout
+
+| Plug contact | Jack pad | Net | Liatris pin | Carries                       |
+| ------------ | -------- | --- | ----------- | ----------------------------- |
+| Tip          | T        | VCC | VCC         | 3.6V supply to the other half |
+| Ring 1       | R1       | -   | -           | nothing                       |
+| Ring 2       | R2       | P2  | GP2         | half-duplex serial data       |
+| Sleeve       | S        | GND | GND         | common ground                 |
+
+The jack footprint, [`trrs_hc_pj320a`](../ergogen/footprints/trrs_hc_pj320a.js), follows HCTL's recommended layout and names each pad for the plug contact it reaches. Both halves mount the jack on the back, so both use the same pin pattern.
+
+### Data path, each half
 
 ```text
-TRRS Ring 2 --(DATA_RAW)--+-- 100Ω --(P2)-- MCU GP2
-                          |
-                         TVS (clamps to GND)
-                          |
-                         GND
+jack R2 --(P2)--+-- Liatris GP2
+                |
+               TVS
+                |
+               GND
 ```
 
-| Part                             | Role                                                                                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TVS (bidirectional, 5V standoff) | Clamps the line to GND. Its 5V turn-on stays above the 3.3V data signal, so it does not conduct in normal use, and it clamps to roughly 9V under surge. |
-| 100Ω series resistor             | Limits current into the MCU pin.                                                                                                                        |
+| Part            | Specification                                                                  | Function                       |
+| --------------- | ------------------------------------------------------------------------------ | ------------------------------ |
+| TVS             | Littelfuse SMF5.0CA (C1851363), bidirectional, 5V standoff, 6.4V breakdown min | Clamps ESD and cable discharge |
+| Series resistor | None                                                                           | See below                      |
 
-The connector pinout also changed: **GND on the sleeve, serial data on ring R2, VCC on the tip.** The sleeve breaks last when you unplug, so the halves keep a common ground through the disconnect, and the data line sits on an inner ring instead of the exposed tip.
+### Decisions
 
-Neither change affects firmware: the data line still terminates at the MCU serial pin, GP2.
+| Decision                                     | Rationale                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No series resistance on the data line        | QMK's RP2040 half-duplex driver has the receiving half drive the line high (2mA setting) while the sender pulls it low (12mA), so the receiver reads a divider and series resistance lifts the low it sees. With nothing in series the low is about 0.36V against a 0.8V input-low limit; 100Ω per half lifts it well above that limit and the link fails. |
+| Bidirectional TVS with a 5V standoff         | It conducts only above 6.4V, so never on the 3.6V line in either polarity. It absorbs ESD energy; the RP2040's own clamp diodes conduct from about 4.1V. Its capacitance, about 1nF per half, settles within a small fraction of a bit at the default 230400 baud because the receiver drives the line high actively.                                      |
+| Sleeve on GND                                | The sleeve is the largest exposed contact on a loose plug, so it is the one that must not be live.                                                                                                                                                                                                                                                         |
+| Ring 1 unconnected                           | Only the tip carries VCC. With ring 1 on VCC as well, two cable conductors meet at the far half's VCC, and a part-withdrawn plug bridges them from the near half's VCC spring to its sleeve (GND) spring: a direct short of the supply. With one VCC conductor no plug position closes that loop.                                                          |
+| Liatris VCC jumper set to 3.6V (both halves) | The [VCC pin](https://docs.splitkb.com/product-guides/liatris/pinout) outputs USB voltage (about 5V) by default. A momentary VCC-to-data contact would then exceed the RP2040's 4.1V pin limit (IOVDD + 0.5V). At 3.6V nothing on the cable is above the logic supply. After setting it, confirm the half without USB still runs as the secondary.         |
+| No hot-plugging                              | Each band of a 3.5mm plug slides across the jack's other springs on the way in and out, so no pinout avoids momentary contact between VCC, data and GND. The choices above reduce what that contact can do; they do not make hot-plugging safe.                                                                                                            |
+| Never pair with a symmetric-footprint board  | Boards built with the symmetric `ceoloide/trrs_pj320a` footprint carry VCC on the sleeve and GND on ring 2. On one cable with a board of this revision, the sleeve joins VCC to GND. Build and use both halves from the same revision.                                                                                                                     |
+
+Firmware: `split.serial.pin` is GP2 on both halves, using the vendor (PIO) driver in half-duplex mode; `USB_VBUS_PIN` (GP19) decides which half is primary.
 
 ## Copper keepout zones
 
@@ -109,8 +134,7 @@ Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating h
 | Hot swap sockets         | 62       | [Adafruit 4958](https://www.digikey.ca/en/products/detail/adafruit-industries-llc/4958/13997772) (Kailh CPG151101S11 MX hotswap socket; DigiKey 1528-4958-ND, 20/pack)                                                               |
 | Keycap set               | 1        | [GMK CYL Sixes keycaps](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras) and [Ergo Kit](https://www.deskhero.ca/products/gmk-sixes-keycaps-extras?variant=40182207676482)                                                  |
 | Key switches             | 62       | [Cherry MX Ergo Clear](https://shockport.ca/collections/switches-1/products/cherry-mx-ergo-clear)                                                                                                                                    |
-| Microcontrollers         | 2        | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040)                                                                                                                                                                     |
-| Resistors                | 2        | [100Ω 0805 1%](https://www.lcsc.com/product-detail/C17408.html) (C17408, UNI-ROYAL 0805W8F1000T5E; JLCPCB Basic, alt YAGEO C105577)                                                                                                  |
+| Microcontrollers         | 2        | [splitkb Liatris](https://splitkb.com/products/liatris) (RP2040). Set each module's VCC jumper to 3.6V before use; see [Split connection](#split-connection-trrs)                                                                    |
 | Screws                   | 6        | M2.5x10 button head, ISO 7380 (one per boss, 3 per half). The counterbores put every head at one level, so one length serves all six; see the [case build sheet](./onshape/BUILD.md#screw-bosses)                                    |
 | Silicon bumpers          | 8        | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html)                                                                                                                                              |
 | Sockets (12-pin)         | 4        | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000) ([series documentation](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2481/310%2C%20311%2C%20315%20Series%20%28in.%29.pdf)) |
@@ -125,12 +149,12 @@ Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating h
 
 See the root README's [fabrication step](../README.md#step-5-fabrication-jlcpcb) for how `npm run fab`, the DRC gate, and [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) work. This section covers only what is v4-specific.
 
-| Part                                        | Assembly                                                                                                                                                                   |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Matrix diodes, 100Ω data-line resistor, TVS | Placed by JLCPCB                                                                                                                                                           |
-| Hotswap sockets                             | Do-Not-Place. Keeping them off the assembly BOM is what holds the order on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly. |
-| MCU (Liatris), TRRS jack, reset switch      | Do-Not-Place, hand-soldered                                                                                                                                                |
+| Part                                   | Assembly                                                                                                                                                                   |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Matrix diodes, TVS                     | Placed by JLCPCB                                                                                                                                                           |
+| Hotswap sockets                        | Do-Not-Place. Keeping them off the assembly BOM is what holds the order on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly. |
+| MCU (Liatris), TRRS jack, reset switch | Do-Not-Place, hand-soldered                                                                                                                                                |
 
 The LCSC and vendor links in the [BOM](#bill-of-materials-bom) for Do-Not-Place parts are for sourcing only.
 
-The diode footprint (`diode_sod123`) carries `rotation: 180` in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) so the cathode band lands on pad 1, the cathode and row net. The resistor and TVS are non-polar, so their rotation is irrelevant. After uploading, confirm orientation in JLCPCB's DFM viewer.
+The diode footprint (`diode_sod123`) carries `rotation: 180` in [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) so the cathode band lands on pad 1, the cathode and row net. The TVS is bidirectional, so its rotation is irrelevant. After uploading, confirm orientation in JLCPCB's DFM viewer.

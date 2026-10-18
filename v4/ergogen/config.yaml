@@ -26,23 +26,18 @@ units:
   # the inner mod-key pad (2mm keepout) and out to the box inner edge (closes the
   # inner-corner notch), without growing the vertical pads (which thumb_pad_h would).
   thumb_inner_pad: 0.9
-  # MCU/reset/TRRS/TVS/resistor placement (off matrix_five_num, both halves).
-  # x is shared per column: MCU+reset on mcu_reset_x, the rest on trrs_tvs_resistor_x.
+  # MCU/reset/TRRS/TVS placement (off matrix_five_num, both halves).
+  # x is shared per column: MCU+reset on mcu_reset_x, TRRS+TVS on trrs_tvs_x.
   mcu_reset_x: 17.965
   # Seats the Liatris body outline flush with the board top edge, leaving the USB-C
   # connector mouth (which the footprint draws protruding past the body outline)
   # to overhang the edge so a cable can plug in from outside the case wall.
   mcu_y: -0.985
   reset_y: 8.065 # set for an 8mm body-edge gap below the MCU
-  trrs_tvs_resistor_x: mcu_reset_x + 12.860
+  trrs_tvs_x: mcu_reset_x + 12.860
   trrs_y: 15.525
-  # Drop the TVS so its body-edge gap up to the TRRS equals the gap down to the
-  # resistor: the TVS sits symmetrically between its two neighbours (mirrors the
-  # bottom gap up). Carries the resistor (defined off tvs_y) down with it.
+  # Drop the TVS clear of the TRRS body; its multi-line silk label sits below it.
   tvs_y: trrs_y - 21.57
-  # Sets the body-edge gap below the TVS, with room for the TVS's multi-line silk
-  # label plus clearance to the resistor; tvs_y mirrors this same gap above the TVS.
-  resistor_y: tvs_y - 10.145
   # Silkscreen credit text offsets. Center-justified (see footprint). Pushed down to
   # sit clear below the provenance stamp, both just inside the perimeter keepout; the
   # credit then overlaps the keyswitch outlines (User.Eco1 only, never on the PCB).
@@ -56,14 +51,14 @@ units:
   # column); hugging labels track the part's y, label_mcu_y is absolute.
   label_mcu_y: -20.55
   label_trrs_y: trrs_y - 14.27
-  # TRRS pad-net labels: centered on the jack centerline (the gap between its two
-  # mirrored pad columns), each level with its net's pad row. Offsets are the
-  # footprint's local pad ys, which run downward, so subtract from trrs_y.
-  label_trrs_gnd_y: trrs_y - 3.2 # SL pad row
-  label_trrs_data_y: trrs_y - 6.2 # R2 pad row
-  label_trrs_vcc_y: trrs_y - 10.75 # TP pad row
+  # TRRS pad-net labels on the jack centerline, between its pin row and its sleeve
+  # pin, in the same top-to-bottom order as their pads: GP2 (R2), VCC (T), GND (S).
+  # VCC sits just under the rear locating peg and GND just above the TRRS part label.
+  # Offsets are footprint-local ys, which run downward, so subtract from trrs_y.
+  label_trrs_data_y: trrs_y - 3.2
+  label_trrs_vcc_y: trrs_y - 10.0
+  label_trrs_gnd_y: trrs_y - 11.9
   label_tvs_y: tvs_y - 4.34
-  label_resistor_y: resistor_y - 5.42
   label_reset_y: reset_y - 6.52
   # Reset pad-net label offset: GND uses +dx (right of pad column), RST -dx.
   label_reset_pad_dx: 4.5
@@ -99,7 +94,7 @@ points:
     # Left-half MCU nets are mirrored across the socket header: each one sits on
     # the pin opposite it in the other socket column (the pin-matrix rows in
     # mcu_liatris.js pair them). P2 (TRRS serial) is not mirrored: QMK has a
-    # single split.serial.pin, so both halves keep it (see data_resistor).
+    # single split.serial.pin, so both halves keep it (see trrs).
     columns:
       zero:
         key.column_net: P19
@@ -203,7 +198,7 @@ points:
   # Right counterparts to the left's mirror.skip columns, defined explicitly
   # because they differ (backspace, punctuation, right mods).
   # P2 (GP2) is left free for the TRRS serial pin so one firmware
-  # split.serial.pin = GP2 fits both halves (see data_resistor).
+  # split.serial.pin = GP2 fits both halves (see trrs).
   zones.extra:
     key.tags.right: true
     anchor:
@@ -676,47 +671,36 @@ pcbs:
           from: GND
           to: RST
           side: B
-      # Hot-unplug mitigation: GND on the sleeve (last to break), data on ring R2,
-      # VCC on the tip (per ceoloide/trrs_pj320a.js). DATA_RAW is the unprotected
-      # jack-side net; after the TVS+resistor it reaches the MCU serial pin.
+      # GND on the sleeve, VCC on the tip, data on ring 2, ring 1 unconnected. Every
+      # contact has its own pad, so the tip and sleeve can carry different nets, and
+      # the pads are named for the plug contact they reach (see trrs_hc_pj320a.js).
+      # The data ring runs straight to the MCU serial pin, P2 (GP2), with only the
+      # TVS to GND on it. No series resistor: QMK's RP2040 half-duplex driver has the
+      # receiving half drive the line high while the sender pulls it low, so series
+      # resistance raises the low the receiver reads and breaks the link.
       trrs: &trrs
-        what: ceoloide/trrs_pj320a
+        what: trrs_hc_pj320a
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, trrs_y]
+          shift: [trrs_tvs_x, trrs_y]
         params:
-          TP: VCC # 1  Tip
-          R2: DATA_RAW # 3 Ring 2 (data; to GND via TVS, to MCU via resistor)
-          SL: GND # 4  Sleeve
-          reversible: true
+          T: VCC
+          R2: P2 # serial data -> GP2; TVS to GND
+          S: GND
+          # Both halves mount the jack on the back, so both use the same
+          # (non-mirrored) pin field; validate:symmetry treats it like the MCU.
           side: B
-          # Symmetric uses only TP/R2/SL, which is exactly this 3-net pinout
-          symmetric: true
-      # Clamps data-line transients (e.g. hot-unplug) before the MCU.
+      # Clamps ESD and cable discharge on the data line before the MCU.
       # from=anode, to=cathode; bidirectional, so A/K orientation is irrelevant.
       data_tvs: &data_tvs
         what: sod-123fl
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, tvs_y]
+          shift: [trrs_tvs_x, tvs_y]
         params:
           side: B # single-side SMD, same side as the diodes (Economic PCBA)
-          from: DATA_RAW
+          from: P2
           to: GND
-      # In series from DATA_RAW to the MCU serial pin, limiting residual surge
-      # current after the TVS. Non-polar, so from/to is arbitrary. Both halves
-      # output to P2 (GP2) so one firmware split.serial.pin = GP2 fits both.
-      data_resistor: &data_resistor
-        what: r_0805
-        where:
-          ref: matrix_five_num
-          rotate: 90 # lays the vertical-default footprint horizontal
-          shift: [trrs_tvs_resistor_x, resistor_y]
-        params: &data_resistor_params
-          designator: R # ref prefix R<n>
-          side: B
-          from: DATA_RAW
-          to: P2 # serial data -> GP2
       # reversible -> copy on F+B silk. Center-justified so the back copy mirrors
       # onto the same spot, over the pinky top corner.
       label_credit: &label_credit
@@ -743,7 +727,7 @@ pcbs:
         params: &label_tht_params
           # Through-hole parts (MCU, TRRS jack, MX switch) get silk on BOTH sides
           # (reversible) so the part and its pads read from the front and the back.
-          # SMD-only parts (TVS, resistor, reset) stay back-only via &label_params.
+          # SMD-only parts (TVS, reset) stay back-only via &label_params.
           # &text_style: shared silk text geometry (also used by the screw labels).
           <<: &text_style
             layer: SilkS
@@ -756,7 +740,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_y]
+          shift: [trrs_tvs_x, label_trrs_y]
         params:
           <<: *label_tht_params
           text: 'TRRS\nPJ-320A'
@@ -764,7 +748,7 @@ pcbs:
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_tvs_y]
+          shift: [trrs_tvs_x, label_tvs_y]
         params:
           &label_params # Back-only silk (side B, mirrored) for SMD parts, which live on the back.
           <<: *text_style
@@ -772,14 +756,6 @@ pcbs:
           side: B
           mirrored: true
           text: 'TVS\nLittelfuse\nSMF5.0CA\nSOD-123FL'
-      label_resistor: &label_resistor
-        what: ceoloide/utility_text
-        where:
-          ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_resistor_y]
-        params:
-          <<: *label_params
-          text: 'Resistor\n100R 1%\nUNI-ROYAL\n0805W8F-\n1000T5E\n0805'
       label_reset: &label_reset
         what: ceoloide/utility_text
         where:
@@ -805,14 +781,13 @@ pcbs:
         params:
           <<: *label_params
           text: RST
-      # TRRS pad-net labels: GND/DATA/VCC down the jack centerline, each level
-      # with its pad row. The jack is symmetric, so each net has a pad either side
-      # of the centerline; the label sits in the gap between the pair.
+      # TRRS pad-net labels: GP2, VCC, GND down the jack centerline (see the
+      # label_trrs_*_y units).
       label_trrs_gnd: &label_trrs_gnd
         what: ceoloide/utility_text
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_gnd_y]
+          shift: [trrs_tvs_x, label_trrs_gnd_y]
         params:
           <<: *label_tht_params
           text: GND
@@ -820,18 +795,18 @@ pcbs:
         <<: *label_trrs_gnd
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_data_y]
+          shift: [trrs_tvs_x, label_trrs_data_y]
         params:
           <<: *label_tht_params
-          # MCU GPIO the data ring reaches (through the TVS+resistor): the data_resistor
-          # `to: P2` net, which mcu_liatris.js maps to pad GP2, and which the firmware
-          # uses as split.serial.pin. Update all three together if the serial pin changes.
+          # MCU GPIO the data ring reaches: the trrs `R2: P2` net, which mcu_liatris.js
+          # maps to pad GP2, and which the firmware uses as split.serial.pin. Update
+          # all three together if the serial pin changes.
           text: &trrs_data_pin GP2
       label_trrs_vcc:
         <<: *label_trrs_gnd
         where:
           ref: matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
+          shift: [trrs_tvs_x, label_trrs_vcc_y]
         params:
           <<: *label_tht_params
           text: VCC
@@ -919,24 +894,13 @@ pcbs:
         <<: *trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, trrs_y]
+          shift: [trrs_tvs_x, trrs_y]
       data_tvs:
         <<: *data_tvs
         where:
           ref: mirror_matrix_five_num
           rotate: 180 # mirror A/K (bidirectional, irrelevant)
-          shift: [trrs_tvs_resistor_x, tvs_y]
-      data_resistor:
-        <<: *data_resistor
-        where:
-          ref: mirror_matrix_five_num
-          # 90 (same as the left, not 270): the mirror_ ref auto-negates it, so
-          # this is the left's mirror image with the output pad facing the MCU.
-          rotate: 90
-          shift: [trrs_tvs_resistor_x, resistor_y]
-        params:
-          <<: *data_resistor_params
-          # to: P2 inherited so both halves use the same serial pin.
+          shift: [trrs_tvs_x, tvs_y]
       # Right half credit: over the outer (pinky) top corner, mirroring the left.
       label_credit:
         <<: *label_credit
@@ -953,17 +917,12 @@ pcbs:
         <<: *label_trrs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_y]
+          shift: [trrs_tvs_x, label_trrs_y]
       label_tvs:
         <<: *label_tvs
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_tvs_y]
-      label_resistor:
-        <<: *label_resistor
-        where:
-          ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_resistor_y]
+          shift: [trrs_tvs_x, label_tvs_y]
       label_reset:
         <<: *label_reset
         where:
@@ -983,12 +942,12 @@ pcbs:
         <<: *label_trrs_gnd
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_gnd_y]
+          shift: [trrs_tvs_x, label_trrs_gnd_y]
       label_trrs_data:
         <<: *label_trrs_gnd
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_data_y]
+          shift: [trrs_tvs_x, label_trrs_data_y]
         params:
           <<: *label_tht_params
           text: *trrs_data_pin # mirrors the left half's GP2 (see left label_trrs_data)
@@ -996,7 +955,7 @@ pcbs:
         <<: *label_trrs_gnd
         where:
           ref: mirror_matrix_five_num
-          shift: [trrs_tvs_resistor_x, label_trrs_vcc_y]
+          shift: [trrs_tvs_x, label_trrs_vcc_y]
         params:
           <<: *label_tht_params
           text: VCC

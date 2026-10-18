@@ -79,7 +79,7 @@ ANGLE_TOL = pcbnew.FromMM(0.0005)  # slack when testing a segment for 45 degrees
 FAMILY_GRID = pcbnew.FromMM(0.01)  # pad-offset rounding when grouping keys
 
 SEGMENT_CLASS = "PCB_TRACK"  # a straight segment; an arc cannot be re-cornered
-MATRIX_NETS = ("GND", "VCC", "RST", "DATA_RAW")  # never a key-local net
+MATRIX_NETS = ("GND", "VCC", "RST")  # never a key-local net
 
 
 def _snap(v, grid=GRID):

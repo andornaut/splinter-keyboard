@@ -81,11 +81,14 @@ KEY_FOOTPRINTS = ("switch_mx", "diode_sod123")
 # diode alone would leave it reaching across a pin field that did not move with it.
 # The MCU is a module that plugs in one way up, so its pin 1 stays in its physical
 # corner and the NETS swap columns instead (validate:firmware is what checks that).
+# The TRRS jack mounts on the back of both halves, so both see the same chiral
+# pin field (pin row on one side, sleeve pin on the other); a mirrored pattern would
+# not accept the part.
 #
 # The common thread is a physical part, not a preference. Everything else on the board
 # is held to landing its copper on the mirror line, and a two-pin part that needs a
 # compensating rotation to do so carries one (see the TVS in config.yaml).
-PINFIELD_NOT_MIRRORABLE = ("switch_mx", "diode_sod123", "mcu_liatris")
+PINFIELD_NOT_MIRRORABLE = ("switch_mx", "diode_sod123", "mcu_liatris", "trrs_hc_pj320a")
 
 # How many footprints on each half have no mirrored counterpart: the keys of the
 # outer pinky columns, switch plus diode each. Pinned rather than derived so that a

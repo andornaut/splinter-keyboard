@@ -6,21 +6,21 @@ Case models live here. The case is modelled from the Ergogen outline
 
 Each file has one job:
 
-| File                                                                                     | Holds                                                                      |
-| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [BUILD.md](./BUILD.md)                                                                   | Every dimension, and the feature-by-feature recipe for Onshape             |
-| [gen-case.py](./gen-case.py)                                                             | The same design as geometry, and the validator for the hand-built model    |
-| [differences.json](./differences.json)                                                   | The hand-built model's intentional departures from that geometry           |
-| This file                                                                                | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
-| [Splinter keyboard v4 - Filament.step](./Splinter%20keyboard%20v4%20-%20Filament.step)   | The Onshape model's filament export, both halves, as last validated        |
-| [Splinter keyboard v4 - Aluminium.step](./Splinter%20keyboard%20v4%20-%20Aluminium.step) | The same for the aluminium configuration                                   |
-| [Splinter v4 left shell.step](./Splinter%20v4%20left%20shell.step)                       | The aluminium configuration one part per file, for JLCCNC                  |
-| [Splinter v4 left plate.step](./Splinter%20v4%20left%20plate.step)                       |                                                                            |
-| [Splinter v4 right shell.step](./Splinter%20v4%20right%20shell.step)                     |                                                                            |
-| [Splinter v4 right plate.step](./Splinter%20v4%20right%20plate.step)                     |                                                                            |
-| [Splinter v4 left shell.pdf](./Splinter%20v4%20left%20shell.pdf)                         | The aluminium shells' thread drawings, for JLCCNC                          |
-| [Splinter v4 right shell.pdf](./Splinter%20v4%20right%20shell.pdf)                       |                                                                            |
-| [onshape.png](./onshape.png)                                                             | A render of the filament export                                            |
+| File                                                                                                                       | Holds                                                                      |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [BUILD.md](./BUILD.md)                                                                                                     | Every dimension, and the feature-by-feature recipe for Onshape             |
+| [gen-case.py](./gen-case.py)                                                                                               | The same design as geometry, and the validator for the hand-built model    |
+| [differences.json](./differences.json)                                                                                     | The hand-built model's intentional departures from that geometry           |
+| This file                                                                                                                  | Why the design is shaped the way it is. **No numbers**, so it cannot drift |
+| [Splinter keyboard v4 - Filament.step](./Splinter%20keyboard%20v4%20-%20Filament.step)                                     | The Onshape model's filament export, both halves, as last validated        |
+| [Splinter keyboard v4 - Aluminium.step](./Splinter%20keyboard%20v4%20-%20Aluminium.step)                                   | The same for the aluminium configuration                                   |
+| [Splinter keyboard v4 - Aluminium - Left shell.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Left%20shell.step)   | The aluminium configuration one part per file, for JLCCNC                  |
+| [Splinter keyboard v4 - Aluminium - Left plate.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Left%20plate.step)   |                                                                            |
+| [Splinter keyboard v4 - Aluminium - Right shell.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Right%20shell.step) |                                                                            |
+| [Splinter keyboard v4 - Aluminium - Right plate.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Right%20plate.step) |                                                                            |
+| [Splinter v4 left shell.pdf](./Splinter%20v4%20left%20shell.pdf)                                                           | The aluminium shells' thread drawings, for JLCCNC                          |
+| [Splinter v4 right shell.pdf](./Splinter%20v4%20right%20shell.pdf)                                                         |                                                                            |
+| [onshape.png](./onshape.png)                                                                                               | A render of the filament export                                            |
 
 **These STEP files are the ones to fabricate.** The models `gen-case.py` writes to
 `dist/v4/onshape/` exist only to validate them and are never ordered.
@@ -109,10 +109,10 @@ ring is deliberately carved open over the TRRS so the jack's through-holes are n
 so DRC does not stop a track running under the shelf there. Keep routing in that corner
 clear of it.
 
-**The plate wall's top band is cut down over the top-inner corner.** The top edge there
-carries the USB plug's path and the jack's body, so a band at full height would block the
-plug and sit on the jack. The cut stops just short of the jack's barrel, so a plug pushed
-down bears on the plate rather than on the jack's solder joints. The inner wall runs the
+**The plate wall is removed over the top-inner corner, down to the plate.** The top edge
+there carries the USB plug's path and the jack's body, so a wall at full height would block
+the plug and sit on the jack. None is left under the jack at any height: its underside
+carries exposed spring contacts, which a metal case must not touch. The inner wall runs the
 full height, beside the jack rather than under it.
 
 **Which side the shelf sits on decides whether it can be made.** Above the board, pressed up

@@ -21,12 +21,13 @@ COPY --chown=node:node \
     ergogen/footprints/r_0805.js \
     ergogen/footprints/sod-123fl.js \
     ergogen/footprints/sod-123w.js \
+    ergogen/footprints/trrs_hc_pj320a.js \
     node_modules/ergogen/src/footprints/
 
 # Register our custom footprints; the grep fails the build if the sed no-ops
 # (e.g. the index.js format changed upstream) instead of failing silently in the GUI.
 RUN FP=node_modules/ergogen/src/footprints/index.js && \
-    for fp in diode_sod123 mcu_liatris r_0805 sod-123fl sod-123w; do \
+    for fp in diode_sod123 mcu_liatris r_0805 sod-123fl sod-123w trrs_hc_pj320a; do \
         sed -i "s|^};|  '$fp': require('./$fp'),\n};|" "$FP"; \
     done && \
     grep -q "'diode_sod123'" "$FP" && \
