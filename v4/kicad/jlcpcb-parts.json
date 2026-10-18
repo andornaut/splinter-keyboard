@@ -14,6 +14,13 @@
       "package": "SOD-123FL",
       "rotation": 0,
       "note": "Littelfuse SMF5.0CA. Bidirectional, so rotation is irrelevant. Tier/stock/alternates: see v4/README.md BOM."
+    },
+    "SW_TACT_ALPS_SKQGABE010": {
+      "lcsc": "C115351",
+      "comment": "SKQGABE010",
+      "package": "SMD-4P,5.2x5.2mm",
+      "rotation": 0,
+      "note": "ALPS SKQGABE010 5.2mm tact switch, the MCU reset. Footprint matches JLCPCB's KEY-SMD_4P-L5.2-W5.2-P3.70-LS6.4 at 0 degrees; each pad row is one terminal pair, so 0 and 180 are equivalent and a 90-degree error leaves the terminals off their pads. Verify in DFM."
     }
   }
 }

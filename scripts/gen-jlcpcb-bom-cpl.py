@@ -100,8 +100,7 @@ def main():
     # List the Do-Not-Place footprints (grouped by package) so a part that fell
     # through unintentionally -- e.g. a renamed footprint no longer matching a
     # jlcpcb-parts.json key -- is visible here rather than silently omitted from
-    # assembly. Expected DNP: MCU, TRRS, reset switch, mounting holes, hotswap
-    # sockets.
+    # assembly. Expected DNP: MCU, TRRS, mounting holes, hotswap sockets.
     dnp_items = sorted(dnp.items())
     n_dnp = sum(len(refs) for _, refs in dnp_items)
     print(f"  placed {args.cpl}: {len(placed)} part(s) in {len(refs_by_lcsc)} BOM line(s), {n_dnp} do-not-place")

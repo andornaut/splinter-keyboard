@@ -139,7 +139,7 @@ Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating h
 | Silicon bumpers          | 8        | [10x2mm Silicone Rubber Bumpers](https://www.aliexpress.com/item/1005005315398342.html)                                                                                                                                              |
 | Sockets (12-pin)         | 4        | [Mill-Max 315-43-112-41-003000](https://www.mouser.ca/ProductDetail/575-3154311241003000) ([series documentation](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/2481/310%2C%20311%2C%20315%20Series%20%28in.%29.pdf)) |
 | Socket pins              | 48       | [Mill-Max 3320-0-00-15-00-00-03-0](https://www.mouser.ca/ProductDetail/575-3320000150000030)                                                                                                                                         |
-| Switches/buttons (reset) | 2        | [5.2mm SMD tact switch](https://www.lcsc.com/product-detail/C115351.html) (C115351, ALPS SKQGABE010; JLCPCB Extended, alt ALPS SKQGAFE010 C202424; hand-soldered)                                                                    |
+| Switches/buttons (reset) | 2        | [5.2mm SMD tact switch](https://www.lcsc.com/product-detail/C115351.html) (C115351, ALPS SKQGABE010; JLCPCB Extended, alt ALPS SKQGAFE010 C202424; placed by JLCPCB)                                                                 |
 | Threaded inserts         | 6        | [M2.5 threaded inserts](https://cnckitchen.store/products/gewindeeinsatz-threaded-insert-m2-5-standard-100-stk-pcs) (one per boss, 3 per half; 3.6mm hole, bore depth in the [case build sheet](./onshape/BUILD.md#screw-bosses))    |
 | TRRS cables              | 1        | [King Cables TRRS Cable](https://www.kingcables.org/)                                                                                                                                                                                |
 | TRRS jacks               | 2        | [HCTL HC-PJ-320A-4P-D](https://www.lcsc.com/product-detail/Audio-Connector-Headphone_HCTL-HC-PJ-320A-4P-D_C5372851.html)                                                                                                             |
@@ -149,11 +149,11 @@ Bare mechanical (NPTH) holes, meaning the mounting holes and the TRRS locating h
 
 See the root README's [fabrication step](../README.md#step-5-fabrication-jlcpcb) for how `npm run fab`, the DRC gate, and [jlcpcb-parts.json](./kicad/jlcpcb-parts.json) work. This section covers only what is v4-specific.
 
-| Part                                   | Assembly                                                                                                                                                                   |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Matrix diodes, TVS                     | Placed by JLCPCB                                                                                                                                                           |
-| Hotswap sockets                        | Do-Not-Place. Keeping them off the assembly BOM is what holds the order on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly. |
-| MCU (Liatris), TRRS jack, reset switch | Do-Not-Place, hand-soldered                                                                                                                                                |
+| Part                             | Assembly                                                                                                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Matrix diodes, TVS, reset switch | Placed by JLCPCB. The reset switch is an Extended part, so it adds one feeder-loading fee per order                                                                        |
+| Hotswap sockets                  | Do-Not-Place. Keeping them off the assembly BOM is what holds the order on the cheaper **Economic** PCBA service: they are Standard-only and not stocked for JLC assembly. |
+| MCU (Liatris), TRRS jack         | Do-Not-Place, hand-soldered                                                                                                                                                |
 
 The LCSC and vendor links in the [BOM](#bill-of-materials-bom) for Do-Not-Place parts are for sourcing only.
 
