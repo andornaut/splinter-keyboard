@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Add copper keepout rule areas to a KiCad PCB: two perimeter rings just inside
-the board edge and a disk around each screw boss.
+the board edge, a disk around each screw boss, and the copper-free area under the
+reset switch.
 
-Three kinds of zone, all rule areas (keepouts) on F.Cu + B.Cu. Pads and
+Four kinds of zone, all rule areas (keepouts), the first three on F.Cu + B.Cu. Pads and
 footprints stay allowed at the rule-area level (the rule-area pad keepout cannot
 tell plated copper from a bare hole; conductive pads are caught by a separate
 .kicad_dru rule -- see apply-project-settings.py). The perimeter is split into
@@ -22,6 +23,11 @@ the GND plane is still excluded there:
     each mounting hole, disallowing pour, tracks, and vias, so nothing lands
     within BOSS_MARGIN of a boss. One zone per boss (a single zone with disjoint
     islands collapses to its first island on save), all sharing one zone name.
+  - reset switch (RESET_NAME): ALPS's "prohibited area of copper tracks" from the
+    SKQG recommended land pattern, the gap between each side's two pads
+    (RESET_AREA_X x RESET_AREA_Y in the footprint frame), disallowing pour,
+    tracks and vias on the switch's own copper layer only, where its frame sits.
+    One zone per side, sharing one name.
 
 Edge-open notches (the USB cutout) are bridged so the rings do not dip into them
 (see _perimeter_ring).
@@ -80,9 +86,16 @@ CARVE_OVERSHOOT = pcbnew.FromMM(2.0)
 NOTCH_PROBE_MIN = pcbnew.FromMM(3.0)
 NOTCH_PROBE_MAX = pcbnew.FromMM(15.0)
 
+# The reset switch's copper-free area, per ALPS's SKQG land drawing: between each
+# column's two pads (|y| below the pads' inner edges) and from the 2.0 centre gap out
+# past the pad column, in the footprint's own frame.
+RESET_FPID_KEY = "skqgabe010"
+RESET_AREA_X = (pcbnew.FromMM(1.0), pcbnew.FromMM(4.0))  # |x| range
+RESET_AREA_Y = pcbnew.FromMM(1.3)  # |y| below this
 PERIMETER_POUR_NAME = "keepout_perimeter_pour"
 PERIMETER_ROUTE_NAME = "keepout_perimeter_route"
 BOSS_NAME = "keepout_screw_bosses"
+RESET_NAME = "keepout_reset_switch"
 KEEPOUT_LAYERS = (pcbnew.F_Cu, pcbnew.B_Cu)
 
 
@@ -103,10 +116,10 @@ def _populate(zone, src):
             dst.AddHole(src.Hole(i, h))  # default: attach to the last outline
 
 
-def _add_keepout(board, name, src, *, pour, tracks_vias):
-    """Add a rule-area zone named `name` with outline `src`, on both copper
-    layers. `pour` disallows the copper fill; `tracks_vias` disallows tracks and
-    vias.
+def _add_keepout(board, name, src, *, pour, tracks_vias, layers=KEEPOUT_LAYERS):
+    """Add a rule-area zone named `name` with outline `src`, on `layers` (both
+    copper layers by default). `pour` disallows the copper fill; `tracks_vias`
+    disallows tracks and vias.
 
     Pads and footprints stay allowed: the rule-area pad keepout cannot tell a
     copper pad from a bare hole, so disallowing pads flagged the mechanical
@@ -117,7 +130,7 @@ def _add_keepout(board, name, src, *, pour, tracks_vias):
     zone.SetIsRuleArea(True)
     zone.SetZoneName(name)
     ls = pcbnew.LSET()
-    for layer in KEEPOUT_LAYERS:
+    for layer in layers:
         ls.AddLayer(layer)
     zone.SetLayerSet(ls)
     zone.SetDoNotAllowZoneFills(pour)
@@ -242,6 +255,37 @@ def _boss_radius(board, center):
     )
 
 
+def _reset_areas(board):
+    """(layer, polygon) for each side's copper-free area under every reset switch.
+
+    Mapped from the footprint frame to the board through the footprint's own pads
+    (their footprint-relative and board positions), so the area follows the part's
+    position, rotation and side without restating the transform."""
+    areas = []
+    for fp in _footprints(board, RESET_FPID_KEY):
+        loc = [(p.GetFPRelativePosition(), p.GetPosition()) for p in fp.Pads()]
+        if len(loc) != 4:
+            raise SystemExit(f"{board.GetFileName()}: {fp.GetReference()} has {len(loc)} pads, expected 4")
+        (l0, b0) = loc[0]
+        # One pad in the same row and one in the same column as the first give the
+        # footprint's x and y axes in board coordinates.
+        l1, b1 = next(q for q in loc if q[0].y == l0.y and q[0].x != l0.x)
+        l2, b2 = next(q for q in loc if q[0].x == l0.x and q[0].y != l0.y)
+        ux = ((b1.x - b0.x) / (l1.x - l0.x), (b1.y - b0.y) / (l1.x - l0.x))
+        uy = ((b2.x - b0.x) / (l2.y - l0.y), (b2.y - b0.y) / (l2.y - l0.y))
+        origin = (b0.x - l0.x * ux[0] - l0.y * uy[0], b0.y - l0.x * ux[1] - l0.y * uy[1])
+
+        def to_board(lx, ly, ux=ux, uy=uy, origin=origin):
+            return (origin[0] + lx * ux[0] + ly * uy[0], origin[1] + lx * ux[1] + ly * uy[1])
+
+        x0, x1 = RESET_AREA_X
+        y = RESET_AREA_Y
+        for sx in (-1, 1):
+            corners = [(sx * x0, -y), (sx * x1, -y), (sx * x1, y), (sx * x0, y)]
+            areas.append((fp.GetLayer(), _poly(to_board(cx, cy) for cx, cy in corners)))
+    return areas
+
+
 def _boss_centers(board):
     """Center of every mounting-hole footprint (one per screw boss)."""
     return [fp.GetPosition() for fp in _footprints(board, BOSS_FPID_KEY)]
@@ -335,7 +379,7 @@ def _strip_degenerate_edges(board, path):
 def add_keepout_zones(path):
     board = pcbnew.LoadBoard(path)
 
-    keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME)
+    keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME, RESET_NAME)
     existing = {z.GetZoneName() for z in board.Zones() if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
     if existing:
         note(f"  unchanged {path}: keepouts already present ({', '.join(sorted(existing))})")
@@ -369,11 +413,15 @@ def add_keepout_zones(path):
             tracks_vias=True,
         )
 
+    resets = _reset_areas(board)
+    for layer, area in resets:
+        _add_keepout(board, RESET_NAME, area, pour=True, tracks_vias=True, layers=(layer,))
+
     board.Save(path)
     print(
         f"  ADDED {path}: {pcbnew.ToMM(PERIMETER_INSET):.1f}mm perimeter pour ring + "
         f"route ring (TRRS corner carved) + {len(centers)} screw-boss disk(s) "
-        f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm)"
+        f"(+{pcbnew.ToMM(BOSS_MARGIN):.1f}mm) + {len(resets)} reset-switch area(s)"
     )
 
 
