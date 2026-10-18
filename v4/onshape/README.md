@@ -18,8 +18,10 @@ Each file has one job:
 | [Splinter keyboard v4 - Aluminium - Left plate.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Left%20plate.step)   |                                                                            |
 | [Splinter keyboard v4 - Aluminium - Right shell.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Right%20shell.step) |                                                                            |
 | [Splinter keyboard v4 - Aluminium - Right plate.step](./Splinter%20keyboard%20v4%20-%20Aluminium%20-%20Right%20plate.step) |                                                                            |
-| [Splinter v4 left shell.pdf](./Splinter%20v4%20left%20shell.pdf)                                                           | The aluminium shells' thread drawings, for JLCCNC                          |
+| [Splinter v4 left shell.pdf](./Splinter%20v4%20left%20shell.pdf)                                                           | The aluminium parts' drawings (threads, tolerances), for JLCCNC            |
+| [Splinter v4 left plate.pdf](./Splinter%20v4%20left%20plate.pdf)                                                           |                                                                            |
 | [Splinter v4 right shell.pdf](./Splinter%20v4%20right%20shell.pdf)                                                         |                                                                            |
+| [Splinter v4 right plate.pdf](./Splinter%20v4%20right%20plate.pdf)                                                         |                                                                            |
 | [onshape.png](./onshape.png)                                                                                               | A render of the filament export                                            |
 
 **These STEP files are the ones to fabricate.** The models `gen-case.py` writes to
