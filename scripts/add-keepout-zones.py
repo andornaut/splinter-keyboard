@@ -28,6 +28,10 @@ the GND plane is still excluded there:
     (RESET_AREA_X x RESET_AREA_Y in the footprint frame), disallowing pour,
     tracks and vias on the switch's own copper layer only, where its frame sits.
     One zone per side, sharing one name.
+  - reset switch pour clearing (RESET_POUR_NAME): one rectangle around the whole
+    switch, its four pads included (RESET_POUR_X x RESET_POUR_Y), disallowing only
+    the pour on the switch's layer. Tracks stay allowed: the switch's own GND and
+    RST traces run along its pad rows and leave from the pads' ends.
 
 Edge-open notches (the USB cutout) are bridged so the rings do not dip into them
 (see _perimeter_ring).
@@ -92,10 +96,15 @@ NOTCH_PROBE_MAX = pcbnew.FromMM(15.0)
 RESET_FPID_KEY = "skqgabe010"
 RESET_AREA_X = (pcbnew.FromMM(1.0), pcbnew.FromMM(4.0))  # |x| range
 RESET_AREA_Y = pcbnew.FromMM(1.3)  # |y| below this
+# The pour clearing: the pads' outer extent (|x| 4.0, |y| 2.4) plus RESET_POUR_MARGIN.
+RESET_POUR_MARGIN = pcbnew.FromMM(0.5)
+RESET_POUR_X = pcbnew.FromMM(4.0) + RESET_POUR_MARGIN  # |x| below this
+RESET_POUR_Y = pcbnew.FromMM(2.4) + RESET_POUR_MARGIN  # |y| below this
 PERIMETER_POUR_NAME = "keepout_perimeter_pour"
 PERIMETER_ROUTE_NAME = "keepout_perimeter_route"
 BOSS_NAME = "keepout_screw_bosses"
 RESET_NAME = "keepout_reset_switch"
+RESET_POUR_NAME = "keepout_reset_switch_pour"
 KEEPOUT_LAYERS = (pcbnew.F_Cu, pcbnew.B_Cu)
 
 
@@ -256,7 +265,9 @@ def _boss_radius(board, center):
 
 
 def _reset_areas(board):
-    """(layer, polygon) for each side's copper-free area under every reset switch.
+    """(name, layer, polygon) for each reset switch's keepouts: the copper-free area
+    on each side (RESET_NAME) and the pour clearing around the whole switch
+    (RESET_POUR_NAME).
 
     Mapped from the footprint frame to the board through the footprint's own pads
     (their footprint-relative and board positions), so the area follows the part's
@@ -282,7 +293,10 @@ def _reset_areas(board):
         y = RESET_AREA_Y
         for sx in (-1, 1):
             corners = [(sx * x0, -y), (sx * x1, -y), (sx * x1, y), (sx * x0, y)]
-            areas.append((fp.GetLayer(), _poly(to_board(cx, cy) for cx, cy in corners)))
+            areas.append((RESET_NAME, fp.GetLayer(), _poly(to_board(cx, cy) for cx, cy in corners)))
+        px, py = RESET_POUR_X, RESET_POUR_Y
+        corners = [(-px, -py), (px, -py), (px, py), (-px, py)]
+        areas.append((RESET_POUR_NAME, fp.GetLayer(), _poly(to_board(cx, cy) for cx, cy in corners)))
     return areas
 
 
@@ -379,7 +393,7 @@ def _strip_degenerate_edges(board, path):
 def add_keepout_zones(path):
     board = pcbnew.LoadBoard(path)
 
-    keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME, RESET_NAME)
+    keepout_names = (PERIMETER_POUR_NAME, PERIMETER_ROUTE_NAME, BOSS_NAME, RESET_NAME, RESET_POUR_NAME)
     existing = {z.GetZoneName() for z in board.Zones() if z.GetIsRuleArea() and z.GetZoneName() in keepout_names}
     if existing:
         note(f"  unchanged {path}: keepouts already present ({', '.join(sorted(existing))})")
@@ -414,8 +428,8 @@ def add_keepout_zones(path):
         )
 
     resets = _reset_areas(board)
-    for layer, area in resets:
-        _add_keepout(board, RESET_NAME, area, pour=True, tracks_vias=True, layers=(layer,))
+    for name, layer, area in resets:
+        _add_keepout(board, name, area, pour=True, tracks_vias=name == RESET_NAME, layers=(layer,))
 
     board.Save(path)
     print(

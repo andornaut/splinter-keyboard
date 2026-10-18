@@ -182,7 +182,7 @@ every head flush.
 | Switch recess depth                | 1.50                          | nesting                                                                                 |
 | Plate at a switch cutout           | 1.50                          | MX standard, 1.5mm +-0.1mm                                                              |
 | Bottom plate                       | 1.50                          | takes the button head's full height                                                     |
-| Board pocket                       | 161.00 x 120.00               | hull + 0.50/side, so the board is 0.50/side loose in x and y                            |
+| Board pocket                       | 161.00 x 120.00               | hull + 0.50/side, so the board is 0.48-0.50/side loose in x and y                       |
 | Shell outer profile                | 165.00 x 124.00               | pocket + wall                                                                           |
 | Boss and standoff diameter         | 5.50                          | = 2 x `screw_boss_radius`, the DXF's own circle                                         |
 | Boss height                        | 3.00                          | top underside to PCB                                                                    |
