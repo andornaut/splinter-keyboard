@@ -115,6 +115,11 @@ BORE_DEPTH = 4.00
 STANDOFF_R = 2.75
 SCREW_R = 1.45  # 2.90 dia clearance
 CBORE_R = 2.50  # 5.00 dia, flat-bottomed, for a flat-underside head
+# The counterbore floors' rise above the plate's top face at the shallowest boss. It shortens
+# the stack so an M2.5x8 engages the shell by about one diameter, leaving the tapped hole
+# room for the tap's run-out below its full thread. It must stay below the flare's top, or
+# the counterbore cuts into the standoff.
+CBORE_RISE = 1.00
 LID_CLR = 0.20  # plate outline in from the cavity, per side; a print fit
 # The board is clamped around its whole perimeter, not only at the three bosses: a shelf
 # hangs from the case's top and the plate carries a wall up to meet it. The shelf laps the
@@ -605,14 +610,20 @@ def build(dxf, half, explode):
     # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside, and
     # it bears on the flare's base over a 1.50mm annulus.
     #
-    # Every floor lies on ONE horizontal plane, the plate's top face where it is highest
-    # among the bosses. The stack each screw spans then runs from that plane to the board's
-    # top face, the same at every boss, so one screw length serves all three. That plane is
-    # the highest it can go: the shallowest boss's head sits flush, and the others recessed.
+    # Every floor lies on ONE horizontal plane, CBORE_RISE above the plate's top face where
+    # it is highest among the bosses. The stack each screw spans then runs from that plane to
+    # the board's top face, the same at every boss, so one screw length serves all three.
+    # Every head sits recessed, the shallowest boss's by CBORE_RISE.
     # Level, not parallel to the plate, in both variants: the screw hole must be vertical,
     # so a mill cuts it with the plate tilted, and in that setup a level floor is a plain
     # counterbore on the hole's own axis.
-    floor_z = max(rim_z(sign, bx) for bx, _ in bosses) + plate_rise
+    floor_z = max(rim_z(sign, bx) for bx, _ in bosses) + plate_rise + CBORE_RISE
+    if floor_z > PCB_BOT - FLARE_GAP:
+        raise SystemExit(
+            f"FAIL gen-case: the counterbore floor at z {floor_z:.2f} is above the flare's "
+            f"top at {PCB_BOT - FLARE_GAP:.2f}, so the counterbore cuts into the standoff. "
+            "Reduce CBORE_RISE"
+        )
     for bx, by in bosses:
         plate = plate.cut(cyl(SCREW_R, -BIG, BIG, bx, by))
         plate = plate.cut(cyl(CBORE_R, -BIG, floor_z, bx, by))

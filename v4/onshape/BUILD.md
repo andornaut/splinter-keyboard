@@ -171,7 +171,7 @@ tails, that margin is the point.
 the look, and it buys that at the price of three standoff heights, recessed screw heads, and
 putting the tightest clearance in the design on the shallow side. A flat 16.50mm case would
 give the Liatris +2.00, the jack +2.20 and the socket +5.55 with one standoff height and
-every head flush.
+every head at one depth.
 
 ## Parameters
 
@@ -188,8 +188,8 @@ every head flush.
 | Boss height                        | 3.00                          | top underside to PCB                                                                    |
 | Material above the PCB at a boss   | 6.00                          | top 3.00 + boss 3.00; **4.50 where a recess overlaps**                                  |
 | Insert hole, filament              | 3.60 dia                      | M2.5 melt diameter; 4.00 deep at every boss, see below                                  |
-| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45     | same 4.00 drill; full thread to 3.60, see Aluminium variant                             |
-| Screw                              | M2.5 button head, ISO 7380    | head 4.70 dia x 1.50, **flat underside**; one length, M2.5x10                           |
+| Tapped hole, machined              | 2.05 tap drill, M2.5x0.45     | same 4.00 drill; full thread to 2.65, see Aluminium variant                             |
+| Screw                              | M2.5 button head, ISO 7380    | head 4.70 dia x 1.50, **flat underside**; one length, M2.5x8                            |
 | Screw clearance hole               | 2.90 dia                      | through the plate and the standoff                                                      |
 | Counterbore in the plate           | 5.00 dia, **flat bottomed**   | head + 0.30; every floor on one level plane                                             |
 | Perimeter shelf, on the shell      | 1.50 wide, underside at -6.00 | measured in from the cavity, so it laps the board by 1.00, inside its 2.00 keepout ring |
@@ -242,26 +242,32 @@ Left half, from the outline centre. The right half is the exact mirror (negate x
 and inner name the board edge each boss is nearer, as in the config's `screw_left_outer`,
 `screw_left_inner` and `screw_left_center` zones.
 
-| Boss   | Position          | Standoff height | Head recessed | Stack | Bore depth | Screw   | Engagement |
-| ------ | ----------------- | --------------- | ------------- | ----- | ---------- | ------- | ---------- |
-| Outer  | (-42.375, -3.650) | 4.87            | 0.00          | 6.47  | 4.00       | M2.5x10 | 3.53       |
-| Inner  | (33.825, 0.050)   | 6.72            | 1.85          | 6.47  | 4.00       | M2.5x10 | 3.53       |
-| Centre | (-3.325, 22.175)  | 5.82            | 0.95          | 6.47  | 4.00       | M2.5x10 | 3.53       |
+| Boss   | Position          | Standoff height | Head recessed | Stack | Bore depth | Screw  | Engagement |
+| ------ | ----------------- | --------------- | ------------- | ----- | ---------- | ------ | ---------- |
+| Outer  | (-42.375, -3.650) | 4.87            | 1.00          | 5.47  | 4.00       | M2.5x8 | 2.53       |
+| Inner  | (33.825, 0.050)   | 6.72            | 2.85          | 5.47  | 4.00       | M2.5x8 | 2.53       |
+| Centre | (-3.325, 22.175)  | 5.82            | 1.95          | 5.47  | 4.00       | M2.5x8 | 2.53       |
 
-**Every counterbore floor lies on one level plane, z -12.47**: the plate's top face over
-the outer boss, the highest of the three. A flat-underside head bears on that floor, inside
-the flare, and its length is measured from there to the board's top face, so the stack is
-6.47 at every boss and one screw length, M2.5x10, serves all three with 3.53mm of thread,
-0.47 short of the bore's bottom. The plane can go no lower: the outer head sits flush, and
-the others are recessed by however far the slope drops the plate under them. Derive it
-from the slope, not as a typed z.
+**Every counterbore floor lies on one level plane, z -11.47**: 1.00 above the plate's top
+face over the outer boss, the highest of the three. A flat-underside head bears on that
+floor, inside the flare, and its length is measured from there to the board's top face, so
+the stack is 5.47 at every boss and one screw length, M2.5x8, serves all three with 2.53mm
+of thread, 1.47 short of the bore's bottom. The outer head is recessed 1.00, and the
+others by that plus however far the slope drops the plate under them. Derive the plane
+from the slope plus the 1.00 rise, not as a typed z.
+
+**The 1.00 rise sets the engagement.** It shortens the stack so the M2.5x8 engages about
+one diameter, which in 6061 strips at roughly the load an A2-70 M2.5 breaks, and it leaves
+the tapped hole 1.35 of run-out below its full thread, enough for a standard tap. The floor
+can rise no further than the flare's top at -10.35: above it the 5.00 counterbore cuts into
+the 5.50 standoff.
 
 **Any flat-underside head works; the counterbore diameter is what follows from the choice.**
 5.00 suits a 4.70 head (button ISO 7380, socket cap DIN 912) with 0.30 to spare, and leaves
 0.25 of standoff outside it. A 5.00 pan head needs 5.30, which leaves 0.10 and a knife edge
 on the standoff, so grow the standoff if you go that way. Head height decides flushness
-only: 1.50 finishes level with the plate at the outer boss, 1.70 stands 0.20 proud there,
-and neither affects the screw length, since that is measured under the head.
+only: 1.50 sits 1.00 inside the plate's underside at the outer boss, 1.70 sits 0.80
+inside, and neither affects the screw length, since that is measured under the head.
 
 The outer and inner bosses sit 3.70mm apart in y. That is forced: the pinky columns are
 asymmetric, so the two screws cannot share a y while clearing both switch holes and pads.
@@ -538,7 +544,7 @@ On each half, after the mirror, from that half's own curves:
 4. **Screw holes**, 2.90 dia, through the plate and up the full height of each standoff
    to z -7.60, so the screw passes through the standoff and the PCB into the boss's
    insert. Each has a flat-bottomed 5.00 counterbore, cut from below up to one level
-   plane: the plate's top face over the outer boss, z -12.47. Sketch the circles on a
+   plane: 1.00 above the plate's top face over the outer boss, z -11.47. Sketch the circles on a
    horizontal plane, concentric with the screw circles.
 5. **Bumper recesses**, 12.00 dia x 0.50 deep on the outer face at (-72.80, +52.30),
    (+72.80, +52.30), (-72.80, -34.55), (+69.39, -50.33), each tangent to the wall's inner
@@ -613,9 +619,9 @@ is the whole reason its clearance is 0.50.
 suffix. In Onshape, a configuration on the shell's screw holes keeps both variants in one
 document. Everything else, the whole plate included, is shared.
 
-| Feature                 | Filament                                           | Aluminium                                                                                       |
-| ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Screw hole in each boss | 3.60 bore, 4.00 deep, for a 4.00mm heat-set insert | 2.05 tap drill, 4.00 deep plus its 118 deg point, M2.5x0.45 full thread to 3.60 (bottoming tap) |
+| Feature                 | Filament                                           | Aluminium                                                                       |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Screw hole in each boss | 3.60 bore, 4.00 deep, for a 4.00mm heat-set insert | 2.05 tap drill, 4.00 deep plus its 118 deg point, M2.5x0.45 full thread to 2.65 |
 
 **The counterbores stay level in aluminium.** The 2.90 screw hole runs up to 9.3 tall
 through the plate and standoff, and drilled square to the plate its top would land 0.22 off
@@ -623,8 +629,11 @@ the screw, more than the 0.20 radial clearance. So a mill drills it with the pla
 1.39 deg, and in that setup a level floor is a plain counterbore on the hole's own axis,
 concentric with it and seating the head square.
 
-**The full thread runs to 3.60** because the screw engages 3.53 and a standard tap leaves
-its last threads incomplete at the bottom of a blind hole. State it on the drawing.
+**The full thread runs to 2.65** because the screw engages 2.53 and a tap leaves its last
+threads incomplete at the bottom of a blind hole. The 1.35 below it, three whole pitches,
+is more than half the diameter, so a standard tap reaches it. A whole number of pitches
+also keeps Onshape's Hole feature exact: it rounds tap clearance to six decimals, so a
+fractional count leaves the drill a few nanometres short of 4.00. State it on the drawing.
 The drill's 118 deg point reaches 0.62 past the 4.00, narrowing inside the hole, so it stays
 far inside the switch recesses' edges.
 
