@@ -196,6 +196,7 @@ every head at one depth.
 | Perimeter wall, on the plate       | 1.50 wide, top at -7.60       | from the plate edge, so it laps the board by 1.20, clear of the nearest hotswap pads    |
 | Wall relief                        | 29.00 in from the plate edge  | x +-51.30 to +-78.80, from y 56.30, down to the plate                                   |
 | Flared standoff base               | 8.00 dia, up to -10.35        | = the built v4 lid; gives the counterbore a 1.50 annulus                                |
+| Plate inside corners               | R1.00; bumper floors R0.50    | tool radius where a vertical feature meets the slope; see Part B step 6                 |
 | Switch cutout / recess             | 14.50 / 16.00, R1.00 corners  | see below                                                                               |
 | Outer edge fillets, top and bottom | R1.00, one radius             | one corner-rounding pass each; the switch recesses and the cavity mouth stay square     |
 | Kink, the re-entrant corner        | R2.50 outside, R2.00 inside   | each loop's own corner radius; for looks                                                |
@@ -553,6 +554,16 @@ On each half, after the mirror, from that half's own curves:
    wall's edges project up to 0.2 sideways. Floor **parallel to the plate faces**, so the
    depth is 0.50 and the plate left is 1.00 right across every foot. All are well clear of the
    three screw heads.
+6. **Tool-radius fillets**: **R1.00** on every inside edge where a vertical feature meets
+   the plate's top face (the wall's base all round, the relief's ends and the three flares'
+   bases), and **R0.50** on each bumper recess floor's edge.
+
+**The plate's inside corners are rounded because a mill cannot cut them square.** A vertical
+wall meeting a sloped floor needs a ball or bull-nose tool, which leaves its own radius in
+the corner; a square corner would take EDM. None of the radii reaches anything: the wall's
+fillet tops out 1.10 below the lowest hotswap socket and 0.74 below the Liatris at the
+relief end, which it also misses in plan by 0.53 (0.28 with the board's screw play), and a
+bumper floor stays 11.00 flat across for a 10.00 foot.
 
 **Only the counterbores have level floors.** The plate is a parallel-sided slab lying at
 1.3887 deg, so "flat" and "level" are different instructions here. The counterbores mean

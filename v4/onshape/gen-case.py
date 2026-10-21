@@ -183,6 +183,12 @@ TRRS_BARREL_R = 2.50  # PJ-320A barrel
 # its corner, so the feet sit as far out as the plate allows.
 BUMPERS = [(-72.80, 52.30), (72.80, 52.30), (-72.80, -34.55), (69.39, -50.33)]
 BUMPER_R, BUMPER_D = 6.00, 0.50
+# A mill can reach a corner on the sloped plate only with a rounded tool, so every concave
+# edge where a vertical feature meets a sloped face carries that tool's radius: the plate
+# wall's base and its relief ends and the flares' bases at PLATE_FILLET, the bumper recess
+# floors at BUMPER_FILLET.
+PLATE_FILLET = 1.00
+BUMPER_FILLET = 0.50
 
 BIG = 500.0
 EPS = 1e-6
@@ -506,6 +512,36 @@ def rim_face(shell):
     return min(rims, key=lambda f: f.CenterOfMass.z, default=None)
 
 
+def cylinder_key(face):
+    """A cylindrical face's radius and axis line, rounded, so a split face keys once."""
+    c, d = face.Surface.Center, face.Surface.Axis
+    if d.z < 0 or (d.z == 0 and (d.x < 0 or (d.x == 0 and d.y < 0))):
+        d = -d
+    p = c - d * c.dot(d)  # the axis's point nearest the origin
+    return round(face.Surface.Radius, 2), tuple(round(v, 2) for v in (p.x, p.y, p.z, d.x, d.y, d.z))
+
+
+def concave_edges(body, face):
+    """The edges where FACE meets material rising from it: the inside corners of its outline.
+
+    Tested at each edge's midpoint by stepping just above FACE and just into the other face's
+    material. A convex edge, such as the plate's outline under the wall relief, puts that
+    point in the air. Testing a neighbour's extent instead would misread a side face that
+    merges with the wall above it.
+    """
+    out = []
+    for e in face.Edges:
+        m = e.valueAt(0.5 * (e.FirstParameter + e.LastParameter))
+        n = face.normalAt(*face.Surface.parameter(m))
+        other = [f for f in body.ancestorsOfType(e, Part.Face) if not f.isSame(face)]
+        if not other:
+            continue
+        nf = other[0].normalAt(*other[0].Surface.parameter(m))
+        if body.isInside(m + n * 0.05 - nf * 0.05, 1e-6, True):
+            out.append(e)
+    return out
+
+
 def fillet_edges(body, r):
     """Fillet the outer wall's top and bottom edges.
 
@@ -606,6 +642,11 @@ def build(dxf, half, explode):
         plate = plate.fuse(cyl(STANDOFF_R, -BIG, PCB_BOT, bx, by).cut(half_space(sign, ang, 0.0)))
         plate = plate.fuse(cyl(FLARE_R, -BIG, PCB_BOT - FLARE_GAP, bx, by).cut(half_space(sign, ang, 0.0)))
     plate = plate.removeSplitter()
+    top = max(
+        (f for f in plate.Faces if isinstance(f.Surface, Part.Plane) and f.normalAt(0, 0).z > 0.99),
+        key=lambda f: f.Area,
+    )
+    plate = plate.makeFillet(PLATE_FILLET, concave_edges(plate, top))
 
     # Flat-bottomed counterbore, not a countersink: the screw has a flat head underside, and
     # it bears on the flare's base over a 1.50mm annulus.
@@ -631,10 +672,17 @@ def build(dxf, half, explode):
     # every foot leaves the same material behind. A horizontal floor would be a constant z
     # in a plate that is not, making the recess shallower at one edge than the other and
     # leaving a different thickness at each. A stuck-on foot has no axis wanting a
-    # horizontal seat, so the plate wins: bounded by two slope-parallel planes.
-    skin = half_space(sign, ang, BUMPER_D / math.cos(math.radians(ang))).cut(half_space(sign, ang, 0.0))
+    # horizontal seat, so the plate wins: the floor is a slope-parallel plane.
+    #
+    # The floor's rounded edge is cut by rounding the cutter. BUMPER_FILLET equals
+    # BUMPER_D, so the radius takes the recess's whole wall, and OCC cannot fillet an edge
+    # into a face no taller than the radius: the cutter runs on below the plate, where it
+    # cuts nothing, to give the fillet a wall to end on.
+    floor_plane = half_space(sign, ang, BUMPER_D / math.cos(math.radians(ang)))
     for bx, by in BUMPERS:
-        plate = plate.cut(cyl(BUMPER_R, -BIG, BIG, sign * bx, by).common(skin))
+        cutter = cyl(BUMPER_R, -BIG, BIG, sign * bx, by).common(floor_plane)
+        floor = max(cutter.Faces, key=lambda f: f.CenterOfMass.z)
+        plate = plate.cut(cutter.makeFillet(BUMPER_FILLET, floor.Edges))
     plate = plate.removeSplitter()
 
     if explode:
@@ -722,7 +770,11 @@ def check(out, half, explode, keys):
         fails.append(f"shelf plus boss ends only {sum(f.Area for f in shelf):.0f} mm2, expected a perimeter shelf")
 
     for name, s in (("shell", shell), ("plate", plate)):
-        got = collections.Counter(round(f.Surface.Radius, 2) for f in s.Faces if isinstance(f.Surface, Part.Cylinder))
+        # One count per cylinder, not per face: a face can come back split in two, as a
+        # bumper recess wall does where its fillet takes all but a sliver of it.
+        got = collections.Counter(
+            r for r, _ in {cylinder_key(f) for f in s.Faces if isinstance(f.Surface, Part.Cylinder)}
+        )
         want = dict(EXPECT_CYL[name])
         if name == "shell":
             want[CNC_FILLET_R] = 4 * keys  # each cutout and each recess
