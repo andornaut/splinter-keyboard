@@ -67,6 +67,13 @@ COMPARE_MIN_VOL = 1e-3
 # faces crossing at a shallow angle can defeat every fuzz, and that is local: it should
 # cost the comparison that spot, not the whole part.
 COMPARE_MIN_CELL = 4.0
+# A cell no Boolean settles, typically where the two kernels' fillets cross at a shallow
+# angle, is compared by surface deviation instead: every tessellation vertex of each part's
+# surface in the cell, measured to the other part's surface. Within COMPARE_SURFACE_TOL
+# both ways, the two agree there; a missing or extra feature, or a fillet of the wrong
+# radius, leaves points tenths of a millimetre off.
+COMPARE_SURFACE_TOL = 0.05
+COMPARE_SURFACE_DEFLECTION = 0.2
 # How far extra - missing may stray from model - ref before a Boolean is taken as broken.
 # Fixed, not scaled by fuzz and surface area: that scale admits tens of mm3, enough for a
 # broken result to lose a real hole and still balance. A sound one strays by hundredths.
@@ -981,6 +988,31 @@ def verified(regions_, inside, outside):
     return True
 
 
+def surface_deviation(src, dst, box):
+    """How far src's surface inside box strays from dst's surface, and where, both as worst.
+
+    Only dst's faces near the box are searched, so a point farther than COMPARE_SURFACE_TOL
+    from all of them may read farther still; one within it reads exactly.
+    """
+    near = App.BoundBox(box)
+    near.enlarge(COMPARE_SURFACE_TOL)
+    faces = [f for f in dst.Faces if f.BoundBox.intersect(near)]
+    if not faces:
+        return math.inf, box.Center
+    surf = Part.makeCompound(faces)
+    worst, at = 0.0, None
+    for f in src.Faces:
+        if not f.BoundBox.intersect(box):
+            continue
+        pts, _ = f.tessellate(COMPARE_SURFACE_DEFLECTION)
+        for p in pts:
+            if box.isInside(p):
+                d = surf.distToShape(Part.Vertex(p))[0]
+                if d > worst:
+                    worst, at = d, p
+    return worst, at
+
+
 def sound_residuals(model, ref, cell, whole):
     """model - ref and ref - model, at the first fuzz OCC computes them sanely with, or None.
 
@@ -1161,11 +1193,20 @@ def compare(ref_path, model_paths, half, diffs_path, spacing):
             ("no cut into cells conserves the volume of", no_cut),
         ):
             for b in boxes:
+                span = f"x {b.XMin:.2f}..{b.XMax:.2f}, y {b.YMin:.2f}..{b.YMax:.2f}, z {b.ZMin:.2f}..{b.ZMax:.2f}"
+                (dm, pm), (dr, pr) = (
+                    surface_deviation(model[name], ref[name], b),
+                    surface_deviation(ref[name], model[name], b),
+                )
+                if max(dm, dr) <= COMPARE_SURFACE_TOL:
+                    print(f"  note {subject}: {name}: {why} {span}; surfaces agree within {max(dm, dr):.3f}")
+                    continue
                 mismatches += 1
+                d, at, kind = (dm, pm, "model") if dm >= dr else (dr, pr, "reference")
                 sys.stdout.flush()
                 print(
-                    f"  FAIL {subject}: {name}: {why} x {b.XMin:.2f}..{b.XMax:.2f}, "
-                    f"y {b.YMin:.2f}..{b.YMax:.2f}, z {b.ZMin:.2f}..{b.ZMax:.2f}; compare it by hand",
+                    f"  FAIL {subject}: {name}: {why} {span}, and the {kind}'s surface strays {d:.3f} from "
+                    f"the other's at ({at.x:.2f}, {at.y:.2f}, {at.z:.2f}), over {COMPARE_SURFACE_TOL:.2f}",
                     file=sys.stderr,
                 )
         for kind, residual in (("extra", extra), ("missing", missing)):

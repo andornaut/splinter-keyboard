@@ -462,8 +462,10 @@ reverse, each with its volume, centre and size in the sheet's frame. It exits no
 any region not on record. A part whose centre is over 1mm from the reference's stops it
 before comparing, since every face would differ and the cause is the export frame. Where no
 Boolean computes, as where two faces cross at a shallow angle, it compares the part in
-smaller cells; a cell that still fails is reported with its box, to check by hand, and also
-fails the run.
+smaller cells. A cell that still fails is compared by surface deviation: it passes if each
+model's surface there lies within 0.05 of the other's, and otherwise fails the run with the
+worst point and its distance. The plate's fillets are such a spot, since Onshape's and
+OCC's land a few thousandths apart.
 
 **Decide every region one of three ways.**
 
