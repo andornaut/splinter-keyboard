@@ -55,7 +55,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Set up Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version-file: .python-version
 
@@ -122,7 +122,7 @@ jobs:
         run: npm run lint
 
       - name: Set up Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version-file: .python-version
 
