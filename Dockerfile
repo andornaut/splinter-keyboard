@@ -2,9 +2,12 @@ FROM node:26-alpine
 # Node 26 images ship no Yarn and no Corepack. ergogen-gui needs Yarn 1: it ships only a
 # yarn.lock, and its own lifecycle scripts call yarn.
 RUN apk add --no-cache bash git && npm install -g yarn@1.22.22
+# Run as uid 19001, which owns nothing on the host, rather than the image's
+# "node" user (uid 1000, usually the host's first user).
+RUN addgroup -g 19001 ergogen && adduser -D -u 19001 -G ergogen ergogen
 WORKDIR /app
-RUN chown node:node /app
-USER node
+RUN chown ergogen:ergogen /app
+USER ergogen
 
 # Clone a pinned ergogen-gui and install deps. The repo's postinstall runs
 # patch_ergogen.sh, which clones the @ceoloide and @infused-kim footprint
@@ -15,7 +18,7 @@ RUN git clone --branch v20251103 --depth 1 https://github.com/ergogen/ergogen-gu
 
 # Add our custom footprints (not part of any upstream library) so the GUI can
 # render configs that use them.
-COPY --chown=node:node \
+COPY --chown=ergogen:ergogen \
     ergogen/footprints/diode_sod123.js \
     ergogen/footprints/mcu_liatris.js \
     ergogen/footprints/r_0805.js \

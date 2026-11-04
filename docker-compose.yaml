@@ -9,7 +9,7 @@ services:
     # footprint still needs `docker compose build --no-cache` to bust the cache.
     pull_policy: build
 
-    # The container runs as the unprivileged "node" user; allow it to bind the
+    # The container runs as the unprivileged uid 19001; allow it to bind the
     # privileged port 80 so http://ergogen.internal works without a port suffix.
     sysctls:
       - net.ipv4.ip_unprivileged_port_start=0
