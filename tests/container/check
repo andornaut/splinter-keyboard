@@ -15,7 +15,7 @@ lint() {
     npm run lint:internal
     find . \( -path ./node_modules -o -path ./ergogen -o -path ./.husky \) -prune -o \
         -type f -name '*.sh' -print0 | xargs -0 -r shellcheck -x -P SCRIPTDIR
-    shellcheck -x -P SCRIPTDIR tests/container/run tests/container/check
+    shellcheck -x -P SCRIPTDIR tests/container/run tests/container/check tests/container/staged tests/container/staged-git
     ruff check .
     ruff format --check .
     /opt/check-tools/node_modules/.bin/markdownlint-cli2
