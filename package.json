@@ -43,5 +43,9 @@
     "validate:symmetry": "python3 ./scripts/validate-symmetry.py",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen\"",
     "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\""
+  },
+  "//": "WORKAROUND: https://github.com/advisories/GHSA-g3hv-75wg-m249. Remove when upstream dependency ranges require patched minimatch versions.",
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "11.0.5"
   }
 }
