@@ -22,7 +22,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "nodemon": "^3.1.14",
-    "prettier": "^3.9.10"
+    "prettier": "^3.9.10",
+    "markdownlint-cli2": "0.24.0"
   },
   "scripts": {
     "clean": "rm -rf dist && echo 'OK: clean: removed dist/'",
@@ -50,6 +51,10 @@
   },
   "//": "WORKAROUND: https://github.com/advisories/GHSA-g3hv-75wg-m249. Remove when upstream dependency ranges require patched minimatch versions.",
   "overrides": {
-    "minimatch@>=7.0.0 <11.0.1": "11.0.5"
+    "minimatch@>=7.0.0 <11.0.1": "11.0.5",
+    "markdownlint-cli2@0.24.0": {
+      "markdownlint": "0.42.1",
+      "katex": "0.19.1"
+    }
   }
 }

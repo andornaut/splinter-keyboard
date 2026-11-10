@@ -18,7 +18,7 @@ lint() {
     shellcheck -x -P SCRIPTDIR tests/container/run tests/container/check tests/container/staged tests/container/staged-git
     ruff check .
     ruff format --check .
-    /opt/check-tools/node_modules/.bin/markdownlint-cli2
+    /opt/node-deps/node_modules/.bin/markdownlint-cli2
 }
 
 test_suite() {

@@ -12,7 +12,6 @@ COPY package.json package-lock.json /opt/node-deps/
 RUN cd /opt/node-deps && HUSKY=0 npm ci --no-audit --no-fund && chmod -R a+rX /opt/node-deps
 COPY requirements-dev.txt /opt/check/requirements-dev.txt
 RUN python -m venv /opt/venv && /opt/venv/bin/python -m pip install -r /opt/check/requirements-dev.txt
-RUN npm install --prefix /opt/check-tools --ignore-scripts --no-audit --no-fund markdownlint-cli2@0.24.0
 COPY tests/container/check /opt/check/run
 WORKDIR /work
 USER 19001:19001
