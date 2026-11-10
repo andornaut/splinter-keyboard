@@ -31,8 +31,8 @@
     "copy:unrouted-to-routed": "./scripts/copy-unrouted-to-routed.sh",
     "ergogen": "./scripts/ergogen.sh",
     "fab": "./scripts/fab.sh",
-    "format": "prettier --write . && eslint --fix .",
-    "lint": "prettier --check . && eslint --max-warnings 0 .",
+    "format": "make exec COMMAND='prettier --write . && eslint --fix .'",
+    "lint": "make lint",
     "panelize": "./scripts/panelize.sh",
     "pipeline": "./scripts/pipeline.sh",
     "prepare": "husky",
@@ -42,7 +42,11 @@
     "validate:provenance": "python3 ./scripts/validate-provenance.py",
     "validate:symmetry": "python3 ./scripts/validate-symmetry.py",
     "watch": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen\"",
-    "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\""
+    "watch:sync-unrouted": "nodemon --ext .js,.yaml --watch ./$npm_package_config_VERSION/ergogen/config.yaml --exec \"npm run ergogen && npm run copy:dist-to-unrouted\"",
+    "lint:internal": "prettier --check . && eslint --max-warnings 0 .",
+    "check": "make check",
+    "test": "make test",
+    "build": "make build"
   },
   "//": "WORKAROUND: https://github.com/advisories/GHSA-g3hv-75wg-m249. Remove when upstream dependency ranges require patched minimatch versions.",
   "overrides": {

@@ -26,129 +26,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Runs the one validator that works outside KiCad. The other three import
-  # pcbnew, which exists only inside KiCad's own interpreter, so CI can lint
-  # them and nothing more. This one reads the committed boards and config.yaml
-  # with the standard library, and catches a board generated from a config.yaml
-  # that has since moved, which no other check in this repository sees.
   test:
     name: Test
     runs-on: ubuntu-latest
-    # Capped well under the six-hour default: nothing here runs longer than
-    # six minutes, so a job still going at fifteen has hung rather than failed.
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
-          # Nothing in this job uses the token, so it is not left
-          # in .git/config for a later step to read.
           persist-credentials: false
-
-      # The validator is invoked through npm, which is what puts the active
-      # version in npm_package_config_VERSION for it to read. It imports only
-      # the standard library, so no dependency install is needed either side.
-      - name: Set up Node.js
-        uses: actions/setup-node@v7.1.0
-        with:
-          node-version-file: .nvmrc
-
-      - name: Set up Python
-        uses: actions/setup-python@v7.1.0
-        with:
-          python-version-file: .python-version
-
-      - name: Check the boards match the config they were built from
-        run: npm run validate:provenance
+      - name: Run containerized test
+        run: make test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
-          # Nothing in this job uses the token, so it is not left
-          # in .git/config for a later step to read.
           persist-credentials: false
-
-      # -x follows a `source` into the file it names and -P SCRIPTDIR looks for
-      # it beside the script doing the sourcing, which shellcheck cannot resolve
-      # on its own. Set everywhere rather than only where something sources
-      # today, so a script that starts to is already covered.
-      #
-      # The whole tree, with ergogen/ skipped alongside node_modules: it holds
-      # the vendored footprint libraries, and the one shell file under it is
-      # upstream's. Scoping to scripts/ instead would leave a script added
-      # anywhere else unchecked until someone remembered to widen this.
-      #
-      # .husky/_ is skipped for the same reason node_modules is: husky writes
-      # its hook stubs there from the prepare script npm ci runs, and husky.sh
-      # carries no shebang. This step runs before that install today, so the
-      # entry is what keeps the gate from depending on the order.
-      - name: Run ShellCheck
-        # Followed at the commit rather than at the 2.0.0 tag, which is the newest
-        # the action has: it has had no release since 2023, so nothing upstream
-        # would notice the tag being moved. The tag is named beside the sha so a
-        # reader can tell which release this is.
-        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
-        env:
-          SHELLCHECK_OPTS: -x -P SCRIPTDIR
-        with:
-          # Pinned rather than the action's `stable` default, which names a
-          # moving release the action downloads at run time: without this a
-          # ShellCheck release turns every one of these gates red on a commit
-          # that did not touch them. Dependabot does not read an action input,
-          # so this moves by hand.
-          version: v0.11.0
-          ignore_paths: node_modules ergogen .husky
-          scandir: "."
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      # eslint.config.mjs scopes this to the footprints written here rather
-      # than pulled from the two upstream submodules.
-      - name: Lint the footprints
-        run: npm run lint
-
-      - name: Set up Python
-        uses: actions/setup-python@v7.1.0
-        with:
-          python-version-file: .python-version
-
-      # Pinned in a manifest rather than installed by name, so Dependabot can
-      # see the version and a ruff release cannot turn this red on a commit
-      # that did not touch the sources.
-      - name: Install dependencies
-        run: pip install -r requirements-dev.txt
-
-      # The whole tree rather than a list of paths: ruff.toml excludes the
-      # vendored libraries, so a script added outside scripts/ is covered
-      # without an edit here.
-      - name: Run ruff check
-        run: ruff check .
-
-      - name: Run ruff format check
-        run: ruff format --check .
-
-      # The action bundles markdownlint-cli2, so its own tag is the tool pin and
-      # Dependabot proposes the bump through the github-actions ecosystem. It
-      # fetches nothing at run time, so a slow host cannot turn this red.
-      - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@v25.0.0
-        with:
-          # Empty on purpose. The action defaults this to `*.{md,markdown}`,
-          # which is the repository root only, and anything passed here outranks
-          # the `globs` in .markdownlint-cli2.yaml. Empty leaves the config file
-          # deciding, so this gate and a local `markdownlint-cli2` read one list.
-          globs: ""
+      - name: Run containerized lint
+        run: make lint

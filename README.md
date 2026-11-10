@@ -291,3 +291,17 @@ npm run pipeline
 ```
 
 Taking `kicad/routed/*.kicad_pcb` straight from that commit instead gives you the _previous_ build's masters. Rebuilding reproduces copper, drill, mask, paste, outline and the assembly files identically; only the `built=` timestamp drawn on the silk and a few microns of teardrop fill tessellation differ.
+
+## Verification
+
+Docker and Make run the project checks with an isolated source snapshot and scratch
+storage. The checks do not modify the checkout or access host credentials.
+
+```bash
+make check-info
+make check
+make lint
+make test
+```
+
+`make test` validates committed-board provenance. It does not regenerate or route boards.
