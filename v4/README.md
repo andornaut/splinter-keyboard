@@ -2,6 +2,8 @@
 
 A 62-key split columnar ergonomic keyboard with symmetrical enclosures and non-traditional backspace and backslash placement.
 
+**Status:** PCB and case built and confirmed working.
+
 - [QMK firmware](https://github.com/andornaut/qmk_firmware/tree/splinter/keyboards/splinter)
 - Build and fabrication workflow: [root README](../README.md#developing)
 

@@ -4,6 +4,8 @@ Case models live here. The case is modelled from the Ergogen outline
 (`dist/v4/ergogen/outlines/full_unfilleted.dxf`), then printed (OrcaSlicer) or CNC-machined
 (JLCCNC). See the root `README.md` steps 6-7 for the import and order workflow.
 
+**Status:** Case built and confirmed to fit the assembled v4 keyboard.
+
 Each file has one job:
 
 | File                                                                                                                       | Holds                                                                      |
