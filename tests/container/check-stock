@@ -16,13 +16,11 @@ python_image=
 shellcheck_image=
 stock_begin "${checkout}"
 stock_image python_image "${PYTHON_IMAGE}"
-if [[ ${action} == check || ${action} == lint ]]; then
+if [[ ${action} != test ]]; then
     stock_image node_image "${NODE_IMAGE}"
     stock_image shellcheck_image "${SHELLCHECK_IMAGE}"
-    stock_prepare "${node_image}" node -- sh tests/container/node prepare
-    stock_prepare "${python_image}" python -- sh tests/container/python prepare
-    stock_run "${node_image}" node -- sh tests/container/node lint
-    stock_run "${python_image}" python -- sh tests/container/python lint
+    STOCK_NETWORK=bridge stock_run "${node_image}" -- sh tests/container/node
+    STOCK_NETWORK=bridge stock_run "${python_image}" -- sh tests/container/python "${action}"
     "${git_metadata[@]}" -C "${checkout}" ls-files --cached --others --exclude-standard -z -- '*.sh' > "${scratch}/shell-files.list"
     shell_files=()
     while IFS= read -r -d '' shell_file; do
@@ -32,7 +30,7 @@ if [[ ${action} == check || ${action} == lint ]]; then
     stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR "${shell_files[@]}" \
         tests/container/stock tests/container/check-stock tests/container/node tests/container/python
 fi
-if [[ ${action} == check || ${action} == test ]]; then
-    stock_run "${python_image}" '' -- sh tests/container/python test
+if [[ ${action} == test ]]; then
+    stock_run "${python_image}" -- sh tests/container/python test
 fi
 stock_finish

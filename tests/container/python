@@ -1,18 +1,15 @@
 #!/bin/sh
 set -eu
-case "$1" in
-    prepare)
-        python -m venv /scratch/venv >&2
-        /scratch/venv/bin/python -m pip install --disable-pip-version-check -r requirements-dev.txt >&2
-        exec tar --create --file - --directory / scratch/venv
-        ;;
-    lint)
-        /scratch/venv/bin/ruff check .
-        exec /scratch/venv/bin/ruff format --check .
-        ;;
-    test)
-        version=$(python -c 'import json; print(json.load(open("package.json"))["config"]["VERSION"])')
-        npm_package_config_VERSION="$version" exec python scripts/validate-provenance.py
-        ;;
-    *) exit 2 ;;
-esac
+
+action=${1:-check}
+case "$action" in check|lint|test) ;; *) exit 2 ;; esac
+if [ "$action" != test ]; then
+    python -m venv /scratch/venv
+    /scratch/venv/bin/python -m pip install --disable-pip-version-check -r requirements-dev.txt
+    /scratch/venv/bin/ruff check .
+    /scratch/venv/bin/ruff format --check .
+fi
+if [ "$action" != lint ]; then
+    version=$(python -c 'import json; print(json.load(open("package.json"))["config"]["VERSION"])')
+    npm_package_config_VERSION="$version" exec python scripts/validate-provenance.py
+fi
