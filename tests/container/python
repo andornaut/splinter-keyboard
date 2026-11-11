@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+case "$1" in
+    prepare)
+        python -m venv /scratch/venv >&2
+        /scratch/venv/bin/python -m pip install --disable-pip-version-check -r requirements-dev.txt >&2
+        exec tar --create --file - --directory / scratch/venv
+        ;;
+    lint)
+        /scratch/venv/bin/ruff check .
+        exec /scratch/venv/bin/ruff format --check .
+        ;;
+    test)
+        version=$(python -c 'import json; print(json.load(open("package.json"))["config"]["VERSION"])')
+        npm_package_config_VERSION="$version" exec python scripts/validate-provenance.py
+        ;;
+    *) exit 2 ;;
+esac

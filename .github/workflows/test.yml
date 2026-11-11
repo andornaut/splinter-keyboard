@@ -39,13 +39,18 @@ jobs:
         uses: docker/setup-docker-action@v5.7.0
         with:
           version: v29.9.3
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v4.4.1
-        with:
-          version: v0.38.2
-          driver: docker
-      - name: Run containerized test
-        run: make test
+      - name: Run test
+        shell: bash
+        run: |
+          set -euo pipefail
+          source tests/container/stock
+          stock_begin "$PWD"
+          stock_image python_image "python:$(cat .python-version)"
+          stock_run "${python_image}" '' -- sh -ec '
+          version=$(python -c "import json; print(json.load(open(\"package.json\"))[\"config\"][\"VERSION\"])")
+          npm_package_config_VERSION="$version" python scripts/validate-provenance.py
+          '
+          stock_finish
 
   lint:
     name: Lint
@@ -60,10 +65,41 @@ jobs:
         uses: docker/setup-docker-action@v5.7.0
         with:
           version: v29.9.3
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v4.4.1
-        with:
-          version: v0.38.2
-          driver: docker
-      - name: Run containerized lint
-        run: make lint
+      - name: Run lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          source tests/container/stock
+          stock_begin "$PWD"
+          stock_image node_image "node:$(sed 's/^v//' .nvmrc)"
+          stock_image python_image "python:$(cat .python-version)"
+          stock_image shellcheck_image koalaman/shellcheck:v0.11.0
+          stock_prepare "${node_image}" node -- sh -ec '
+          mkdir -p /scratch/node
+          cp package.json package-lock.json /scratch/node/
+          HUSKY=0 npm ci --prefix /scratch/node --ignore-scripts --maxsockets=1 --no-audit --no-fund >&2
+          tar --create --file - --directory / scratch/node
+          '
+          stock_prepare "${python_image}" python -- sh -ec '
+          python -m venv /scratch/venv >&2
+          /scratch/venv/bin/python -m pip install --disable-pip-version-check -r requirements-dev.txt >&2
+          tar --create --file - --directory / scratch/venv
+          '
+          stock_run "${node_image}" node -- sh -ec '
+          ln -s /scratch/node/node_modules node_modules
+          npm run lint
+          /scratch/node/node_modules/.bin/markdownlint-cli2
+          '
+          stock_run "${python_image}" python -- sh -ec '
+          /scratch/venv/bin/ruff check .
+          /scratch/venv/bin/ruff format --check .
+          '
+          "${git_metadata[@]}" -C "${checkout}" ls-files --cached --others --exclude-standard -z -- '*.sh' > "${scratch}/shell-files.list"
+          shell_files=()
+          while IFS= read -r -d '' shell_file; do
+              case "${shell_file}" in node_modules/*|ergogen/*|.husky/*) continue ;; esac
+              if [[ -f ${checkout}/${shell_file} && ! -L ${checkout}/${shell_file} ]]; then shell_files+=("${shell_file}"); fi
+          done < "${scratch}/shell-files.list"
+          stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR "${shell_files[@]}" \
+              tests/container/stock tests/container/check-stock tests/container/node tests/container/python
+          stock_finish

@@ -294,14 +294,9 @@ Taking `kicad/routed/*.kicad_pcb` straight from that commit instead gives you th
 
 ## Verification
 
-Docker and Make run the project checks with an isolated source snapshot and scratch
-storage. The checks do not modify the checkout or access host credentials.
+Run `make check` for containerized lint and committed-board provenance validation.
+The checks do not regenerate, route or modify boards.
 
-```bash
-make check-info
-make check
-make lint
-make test
-```
-
-`make test` validates committed-board provenance. It does not regenerate or route boards.
+Native npm commands run locally. `npm run lint` checks formatting and JavaScript;
+`npm run validate:provenance` validates committed boards. `npm run format` and the
+commit hook preserve automatic formatting fixes.

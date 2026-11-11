@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+case "$1" in
+    prepare)
+        mkdir -p /scratch/node
+        cp package.json package-lock.json /scratch/node/
+        HUSKY=0 npm ci --prefix /scratch/node --ignore-scripts --maxsockets=1 --no-audit --no-fund >&2
+        exec tar --create --file - --directory / scratch/node
+        ;;
+    lint)
+        ln -s /scratch/node/node_modules node_modules
+        npm run lint
+        exec /scratch/node/node_modules/.bin/markdownlint-cli2
+        ;;
+    *) exit 2 ;;
+esac
