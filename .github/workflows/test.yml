@@ -47,6 +47,8 @@ jobs:
           set -euo pipefail
           source tests/container/stock
           stock_begin "$PWD"
+          [[ ${revision} == "${GITHUB_SHA:?}" ]]
+          [[ ${source_dirty} == false ]]
           stock_image python_image "python:$(cat .python-version)"
           stock_run "${python_image}" '' -- sh -ec '
           version=$(python -c "import json; print(json.load(open(\"package.json\"))[\"config\"][\"VERSION\"])")
@@ -73,6 +75,8 @@ jobs:
           set -euo pipefail
           source tests/container/stock
           stock_begin "$PWD"
+          [[ ${revision} == "${GITHUB_SHA:?}" ]]
+          [[ ${source_dirty} == false ]]
           stock_image node_image "node:$(sed 's/^v//' .nvmrc)"
           stock_image python_image "python:$(cat .python-version)"
           stock_image shellcheck_image koalaman/shellcheck:v0.11.0
