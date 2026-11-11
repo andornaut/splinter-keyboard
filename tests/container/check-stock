@@ -1,36 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 checkout=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
-stock_entrypoint_path=${BASH_SOURCE[0]}
-stock_entrypoint_hash=$(sha256sum "${stock_entrypoint_path}" | cut -d ' ' -f1)
 # shellcheck source=tests/container/stock
 source "${checkout}/tests/container/stock"
 action=${1:-check}
 case "${action}" in check|lint|test) ;; *) printf 'Unknown stock check: %s\n' "${action}" >&2; exit 2 ;; esac
 if (( $# > 1 )); then printf '%s\n' 'Stock checks do not accept extra arguments.' >&2; exit 2; fi
-: "${NODE_IMAGE:?The Makefile declares NODE_IMAGE}"
-: "${PYTHON_IMAGE:?The Makefile declares PYTHON_IMAGE}"
-: "${SHELLCHECK_IMAGE:?The Makefile declares SHELLCHECK_IMAGE}"
-node_image=
-python_image=
-shellcheck_image=
 stock_begin "${checkout}"
-stock_image python_image "${PYTHON_IMAGE}"
 if [[ ${action} != test ]]; then
-    stock_image node_image "${NODE_IMAGE}"
-    stock_image shellcheck_image "${SHELLCHECK_IMAGE}"
-    STOCK_NETWORK=bridge stock_run "${node_image}" -- sh tests/container/node
-    STOCK_NETWORK=bridge stock_run "${python_image}" -- sh tests/container/python "${action}"
+    STOCK_NETWORK=bridge stock_run "${NODE_IMAGE}" -- sh tests/container/node
+    STOCK_NETWORK=bridge stock_run "${PYTHON_IMAGE}" -- sh tests/container/python "${action}"
     "${git_metadata[@]}" -C "${checkout}" ls-files --cached --others --exclude-standard -z -- '*.sh' > "${scratch}/shell-files.list"
     shell_files=()
     while IFS= read -r -d '' shell_file; do
         case "${shell_file}" in node_modules/*|ergogen/*|.husky/*) continue ;; esac
         if [[ -f ${checkout}/${shell_file} && ! -L ${checkout}/${shell_file} ]]; then shell_files+=("${shell_file}"); fi
     done < "${scratch}/shell-files.list"
-    stock_readonly "${shellcheck_image}" /bin/shellcheck -x -P SCRIPTDIR "${shell_files[@]}" \
+    stock_readonly "${SHELLCHECK_IMAGE}" /bin/shellcheck -x -P SCRIPTDIR "${shell_files[@]}" \
         tests/container/stock tests/container/check-stock tests/container/node tests/container/python
 fi
 if [[ ${action} == test ]]; then
-    stock_run "${python_image}" -- sh tests/container/python test
+    stock_run "${PYTHON_IMAGE}" -- sh tests/container/python test
 fi
 stock_finish
